@@ -2,7 +2,6 @@
     "config": {
         "step": {
             "user": {
-                "title": "EV Smart Charging",
                 "description": "Setup of EV Smart Charging",
                 "data": {
                     "nordpool_sensor": "Nordpool sensor",

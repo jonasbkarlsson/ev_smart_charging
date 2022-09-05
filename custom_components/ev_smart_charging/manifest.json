@@ -6,6 +6,7 @@
   "dependencies": [],
   "documentation": "https://github.com/jonasbkarlsson/ev_smart_charging/",
   "domain": "ev_smart_charging",
+  "iot_class": "calculated",
   "issue_tracker": "https://github.com/jonasbkarlsson/ev_smart_charging/issues",
   "name": "EV Smart Charging",
   "requirements": [],
