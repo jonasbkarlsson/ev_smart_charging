@@ -32,6 +32,3 @@ If you have any issues with this you need to open an issue here:
 {ISSUE_URL}
 -------------------------------------------------------------------
 """
-
-# Events
-EVENT_NEW_HOUR = "ev_smart_charger_new_hour"
