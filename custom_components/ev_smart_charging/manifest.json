@@ -1,0 +1,13 @@
+{
+  "codeowners": [
+    "@jonasbkarlsson"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/jonasbkarlsson/ev_smart_charging/",
+  "domain": "ev_smart_charging",
+  "issue_tracker": "https://github.com/jonasbkarlsson/ev_smart_charging/issues",
+  "name": "EV Smart Charging",
+  "requirements": [],
+  "version": "0.1.0"
+}

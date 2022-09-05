@@ -1,0 +1,14 @@
+__pycache__
+pythonenv*
+venv
+.venv
+.coverage
+.idea
+
+# Ignore other folders than ev_smart_charging
+custom_components/*
+!custom_components/__init__.py
+!custom_components/ev_smart_charging/
+
+# Temporarily ignore some files in tests folder
+tests/TEMP*

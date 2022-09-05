@@ -1,0 +1,21 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "EV Smart Charging",
+                "description": "Setup of EV Smart Charging",
+                "data": {
+                    "nordpool_sensor": "Nordpool sensor",
+                    "ev_soc_sensor": "EV SOC sensor",
+                    "ev_target_soc_sensor": "EV Target SOC sensor"
+                }
+            }
+        },
+        "error": {
+            "sensor_invalid": "Sensor is invalid."
+        },
+        "abort": {
+            "single_instance_allowed": "Already configured. Only a single configuration possible."
+        }
+    }
+}

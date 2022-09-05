@@ -1,0 +1,15 @@
+{
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.pythonPath": "/usr/local/bin/python",
+    "files.associations": {
+        "*.yaml": "home-assistant"
+    },
+    "python.testing.pytestArgs": [
+        "--cov-report=html:cov_html",
+        "--cov=custom_components.ev_smart_charging",
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}
