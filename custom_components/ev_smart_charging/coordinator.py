@@ -85,7 +85,7 @@ class EVSmartChargingCoordinator:
 
         nordpool_state = self.hass.states.get(self.nordpool_entity_id)
         if nordpool_state is not None:
-            if nordpool_state.state is not "unavailable":
+            if nordpool_state.state != "unavailable":
                 self.sensor.current_price = nordpool_state.attributes["current_price"]
                 self.raw_today = nordpool_state.attributes["raw_today"]
                 self.raw_tomorrow = nordpool_state.attributes["raw_tomorrow"]
@@ -93,13 +93,13 @@ class EVSmartChargingCoordinator:
 
         ev_soc_state = self.hass.states.get(self.ev_soc_entity_id)
         if ev_soc_state is not None:
-            if ev_soc_state.state is not "unavailable":
+            if ev_soc_state.state != "unavailable":
                 self.sensor.ev_soc = ev_soc_state.state
                 self.ev_soc = ev_soc_state.state
 
         ev_target_soc_state = self.hass.states.get(self.ev_target_soc_entity_id)
         if ev_target_soc_state is not None:
-            if ev_target_soc_state.state is not "unavailable":
+            if ev_target_soc_state.state != "unavailable":
                 self.sensor.ev_target_soc = ev_target_soc_state.state
                 self.ev_target_soc = ev_target_soc_state.state
 
