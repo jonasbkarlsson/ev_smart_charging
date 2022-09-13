@@ -6,7 +6,9 @@
                 "data": {
                     "nordpool_sensor": "Nordpool sensor",
                     "ev_soc_sensor": "EV SOC sensor",
-                    "ev_target_soc_sensor": "EV Target SOC sensor"
+                    "ev_target_soc_sensor": "EV Target SOC sensor",
+                    "pct_per_hour": "Assumed charging per hour expressed in percent",
+                    "ready_hour": "Latest time for charging to be completed next day"
                 }
             }
         },

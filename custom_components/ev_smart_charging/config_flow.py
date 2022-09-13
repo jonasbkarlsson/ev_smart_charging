@@ -9,7 +9,10 @@ from .const import (
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_NORDPOOL_SENSOR,
+    CONF_PCT_PER_HOUR,
+    CONF_READY_HOUR,
     DOMAIN,
+    HOURS,
     NAME,
     PLATFORM_NORDPOOL,
     PLATFORM_VW,
@@ -46,6 +49,8 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input[CONF_NORDPOOL_SENSOR] = self._get_nordpool_sensor()
         user_input[CONF_EV_SOC_SENSOR] = self._get_vw_soc_sensor()
         user_input[CONF_EV_TARGET_SOC_SENSOR] = self._get_vw_target_soc_sensor()
+        user_input[CONF_PCT_PER_HOUR] = 6.0
+        user_input[CONF_READY_HOUR] = "08:00"
 
         return await self._show_config_form(user_input)
 
@@ -62,6 +67,12 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required(
                 CONF_EV_TARGET_SOC_SENSOR, default=user_input[CONF_EV_TARGET_SOC_SENSOR]
             ): cv.string,
+            vol.Required(
+                CONF_PCT_PER_HOUR, default=user_input[CONF_PCT_PER_HOUR]
+            ): cv.positive_float,
+            vol.Required(CONF_READY_HOUR, default=user_input[CONF_READY_HOUR]): vol.In(
+                HOURS
+            ),
         }
 
         return self.async_show_form(
