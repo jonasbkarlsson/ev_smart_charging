@@ -57,7 +57,12 @@ class Raw:
 def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int):
     """From the two-day prices, calculate the cheapest hours"""
     # TODO: Make this work with daylight saving time
+
     _LOGGER.debug("ready_hour = %s", ready_hour)
+
+    if hours == 0:
+        return []
+
     price = []
     for item in raw_two_days.get_raw():
         price.append(item["value"])
@@ -76,8 +81,8 @@ def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int):
         if item["start"] < time_end:
             time_end_index = index
 
-    if (time_end_index - hours + 2) <= time_now_index:
-        time_end_index = time_now_index + hours - 1
+    if (time_end_index - time_now_index) < hours:
+        return list(range(time_now_index, time_end_index + 1))
 
     for index in range(time_now_index, time_end_index - hours + 2):
         if lowest_index is None:
@@ -95,6 +100,7 @@ def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int):
 
 def get_charging(lowest_hours, value_on=100):
     """Calculate charging information"""
+    # TODO: use raw_two_days and _max_price to set value=0 when charging should be stopped
 
     start_time = dt.now().replace(hour=0, minute=0, second=0, microsecond=0)
     end_time = start_time + timedelta(hours=1)
