@@ -13,6 +13,11 @@ class EVSmartChargingEntity(Entity):
     def __init__(self, config_entry):
         self.config_entry = config_entry
 
+    def update_ha_state(self):
+        """Update the HA state"""
+        if self.entity_id is not None:
+            self.async_schedule_update_ha_state()
+
     @property
     def unique_id(self):
         """Return a unique ID to use for this entity."""

@@ -11,16 +11,24 @@ ICON = "mdi:flash"
 
 # Platforms
 SENSOR = "sensor"
-PLATFORMS = [SENSOR]
+SWITCH = "switch"
+PLATFORMS = [SWITCH, SENSOR]
 PLATFORM_NORDPOOL = "nordpool"
 PLATFORM_VW = "volkswagen_we_connect_id"
+PLATFORM_OCPP = "ocpp"
 
 # Configuration and options
 CONF_NORDPOOL_SENSOR = "nordpool_sensor"
 CONF_EV_SOC_SENSOR = "ev_soc_sensor"
 CONF_EV_TARGET_SOC_SENSOR = "ev_target_soc_sensor"
+CONF_CHARGER_TYPE = "charger_type"
+CONF_CHARGER_ENTITY = "charger_entity"
 CONF_PCT_PER_HOUR = "pct_per_hour"
 CONF_READY_HOUR = "ready_hour"
+CONF_MAX_PRICE = "maximum_price"
+
+CHARGER_TYPE_NONE = "None"
+CHARGER_TYPE_OCPP = "OCPP"
 
 HOURS = [
     "00:00",

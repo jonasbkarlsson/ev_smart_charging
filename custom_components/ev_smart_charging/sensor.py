@@ -43,11 +43,6 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
 
         _LOGGER.debug("EVSmartChargingSensor.__init__() - end")
 
-    def update_ha_state(self):
-        """Update the HA state"""
-        if self.entity_id is not None:
-            self.async_schedule_update_ha_state()
-
     @SensorEntity.native_value.setter
     def native_value(self, new_value):
         """Return the value reported by the sensor."""
