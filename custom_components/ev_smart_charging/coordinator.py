@@ -180,7 +180,9 @@ class EVSmartChargingCoordinator:
             )
             _LOGGER.debug("lowest_hours = %s", lowest_hours)
             self._charging = get_charging(
-                lowest_hours, self.raw_two_days.max_value() / 4.0
+                lowest_hours,
+                self.raw_two_days,
+                self._max_price,
             )
         # else:
         #     self._charging = None

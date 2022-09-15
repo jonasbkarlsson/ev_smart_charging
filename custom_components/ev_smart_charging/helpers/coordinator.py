@@ -53,6 +53,13 @@ class Raw:
                 largest = item["value"]
         return largest
 
+    def get_value(self, time: datetime) -> float:
+        """Get the value at time dt"""
+        for item in self.data:
+            if item["start"] <= time < item["end"]:
+                return item["value"]
+        return None
+
 
 def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int):
     """From the two-day prices, calculate the cheapest hours"""
@@ -74,7 +81,7 @@ def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int):
     ) + timedelta(days=1)
     time_now_index = None
     time_end_index = None
-    for index in range(len(price) - hours + 1):
+    for index in range(len(price)):
         item = raw_two_days.get_raw()[index]
         if item["end"] > time_now and time_now_index is None:
             time_now_index = index
@@ -98,16 +105,20 @@ def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int):
     return res
 
 
-def get_charging(lowest_hours, value_on=100):
+def get_charging(lowest_hours: list[int], raw_two_days: Raw, max_price: float) -> list:
     """Calculate charging information"""
-    # TODO: use raw_two_days and _max_price to set value=0 when charging should be stopped
 
+    if max_price > 0.0:
+        value_on = max_price
+    else:
+        value_on = (raw_two_days.max_value() / 4.0,)
     start_time = dt.now().replace(hour=0, minute=0, second=0, microsecond=0)
     end_time = start_time + timedelta(hours=1)
     result = []
     for hour in range(48):
         value = 0
-        if hour in lowest_hours:
+        price = raw_two_days.get_value(start_time)
+        if hour in lowest_hours and (price < max_price or max_price == 0.0):
             value = value_on
         item = {
             "start": start_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
@@ -134,9 +145,11 @@ def get_charging_value(charging):
     """Get value for charging now"""
     time_now = dt.now()
     for item in charging:
-        if time_now >= datetime.strptime(
-            item["start"], "%Y-%m-%dT%H:%M:%S%z"
-        ) and time_now < datetime.strptime(item["end"], "%Y-%m-%dT%H:%M:%S%z"):
+        if (
+            datetime.strptime(item["start"], "%Y-%m-%dT%H:%M:%S%z")
+            <= time_now
+            < datetime.strptime(item["end"], "%Y-%m-%dT%H:%M:%S%z")
+        ):
             return item["value"]
     return None
 
