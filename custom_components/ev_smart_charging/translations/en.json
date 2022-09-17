@@ -2,11 +2,21 @@
     "config": {
         "step": {
             "user": {
-                "description": "Setup of EV Smart Charging",
+                "description": "Setup of external entities",
                 "data": {
                     "nordpool_sensor": "Nordpool sensor",
                     "ev_soc_sensor": "EV SOC sensor",
-                    "ev_target_soc_sensor": "EV Target SOC sensor"
+                    "ev_target_soc_sensor": "EV Target SOC sensor",
+                    "charger_type": "Charger type",
+                    "charger_entity": "Charger control entity"
+                }
+            },
+            "charger": {
+                "description": "Setup of charging parameters",
+                "data": {
+                    "pct_per_hour": "Assumed charging per hour expressed in percent",
+                    "ready_hour": "Latest time for charging to be completed next day",
+                    "maximum_price": "Maximum price for charging. 0 = no limit."
                 }
             }
         },
@@ -15,6 +25,18 @@
         },
         "abort": {
             "single_instance_allowed": "Already configured. Only a single configuration possible."
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "description": "Setup of charging parameters",
+                "data": {
+                    "pct_per_hour": "Assumed charging per hour expressed in percent",
+                    "ready_hour": "Latest time for charging to be completed next day",
+                    "maximum_price": "Maximum price for charging. 0 = no limit."
+                }
+            }
         }
     }
 }

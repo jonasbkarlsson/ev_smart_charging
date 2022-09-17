@@ -8,7 +8,7 @@ from custom_components.ev_smart_charging.const import (
     DOMAIN,
 )
 
-from .const import MOCK_CONFIG
+from .const import MOCK_CONFIG_CHARGER, MOCK_CONFIG_USER
 
 
 # This fixture bypasses the actual setup of the integration
@@ -42,15 +42,32 @@ async def test_successful_config_flow(hass):
     assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
     assert result["step_id"] == "user"
 
-    # If a user were to enter `test_username` for username and `test_password`
-    # for password, it would result in this function call
     result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], user_input=MOCK_CONFIG
+        result["flow_id"], user_input=MOCK_CONFIG_USER
     )
 
     # Check that the config flow is complete and a new entry is created with
     # the input data
+    #    assert result["type"] == data_entry_flow.RESULT_TYPE_CREATE_ENTRY
+    assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result["step_id"] == "charger"
+
+    # Initialize a config flow
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "charger"}
+    )
+    print(str(result))
+
+    # Check that the config flow shows the user form as the first step
+    assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result["step_id"] == "charger"
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input=MOCK_CONFIG_CHARGER
+    )
+    print(str(result))
+
     assert result["type"] == data_entry_flow.RESULT_TYPE_CREATE_ENTRY
     assert result["title"] == "EV Smart Charging"
-    assert result["data"] == MOCK_CONFIG
+    assert result["data"] == MOCK_CONFIG_CHARGER
     assert result["result"]

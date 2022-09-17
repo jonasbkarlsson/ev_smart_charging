@@ -13,7 +13,7 @@ from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
 
-from .const import MOCK_CONFIG
+from .const import MOCK_CONFIG_ALL
 
 
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
@@ -27,7 +27,7 @@ from .const import MOCK_CONFIG
 async def test_setup_unload_and_reload_entry(hass, bypass_validate_input_sensors):
     """Test entry setup and unload."""
     # Create a mock entry so we don't have to go through config flow
-    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG, entry_id="test")
+    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
 
     # Set up the entry and assert that the values set during setup are where we expect
     # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
@@ -53,7 +53,7 @@ async def test_setup_unload_and_reload_entry(hass, bypass_validate_input_sensors
 # pylint: disable=unused-argument
 async def test_setup_entry_exception(hass):
     """Test ConfigEntryNotReady when validate_input_sensors returns an error message."""
-    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG, entry_id="test")
+    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
 
     # In this case we are testing the condition where async_setup_entry raises
     # ConfigEntryNotReady using the `error_on_get_data` fixture which simulates

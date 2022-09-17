@@ -11,7 +11,7 @@ from custom_components.ev_smart_charging.coordinator import (
 from custom_components.ev_smart_charging.const import DOMAIN
 from custom_components.ev_smart_charging.sensor import EVSmartChargingSensor
 
-from .const import MOCK_CONFIG
+from .const import MOCK_CONFIG_ALL
 
 
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
@@ -24,7 +24,7 @@ from .const import MOCK_CONFIG
 async def test_sensor_properties(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
-    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG, entry_id="test")
+    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
 
     # Set up the entry and assert that the values set during setup are where we expect
     # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
@@ -36,7 +36,7 @@ async def test_sensor_properties(hass, bypass_validate_input_sensors):
     )
 
     # coordinator = hass.data[DOMAIN][config_entry.entry_id]
-    sensor = EVSmartChargingSensor(config_entry, hass)
+    sensor = EVSmartChargingSensor(config_entry)
     assert isinstance(sensor, EVSmartChargingSensor)
 
     # Unload the entry and verify that the data has been removed
