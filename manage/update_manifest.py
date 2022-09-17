@@ -11,6 +11,7 @@ def update_manifest():
         if value in ["--version", "-V"]:
             version = sys.argv[index + 1]
 
+    # pylint: disable=unspecified-encoding
     with open(
         f"{os.getcwd()}/custom_components/ev_smart_charging/manifest.json"
     ) as manifestfile:

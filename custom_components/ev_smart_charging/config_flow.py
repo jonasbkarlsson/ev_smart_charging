@@ -40,6 +40,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Initialize."""
         _LOGGER.debug("EVChargingControlConfigFlow.__init__")
         self._errors = {}
+        self.user_input = {}
 
     @staticmethod
     @callback
