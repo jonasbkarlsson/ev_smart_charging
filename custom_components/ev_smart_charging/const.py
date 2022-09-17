@@ -17,6 +17,10 @@ PLATFORM_NORDPOOL = "nordpool"
 PLATFORM_VW = "volkswagen_we_connect_id"
 PLATFORM_OCPP = "ocpp"
 
+# Entity names
+ENTITY_NAME_CHARGING_SENSOR = "Charging"
+ENTITY_NAME_ACTIVE_SWITCH = "Activate smart charging"
+
 # Configuration and options
 CONF_NORDPOOL_SENSOR = "nordpool_sensor"
 CONF_EV_SOC_SENSOR = "ev_soc_sensor"

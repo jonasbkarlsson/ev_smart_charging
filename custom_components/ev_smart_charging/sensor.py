@@ -6,12 +6,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.const import STATE_OFF
 
 
-from .const import (
-    DEFAULT_NAME,
-    DOMAIN,
-    ICON,
-    SENSOR,
-)
+from .const import DOMAIN, ENTITY_NAME_CHARGING_SENSOR, SENSOR
 from .entity import EVSmartChargingEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -21,7 +16,7 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_devices):
     """Setup sensor platform."""
     _LOGGER.debug("EVSmartCharging.sensor.py")
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    sensor = EVSmartChargingSensor(entry, hass)
+    sensor = EVSmartChargingSensor(entry)
     async_add_devices([sensor])
     coordinator.add_sensor(sensor)
 
@@ -29,10 +24,12 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_devices):
 class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
     """EV Smart Charging sensor class."""
 
-    def __init__(self, entry, hass):
-        _LOGGER.debug("EVSmartChargingSensor.__init__() - beginning")
+    _attr_name = ENTITY_NAME_CHARGING_SENSOR
+
+    def __init__(self, entry):
+        _LOGGER.debug("EVSmartChargingSensor.__init__()")
         super().__init__(entry)
-        self.hass = hass
+        self._attr_unique_id = ".".join([entry.entry_id, SENSOR])
         self._attr_native_value = STATE_OFF
 
         self._current_price = None
@@ -41,23 +38,11 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
         self._raw_two_days = None
         self._charging_schedule = None
 
-        _LOGGER.debug("EVSmartChargingSensor.__init__() - end")
-
     @SensorEntity.native_value.setter
     def native_value(self, new_value):
         """Return the value reported by the sensor."""
         self._attr_native_value = new_value
         self.update_ha_state()
-
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return f"{DEFAULT_NAME}_{SENSOR}"
-
-    @property
-    def icon(self):
-        """Return the icon of the sensor."""
-        return ICON
 
     @property
     def extra_state_attributes(self) -> dict:

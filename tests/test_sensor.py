@@ -36,7 +36,7 @@ async def test_sensor_properties(hass, bypass_validate_input_sensors):
     )
 
     # coordinator = hass.data[DOMAIN][config_entry.entry_id]
-    sensor = EVSmartChargingSensor(config_entry, hass)
+    sensor = EVSmartChargingSensor(config_entry)
     assert isinstance(sensor, EVSmartChargingSensor)
 
     # Unload the entry and verify that the data has been removed
