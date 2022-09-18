@@ -7,7 +7,7 @@
 [![Project Maintenance][maintenance-shield]][user_profile]
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
-The EV Smart Charging integration will automatically charge the EV when the electrity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration, and can automatically detect [Volkswagen We Connect ID] (https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Integrations for other car makers and charger makers can be used with manual configuration.
+The EV Smart Charging integration will automatically charge the EV when the electrity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration, and can automatically detect the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Integrations for other car makers and charger makers can be used with manual configurations.
 
 ## Installation
 
