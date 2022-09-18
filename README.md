@@ -7,7 +7,7 @@
 [![Project Maintenance][maintenance-shield]][user_profile]
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
-The EV Smart Charging integration will automatically charge the EV when the electrity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration, and can automatically detect the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Integrations for other car makers and charger makers can be used with manual configurations.
+The EV Smart Charging integration will automatically charge the EV when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration, and can automatically detect the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Integrations for other car makers and charger makers can be used with manual configurations.
 
 ## Installation
 
@@ -29,6 +29,21 @@ The EV Smart Charging integration will automatically charge the EV when the elec
 ## Configuration
 
 The configuration is done in the Home Assistant user interface.
+
+The first form contains the entities that the integration is interacting with.
+Parameter | Required | Description
+-- | -- | --
+Nordpool entity | Yes | Sensor entity to the Nordpool integration.
+EV SOC entity | Yes | Sensor entity with the car's State-of-Charge. A value between 0 and 100.
+EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
+Charger entity | No | If provided, the integration will set the state of this entity to 'on' and 'off'.
+
+The second form contain parameters that affects how the charging will be done.
+Parameter | Required | Description
+-- | -- | --
+Percent per hour | Yes | The charging speed expressed as percent per hour.
+Departure time | Yes | The lastest time tomorrow for the charging to reach the target State-of-Charge.
+Electricity price limit | No | If provided, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to the car not being charged to the target State-of-Charge.
 
 ![Setup](images/setup.png)
 
