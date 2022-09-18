@@ -12,33 +12,29 @@ The EV Smart Charging integration will automatically charge the EV when the elec
 ## Installation
 
 ### HACS
-1. In HA UI go to "HACS" -> "Integrations". Click on the three dots in the upper-right corner and select "Custom repositories". Paste [ev_smart_charging] into the Repository field. In "Category" select "Integration". Click on "ADD".
-2. In HA UI go to "HACS" -> "Integrations". Click on "+ Explore & Download Repositories" and search for "EV Smart Charging".
-3. In the HA UI go to "Settings" -> "Devices & Services" -> "Integrations" click "+ Add integration" and search for "EV Smart Charging".
+1. In Home Assistant go to "HACS" -> "Integrations". Click on the three dots in the upper-right corner and select "Custom repositories". Paste [ev_smart_charging] into the Repository field. In "Category" select "Integration". Click on "ADD".
+2. In Home Assistant go to "HACS" -> "Integrations". Click on "+ Explore & Download Repositories" and search for "EV Smart Charging".
+3. In Home Assistant go to "Settings" -> "Devices & Services" -> "Integrations" click "+ Add integration" and search for "EV Smart Charging".
 
 ### Manual
 
-1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
+1. Using the tool of choice open the directory (folder) for your Home Assistant configuration (where you find `configuration.yaml`).
 2. If you do not have a `custom_components` directory (folder) there, you need to create it.
 3. In the `custom_components` directory (folder) create a new folder called `ev_smart_charging`.
 4. Download _all_ the files from the `custom_components/ev_smart_charging/` directory (folder) in this repository.
 5. Place the files you downloaded in the new directory (folder) you created.
-6. Restart Home Assistant
-7. In the HA UI go to "Settings" -> "Devices & Services" -> "Integrations" click "+ Add integration" and search for "EV Smart Charging".
+6. Restart Home Assistant.
+7. In Home Assistant go to "Settings" -> "Devices & Services" -> "Integrations" click "+ Add integration" and search for "EV Smart Charging".
 
 ## Configuration
 
-The configuration is done in the UI.
+The configuration is done in the Home Assistant user interface.
 
 ![Setup](images/setup.png)
 
 ## Sensor
 
 ![Sensor](images/sensor.png)
-
-## Contributions
-
-If you want to contribute to this please read the [Contribution guidelines](https://github.com/jonasbkarlsson/ev_smart_charging/blob/main/CONTRIBUTING.md)
 
 [ev_smart_charging]: https://github.com/jonasbkarlsson/ev_smart_charging
 [releases-shield]: https://img.shields.io/github/v/release/jonasbkarlsson/ev_smart_charging?style=for-the-badge
