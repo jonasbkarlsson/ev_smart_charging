@@ -1,13 +1,13 @@
 # EV Smart Charger
 
 [![GitHub Release][releases-shield]][releases]
-[![License][license-shield]](LICENSE)
+[![License][license-shield]][license]
 
 [![hacs][hacsbadge]][hacs]
 [![Project Maintenance][maintenance-shield]][user_profile]
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
-The EV Smart Charinger integration.
+The EV Smart Charging integration will automatically charge the EV when the electrity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration, and can automatically detect [Volkswagen We Connect ID] (https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Integrations for other car makers and charger makers can be used with manual configuration.
 
 ## Installation
 
@@ -38,12 +38,13 @@ The configuration is done in the UI.
 
 ## Contributions
 
-If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)
+If you want to contribute to this please read the [Contribution guidelines](https://github.com/jonasbkarlsson/ev_smart_charging/blob/main/CONTRIBUTING.md)
 
 [ev_smart_charging]: https://github.com/jonasbkarlsson/ev_smart_charging
 [releases-shield]: https://img.shields.io/github/v/release/jonasbkarlsson/ev_smart_charging?style=for-the-badge
 [releases]: https://github.com/jonasbkarlsson/ev_smart_charging/releases
 [license-shield]: https://img.shields.io/github/license/jonasbkarlsson/ev_smart_charging?style=for-the-badge
+[license]: https://github.com/jonasbkarlsson/ev_smart_charging/blob/main/LICENSE
 [hacs]: https://github.com/hacs/integration
 [hacsbadge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge
 [maintenance-shield]: https://img.shields.io/badge/maintainer-Jonas%20Karlsson%20@jonasbkarlsson-41BDF5.svg?style=for-the-badge
