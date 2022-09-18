@@ -12,7 +12,8 @@ ICON = "mdi:flash"
 # Platforms
 SENSOR = "sensor"
 SWITCH = "switch"
-PLATFORMS = [SWITCH, SENSOR]
+BUTTON = "button"
+PLATFORMS = [SWITCH, SENSOR, BUTTON]
 PLATFORM_NORDPOOL = "nordpool"
 PLATFORM_VW = "volkswagen_we_connect_id"
 PLATFORM_OCPP = "ocpp"
@@ -20,6 +21,8 @@ PLATFORM_OCPP = "ocpp"
 # Entity names
 ENTITY_NAME_CHARGING_SENSOR = "Charging"
 ENTITY_NAME_ACTIVE_SWITCH = "Activate smart charging"
+ENTITY_NAME_START_BUTTON = "Start charging"
+ENTITY_NAME_STOP_BUTTON = "Stop charging"
 
 # Configuration and options
 CONF_NORDPOOL_SENSOR = "nordpool_sensor"

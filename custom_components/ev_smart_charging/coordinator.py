@@ -98,16 +98,24 @@ class EVSmartChargingCoordinator:
             _LOGGER.debug("current_value = %s", current_value)
             if turn_on_charging and not current_value:
                 # Turn on charging
-                _LOGGER.debug("Turn on charging")
-                self.sensor.native_value = STATE_ON
-                if self.charger_switch is not None:
-                    self.hass.states.async_set(self.charger_switch, STATE_ON)
+                self.turn_on_charging()
             if not turn_on_charging and current_value:
                 # Turn off charging
-                _LOGGER.debug("Turn off charging")
-                self.sensor.native_value = STATE_OFF
-                if self.charger_switch is not None:
-                    self.hass.states.async_set(self.charger_switch, STATE_OFF)
+                self.turn_off_charging()
+
+    def turn_on_charging(self):
+        """Turn on charging"""
+        _LOGGER.debug("Turn on charging")
+        self.sensor.native_value = STATE_ON
+        if self.charger_switch is not None:
+            self.hass.states.async_set(self.charger_switch, STATE_ON)
+
+    def turn_off_charging(self):
+        """Turn off charging"""
+        _LOGGER.debug("Turn off charging")
+        self.sensor.native_value = STATE_OFF
+        if self.charger_switch is not None:
+            self.hass.states.async_set(self.charger_switch, STATE_OFF)
 
     def add_sensor(self, sensor: EVSmartChargingSensor):
         """Set up sensor"""
