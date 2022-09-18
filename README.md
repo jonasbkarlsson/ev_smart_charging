@@ -1,4 +1,4 @@
-# EV Smart Charger
+# EV Smart Charging
 
 [![GitHub Release][releases-shield]][releases]
 [![License][license-shield]][license]
