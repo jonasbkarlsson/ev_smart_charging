@@ -12,8 +12,9 @@ from homeassistant.const import STATE_ON, STATE_OFF
 
 from .helpers.coordinator import (
     Raw,
-    get_charging,
     get_charging_hours,
+    get_charging_original,
+    get_charging_update,
     get_lowest_hours,
     get_charging_value,
 )
@@ -44,6 +45,8 @@ class EVSmartChargingCoordinator:
         self.listeners = []
 
         self.sensor = None
+        self.switch_active = None
+        self.switch_ignore_limit = None
         self.nordpool_entity_id = None
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
@@ -59,6 +62,7 @@ class EVSmartChargingCoordinator:
         self.tomorrow_valid = False
 
         self.raw_two_days = None
+        self._charging_original = None
         self._charging = None
         self._charging_pct_per_hour = self._get_existing_param(CONF_PCT_PER_HOUR)
         if self._charging_pct_per_hour is None or self._charging_pct_per_hour <= 0.0:
@@ -91,6 +95,7 @@ class EVSmartChargingCoordinator:
                 and (
                     self.sensor.current_price < self._max_price
                     or self._max_price == 0.0
+                    or self.switch_ignore_limit is True
                 )
             )
             _LOGGER.debug("turn_on_charging = %s", turn_on_charging)
@@ -137,6 +142,19 @@ class EVSmartChargingCoordinator:
             self.update_sensors,
         )
         self.listeners.append(cb_sensors)
+        # TODO: Set self._charging to all 0 for intial value.
+        self.update_sensors()
+
+    def switch_active_update(self, state: bool):
+        """Handle the Active switch"""
+        self.switch_active = state
+        _LOGGER.debug("switch_active_update = %s", state)
+        self.update_sensors()
+
+    def switch_ignore_limit_update(self, state: bool):
+        """Handle the Active switch"""
+        self.switch_ignore_limit = state
+        _LOGGER.debug("switch_ignore_limit_update = %s", state)
         self.update_sensors()
 
     @callback
@@ -187,14 +205,21 @@ class EVSmartChargingCoordinator:
                 self._ready_hour, self.raw_two_days, charging_hours
             )
             _LOGGER.debug("lowest_hours = %s", lowest_hours)
-            self._charging = get_charging(
-                lowest_hours,
-                self.raw_two_days,
+            self._charging_original = get_charging_original(
+                lowest_hours, self.raw_two_days
+            )
+        if (
+            self._charging_original is not None
+            and self.switch_active is not None
+            and self.switch_ignore_limit is not None
+        ):
+            self._charging = get_charging_update(
+                self._charging_original,
+                self.switch_active,
+                self.switch_ignore_limit,
                 self._max_price,
             )
-        # else:
-        #     self._charging = None
-        self.sensor.charging_schedule = self._charging
+            self.sensor.charging_schedule = self._charging
 
         _LOGGER.debug("self._max_price = %s", self._max_price)
         _LOGGER.debug("Current price = %s", self.sensor.current_price)

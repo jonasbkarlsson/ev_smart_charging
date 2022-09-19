@@ -21,7 +21,7 @@ PLATFORM_OCPP = "ocpp"
 # Entity names
 ENTITY_NAME_CHARGING_SENSOR = "Charging"
 ENTITY_NAME_ACTIVE_SWITCH = "Smart charging activated"
-ENTITY_NAME_IGNORE_LIMIT_SWITCH = "Ignore price limit once"
+ENTITY_NAME_IGNORE_LIMIT_SWITCH = "Ignore price limit"
 ENTITY_NAME_START_BUTTON = "Start charging"
 ENTITY_NAME_STOP_BUTTON = "Stop charging"
 
