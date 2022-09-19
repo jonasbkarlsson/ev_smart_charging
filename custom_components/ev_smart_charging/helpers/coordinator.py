@@ -105,6 +105,25 @@ def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int):
     return res
 
 
+def get_charging_initial() -> list:
+    """Create initial charging information"""
+
+    start_time = dt.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    end_time = start_time + timedelta(hours=1)
+    result = []
+    for hour in range(48):  # pylint: disable=unused-variable
+        item = {
+            "start": start_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+            "end": end_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+            "value": 0.0,
+        }
+        result.append(item)
+        start_time = start_time + timedelta(hours=1)
+        end_time = end_time + timedelta(hours=1)
+
+    return result
+
+
 def get_charging_original(lowest_hours: list[int], raw_two_days: Raw) -> list:
     """Calculate charging information"""
 

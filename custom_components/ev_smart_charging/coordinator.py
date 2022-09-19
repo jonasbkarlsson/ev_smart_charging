@@ -10,14 +10,6 @@ from homeassistant.helpers.event import (
 )
 from homeassistant.const import STATE_ON, STATE_OFF
 
-from .helpers.coordinator import (
-    Raw,
-    get_charging_hours,
-    get_charging_original,
-    get_charging_update,
-    get_lowest_hours,
-    get_charging_value,
-)
 from .const import (
     CHARGER_TYPE_OCPP,
     CONF_CHARGER_ENTITY,
@@ -28,6 +20,15 @@ from .const import (
     CONF_NORDPOOL_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
+)
+from .helpers.coordinator import (
+    Raw,
+    get_charging_hours,
+    get_charging_initial,
+    get_charging_original,
+    get_charging_update,
+    get_lowest_hours,
+    get_charging_value,
 )
 from .sensor import EVSmartChargingSensor
 
@@ -98,6 +99,13 @@ class EVSmartChargingCoordinator:
                     or self.switch_ignore_limit is True
                 )
             )
+            if (
+                self.ev_soc is not None
+                and self.ev_target_soc is not None
+                and self.ev_soc >= self.ev_target_soc
+            ):
+                turn_on_charging = False
+
             _LOGGER.debug("turn_on_charging = %s", turn_on_charging)
             current_value = self.sensor.native_value == STATE_ON
             _LOGGER.debug("current_value = %s", current_value)
@@ -142,7 +150,9 @@ class EVSmartChargingCoordinator:
             self.update_sensors,
         )
         self.listeners.append(cb_sensors)
-        # TODO: Set self._charging to all 0 for intial value.
+        self._charging_original = get_charging_initial()
+        self._charging = self._charging_original
+        self.sensor.charging_schedule = self._charging
         self.update_sensors()
 
     def switch_active_update(self, state: bool):
