@@ -38,9 +38,8 @@ class EVSmartChargingButtonStart(EVSmartChargingButton):
 
     _attr_name = ENTITY_NAME_START_BUTTON
 
-    def press(self) -> None:
+    async def async_press(self) -> None:
         """Press the button."""
-        _LOGGER.debug("EVSmartChargingButtonStart.press()")
         self.coordinator.turn_on_charging()
 
 
@@ -49,7 +48,6 @@ class EVSmartChargingButtonStop(EVSmartChargingButton):
 
     _attr_name = ENTITY_NAME_STOP_BUTTON
 
-    def press(self) -> None:
+    async def async_press(self) -> None:
         """Press the button."""
-        _LOGGER.debug("EVSmartChargingButtonStop.press()")
         self.coordinator.turn_off_charging()

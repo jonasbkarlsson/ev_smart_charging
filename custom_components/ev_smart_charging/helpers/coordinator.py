@@ -105,21 +105,16 @@ def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int):
     return res
 
 
-def get_charging(lowest_hours: list[int], raw_two_days: Raw, max_price: float) -> list:
+def get_charging_original(lowest_hours: list[int], raw_two_days: Raw) -> list:
     """Calculate charging information"""
 
-    if max_price > 0.0:
-        value_on = max_price
-    else:
-        value_on = (raw_two_days.max_value() / 4.0,)
     start_time = dt.now().replace(hour=0, minute=0, second=0, microsecond=0)
     end_time = start_time + timedelta(hours=1)
     result = []
     for hour in range(48):
         value = 0
-        price = raw_two_days.get_value(start_time)
-        if hour in lowest_hours and (price < max_price or max_price == 0.0):
-            value = value_on
+        if hour in lowest_hours:
+            value = raw_two_days.get_value(start_time)
         item = {
             "start": start_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
             "end": end_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
@@ -128,6 +123,32 @@ def get_charging(lowest_hours: list[int], raw_two_days: Raw, max_price: float) -
         result.append(item)
         start_time = start_time + timedelta(hours=1)
         end_time = end_time + timedelta(hours=1)
+
+    return result
+
+
+def get_charging_update(
+    charging_original: list, active: bool, ignore_limit: bool, max_price: float
+):
+    """Update the charging schedule"""
+
+    if max_price is not None and max_price > 0.0:
+        value_on = max_price
+    else:
+        value_on = Raw(charging_original).max_value()
+
+    result = []
+    for item in charging_original:
+        if item["value"] == 0.0:
+            pass
+        elif not active:
+            item["value"] = 0.0
+        elif not ignore_limit and item["value"] > max_price:
+            item["value"] = 0.0
+        else:
+            item["value"] = value_on
+        result.append(item)
+
     return result
 
 
