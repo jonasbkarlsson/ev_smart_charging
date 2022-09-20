@@ -71,6 +71,8 @@ class EVSmartChargingCoordinator:
         self._ready_hour = int(self._get_existing_param(CONF_READY_HOUR)[0:2])
         self._max_price = float(self._get_existing_param(CONF_MAX_PRICE))
 
+        self.auto_charging_state = STATE_OFF
+
         # Do work once per hour.
         self.listeners.append(
             async_track_time_change(hass, self.new_hour, minute=0, second=0)
@@ -107,13 +109,15 @@ class EVSmartChargingCoordinator:
                 turn_on_charging = False
 
             _LOGGER.debug("turn_on_charging = %s", turn_on_charging)
-            current_value = self.sensor.native_value == STATE_ON
+            current_value = self.auto_charging_state == STATE_ON
             _LOGGER.debug("current_value = %s", current_value)
             if turn_on_charging and not current_value:
                 # Turn on charging
+                self.auto_charging_state = STATE_ON
                 self.turn_on_charging()
             if not turn_on_charging and current_value:
                 # Turn off charging
+                self.auto_charging_state = STATE_OFF
                 self.turn_off_charging()
 
     def turn_on_charging(self):

@@ -62,7 +62,9 @@ class Raw:
 
 
 def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int):
-    """From the two-day prices, calculate the cheapest hours"""
+    """From the two-day prices, calculate the cheapest hours
+
+    A continues range of hours will be choosen."""
     # TODO: Make this work with daylight saving time
 
     _LOGGER.debug("ready_hour = %s", ready_hour)
