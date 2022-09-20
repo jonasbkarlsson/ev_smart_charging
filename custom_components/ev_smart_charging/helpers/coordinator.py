@@ -1,5 +1,6 @@
 """Helpers for coordinator"""
 
+from copy import deepcopy
 from datetime import datetime, timedelta
 import logging
 from math import ceil
@@ -158,8 +159,8 @@ def get_charging_update(
     else:
         value_on = Raw(charging_original).max_value()
 
-    result = []
-    for item in charging_original:
+    result = deepcopy(charging_original)  # Make a copy, not a reference.
+    for item in result:
         if item["value"] == 0.0:
             pass
         elif not active:
@@ -168,7 +169,6 @@ def get_charging_update(
             item["value"] = 0.0
         else:
             item["value"] = value_on
-        result.append(item)
 
     return result
 

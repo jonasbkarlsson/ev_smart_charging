@@ -205,11 +205,13 @@ class EVSmartChargingCoordinator:
                 self.sensor.ev_target_soc = ev_target_soc_state.state
                 self.ev_target_soc = float(ev_target_soc_state.state)
 
-        # Calculate charging schedule
+        # Calculate charging schedule if tomorrow's prices are available,
+        # SOC and target SOC are available and if the auto charging state is off
         if (
             self.tomorrow_valid
             and self.ev_soc is not None
             and self.ev_target_soc is not None
+            and self.auto_charging_state == STATE_OFF
         ):
             charging_hours = get_charging_hours(
                 self.ev_soc, self.ev_target_soc, self._charging_pct_per_hour
