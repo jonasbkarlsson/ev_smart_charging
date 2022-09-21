@@ -26,6 +26,7 @@ ENTITY_NAME_START_BUTTON = "Start charging"
 ENTITY_NAME_STOP_BUTTON = "Stop charging"
 
 # Configuration and options
+CONF_DEVICE_NAME = "device_name"
 CONF_NORDPOOL_SENSOR = "nordpool_sensor"
 CONF_EV_SOC_SENSOR = "ev_soc_sensor"
 CONF_EV_TARGET_SOC_SENSOR = "ev_target_soc_sensor"

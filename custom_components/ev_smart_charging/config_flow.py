@@ -7,11 +7,13 @@ from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.device_registry import async_get, DeviceRegistry
 
 from .const import (
     CHARGER_TYPE_NONE,
     CHARGER_TYPE_OCPP,
     CONF_CHARGER_TYPE,
+    CONF_DEVICE_NAME,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_MAX_PRICE,
@@ -56,8 +58,8 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._errors = {}
 
         # Uncomment the next 2 lines if only a single instance of the integration is allowed:
-        if self._async_current_entries():
-            return self.async_abort(reason="single_instance_allowed")
+        # if self._async_current_entries():
+        #    return self.async_abort(reason="single_instance_allowed")
 
         if user_input is not None:
             # process user_input
@@ -118,6 +120,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             # process user_input
+            user_input[CONF_DEVICE_NAME] = self._get_device_name()  # Add device name
             self.user_input.update(user_input)
             return self.async_create_entry(title=NAME, data=self.user_input)
 
@@ -188,6 +191,34 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if entity_id.endswith("target_state_of_charge"):
                     return registry_entries[entry].entity_id
         return "Not found"
+
+    def _get_device_name(self):
+        device_registry: DeviceRegistry = async_get(self.hass)
+        devices = device_registry.devices
+        # Find existing EV Smart Charging devices
+        ev_devices = []
+        for device in devices:
+            for item in devices[device].identifiers:
+                if item[0] == DOMAIN:
+                    ev_devices.append(device)
+        # If this is the first device. just return NAME
+        if len(ev_devices) == 0:
+            return NAME
+        # Find the highest number at the end of the name
+        higest = 1
+        for device in ev_devices:
+            device_name: str = devices[device].name
+            if device_name == NAME:
+                pass
+            else:
+                try:
+                    device_number = int(device_name[len(NAME) :])
+                    if device_number > higest:
+                        higest = device_number
+                except ValueError:
+                    pass
+        # Add ONE to the highest value and append after NAME
+        return f"{NAME} {higest+1}"
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
