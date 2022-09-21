@@ -8,7 +8,7 @@ from custom_components.ev_smart_charging.const import (
     DOMAIN,
 )
 
-from .const import MOCK_CONFIG_CHARGER, MOCK_CONFIG_USER
+from .const import MOCK_CONFIG_CHARGER, MOCK_CONFIG_CHARGER_EXTRA, MOCK_CONFIG_USER
 
 
 # This fixture bypasses the actual setup of the integration
@@ -69,5 +69,5 @@ async def test_successful_config_flow(hass):
 
     assert result["type"] == data_entry_flow.RESULT_TYPE_CREATE_ENTRY
     assert result["title"] == "EV Smart Charging"
-    assert result["data"] == MOCK_CONFIG_CHARGER
+    assert result["data"] == MOCK_CONFIG_CHARGER_EXTRA
     assert result["result"]
