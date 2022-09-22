@@ -3,6 +3,7 @@
 from datetime import datetime
 import logging
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import SERVICE_TURN_ON, SERVICE_TURN_OFF
 from homeassistant.core import HomeAssistant, State, callback
 from homeassistant.helpers.event import (
     async_track_state_change,
@@ -20,6 +21,7 @@ from .const import (
     CONF_NORDPOOL_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
+    SWITCH,
 )
 from .helpers.coordinator import (
     Raw,
@@ -125,14 +127,28 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("Turn on charging")
         self.sensor.native_value = STATE_ON
         if self.charger_switch is not None:
-            self.hass.states.async_set(self.charger_switch, STATE_ON)
+            _LOGGER.debug("Before service call")
+            # self.hass.services.call(
+            #     domain=SWITCH,
+            #     service=SERVICE_TURN_ON,
+            #     target={"entity_id": self.charger_switch},
+            # )
+            _LOGGER.debug("After service call")
+            # self.hass.states.async_set(self.charger_switch, STATE_ON)
 
     def turn_off_charging(self):
         """Turn off charging"""
         _LOGGER.debug("Turn off charging")
         self.sensor.native_value = STATE_OFF
         if self.charger_switch is not None:
-            self.hass.states.async_set(self.charger_switch, STATE_OFF)
+            _LOGGER.debug("Before service call")
+            # self.hass.services.call(
+            #     domain=SWITCH,
+            #     service=SERVICE_TURN_OFF,
+            #     target={"entity_id": self.charger_switch},
+            # )
+            _LOGGER.debug("After service call")
+            # self.hass.states.async_set(self.charger_switch, STATE_OFF)
 
     def add_sensor(self, sensor: EVSmartChargingSensor):
         """Set up sensor"""
