@@ -94,7 +94,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required(
                 CONF_EV_SOC_SENSOR, default=user_input[CONF_EV_SOC_SENSOR]
             ): cv.string,
-            vol.Required(
+            vol.Optional(
                 CONF_EV_TARGET_SOC_SENSOR, default=user_input[CONF_EV_TARGET_SOC_SENSOR]
             ): cv.string,
             vol.Required(
@@ -169,7 +169,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         for entry in registry_entries:
             if registry_entries[entry].platform == PLATFORM_NORDPOOL:
                 return registry_entries[entry].entity_id
-        return "Not found"
+        return None
 
     def _get_vw_soc_sensor(self):
         """Search for Volkswagen SOC sensor"""
@@ -180,7 +180,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if entity_id.endswith("state_of_charge"):
                     if not entity_id.endswith("target_state_of_charge"):
                         return registry_entries[entry].entity_id
-        return "Not found"
+        return None
 
     def _get_vw_target_soc_sensor(self):
         """Search for Volkswagen Target SOC sensor"""
@@ -190,7 +190,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 entity_id = registry_entries[entry].entity_id
                 if entity_id.endswith("target_state_of_charge"):
                     return registry_entries[entry].entity_id
-        return "Not found"
+        return None
 
     def _get_device_name(self):
         device_registry: DeviceRegistry = async_get(self.hass)
