@@ -146,7 +146,7 @@ class FindEntity:
         ] = entity_registry.entities.items()
         for entry in registry_entries:
             if entry[1].platform == PLATFORM_OCPP:
-                entity_id = entry[1].entry_id
+                entity_id = entry[1].entity_id
                 if entity_id.startswith("switch"):
                     if "charge_control" in entity_id:
                         return entity_id
