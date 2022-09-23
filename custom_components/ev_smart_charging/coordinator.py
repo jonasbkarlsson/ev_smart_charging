@@ -3,6 +3,7 @@
 from datetime import datetime
 import logging
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import SERVICE_TURN_ON, SERVICE_TURN_OFF
 from homeassistant.core import HomeAssistant, State, callback
 from homeassistant.helpers.event import (
     async_track_state_change,
@@ -20,6 +21,7 @@ from .const import (
     CONF_NORDPOOL_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
+    SWITCH,
 )
 from .helpers.coordinator import (
     Raw,
@@ -86,7 +88,9 @@ class EVSmartChargingCoordinator:
         return default_val
 
     @callback
-    def new_hour(self, date_time: datetime = None):  # pylint: disable=unused-argument
+    async def new_hour(
+        self, date_time: datetime = None
+    ):  # pylint: disable=unused-argument
         """Called every hour"""
         _LOGGER.debug("EVSmartChargingCoordinator.new_hour()")
         if self._charging is not None:
@@ -114,27 +118,39 @@ class EVSmartChargingCoordinator:
             if turn_on_charging and not current_value:
                 # Turn on charging
                 self.auto_charging_state = STATE_ON
-                self.turn_on_charging()
+                await self.turn_on_charging()
             if not turn_on_charging and current_value:
                 # Turn off charging
                 self.auto_charging_state = STATE_OFF
-                self.turn_off_charging()
+                await self.turn_off_charging()
 
-    def turn_on_charging(self):
+    async def turn_on_charging(self):
         """Turn on charging"""
         _LOGGER.debug("Turn on charging")
         self.sensor.native_value = STATE_ON
         if self.charger_switch is not None:
-            self.hass.states.async_set(self.charger_switch, STATE_ON)
+            _LOGGER.debug("Before service call switch.turn_on: %s", self.charger_switch)
+            await self.hass.services.async_call(
+                domain=SWITCH,
+                service=SERVICE_TURN_ON,
+                target={"entity_id": self.charger_switch},
+            )
 
-    def turn_off_charging(self):
+    async def turn_off_charging(self):
         """Turn off charging"""
         _LOGGER.debug("Turn off charging")
         self.sensor.native_value = STATE_OFF
         if self.charger_switch is not None:
-            self.hass.states.async_set(self.charger_switch, STATE_OFF)
+            _LOGGER.debug(
+                "Before service call switch.turn_off: %s", self.charger_switch
+            )
+            await self.hass.services.async_call(
+                domain=SWITCH,
+                service=SERVICE_TURN_OFF,
+                target={"entity_id": self.charger_switch},
+            )
 
-    def add_sensor(self, sensor: EVSmartChargingSensor):
+    async def add_sensor(self, sensor: EVSmartChargingSensor):
         """Set up sensor"""
         self.sensor = sensor
 
@@ -157,22 +173,22 @@ class EVSmartChargingCoordinator:
         self._charging_original = get_charging_initial()
         self._charging = self._charging_original
         self.sensor.charging_schedule = self._charging
-        self.update_sensors()
+        await self.update_sensors()
 
-    def switch_active_update(self, state: bool):
+    async def switch_active_update(self, state: bool):
         """Handle the Active switch"""
         self.switch_active = state
         _LOGGER.debug("switch_active_update = %s", state)
-        self.update_sensors()
+        await self.update_sensors()
 
-    def switch_ignore_limit_update(self, state: bool):
+    async def switch_ignore_limit_update(self, state: bool):
         """Handle the Active switch"""
         self.switch_ignore_limit = state
         _LOGGER.debug("switch_ignore_limit_update = %s", state)
-        self.update_sensors()
+        await self.update_sensors()
 
     @callback
-    def update_sensors(
+    async def update_sensors(
         self, entity_id: str = None, old_state: State = None, new_state: State = None
     ):  # pylint: disable=unused-argument
         """Nordpool or EV sensors have been updated."""
@@ -239,7 +255,7 @@ class EVSmartChargingCoordinator:
 
         _LOGGER.debug("self._max_price = %s", self._max_price)
         _LOGGER.debug("Current price = %s", self.sensor.current_price)
-        self.new_hour()  # Update the charging status
+        await self.new_hour()  # Update the charging status
 
     def validate_input_sensors(self) -> str:
         """Check that all input sensors returns values."""
