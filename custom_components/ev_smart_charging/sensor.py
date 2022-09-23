@@ -18,7 +18,7 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_devices):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     sensor = EVSmartChargingSensor(entry)
     async_add_devices([sensor])
-    coordinator.add_sensor(sensor)
+    await coordinator.add_sensor(sensor)
 
 
 class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):

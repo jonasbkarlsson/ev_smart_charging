@@ -64,12 +64,12 @@ class EVSmartChargingSwitchActive(EVSmartChargingSwitch):
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""
         await super().async_turn_on(**kwargs)
-        self.coordinator.switch_active_update(True)
+        await self.coordinator.switch_active_update(True)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the entity off."""
         await super().async_turn_off(**kwargs)
-        self.coordinator.switch_active_update(False)
+        await self.coordinator.switch_active_update(False)
 
 
 class EVSmartChargingSwitchIgnoreLimit(EVSmartChargingSwitch):
@@ -88,9 +88,9 @@ class EVSmartChargingSwitchIgnoreLimit(EVSmartChargingSwitch):
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""
         await super().async_turn_on(**kwargs)
-        self.coordinator.switch_ignore_limit_update(True)
+        await self.coordinator.switch_ignore_limit_update(True)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the entity off."""
         await super().async_turn_off(**kwargs)
-        self.coordinator.switch_ignore_limit_update(False)
+        await self.coordinator.switch_ignore_limit_update(False)
