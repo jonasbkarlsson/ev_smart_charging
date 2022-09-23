@@ -31,7 +31,7 @@ def bypass_setup_fixture():
 # Note that we use the `bypass_get_data` fixture here because
 # we want the config flow validation to succeed during the test.
 # pylint: disable=unused-argument
-async def test_successful_config_flow(hass):
+async def test_successful_config_flow(hass, bypass_validate_step_user):
     """Test a successful config flow."""
     # Initialize a config flow
     result = await hass.config_entries.flow.async_init(
