@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -e
+
+sed -i "s/VERSION =.*/VERSION = \"${1}\"/" custom_components/github_test/const.py
