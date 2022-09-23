@@ -2,7 +2,7 @@
 import logging
 from homeassistant.helpers.entity import Entity
 
-from .const import CONF_DEVICE_NAME, DOMAIN, ICON, NAME, VERSION
+from .const import CONF_DEVICE_NAME, DOMAIN, ICON, NAME
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,6 +26,5 @@ class EVSmartChargingEntity(Entity):
         return {
             "identifiers": {(DOMAIN, self.config_entry.entry_id)},
             "name": self.config_entry.data.get(CONF_DEVICE_NAME),
-            "model": VERSION,
-            "manufacturer": NAME,
+            "model": NAME,
         }
