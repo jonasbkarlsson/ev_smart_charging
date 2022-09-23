@@ -128,6 +128,14 @@ class EVSmartChargingCoordinator:
         self.sensor.native_value = STATE_ON
         if self.charger_switch is not None:
             _LOGGER.debug("Before service call")
+            service_on = self.hass.services.has_service(SWITCH, SERVICE_TURN_ON)
+            _LOGGER.debug("service_on = %s", service_on)
+            domain = SWITCH
+            _LOGGER.debug("domain = %s", domain)
+            service = SERVICE_TURN_ON
+            _LOGGER.debug("service = %s", service)
+            target = {"entity_id": self.charger_switch}
+            _LOGGER.debug("target = %s", target)
             # self.hass.services.call(
             #     domain=SWITCH,
             #     service=SERVICE_TURN_ON,
