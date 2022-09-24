@@ -12,7 +12,6 @@ from homeassistant.helpers.entity_registry import (
     RegistryEntry,
 )
 
-
 # pylint: disable=relative-beyond-top-level
 from ..const import (
     CONF_CHARGER_ENTITY,

@@ -3,6 +3,7 @@
 # pylint: disable=relative-beyond-top-level
 from typing import Any
 from homeassistant.core import State
+
 from .coordinator import Raw
 
 

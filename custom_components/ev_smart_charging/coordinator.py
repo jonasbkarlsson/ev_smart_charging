@@ -12,8 +12,6 @@ from homeassistant.helpers.event import (
 )
 from homeassistant.const import STATE_ON, STATE_OFF
 
-from .helpers.general import Validator
-
 from .const import (
     CONF_CHARGER_ENTITY,
     CONF_MAX_PRICE,
@@ -34,6 +32,7 @@ from .helpers.coordinator import (
     get_lowest_hours,
     get_charging_value,
 )
+from .helpers.general import Validator
 from .sensor import EVSmartChargingSensor
 
 _LOGGER = logging.getLogger(__name__)
