@@ -52,22 +52,35 @@ class FlowValidator:
         entities = entity_registry.entities
 
         # Validate Nordpool entity
-        if hass.states.get(user_input[CONF_NORDPOOL_SENSOR]) is None:
+        nordpool_state = hass.states.get(user_input[CONF_NORDPOOL_SENSOR])
+        if nordpool_state is None:
             return ("base", "nordpool_not_found")
         entry: RegistryEntry = entities.get(user_input[CONF_NORDPOOL_SENSOR])
         if entry.domain != SENSOR:
             return ("base", "nordpool_not_sensor")
+        if not "current_price" in nordpool_state.attributes.keys():
+            _LOGGER.debug("No attribute current_price in nordpool sensor")
+            return ("base", "sensor_is_not_nordpool")
+        if not "raw_today" in nordpool_state.attributes.keys():
+            _LOGGER.debug("No attribute raw_today in nordpool sensor")
+            return ("base", "sensor_is_not_nordpool")
+        if not "raw_tomorrow" in nordpool_state.attributes.keys():
+            _LOGGER.debug("No attribute raw_tomorrow in nordpool sensor")
+            return ("base", "sensor_is_not_nordpool")
 
         # Validate EV SOC entity
         entity = hass.states.get(user_input[CONF_EV_SOC_SENSOR])
         if entity is None:
             return ("base", "ev_soc_not_found")
         if not FlowValidator.is_float(entity.state):
+            _LOGGER.debug("EV SOC state is not float")
             return ("base", "ev_soc_invalid_data")
         if not 0.0 <= float(entity.state) <= 100.0:
+            _LOGGER.debug("EV SOC state is between 0 and 100")
             return ("base", "ev_soc_invalid_data")
 
         # Validate EV Target SOC entity
+        # If the set value is only whitespaces, the value will be set to ""
         user_input[CONF_EV_TARGET_SOC_SENSOR] = user_input[
             CONF_EV_TARGET_SOC_SENSOR
         ].strip()
@@ -76,11 +89,14 @@ class FlowValidator:
             if entity is None:
                 return ("base", "ev_target_soc_not_found")
             if not FlowValidator.is_float(entity.state):
+                _LOGGER.debug("EV Target SOC state is not float")
                 return ("base", "ev_soc_target_invalid_data")
             if not 0.0 <= float(entity.state) <= 100.0:
+                _LOGGER.debug("EV Target SOC state is between 0 and 100")
                 return ("base", "ev_soc_target_invalid_data")
 
         # Validate Charger control switch entity
+        # If the set value is only whitespaces, the value will be set to ""
         user_input[CONF_CHARGER_ENTITY] = user_input[CONF_CHARGER_ENTITY].strip()
         if len(user_input[CONF_CHARGER_ENTITY]) > 0:
             entity = hass.states.get(user_input[CONF_CHARGER_ENTITY])

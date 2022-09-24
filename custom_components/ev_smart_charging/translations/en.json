@@ -22,6 +22,7 @@
         "error": {
             "nordpool_not_found": "Nordpool sensor not found.",
             "nordpool_not_sensor": "The Nordpool entity is not a sensor.",
+            "sensor_is_not_nordpool": "The Nordpool sensor does not have the needed attributes.",
             "ev_soc_not_found": "EV SOC entity not found.",
             "ev_soc_invalid_data": "The SOC entity gives invalid data.",
             "ev_target_soc_not_found": "EV Target SOC entity not found.",

@@ -2,6 +2,7 @@
 
 from datetime import datetime
 import logging
+from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import SERVICE_TURN_ON, SERVICE_TURN_OFF
 from homeassistant.core import HomeAssistant, State, callback
@@ -12,15 +13,14 @@ from homeassistant.helpers.event import (
 from homeassistant.const import STATE_ON, STATE_OFF
 
 from .const import (
-    CHARGER_TYPE_OCPP,
     CONF_CHARGER_ENTITY,
-    CONF_CHARGER_TYPE,
     CONF_MAX_PRICE,
     CONF_PCT_PER_HOUR,
     CONF_READY_HOUR,
     CONF_NORDPOOL_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
+    DEFAULT_TARGET_SOC,
     SWITCH,
 )
 from .helpers.coordinator import (
@@ -55,8 +55,8 @@ class EVSmartChargingCoordinator:
         self.ev_target_soc_entity_id = None
 
         self.charger_switch = None
-        if self.config_entry.data.get(CONF_CHARGER_TYPE) == CHARGER_TYPE_OCPP:
-            self.charger_switch = self._get_existing_param(CONF_CHARGER_ENTITY)
+        if len(self._get_parameter(CONF_CHARGER_ENTITY)) > 0:
+            self.charger_switch = self._get_parameter(CONF_CHARGER_ENTITY)
 
         self.ev_soc = None
         self.ev_target_soc = None
@@ -67,11 +67,11 @@ class EVSmartChargingCoordinator:
         self.raw_two_days = None
         self._charging_original = None
         self._charging = None
-        self._charging_pct_per_hour = self._get_existing_param(CONF_PCT_PER_HOUR)
+        self._charging_pct_per_hour = self._get_parameter(CONF_PCT_PER_HOUR)
         if self._charging_pct_per_hour is None or self._charging_pct_per_hour <= 0.0:
             self._charging_pct_per_hour = 6.0
-        self._ready_hour = int(self._get_existing_param(CONF_READY_HOUR)[0:2])
-        self._max_price = float(self._get_existing_param(CONF_MAX_PRICE))
+        self._ready_hour = int(self._get_parameter(CONF_READY_HOUR)[0:2])
+        self._max_price = float(self._get_parameter(CONF_MAX_PRICE))
 
         self.auto_charging_state = STATE_OFF
 
@@ -80,7 +80,7 @@ class EVSmartChargingCoordinator:
             async_track_time_change(hass, self.new_hour, minute=0, second=0)
         )
 
-    def _get_existing_param(self, parameter: str, default_val: any = None):
+    def _get_parameter(self, parameter: str, default_val: Any = None):
         if parameter in self.config_entry.options.keys():
             return self.config_entry.options.get(parameter)
         if parameter in self.config_entry.data.keys():
@@ -154,22 +154,35 @@ class EVSmartChargingCoordinator:
         """Set up sensor"""
         self.sensor = sensor
 
-        self.nordpool_entity_id = self._get_existing_param(CONF_NORDPOOL_SENSOR)
-        self.ev_soc_entity_id = self._get_existing_param(CONF_EV_SOC_SENSOR)
-        self.ev_target_soc_entity_id = self.config_entry.data.get(
-            CONF_EV_TARGET_SOC_SENSOR
-        )
+        self.nordpool_entity_id = self._get_parameter(CONF_NORDPOOL_SENSOR)
+        self.ev_soc_entity_id = self._get_parameter(CONF_EV_SOC_SENSOR)
+        self.ev_target_soc_entity_id = self._get_parameter(CONF_EV_TARGET_SOC_SENSOR)
 
-        cb_sensors = async_track_state_change(
-            self.hass,
-            [
-                self.nordpool_entity_id,
-                self.ev_soc_entity_id,
-                self.ev_target_soc_entity_id,
-            ],
-            self.update_sensors,
+        self.listeners.append(
+            async_track_state_change(
+                self.hass,
+                [
+                    self.nordpool_entity_id,
+                    self.ev_soc_entity_id,
+                ],
+                self.update_sensors,
+            )
         )
-        self.listeners.append(cb_sensors)
+        if len(self.ev_target_soc_entity_id) > 0:
+            self.listeners.append(
+                async_track_state_change(
+                    self.hass,
+                    [
+                        self.ev_target_soc_entity_id,
+                    ],
+                    self.update_sensors,
+                )
+            )
+        else:
+            # Set default Target SOC when there is no sensor
+            self.sensor.ev_target_soc = DEFAULT_TARGET_SOC
+            self.ev_target_soc = DEFAULT_TARGET_SOC
+
         self._charging_original = get_charging_initial()
         self._charging = self._charging_original
         self.sensor.charging_schedule = self._charging
@@ -260,19 +273,20 @@ class EVSmartChargingCoordinator:
     def validate_input_sensors(self) -> str:
         """Check that all input sensors returns values."""
 
-        nordpool = self._get_existing_param(CONF_NORDPOOL_SENSOR)
+        nordpool = self._get_parameter(CONF_NORDPOOL_SENSOR)
         nordpool_state = self.hass.states.get(nordpool)
         if nordpool_state is None:
             return "Input sensors not ready."
 
-        ev_soc = self._get_existing_param(CONF_EV_SOC_SENSOR)
+        ev_soc = self._get_parameter(CONF_EV_SOC_SENSOR)
         ev_soc_state = self.hass.states.get(ev_soc).state
         if ev_soc_state is None:
             return "Input sensors not ready."
 
-        ev_target_soc = self._get_existing_param(CONF_EV_TARGET_SOC_SENSOR)
-        ev_target_soc_state = self.hass.states.get(ev_target_soc).state
-        if ev_target_soc_state is None:
-            return "Input sensors not ready."
+        ev_target_soc = self._get_parameter(CONF_EV_TARGET_SOC_SENSOR)
+        if len(ev_target_soc) > 0:  # Check if the sensor exists
+            ev_target_soc_state = self.hass.states.get(ev_target_soc).state
+            if ev_target_soc_state is None:
+                return "Input sensors not ready."
 
         return None
