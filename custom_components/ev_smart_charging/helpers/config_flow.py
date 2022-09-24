@@ -26,21 +26,13 @@ from ..const import (
     SENSOR,
     SWITCH,
 )
+from .general import Validator
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class FlowValidator:
     """Validator of flows"""
-
-    @staticmethod
-    def is_float(element: Any) -> bool:
-        """Check that argument is a float"""
-        try:
-            float(element)
-            return True
-        except ValueError:
-            return False
 
     @staticmethod
     def validate_step_user(
@@ -72,7 +64,7 @@ class FlowValidator:
         entity = hass.states.get(user_input[CONF_EV_SOC_SENSOR])
         if entity is None:
             return ("base", "ev_soc_not_found")
-        if not FlowValidator.is_float(entity.state):
+        if not Validator.is_float(entity.state):
             _LOGGER.debug("EV SOC state is not float")
             return ("base", "ev_soc_invalid_data")
         if not 0.0 <= float(entity.state) <= 100.0:
@@ -88,7 +80,7 @@ class FlowValidator:
             entity = hass.states.get(user_input[CONF_EV_TARGET_SOC_SENSOR])
             if entity is None:
                 return ("base", "ev_target_soc_not_found")
-            if not FlowValidator.is_float(entity.state):
+            if not Validator.is_float(entity.state):
                 _LOGGER.debug("EV Target SOC state is not float")
                 return ("base", "ev_soc_target_invalid_data")
             if not 0.0 <= float(entity.state) <= 100.0:

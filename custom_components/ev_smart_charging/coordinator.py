@@ -32,6 +32,7 @@ from .helpers.coordinator import (
     get_lowest_hours,
     get_charging_value,
 )
+from .helpers.general import Validator
 from .sensor import EVSmartChargingSensor
 
 _LOGGER = logging.getLogger(__name__)
@@ -212,27 +213,31 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("new_state = %s", new_state)
 
         nordpool_state = self.hass.states.get(self.nordpool_entity_id)
-        if nordpool_state is not None:
-            if nordpool_state.state != "unavailable":
-                self.sensor.current_price = nordpool_state.attributes["current_price"]
-                self.raw_today = Raw(nordpool_state.attributes["raw_today"])
-                self.raw_tomorrow = Raw(nordpool_state.attributes["raw_tomorrow"])
-                self.tomorrow_valid = self.raw_tomorrow.is_valid()
-                self.raw_two_days = self.raw_today.copy()
-                self.raw_two_days.extend(self.raw_tomorrow)
-                self.sensor.raw_two_days = self.raw_two_days.get_raw()
+        if Validator.is_nordpool_state(nordpool_state):
+            self.sensor.current_price = nordpool_state.attributes["current_price"]
+            self.raw_today = Raw(nordpool_state.attributes["raw_today"])
+            self.raw_tomorrow = Raw(nordpool_state.attributes["raw_tomorrow"])
+            self.tomorrow_valid = self.raw_tomorrow.is_valid()
+            self.raw_two_days = self.raw_today.copy()
+            self.raw_two_days.extend(self.raw_tomorrow)
+            self.sensor.raw_two_days = self.raw_two_days.get_raw()
+        else:
+            _LOGGER.error("Nordpool sensor not valid.")
 
         ev_soc_state = self.hass.states.get(self.ev_soc_entity_id)
-        if ev_soc_state is not None:
-            if ev_soc_state.state != "unavailable":
-                self.sensor.ev_soc = ev_soc_state.state
-                self.ev_soc = float(ev_soc_state.state)
+        if Validator.is_soc_state(ev_soc_state):
+            self.sensor.ev_soc = ev_soc_state.state
+            self.ev_soc = float(ev_soc_state.state)
+        else:
+            _LOGGER.error("SOC sensor not valid: %s", ev_soc_state)
 
-        ev_target_soc_state = self.hass.states.get(self.ev_target_soc_entity_id)
-        if ev_target_soc_state is not None:
-            if ev_target_soc_state.state != "unavailable":
+        if len(self.ev_target_soc_entity_id) > 0:
+            ev_target_soc_state = self.hass.states.get(self.ev_target_soc_entity_id)
+            if Validator.is_soc_state(ev_target_soc_state):
                 self.sensor.ev_target_soc = ev_target_soc_state.state
                 self.ev_target_soc = float(ev_target_soc_state.state)
+            else:
+                _LOGGER.error("Target SOC sensor not valid: %s", ev_target_soc_state)
 
         # Calculate charging schedule if tomorrow's prices are available,
         # SOC and target SOC are available and if the auto charging state is off
