@@ -23,6 +23,7 @@ from .const import (
     DEFAULT_TARGET_SOC,
     SWITCH,
 )
+from .helpers.config_flow import Validator
 from .helpers.coordinator import (
     Raw,
     get_charging_hours,
@@ -225,14 +226,24 @@ class EVSmartChargingCoordinator:
         ev_soc_state = self.hass.states.get(self.ev_soc_entity_id)
         if ev_soc_state is not None:
             if ev_soc_state.state != "unavailable":
-                self.sensor.ev_soc = ev_soc_state.state
-                self.ev_soc = float(ev_soc_state.state)
+                ev_soc = ev_soc_state.state
+                if Validator.is_float(ev_soc) and (0.0 <= float(ev_soc) <= 100.0):
+                    self.sensor.ev_soc = ev_soc
+                    self.ev_soc = float(ev_soc)
+                else:
+                    _LOGGER.error("SOC sensor out of range: %s", ev_soc)
 
         ev_target_soc_state = self.hass.states.get(self.ev_target_soc_entity_id)
         if ev_target_soc_state is not None:
             if ev_target_soc_state.state != "unavailable":
-                self.sensor.ev_target_soc = ev_target_soc_state.state
-                self.ev_target_soc = float(ev_target_soc_state.state)
+                ev_target_soc = ev_target_soc_state.state
+                if Validator.is_float(ev_target_soc) and (
+                    0.0 <= float(ev_target_soc) <= 100.0
+                ):
+                    self.sensor.ev_target_soc = ev_target_soc_state.state
+                    self.ev_target_soc = float(ev_target_soc_state.state)
+                else:
+                    _LOGGER.error("Target SOC sensor out of range: %s", ev_target_soc)
 
         # Calculate charging schedule if tomorrow's prices are available,
         # SOC and target SOC are available and if the auto charging state is off
