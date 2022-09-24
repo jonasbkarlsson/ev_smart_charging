@@ -12,6 +12,8 @@ from homeassistant.helpers.event import (
 )
 from homeassistant.const import STATE_ON, STATE_OFF
 
+from .helpers.general import Validator
+
 from .const import (
     CONF_CHARGER_ENTITY,
     CONF_MAX_PRICE,
@@ -23,7 +25,6 @@ from .const import (
     DEFAULT_TARGET_SOC,
     SWITCH,
 )
-from .helpers.config_flow import Validator
 from .helpers.coordinator import (
     Raw,
     get_charging_hours,
@@ -213,40 +214,31 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("new_state = %s", new_state)
 
         nordpool_state = self.hass.states.get(self.nordpool_entity_id)
-        if nordpool_state is not None:
-            if nordpool_state.state != "unavailable":
-                if Validator.is_nordpool(nordpool_state.state):
-                    self.sensor.current_price = nordpool_state.attributes[
-                        "current_price"
-                    ]
-                    self.raw_today = Raw(nordpool_state.attributes["raw_today"])
-                    self.raw_tomorrow = Raw(nordpool_state.attributes["raw_tomorrow"])
-                    self.tomorrow_valid = self.raw_tomorrow.is_valid()
-                    self.raw_two_days = self.raw_today.copy()
-                    self.raw_two_days.extend(self.raw_tomorrow)
-                    self.sensor.raw_two_days = self.raw_two_days.get_raw()
-                else:
-                    _LOGGER.error("Nordpool sensor not valid.")
+        if Validator.is_nordpool_state(nordpool_state):
+            self.sensor.current_price = nordpool_state.attributes["current_price"]
+            self.raw_today = Raw(nordpool_state.attributes["raw_today"])
+            self.raw_tomorrow = Raw(nordpool_state.attributes["raw_tomorrow"])
+            self.tomorrow_valid = self.raw_tomorrow.is_valid()
+            self.raw_two_days = self.raw_today.copy()
+            self.raw_two_days.extend(self.raw_tomorrow)
+            self.sensor.raw_two_days = self.raw_two_days.get_raw()
+        else:
+            _LOGGER.error("Nordpool sensor not valid.")
 
         ev_soc_state = self.hass.states.get(self.ev_soc_entity_id)
-        if ev_soc_state is not None:
-            if ev_soc_state.state != "unavailable":
-                ev_soc = ev_soc_state.state
-                if Validator.is_soc(ev_soc):
-                    self.sensor.ev_soc = ev_soc
-                    self.ev_soc = float(ev_soc)
-                else:
-                    _LOGGER.error("SOC sensor out of range: %s", ev_soc)
+        if Validator.is_soc_state(ev_soc_state):
+            self.sensor.ev_soc = ev_soc_state.state
+            self.ev_soc = float(ev_soc_state.state)
+        else:
+            _LOGGER.error("SOC sensor not valid: %s", ev_soc_state)
 
-        ev_target_soc_state = self.hass.states.get(self.ev_target_soc_entity_id)
-        if ev_target_soc_state is not None:
-            if ev_target_soc_state.state != "unavailable":
-                ev_target_soc = ev_target_soc_state.state
-                if Validator.is_soc(ev_target_soc):
-                    self.sensor.ev_target_soc = ev_target_soc_state.state
-                    self.ev_target_soc = float(ev_target_soc_state.state)
-                else:
-                    _LOGGER.error("Target SOC sensor out of range: %s", ev_target_soc)
+        if len(self.ev_target_soc_entity_id) > 0:
+            ev_target_soc_state = self.hass.states.get(self.ev_target_soc_entity_id)
+            if Validator.is_soc_state(ev_target_soc_state):
+                self.sensor.ev_target_soc = ev_target_soc_state.state
+                self.ev_target_soc = float(ev_target_soc_state.state)
+            else:
+                _LOGGER.error("Target SOC sensor not valid: %s", ev_target_soc_state)
 
         # Calculate charging schedule if tomorrow's prices are available,
         # SOC and target SOC are available and if the auto charging state is off
