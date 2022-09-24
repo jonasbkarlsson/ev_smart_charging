@@ -1,8 +1,6 @@
 """Constants for ev_smart_charging tests."""
 from custom_components.ev_smart_charging.const import (
-    CHARGER_TYPE_OCPP,
     CONF_CHARGER_ENTITY,
-    CONF_CHARGER_TYPE,
     CONF_DEVICE_NAME,
     CONF_MAX_PRICE,
     CONF_NORDPOOL_SENSOR,
@@ -18,7 +16,6 @@ MOCK_CONFIG_USER = {
     CONF_NORDPOOL_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0",
     CONF_EV_SOC_SENSOR: "sensor.id_4_gtx_state_of_charge",
     CONF_EV_TARGET_SOC_SENSOR: "number.id_4_gtx_target_state_of_charge",
-    CONF_CHARGER_TYPE: CHARGER_TYPE_OCPP,
     CONF_CHARGER_ENTITY: "switch.charger_charge_control",
 }
 
@@ -39,7 +36,6 @@ MOCK_CONFIG_ALL = {
     CONF_NORDPOOL_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0",
     CONF_EV_SOC_SENSOR: "sensor.id_4_gtx_state_of_charge",
     CONF_EV_TARGET_SOC_SENSOR: "number.id_4_gtx_target_state_of_charge",
-    CONF_CHARGER_TYPE: CHARGER_TYPE_OCPP,
     CONF_CHARGER_ENTITY: "switch.charger_charge_control",
     CONF_PCT_PER_HOUR: 6.0,
     CONF_READY_HOUR: "08:00",

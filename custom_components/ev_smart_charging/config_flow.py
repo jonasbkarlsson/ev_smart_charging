@@ -7,12 +7,8 @@ from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.device_registry import async_get, DeviceRegistry
 
 from .const import (
-    CHARGER_TYPE_NONE,
-    CHARGER_TYPE_OCPP,
-    CONF_CHARGER_TYPE,
     CONF_DEVICE_NAME,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
@@ -24,10 +20,8 @@ from .const import (
     DOMAIN,
     HOURS,
     NAME,
-    PLATFORM_NORDPOOL,
-    PLATFORM_OCPP,
-    PLATFORM_VW,
 )
+from .helpers.config_flow import DeviceNameCreator, FindEntity, FlowValidator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -61,30 +55,31 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # if self._async_current_entries():
         #    return self.async_abort(reason="single_instance_allowed")
 
-        if user_input is not None:
+        if user_input is None:
+            user_input = {}
+            # Provide defaults for form
+            user_input[CONF_NORDPOOL_SENSOR] = FindEntity.find_nordpool_sensor(
+                self.hass
+            )
+            user_input[CONF_EV_SOC_SENSOR] = FindEntity.find_vw_soc_sensor(self.hass)
+            user_input[
+                CONF_EV_TARGET_SOC_SENSOR
+            ] = FindEntity.find_vw_target_soc_sensor(self.hass)
+            user_input[CONF_CHARGER_ENTITY] = FindEntity.find_ocpp_device(self.hass)
+
+        else:
             # process user_input
-            self.user_input = user_input
-            # return self.async_create_entry(title=NAME, data=self.user_input)
-            return await self.async_step_charger()
+            error = FlowValidator.validate_step_user(self.hass, user_input)
+            if error is not None:
+                self._errors[error[0]] = error[1]
 
-        user_input = {}
-        # Provide defaults for form
-        user_input[CONF_NORDPOOL_SENSOR] = self._get_nordpool_sensor()
-        user_input[CONF_EV_SOC_SENSOR] = self._get_vw_soc_sensor()
-        user_input[CONF_EV_TARGET_SOC_SENSOR] = self._get_vw_target_soc_sensor()
-        user_input[CONF_CHARGER_TYPE] = CHARGER_TYPE_NONE
-        user_input[CONF_CHARGER_ENTITY] = None
+            if not self._errors:
+                self.user_input = user_input
+                return await self.async_step_charger()
 
-        chargers = [CHARGER_TYPE_NONE]
-        ocpp = self._get_ocpp_device()
-        if ocpp is not None:
-            chargers.append(CHARGER_TYPE_OCPP)
-            user_input[CONF_CHARGER_TYPE] = CHARGER_TYPE_OCPP
-            user_input[CONF_CHARGER_ENTITY] = ocpp
+        return await self._show_config_form_user(user_input)
 
-        return await self._show_config_form_user(user_input, chargers)
-
-    async def _show_config_form_user(self, user_input, chargers):
+    async def _show_config_form_user(self, user_input):
         """Show the configuration form."""
 
         user_schema = {
@@ -94,12 +89,9 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required(
                 CONF_EV_SOC_SENSOR, default=user_input[CONF_EV_SOC_SENSOR]
             ): cv.string,
-            vol.Required(
+            vol.Optional(
                 CONF_EV_TARGET_SOC_SENSOR, default=user_input[CONF_EV_TARGET_SOC_SENSOR]
             ): cv.string,
-            vol.Required(
-                CONF_CHARGER_TYPE, default=user_input[CONF_CHARGER_TYPE]
-            ): vol.In(chargers),
             vol.Optional(
                 CONF_CHARGER_ENTITY, default=user_input[CONF_CHARGER_ENTITY]
             ): cv.string,
@@ -120,7 +112,9 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             # process user_input
-            user_input[CONF_DEVICE_NAME] = self._get_device_name()  # Add device name
+            user_input[CONF_DEVICE_NAME] = DeviceNameCreator.create(
+                self.hass
+            )  # Add device name
             self.user_input.update(user_input)
             return self.async_create_entry(title=NAME, data=self.user_input)
 
@@ -152,73 +146,6 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(charger_schema),
             errors=self._errors,
         )
-
-    def _get_ocpp_device(self):
-        registry_entries = self.hass.data["entity_registry"].entities.data
-        for entry in registry_entries:
-            if registry_entries[entry].platform == PLATFORM_OCPP:
-                entity_id = registry_entries[entry].entity_id
-                if entity_id.startswith("switch"):
-                    if entity_id.endswith("charge_control"):
-                        return registry_entries[entry].entity_id
-        return "Not found"
-
-    def _get_nordpool_sensor(self):
-        """Search for Nordpool sensor"""
-        registry_entries = self.hass.data["entity_registry"].entities.data
-        for entry in registry_entries:
-            if registry_entries[entry].platform == PLATFORM_NORDPOOL:
-                return registry_entries[entry].entity_id
-        return "Not found"
-
-    def _get_vw_soc_sensor(self):
-        """Search for Volkswagen SOC sensor"""
-        registry_entries = self.hass.data["entity_registry"].entities.data
-        for entry in registry_entries:
-            if registry_entries[entry].platform == PLATFORM_VW:
-                entity_id = registry_entries[entry].entity_id
-                if entity_id.endswith("state_of_charge"):
-                    if not entity_id.endswith("target_state_of_charge"):
-                        return registry_entries[entry].entity_id
-        return "Not found"
-
-    def _get_vw_target_soc_sensor(self):
-        """Search for Volkswagen Target SOC sensor"""
-        registry_entries = self.hass.data["entity_registry"].entities.data
-        for entry in registry_entries:
-            if registry_entries[entry].platform == PLATFORM_VW:
-                entity_id = registry_entries[entry].entity_id
-                if entity_id.endswith("target_state_of_charge"):
-                    return registry_entries[entry].entity_id
-        return "Not found"
-
-    def _get_device_name(self):
-        device_registry: DeviceRegistry = async_get(self.hass)
-        devices = device_registry.devices
-        # Find existing EV Smart Charging devices
-        ev_devices = []
-        for device in devices:
-            for item in devices[device].identifiers:
-                if item[0] == DOMAIN:
-                    ev_devices.append(device)
-        # If this is the first device. just return NAME
-        if len(ev_devices) == 0:
-            return NAME
-        # Find the highest number at the end of the name
-        higest = 1
-        for device in ev_devices:
-            device_name: str = devices[device].name
-            if device_name == NAME:
-                pass
-            else:
-                try:
-                    device_number = int(device_name[len(NAME) :])
-                    if device_number > higest:
-                        higest = device_number
-                except ValueError:
-                    pass
-        # Add ONE to the highest value and append after NAME
-        return f"{NAME} {higest+1}"
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):

@@ -5,10 +5,9 @@
                 "description": "Setup of external entities",
                 "data": {
                     "nordpool_sensor": "Nordpool sensor",
-                    "ev_soc_sensor": "EV SOC sensor",
-                    "ev_target_soc_sensor": "EV Target SOC sensor",
-                    "charger_type": "Charger type",
-                    "charger_entity": "Charger control entity"
+                    "ev_soc_sensor": "EV SOC entity",
+                    "ev_target_soc_sensor": "EV Target SOC entity",
+                    "charger_entity": "Charger control switch"
                 }
             },
             "charger": {
@@ -21,10 +20,15 @@
             }
         },
         "error": {
-            "sensor_invalid": "Sensor is invalid."
-        },
-        "abort": {
-            "single_instance_allowed": "Already configured. Only a single configuration possible."
+            "nordpool_not_found": "Nordpool sensor not found.",
+            "nordpool_not_sensor": "The Nordpool entity is not a sensor.",
+            "sensor_is_not_nordpool": "The Nordpool sensor does not have the needed attributes.",
+            "ev_soc_not_found": "EV SOC entity not found.",
+            "ev_soc_invalid_data": "The SOC entity gives invalid data.",
+            "ev_target_soc_not_found": "EV Target SOC entity not found.",
+            "ev_target_soc_invalid_data": "The Target SOC entity gives invalid data.",
+            "charger_control_switch_not_found": "Charger control switch entity not found.",
+            "charger_control_switch_not_switch": "Charger control switch entity is not a switch."
         }
     },
     "options": {
