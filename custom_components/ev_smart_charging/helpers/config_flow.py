@@ -42,6 +42,22 @@ class Validator:
         except ValueError:
             return False
 
+    @staticmethod
+    def is_soc(soc: str | float | int) -> bool:
+        """Check that argument is a SOC state"""
+
+        if not Validator.is_float(soc):
+            return False
+        if 0.0 <= float(soc) <= 100.0:
+            return True
+        return False
+
+    @staticmethod
+    def is_nordpool(nordpool: Any) -> bool:
+        """Check that argument is a Nordpool sensor state"""
+        # TODO: Add checks.
+        return True
+
 
 class FlowValidator:
     """Validator of flows"""

@@ -215,19 +215,24 @@ class EVSmartChargingCoordinator:
         nordpool_state = self.hass.states.get(self.nordpool_entity_id)
         if nordpool_state is not None:
             if nordpool_state.state != "unavailable":
-                self.sensor.current_price = nordpool_state.attributes["current_price"]
-                self.raw_today = Raw(nordpool_state.attributes["raw_today"])
-                self.raw_tomorrow = Raw(nordpool_state.attributes["raw_tomorrow"])
-                self.tomorrow_valid = self.raw_tomorrow.is_valid()
-                self.raw_two_days = self.raw_today.copy()
-                self.raw_two_days.extend(self.raw_tomorrow)
-                self.sensor.raw_two_days = self.raw_two_days.get_raw()
+                if Validator.is_nordpool(nordpool_state.state):
+                    self.sensor.current_price = nordpool_state.attributes[
+                        "current_price"
+                    ]
+                    self.raw_today = Raw(nordpool_state.attributes["raw_today"])
+                    self.raw_tomorrow = Raw(nordpool_state.attributes["raw_tomorrow"])
+                    self.tomorrow_valid = self.raw_tomorrow.is_valid()
+                    self.raw_two_days = self.raw_today.copy()
+                    self.raw_two_days.extend(self.raw_tomorrow)
+                    self.sensor.raw_two_days = self.raw_two_days.get_raw()
+                else:
+                    _LOGGER.error("Nordpool sensor not valid.")
 
         ev_soc_state = self.hass.states.get(self.ev_soc_entity_id)
         if ev_soc_state is not None:
             if ev_soc_state.state != "unavailable":
                 ev_soc = ev_soc_state.state
-                if Validator.is_float(ev_soc) and (0.0 <= float(ev_soc) <= 100.0):
+                if Validator.is_soc(ev_soc):
                     self.sensor.ev_soc = ev_soc
                     self.ev_soc = float(ev_soc)
                 else:
@@ -237,9 +242,7 @@ class EVSmartChargingCoordinator:
         if ev_target_soc_state is not None:
             if ev_target_soc_state.state != "unavailable":
                 ev_target_soc = ev_target_soc_state.state
-                if Validator.is_float(ev_target_soc) and (
-                    0.0 <= float(ev_target_soc) <= 100.0
-                ):
+                if Validator.is_soc(ev_target_soc):
                     self.sensor.ev_target_soc = ev_target_soc_state.state
                     self.ev_target_soc = float(ev_target_soc_state.state)
                 else:
