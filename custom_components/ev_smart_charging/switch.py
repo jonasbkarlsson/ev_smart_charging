@@ -3,7 +3,9 @@ import logging
 from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
-from homeassistant.core import HomeAssistant
+from homeassistant.const import STATE_ON
+from homeassistant.core import HomeAssistant, State
+from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import (
     DOMAIN,
@@ -29,7 +31,7 @@ async def async_setup_entry(
     async_add_devices(switches)
 
 
-class EVSmartChargingSwitch(EVSmartChargingEntity, SwitchEntity):
+class EVSmartChargingSwitch(EVSmartChargingEntity, SwitchEntity, RestoreEntity):
     """EV Smart Charging switch class."""
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
@@ -46,6 +48,15 @@ class EVSmartChargingSwitch(EVSmartChargingEntity, SwitchEntity):
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the entity off."""
         self._attr_is_on = False
+
+    async def async_added_to_hass(self) -> None:
+        """Run when entity about to be added to hass."""
+        restored: State = await self.async_get_last_state()
+        if restored is not None:
+            if restored.state == STATE_ON:
+                await self.async_turn_on()
+            else:
+                await self.async_turn_off()
 
 
 class EVSmartChargingSwitchActive(EVSmartChargingSwitch):
