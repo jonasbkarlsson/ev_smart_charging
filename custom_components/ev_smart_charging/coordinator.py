@@ -24,11 +24,7 @@ from .const import (
 )
 from .helpers.coordinator import (
     Raw,
-    get_charging_hours,
-    get_charging_initial,
-    get_charging_original,
-    get_charging_update,
-    get_lowest_hours,
+    Scheduler,
     get_charging_value,
 )
 from .helpers.general import Validator, get_parameter
@@ -58,6 +54,8 @@ class EVSmartChargingCoordinator:
         if len(get_parameter(self.config_entry, CONF_CHARGER_ENTITY)) > 0:
             self.charger_switch = get_parameter(self.config_entry, CONF_CHARGER_ENTITY)
 
+        self.scheduler = Scheduler()
+
         self.ev_soc = None
         self.ev_target_soc = None
         self.raw_today = None
@@ -65,7 +63,6 @@ class EVSmartChargingCoordinator:
         self.tomorrow_valid = False
 
         self.raw_two_days = None
-        self._charging_original = None
         self._charging = None
         self._charging_pct_per_hour = get_parameter(
             self.config_entry, CONF_PCT_PER_HOUR
@@ -180,8 +177,7 @@ class EVSmartChargingCoordinator:
             self.sensor.ev_target_soc = DEFAULT_TARGET_SOC
             self.ev_target_soc = DEFAULT_TARGET_SOC
 
-        self._charging_original = get_charging_initial()
-        self._charging = self._charging_original
+        self._charging = Scheduler.get_empty_schedule()
         self.sensor.charging_schedule = self._charging
         await self.update_sensors()
 
@@ -243,28 +239,27 @@ class EVSmartChargingCoordinator:
             and self.ev_target_soc is not None
             and self.auto_charging_state == STATE_OFF
         ):
-            charging_hours = get_charging_hours(
-                self.ev_soc, self.ev_target_soc, self._charging_pct_per_hour
-            )
-            _LOGGER.debug("charging_hours = %s", charging_hours)
-            lowest_hours = get_lowest_hours(
-                self._ready_hour, self.raw_two_days, charging_hours
-            )
-            _LOGGER.debug("lowest_hours = %s", lowest_hours)
-            self._charging_original = get_charging_original(
-                lowest_hours, self.raw_two_days
-            )
+            scheduling_params = {
+                "ev_soc": self.ev_soc,
+                "ev_target_soc": self.ev_target_soc,
+                "charging_pct_per_hour": self._charging_pct_per_hour,
+                "ready_hour": self._ready_hour,
+            }
+            self.scheduler.create_base_schedule(scheduling_params, self.raw_two_days)
+            _LOGGER.debug("After create_base_schedule")
+
         if (
-            self._charging_original is not None
+            self.scheduler.base_schedule_exists() is True
             and self.switch_active is not None
             and self.switch_ignore_limit is not None
         ):
-            self._charging = get_charging_update(
-                self._charging_original,
-                self.switch_active,
-                self.switch_ignore_limit,
-                self._max_price,
-            )
+            scheduling_params = {
+                "switch_active": self.switch_active,
+                "switch_ignore_limit": self.switch_ignore_limit,
+                "max_price": self._max_price,
+            }
+            self._charging = self.scheduler.get_schedule(scheduling_params)
+            _LOGGER.debug("After get_schedule")
             self.sensor.charging_schedule = self._charging
 
         _LOGGER.debug("self._max_price = %s", self._max_price)

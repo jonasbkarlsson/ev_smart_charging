@@ -170,17 +170,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Required(
                         CONF_PCT_PER_HOUR,
-                        default=await get_parameter(
-                            self.config_entry, CONF_PCT_PER_HOUR
-                        ),
+                        default=get_parameter(self.config_entry, CONF_PCT_PER_HOUR),
                     ): cv.positive_float,
                     vol.Required(
                         CONF_READY_HOUR,
-                        default=await get_parameter(self.config_entry, CONF_READY_HOUR),
+                        default=get_parameter(self.config_entry, CONF_READY_HOUR),
                     ): vol.In(HOURS),
                     vol.Required(
                         CONF_MAX_PRICE,
-                        default=await get_parameter(self.config_entry, CONF_MAX_PRICE),
+                        default=get_parameter(self.config_entry, CONF_MAX_PRICE),
                     ): cv.positive_float,
                 }
             ),
