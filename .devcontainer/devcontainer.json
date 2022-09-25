@@ -1,7 +1,7 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
 	"image": "ghcr.io/ludeeus/devcontainer/integration:stable",
-	"name": "EV Smart Charging integration development",
+	"name": "EV Smart Charging",
 	"context": "..",
 	"appPort": [
 		"9123:8123"
