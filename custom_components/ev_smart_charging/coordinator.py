@@ -2,7 +2,6 @@
 
 from datetime import datetime
 import logging
-from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import SERVICE_TURN_ON, SERVICE_TURN_OFF
 from homeassistant.core import HomeAssistant, State, callback
@@ -32,7 +31,7 @@ from .helpers.coordinator import (
     get_lowest_hours,
     get_charging_value,
 )
-from .helpers.general import Validator
+from .helpers.general import Validator, get_parameter
 from .sensor import EVSmartChargingSensor
 
 _LOGGER = logging.getLogger(__name__)
@@ -56,8 +55,8 @@ class EVSmartChargingCoordinator:
         self.ev_target_soc_entity_id = None
 
         self.charger_switch = None
-        if len(self._get_parameter(CONF_CHARGER_ENTITY)) > 0:
-            self.charger_switch = self._get_parameter(CONF_CHARGER_ENTITY)
+        if len(get_parameter(self.config_entry, CONF_CHARGER_ENTITY)) > 0:
+            self.charger_switch = get_parameter(self.config_entry, CONF_CHARGER_ENTITY)
 
         self.ev_soc = None
         self.ev_target_soc = None
@@ -68,11 +67,13 @@ class EVSmartChargingCoordinator:
         self.raw_two_days = None
         self._charging_original = None
         self._charging = None
-        self._charging_pct_per_hour = self._get_parameter(CONF_PCT_PER_HOUR)
+        self._charging_pct_per_hour = get_parameter(
+            self.config_entry, CONF_PCT_PER_HOUR
+        )
         if self._charging_pct_per_hour is None or self._charging_pct_per_hour <= 0.0:
             self._charging_pct_per_hour = 6.0
-        self._ready_hour = int(self._get_parameter(CONF_READY_HOUR)[0:2])
-        self._max_price = float(self._get_parameter(CONF_MAX_PRICE))
+        self._ready_hour = int(get_parameter(self.config_entry, CONF_READY_HOUR)[0:2])
+        self._max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE))
 
         self.auto_charging_state = STATE_OFF
 
@@ -80,13 +81,6 @@ class EVSmartChargingCoordinator:
         self.listeners.append(
             async_track_time_change(hass, self.new_hour, minute=0, second=0)
         )
-
-    def _get_parameter(self, parameter: str, default_val: Any = None):
-        if parameter in self.config_entry.options.keys():
-            return self.config_entry.options.get(parameter)
-        if parameter in self.config_entry.data.keys():
-            return self.config_entry.data.get(parameter)
-        return default_val
 
     @callback
     async def new_hour(
@@ -155,9 +149,11 @@ class EVSmartChargingCoordinator:
         """Set up sensor"""
         self.sensor = sensor
 
-        self.nordpool_entity_id = self._get_parameter(CONF_NORDPOOL_SENSOR)
-        self.ev_soc_entity_id = self._get_parameter(CONF_EV_SOC_SENSOR)
-        self.ev_target_soc_entity_id = self._get_parameter(CONF_EV_TARGET_SOC_SENSOR)
+        self.nordpool_entity_id = get_parameter(self.config_entry, CONF_NORDPOOL_SENSOR)
+        self.ev_soc_entity_id = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
+        self.ev_target_soc_entity_id = get_parameter(
+            self.config_entry, CONF_EV_TARGET_SOC_SENSOR
+        )
 
         self.listeners.append(
             async_track_state_change(
@@ -278,17 +274,17 @@ class EVSmartChargingCoordinator:
     def validate_input_sensors(self) -> str:
         """Check that all input sensors returns values."""
 
-        nordpool = self._get_parameter(CONF_NORDPOOL_SENSOR)
+        nordpool = get_parameter(self.config_entry, CONF_NORDPOOL_SENSOR)
         nordpool_state = self.hass.states.get(nordpool)
         if nordpool_state is None:
             return "Input sensors not ready."
 
-        ev_soc = self._get_parameter(CONF_EV_SOC_SENSOR)
+        ev_soc = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
         ev_soc_state = self.hass.states.get(ev_soc).state
         if ev_soc_state is None:
             return "Input sensors not ready."
 
-        ev_target_soc = self._get_parameter(CONF_EV_TARGET_SOC_SENSOR)
+        ev_target_soc = get_parameter(self.config_entry, CONF_EV_TARGET_SOC_SENSOR)
         if len(ev_target_soc) > 0:  # Check if the sensor exists
             ev_target_soc_state = self.hass.states.get(ev_target_soc).state
             if ev_target_soc_state is None:
