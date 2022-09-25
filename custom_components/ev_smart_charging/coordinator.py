@@ -77,13 +77,13 @@ class EVSmartChargingCoordinator:
 
         self.auto_charging_state = STATE_OFF
 
-        # Do work once per hour.
+        # Update state once per hour.
         self.listeners.append(
-            async_track_time_change(hass, self.new_hour, minute=0, second=0)
+            async_track_time_change(hass, self.update_state, minute=0, second=0)
         )
 
     @callback
-    async def new_hour(
+    async def update_state(
         self, date_time: datetime = None
     ):  # pylint: disable=unused-argument
         """Called every hour"""
@@ -269,7 +269,7 @@ class EVSmartChargingCoordinator:
 
         _LOGGER.debug("self._max_price = %s", self._max_price)
         _LOGGER.debug("Current price = %s", self.sensor.current_price)
-        await self.new_hour()  # Update the charging status
+        await self.update_state()  # Update the charging status
 
     def validate_input_sensors(self) -> str:
         """Check that all input sensors returns values."""
