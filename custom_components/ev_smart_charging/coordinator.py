@@ -49,6 +49,7 @@ class EVSmartChargingCoordinator:
         self.nordpool_entity_id = None
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
+        self.number_min_soc = None
 
         self.charger_switch = None
         if len(get_parameter(self.config_entry, CONF_CHARGER_ENTITY)) > 0:
@@ -191,6 +192,12 @@ class EVSmartChargingCoordinator:
         """Handle the Active switch"""
         self.switch_ignore_limit = state
         _LOGGER.debug("switch_ignore_limit_update = %s", state)
+        await self.update_sensors()
+
+    async def number_min_soc_update(self, state: float):
+        """Handle the Min SOC number"""
+        self.number_min_soc = state
+        _LOGGER.debug("number_min_soc_update = %s", state)
         await self.update_sensors()
 
     @callback
