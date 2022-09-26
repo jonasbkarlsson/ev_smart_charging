@@ -22,6 +22,7 @@ from .const import (
     NAME,
 )
 from .helpers.config_flow import DeviceNameCreator, FindEntity, FlowValidator
+from .helpers.general import get_parameter
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -155,13 +156,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Initialize options flow."""
         self.config_entry = config_entry
 
-    async def _get_existing_param(self, parameter: str, default_val: any = None):
-        if parameter in self.config_entry.options.keys():
-            return self.config_entry.options.get(parameter)
-        if parameter in self.config_entry.data.keys():
-            return self.config_entry.data.get(parameter)
-        return default_val
-
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
@@ -176,15 +170,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Required(
                         CONF_PCT_PER_HOUR,
-                        default=await self._get_existing_param(CONF_PCT_PER_HOUR),
+                        default=get_parameter(self.config_entry, CONF_PCT_PER_HOUR),
                     ): cv.positive_float,
                     vol.Required(
                         CONF_READY_HOUR,
-                        default=await self._get_existing_param(CONF_READY_HOUR),
+                        default=get_parameter(self.config_entry, CONF_READY_HOUR),
                     ): vol.In(HOURS),
                     vol.Required(
                         CONF_MAX_PRICE,
-                        default=await self._get_existing_param(CONF_MAX_PRICE),
+                        default=get_parameter(self.config_entry, CONF_MAX_PRICE),
                     ): cv.positive_float,
                 }
             ),

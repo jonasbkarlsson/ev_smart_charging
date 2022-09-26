@@ -2,7 +2,6 @@
 
 from datetime import datetime
 import logging
-from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import SERVICE_TURN_ON, SERVICE_TURN_OFF
 from homeassistant.core import HomeAssistant, State, callback
@@ -25,14 +24,10 @@ from .const import (
 )
 from .helpers.coordinator import (
     Raw,
-    get_charging_hours,
-    get_charging_initial,
-    get_charging_original,
-    get_charging_update,
-    get_lowest_hours,
+    Scheduler,
     get_charging_value,
 )
-from .helpers.general import Validator
+from .helpers.general import Validator, get_parameter
 from .sensor import EVSmartChargingSensor
 
 _LOGGER = logging.getLogger(__name__)
@@ -50,14 +45,17 @@ class EVSmartChargingCoordinator:
 
         self.sensor = None
         self.switch_active = None
-        self.switch_ignore_limit = None
+        self.switch_apply_limit = None
         self.nordpool_entity_id = None
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
+        self.number_min_soc = None
 
         self.charger_switch = None
-        if len(self._get_parameter(CONF_CHARGER_ENTITY)) > 0:
-            self.charger_switch = self._get_parameter(CONF_CHARGER_ENTITY)
+        if len(get_parameter(self.config_entry, CONF_CHARGER_ENTITY)) > 0:
+            self.charger_switch = get_parameter(self.config_entry, CONF_CHARGER_ENTITY)
+
+        self.scheduler = Scheduler()
 
         self.ev_soc = None
         self.ev_target_soc = None
@@ -66,44 +64,39 @@ class EVSmartChargingCoordinator:
         self.tomorrow_valid = False
 
         self.raw_two_days = None
-        self._charging_original = None
-        self._charging = None
-        self._charging_pct_per_hour = self._get_parameter(CONF_PCT_PER_HOUR)
-        if self._charging_pct_per_hour is None or self._charging_pct_per_hour <= 0.0:
-            self._charging_pct_per_hour = 6.0
-        self._ready_hour = int(self._get_parameter(CONF_READY_HOUR)[0:2])
-        self._max_price = float(self._get_parameter(CONF_MAX_PRICE))
+        self._charging_schedule = None
+        self.charging_pct_per_hour = get_parameter(self.config_entry, CONF_PCT_PER_HOUR)
+        if self.charging_pct_per_hour is None or self.charging_pct_per_hour <= 0.0:
+            self.charging_pct_per_hour = 6.0
+        self.ready_hour = int(get_parameter(self.config_entry, CONF_READY_HOUR)[0:2])
+        self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE))
 
         self.auto_charging_state = STATE_OFF
 
-        # Do work once per hour.
+        # Update state once per hour.
         self.listeners.append(
-            async_track_time_change(hass, self.new_hour, minute=0, second=0)
+            async_track_time_change(hass, self.update_state, minute=0, second=0)
         )
 
-    def _get_parameter(self, parameter: str, default_val: Any = None):
-        if parameter in self.config_entry.options.keys():
-            return self.config_entry.options.get(parameter)
-        if parameter in self.config_entry.data.keys():
-            return self.config_entry.data.get(parameter)
-        return default_val
-
     @callback
-    async def new_hour(
+    async def update_state(
         self, date_time: datetime = None
     ):  # pylint: disable=unused-argument
         """Called every hour"""
-        _LOGGER.debug("EVSmartChargingCoordinator.new_hour()")
-        if self._charging is not None:
-            charging_value = get_charging_value(self._charging)
+        _LOGGER.debug("EVSmartChargingCoordinator.update_state()")
+        if self._charging_schedule is not None:
+            charging_value = get_charging_value(self._charging_schedule)
             _LOGGER.debug("charging_value = %s", charging_value)
             turn_on_charging = (
-                charging_value is not None
+                self.ev_soc is not None
+                and self.number_min_soc is not None
+                and charging_value is not None
                 and charging_value != 0
                 and (
-                    self.sensor.current_price < self._max_price
-                    or self._max_price == 0.0
-                    or self.switch_ignore_limit is True
+                    self.sensor.current_price < self.max_price
+                    or self.max_price == 0.0
+                    or self.switch_apply_limit is False
+                    or self.ev_soc < self.number_min_soc
                 )
             )
             if (
@@ -155,9 +148,11 @@ class EVSmartChargingCoordinator:
         """Set up sensor"""
         self.sensor = sensor
 
-        self.nordpool_entity_id = self._get_parameter(CONF_NORDPOOL_SENSOR)
-        self.ev_soc_entity_id = self._get_parameter(CONF_EV_SOC_SENSOR)
-        self.ev_target_soc_entity_id = self._get_parameter(CONF_EV_TARGET_SOC_SENSOR)
+        self.nordpool_entity_id = get_parameter(self.config_entry, CONF_NORDPOOL_SENSOR)
+        self.ev_soc_entity_id = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
+        self.ev_target_soc_entity_id = get_parameter(
+            self.config_entry, CONF_EV_TARGET_SOC_SENSOR
+        )
 
         self.listeners.append(
             async_track_state_change(
@@ -184,9 +179,8 @@ class EVSmartChargingCoordinator:
             self.sensor.ev_target_soc = DEFAULT_TARGET_SOC
             self.ev_target_soc = DEFAULT_TARGET_SOC
 
-        self._charging_original = get_charging_initial()
-        self._charging = self._charging_original
-        self.sensor.charging_schedule = self._charging
+        self._charging_schedule = Scheduler.get_empty_schedule()
+        self.sensor.charging_schedule = self._charging_schedule
         await self.update_sensors()
 
     async def switch_active_update(self, state: bool):
@@ -195,10 +189,16 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("switch_active_update = %s", state)
         await self.update_sensors()
 
-    async def switch_ignore_limit_update(self, state: bool):
+    async def switch_apply_limit_update(self, state: bool):
         """Handle the Active switch"""
-        self.switch_ignore_limit = state
-        _LOGGER.debug("switch_ignore_limit_update = %s", state)
+        self.switch_apply_limit = state
+        _LOGGER.debug("switch_apply_limit_update = %s", state)
+        await self.update_sensors()
+
+    async def number_min_soc_update(self, state: float):
+        """Handle the Min SOC number"""
+        self.number_min_soc = state
+        _LOGGER.debug("number_min_soc_update = %s", state)
         await self.update_sensors()
 
     @callback
@@ -241,54 +241,45 @@ class EVSmartChargingCoordinator:
 
         # Calculate charging schedule if tomorrow's prices are available,
         # SOC and target SOC are available and if the auto charging state is off
-        if (
-            self.tomorrow_valid
-            and self.ev_soc is not None
-            and self.ev_target_soc is not None
-            and self.auto_charging_state == STATE_OFF
-        ):
-            charging_hours = get_charging_hours(
-                self.ev_soc, self.ev_target_soc, self._charging_pct_per_hour
-            )
-            _LOGGER.debug("charging_hours = %s", charging_hours)
-            lowest_hours = get_lowest_hours(
-                self._ready_hour, self.raw_two_days, charging_hours
-            )
-            _LOGGER.debug("lowest_hours = %s", lowest_hours)
-            self._charging_original = get_charging_original(
-                lowest_hours, self.raw_two_days
-            )
-        if (
-            self._charging_original is not None
-            and self.switch_active is not None
-            and self.switch_ignore_limit is not None
-        ):
-            self._charging = get_charging_update(
-                self._charging_original,
-                self.switch_active,
-                self.switch_ignore_limit,
-                self._max_price,
-            )
-            self.sensor.charging_schedule = self._charging
+        if self.tomorrow_valid and self.auto_charging_state == STATE_OFF:
+            scheduling_params = {
+                "ev_soc": self.ev_soc,
+                "ev_target_soc": self.ev_target_soc,
+                "min_soc": self.number_min_soc,
+                "charging_pct_per_hour": self.charging_pct_per_hour,
+                "ready_hour": self.ready_hour,
+            }
+            self.scheduler.create_base_schedule(scheduling_params, self.raw_two_days)
 
-        _LOGGER.debug("self._max_price = %s", self._max_price)
+        if self.scheduler.base_schedule_exists() is True:
+            scheduling_params = {
+                "switch_active": self.switch_active,
+                "switch_apply_limit": self.switch_apply_limit,
+                "max_price": self.max_price,
+            }
+            new_charging = self.scheduler.get_schedule(scheduling_params)
+            if new_charging is not None:
+                self._charging_schedule = new_charging
+                self.sensor.charging_schedule = self._charging_schedule
+
+        _LOGGER.debug("self._max_price = %s", self.max_price)
         _LOGGER.debug("Current price = %s", self.sensor.current_price)
-        await self.new_hour()  # Update the charging status
+        await self.update_state()  # Update the charging status
 
     def validate_input_sensors(self) -> str:
         """Check that all input sensors returns values."""
 
-        nordpool = self._get_parameter(CONF_NORDPOOL_SENSOR)
+        nordpool = get_parameter(self.config_entry, CONF_NORDPOOL_SENSOR)
         nordpool_state = self.hass.states.get(nordpool)
         if nordpool_state is None:
             return "Input sensors not ready."
 
-        ev_soc = self._get_parameter(CONF_EV_SOC_SENSOR)
+        ev_soc = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
         ev_soc_state = self.hass.states.get(ev_soc).state
         if ev_soc_state is None:
             return "Input sensors not ready."
 
-        ev_target_soc = self._get_parameter(CONF_EV_TARGET_SOC_SENSOR)
+        ev_target_soc = get_parameter(self.config_entry, CONF_EV_TARGET_SOC_SENSOR)
         if len(ev_target_soc) > 0:  # Check if the sensor exists
             ev_target_soc_state = self.hass.states.get(ev_target_soc).state
             if ev_target_soc_state is None:

@@ -8,12 +8,16 @@ ISSUE_URL = "https://github.com/jonasbkarlsson/ev_smart_charging/issues"
 
 # Icons
 ICON = "mdi:flash"
+ICON_MIN_SOC = "mdi:battery-charging-30"
+ICON_START = "mdi:play-circle-outline"
+ICON_STOP = "mdi:stop-circle-outline"
 
 # Platforms
 SENSOR = "sensor"
 SWITCH = "switch"
 BUTTON = "button"
-PLATFORMS = [SWITCH, SENSOR, BUTTON]
+NUMBER = "number"
+PLATFORMS = [SWITCH, SENSOR, BUTTON, NUMBER]
 PLATFORM_NORDPOOL = "nordpool"
 PLATFORM_VW = "volkswagen_we_connect_id"
 PLATFORM_OCPP = "ocpp"
@@ -24,9 +28,10 @@ INPUT_NUMBER = "input_number"
 # Entity names
 ENTITY_NAME_CHARGING_SENSOR = "Charging"
 ENTITY_NAME_ACTIVE_SWITCH = "Smart charging activated"
-ENTITY_NAME_IGNORE_LIMIT_SWITCH = "Ignore price limit"
-ENTITY_NAME_START_BUTTON = "Start charging"
-ENTITY_NAME_STOP_BUTTON = "Stop charging"
+ENTITY_NAME_APPLY_LIMIT_SWITCH = "Apply price limit"
+ENTITY_NAME_START_BUTTON = "Start manual charging"
+ENTITY_NAME_STOP_BUTTON = "Stop manual charging"
+ENTITY_NAME_MIN_SOC_NUMBER = "Minimum SOC"
 
 # Configuration and options
 CONF_DEVICE_NAME = "device_name"
