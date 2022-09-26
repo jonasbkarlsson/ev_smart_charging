@@ -7,6 +7,7 @@ from homeassistant.core import HomeAssistant
 from .const import (
     DOMAIN,
     ENTITY_NAME_MIN_SOC_NUMBER,
+    ICON_MIN_SOC,
     NUMBER,
 )
 from .coordinator import EVSmartChargingCoordinator
@@ -51,6 +52,7 @@ class EVSmartChargingNumberMinSOC(EVSmartChargingNumber):
     _attr_native_step = 5.0
     _attr_native_value = 0.0
     _attr_native_unit_of_measurement = "%"
+    _attr_icon = ICON_MIN_SOC
 
     async def async_added_to_hass(self) -> None:
         """Run when entity about to be added to hass."""

@@ -4,7 +4,14 @@ import logging
 from homeassistant.components.button import ButtonEntity
 from homeassistant.core import HomeAssistant
 
-from .const import BUTTON, DOMAIN, ENTITY_NAME_START_BUTTON, ENTITY_NAME_STOP_BUTTON
+from .const import (
+    BUTTON,
+    DOMAIN,
+    ENTITY_NAME_START_BUTTON,
+    ENTITY_NAME_STOP_BUTTON,
+    ICON_START,
+    ICON_STOP,
+)
 from .coordinator import EVSmartChargingCoordinator
 from .entity import EVSmartChargingEntity
 
@@ -37,6 +44,7 @@ class EVSmartChargingButtonStart(EVSmartChargingButton):
     """EV Smart Charging start button class."""
 
     _attr_name = ENTITY_NAME_START_BUTTON
+    _attr_icon = ICON_START
 
     async def async_press(self) -> None:
         """Press the button."""
@@ -47,6 +55,7 @@ class EVSmartChargingButtonStop(EVSmartChargingButton):
     """EV Smart Charging start button class."""
 
     _attr_name = ENTITY_NAME_STOP_BUTTON
+    _attr_icon = ICON_STOP
 
     async def async_press(self) -> None:
         """Press the button."""

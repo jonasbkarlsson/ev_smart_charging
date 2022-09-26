@@ -10,7 +10,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from .const import (
     DOMAIN,
     ENTITY_NAME_ACTIVE_SWITCH,
-    ENTITY_NAME_IGNORE_LIMIT_SWITCH,
+    ENTITY_NAME_APPLY_LIMIT_SWITCH,
     SWITCH,
 )
 from .coordinator import EVSmartChargingCoordinator
@@ -27,7 +27,7 @@ async def async_setup_entry(
     coordinator = hass.data[DOMAIN][entry.entry_id]
     switches = []
     switches.append(EVSmartChargingSwitchActive(entry, coordinator))
-    switches.append(EVSmartChargingSwitchIgnoreLimit(entry, coordinator))
+    switches.append(EVSmartChargingSwitchApplyLimit(entry, coordinator))
     async_add_devices(switches)
 
 
@@ -83,25 +83,25 @@ class EVSmartChargingSwitchActive(EVSmartChargingSwitch):
         await self.coordinator.switch_active_update(False)
 
 
-class EVSmartChargingSwitchIgnoreLimit(EVSmartChargingSwitch):
+class EVSmartChargingSwitchApplyLimit(EVSmartChargingSwitch):
     """EV Smart Charging switch class."""
 
-    _attr_name = ENTITY_NAME_IGNORE_LIMIT_SWITCH
+    _attr_name = ENTITY_NAME_APPLY_LIMIT_SWITCH
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
-        _LOGGER.debug("EVSmartChargingSwitchIgnoreLimit.__init__()")
+        _LOGGER.debug("EVSmartChargingSwitchApplyLimit.__init__()")
         super().__init__(entry, coordinator)
         if self.is_on is None:
             self._attr_is_on = False
             self.update_ha_state()
-        self.coordinator.switch_ignore_limit = self.is_on
+        self.coordinator.switch_apply_limit = self.is_on
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""
         await super().async_turn_on(**kwargs)
-        await self.coordinator.switch_ignore_limit_update(True)
+        await self.coordinator.switch_apply_limit_update(True)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the entity off."""
         await super().async_turn_off(**kwargs)
-        await self.coordinator.switch_ignore_limit_update(False)
+        await self.coordinator.switch_apply_limit_update(False)

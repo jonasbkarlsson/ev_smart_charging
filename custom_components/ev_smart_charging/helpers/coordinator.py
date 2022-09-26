@@ -55,6 +55,14 @@ class Raw:
                 largest = item["value"]
         return largest
 
+    def number_of_nonzero(self) -> int:
+        """Return the number of nonzero values"""
+        number_items = 0
+        for item in self.data:
+            if item["value"] > 0.0:
+                number_items = number_items + 1
+        return number_items
+
     def get_value(self, time: datetime) -> float:
         """Get the value at time dt"""
         for item in self.data:
@@ -132,7 +140,7 @@ def get_charging_original(lowest_hours: list[int], raw_two_days: Raw) -> list:
 
 
 def get_charging_update(
-    charging_original: list, active: bool, ignore_limit: bool, max_price: float
+    charging_original: list, active: bool, apply_limit: bool, max_price: float
 ) -> list:
     """Update the charging schedule"""
 
@@ -147,7 +155,7 @@ def get_charging_update(
             pass
         elif not active:
             item["value"] = 0.0
-        elif not ignore_limit and item["value"] > max_price:
+        elif apply_limit and item["value"] > max_price:
             item["value"] = 0.0
         else:
             item["value"] = value_on
@@ -183,6 +191,7 @@ class Scheduler:
 
     def __init__(self) -> None:
         self.schedule_base = []
+        self.schedule_base_min_soc = []
 
     def create_base_schedule(
         self,
@@ -190,6 +199,14 @@ class Scheduler:
         raw_two_days: Raw,
     ) -> None:
         """Create the base schedule"""
+
+        if (
+            params["ev_soc"] is None
+            or params["ev_target_soc"] is None
+            or params["min_soc"] is None
+        ):
+            return
+
         charging_hours: int = get_charging_hours(
             params["ev_soc"],
             params["ev_target_soc"],
@@ -204,18 +221,61 @@ class Scheduler:
         _LOGGER.debug("lowest_hours = %s", lowest_hours)
         self.schedule_base = get_charging_original(lowest_hours, raw_two_days)
 
+        if params["min_soc"] == 0.0:
+            self.schedule_base_min_soc = []
+            return
+
+        charging_hours: int = get_charging_hours(
+            params["ev_soc"],
+            params["min_soc"],
+            params["charging_pct_per_hour"],
+        )
+        _LOGGER.debug("charging_hours_min_soc = %s", charging_hours)
+        lowest_hours = get_lowest_hours(
+            params["ready_hour"],
+            raw_two_days,
+            charging_hours,
+        )
+        _LOGGER.debug("lowest_hours_min_soc = %s", lowest_hours)
+        self.schedule_base_min_soc = get_charging_original(lowest_hours, raw_two_days)
+
     def base_schedule_exists(self) -> bool:
         """Return true if base schedule exists"""
         return len(self.schedule_base) > 0
 
-    def get_schedule(self, params: dict[str, Any]) -> list:
+    def get_schedule(self, params: dict[str, Any]) -> list | None:
         """Get the schedule"""
+
+        if params["switch_active"] is None or params["switch_apply_limit"] is None:
+            return None
+
         schedule = get_charging_update(
             self.schedule_base,
             params["switch_active"],
-            params["switch_ignore_limit"],
+            params["switch_apply_limit"],
             params["max_price"],
         )
+        schedule_min_soc = get_charging_update(
+            self.schedule_base_min_soc,
+            params["switch_active"],
+            True,
+            params["max_price"],
+        )
+        _LOGGER.debug(
+            "Raw(schedule).number_of_nonzero() = %s", Raw(schedule).number_of_nonzero()
+        )
+        _LOGGER.debug(
+            "Raw(schedule_min_soc).number_of_nonzero() = %s",
+            Raw(schedule_min_soc).number_of_nonzero(),
+        )
+        if (
+            Raw(schedule).number_of_nonzero()
+            < Raw(schedule_min_soc).number_of_nonzero()
+        ):
+            _LOGGER.debug("Use schedule_min_soc")
+            return schedule_min_soc
+
+        _LOGGER.debug("Use schedule")
         return schedule
 
     @staticmethod
