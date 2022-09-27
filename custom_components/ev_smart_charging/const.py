@@ -16,21 +16,17 @@ ICON_STOP = "mdi:stop-circle-outline"
 SENSOR = "sensor"
 SWITCH = "switch"
 BUTTON = "button"
-NUMBER = "number"
-PLATFORMS = [SWITCH, SENSOR, BUTTON, NUMBER]
+PLATFORMS = [SWITCH, SENSOR, BUTTON]
 PLATFORM_NORDPOOL = "nordpool"
 PLATFORM_VW = "volkswagen_we_connect_id"
 PLATFORM_OCPP = "ocpp"
-
-# Domains
-INPUT_NUMBER = "input_number"
 
 # Entity names
 ENTITY_NAME_CHARGING_SENSOR = "Charging"
 ENTITY_NAME_ACTIVE_SWITCH = "Smart charging activated"
 ENTITY_NAME_APPLY_LIMIT_SWITCH = "Apply price limit"
-ENTITY_NAME_START_BUTTON = "Start manual charging"
-ENTITY_NAME_STOP_BUTTON = "Stop manual charging"
+ENTITY_NAME_START_BUTTON = "Manually start charging"
+ENTITY_NAME_STOP_BUTTON = "Manually stop charging"
 ENTITY_NAME_MIN_SOC_NUMBER = "Minimum SOC"
 
 # Configuration and options
@@ -42,6 +38,7 @@ CONF_CHARGER_ENTITY = "charger_entity"
 CONF_PCT_PER_HOUR = "pct_per_hour"
 CONF_READY_HOUR = "ready_hour"
 CONF_MAX_PRICE = "maximum_price"
+CONF_MIN_SOC = "min_soc"
 
 HOURS = [
     "00:00",

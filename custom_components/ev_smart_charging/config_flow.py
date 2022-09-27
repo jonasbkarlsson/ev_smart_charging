@@ -13,6 +13,7 @@ from .const import (
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_MAX_PRICE,
+    CONF_MIN_SOC,
     CONF_NORDPOOL_SENSOR,
     CONF_CHARGER_ENTITY,
     CONF_PCT_PER_HOUR,
@@ -124,6 +125,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input[CONF_PCT_PER_HOUR] = 6.0
         user_input[CONF_READY_HOUR] = "08:00"
         user_input[CONF_MAX_PRICE] = 0.0
+        user_input[CONF_MIN_SOC] = 0.0
 
         return await self._show_config_form_charger(user_input)
 
@@ -140,6 +142,9 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required(
                 CONF_MAX_PRICE, default=user_input[CONF_MAX_PRICE]
             ): cv.positive_float,
+            vol.Required(CONF_MIN_SOC, default=user_input[CONF_MIN_SOC]): vol.All(
+                vol.Coerce(int), vol.Range(min=0, max=100)
+            ),
         }
 
         return self.async_show_form(
@@ -180,6 +185,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         CONF_MAX_PRICE,
                         default=get_parameter(self.config_entry, CONF_MAX_PRICE),
                     ): cv.positive_float,
+                    vol.Required(
+                        CONF_MIN_SOC,
+                        default=get_parameter(self.config_entry, CONF_MIN_SOC),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 }
             ),
         )

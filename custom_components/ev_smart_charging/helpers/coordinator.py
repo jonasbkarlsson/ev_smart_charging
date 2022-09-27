@@ -72,7 +72,7 @@ class Raw:
 
 
 def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int):
-    """From the two-day prices, calculate the cheapest hours
+    """From the two-day prices, calculate the cheapest continues set of hours
 
     A continues range of hours will be choosen."""
     # TODO: Make this work with daylight saving time
@@ -144,10 +144,7 @@ def get_charging_update(
 ) -> list:
     """Update the charging schedule"""
 
-    if max_price is not None and max_price > 0.0:
-        value_on = max_price
-    else:
-        value_on = Raw(charging_original).max_value()
+    value_on = Raw(charging_original).max_value()
 
     result = deepcopy(charging_original)  # Make a copy, not a reference.
     for item in result:
@@ -155,7 +152,7 @@ def get_charging_update(
             pass
         elif not active:
             item["value"] = 0.0
-        elif apply_limit and item["value"] > max_price:
+        elif apply_limit and item["value"] > max_price > 0.0:
             item["value"] = 0.0
         else:
             item["value"] = value_on
