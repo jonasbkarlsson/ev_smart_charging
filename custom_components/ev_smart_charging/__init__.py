@@ -9,7 +9,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 
 from .coordinator import EVSmartChargingCoordinator
 from .const import (
-    CONF_NORDPOOL_SENSOR,
+    CONF_PRICE_SENSOR,
     DOMAIN,
     STARTUP_MESSAGE,
     PLATFORMS,
@@ -32,7 +32,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.data.setdefault(DOMAIN, {})
         _LOGGER.debug(STARTUP_MESSAGE)
 
-    test = entry.data.get(CONF_NORDPOOL_SENSOR)
+    test = entry.data.get(CONF_PRICE_SENSOR)
     _LOGGER.debug("async_setup_entry Test = %s", test)
 
     coordinator = EVSmartChargingCoordinator(hass, entry)

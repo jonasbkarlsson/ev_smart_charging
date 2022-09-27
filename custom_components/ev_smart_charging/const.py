@@ -31,7 +31,7 @@ ENTITY_NAME_MIN_SOC_NUMBER = "Minimum SOC"
 
 # Configuration and options
 CONF_DEVICE_NAME = "device_name"
-CONF_NORDPOOL_SENSOR = "nordpool_sensor"
+CONF_PRICE_SENSOR = "price_sensor"
 CONF_EV_SOC_SENSOR = "ev_soc_sensor"
 CONF_EV_TARGET_SOC_SENSOR = "ev_target_soc_sensor"
 CONF_CHARGER_ENTITY = "charger_entity"

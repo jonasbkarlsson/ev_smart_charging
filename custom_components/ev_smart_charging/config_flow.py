@@ -14,7 +14,7 @@ from .const import (
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
-    CONF_NORDPOOL_SENSOR,
+    CONF_PRICE_SENSOR,
     CONF_CHARGER_ENTITY,
     CONF_PCT_PER_HOUR,
     CONF_READY_HOUR,
@@ -60,9 +60,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is None:
             user_input = {}
             # Provide defaults for form
-            user_input[CONF_NORDPOOL_SENSOR] = FindEntity.find_nordpool_sensor(
-                self.hass
-            )
+            user_input[CONF_PRICE_SENSOR] = FindEntity.find_nordpool_sensor(self.hass)
             user_input[CONF_EV_SOC_SENSOR] = FindEntity.find_vw_soc_sensor(self.hass)
             user_input[
                 CONF_EV_TARGET_SOC_SENSOR
@@ -86,7 +84,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         user_schema = {
             vol.Required(
-                CONF_NORDPOOL_SENSOR, default=user_input[CONF_NORDPOOL_SENSOR]
+                CONF_PRICE_SENSOR, default=user_input[CONF_PRICE_SENSOR]
             ): cv.string,
             vol.Required(
                 CONF_EV_SOC_SENSOR, default=user_input[CONF_EV_SOC_SENSOR]
