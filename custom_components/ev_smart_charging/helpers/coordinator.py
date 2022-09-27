@@ -258,7 +258,7 @@ class Scheduler:
         schedule_min_soc = get_charging_update(
             self.schedule_base_min_soc,
             params["switch_active"],
-            True,
+            False,
             params["max_price"],
             params["value_in_graph"],
         )
