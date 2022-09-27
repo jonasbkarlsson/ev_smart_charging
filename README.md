@@ -8,6 +8,7 @@
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 ![Icon](assets/icon.png)
+
 The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration, and can automatically detect the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Integrations for other car makers and charger makers can be used with manual configurations.
 
 ## Installation
@@ -34,12 +35,12 @@ The configuration is done in the Home Assistant user interface.
 The first form contains the entities that the integration is interacting with.
 Parameter | Required | Description
 -- | -- | --
-Electricity price entity | Yes | Sensor entity to the Nordpool integration.
-EV SOC entity | Yes | Sensor entity with the car's State-of-Charge. A value between 0 and 100.
+Electricity price entity | Yes | The Nordpool integration sensor entity.
+EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control switch entity | No | If provided, the integration will set the state of this entity to 'on' and 'off'.
 
-The second form contain parameters that affects how the charging will be done.
+The second form contain parameters that affects how the charging will be done. These parameters can be changed after intial configuration in "Settings" -> "Devices & Services" -> "Integrations".
 Parameter | Required | Description
 -- | -- | --
 Percent per hour | Yes | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you!
@@ -53,7 +54,7 @@ Entity | Type | Description
 -- | -- | --
 `sensor.ev_smart_charging_charging` | Sensor | State "on" or "off". Can be used with automations to control the EV charger.
 `switch.ev_smart_charging_smart_charging_activated` | Switch | Turns the EV Smart Charging integration on and off.
-`switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit, if set to a non-zero value in the Options menu.
+`switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit, if set to a non-zero value in the configuration form.
 `button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. Is totally independent of the automatic charging.
 `button.ev_smart_charging_manually_stop_charging` | Button | Manually stop charging. Is totally independent of the automatic charging.
 
