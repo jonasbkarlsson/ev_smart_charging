@@ -8,7 +8,6 @@
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 ![Icon](assets/icon.png)
-
 The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration, and can automatically detect the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Integrations for other car makers and charger makers can be used with manual configurations.
 
 ## Installation
@@ -45,12 +44,23 @@ Parameter | Required | Description
 -- | -- | --
 Percent per hour | Yes | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you!
 Typical departure time | Yes | The lastest time tomorrow for the charging to reach the target State-of-Charge. Note, the idea is to set this to a time that is reasonable in most cases, and not to updated this every day.
-Electricity price limit | Yes | If provided, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to the EV will not being charged to the target State-of-Charge.
-Minimum EV SOC | Yes | The minimum level that should be charged, independetly of the electricity price.
+Electricity price limit | Yes | If non-zero value is provided, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge.
+Minimum EV SOC | Yes | The minimum State-of-Charge that should be charged, independetly of the electricity price.
+
+## Entities
+
+Entity | Type | Description
+-- | -- | --
+`sensor.ev_smart_charging_charging` | Sensor | State "on" or "off". Can be used with automations to control the EV charger.
+`switch.ev_smart_charging_smart_charging_activated` | Switch | Turns the EV Smart Charging integration on and off.
+`switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit, if set to a non-zero value in the Options menu.
+`button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. Is totally independent of the automatic charging.
+`button.ev_smart_charging_manually_stop_charging` | Button | Manually stop charging. Is totally independent of the automatic charging.
 
 ## Lovelace UI
 
 [ApexCharts Card](https://github.com/RomRider/apexcharts-card) can be used to create the follow type of graph.
+
 ![Chart](assets/ev_smart_graph.png)
 ```
 type: custom:apexcharts-card
@@ -121,8 +131,6 @@ series:
 experimental:
   color_threshold: true
 ```
-
-
 
 [ev_smart_charging]: https://github.com/jonasbkarlsson/ev_smart_charging
 [releases-shield]: https://img.shields.io/github/v/release/jonasbkarlsson/ev_smart_charging?style=for-the-badge
