@@ -140,11 +140,13 @@ def get_charging_original(lowest_hours: list[int], raw_two_days: Raw) -> list:
 
 
 def get_charging_update(
-    charging_original: list, active: bool, apply_limit: bool, max_price: float
+    charging_original: list,
+    active: bool,
+    apply_limit: bool,
+    max_price: float,
+    value_in_graph: float,
 ) -> list:
     """Update the charging schedule"""
-
-    value_on = Raw(charging_original).max_value()
 
     result = deepcopy(charging_original)  # Make a copy, not a reference.
     for item in result:
@@ -155,7 +157,7 @@ def get_charging_update(
         elif apply_limit and item["value"] > max_price > 0.0:
             item["value"] = 0.0
         else:
-            item["value"] = value_on
+            item["value"] = value_in_graph
 
     return result
 
@@ -251,12 +253,14 @@ class Scheduler:
             params["switch_active"],
             params["switch_apply_limit"],
             params["max_price"],
+            params["value_in_graph"],
         )
         schedule_min_soc = get_charging_update(
             self.schedule_base_min_soc,
             params["switch_active"],
             True,
             params["max_price"],
+            params["value_in_graph"],
         )
         _LOGGER.debug(
             "Raw(schedule).number_of_nonzero() = %s", Raw(schedule).number_of_nonzero()
