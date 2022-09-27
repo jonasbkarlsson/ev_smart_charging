@@ -4,7 +4,7 @@
             "user": {
                 "description": "Setup of external entities",
                 "data": {
-                    "nordpool_sensor": "Nordpool sensor",
+                    "price_sensor": "Electricity price sensor",
                     "ev_soc_sensor": "EV SOC entity",
                     "ev_target_soc_sensor": "EV Target SOC entity",
                     "charger_entity": "Charger control switch"
@@ -21,9 +21,9 @@
             }
         },
         "error": {
-            "nordpool_not_found": "Nordpool sensor not found.",
-            "nordpool_not_sensor": "The Nordpool entity is not a sensor.",
-            "sensor_is_not_nordpool": "The Nordpool sensor does not have the needed attributes.",
+            "price_not_found": "Electricity price sensor not found.",
+            "price_not_sensor": "The Electricity price entity is not a sensor.",
+            "sensor_is_not_price": "The Electricity price sensor does not have the needed attributes.",
             "ev_soc_not_found": "EV SOC entity not found.",
             "ev_soc_invalid_data": "The SOC entity gives invalid data.",
             "ev_target_soc_not_found": "EV Target SOC entity not found.",

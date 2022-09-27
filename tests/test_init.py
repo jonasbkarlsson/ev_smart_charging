@@ -1,4 +1,4 @@
-"""Test nordpool2 setup process."""
+"""Test ev_smart_charging setup process."""
 from homeassistant.exceptions import ConfigEntryNotReady
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry

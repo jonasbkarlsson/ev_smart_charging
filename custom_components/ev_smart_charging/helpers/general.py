@@ -33,15 +33,15 @@ class Validator:
         return False
 
     @staticmethod
-    def is_nordpool_state(nordpool_state: State) -> bool:
-        """Check that argument is a Nordpool sensor state"""
-        if nordpool_state is not None:
-            if nordpool_state.state != "unavailable":
+    def is_price_state(price_state: State) -> bool:
+        """Check that argument is a Price sensor state"""
+        if price_state is not None:
+            if price_state.state != "unavailable":
                 # Check current_price
-                if not Validator.is_float(nordpool_state.attributes["current_price"]):
+                if not Validator.is_float(price_state.attributes["current_price"]):
                     return False
                 # Check raw_today
-                if not Raw(nordpool_state.attributes["raw_today"]).is_valid():
+                if not Raw(price_state.attributes["raw_today"]).is_valid():
                     return False
                 # Don't check raw_tomorrow. It can be missing.
         return True

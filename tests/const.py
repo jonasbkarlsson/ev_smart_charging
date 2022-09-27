@@ -4,7 +4,7 @@ from custom_components.ev_smart_charging.const import (
     CONF_DEVICE_NAME,
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
-    CONF_NORDPOOL_SENSOR,
+    CONF_PRICE_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_PCT_PER_HOUR,
@@ -14,7 +14,7 @@ from custom_components.ev_smart_charging.const import (
 
 # Mock config data to be used across multiple tests
 MOCK_CONFIG_USER = {
-    CONF_NORDPOOL_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0",
+    CONF_PRICE_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0",
     CONF_EV_SOC_SENSOR: "sensor.id_4_gtx_state_of_charge",
     CONF_EV_TARGET_SOC_SENSOR: "number.id_4_gtx_target_state_of_charge",
     CONF_CHARGER_ENTITY: "switch.charger_charge_control",
@@ -36,7 +36,7 @@ MOCK_CONFIG_CHARGER_EXTRA = {
 }
 
 MOCK_CONFIG_ALL = {
-    CONF_NORDPOOL_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0",
+    CONF_PRICE_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0",
     CONF_EV_SOC_SENSOR: "sensor.id_4_gtx_state_of_charge",
     CONF_EV_TARGET_SOC_SENSOR: "number.id_4_gtx_target_state_of_charge",
     CONF_CHARGER_ENTITY: "switch.charger_charge_control",

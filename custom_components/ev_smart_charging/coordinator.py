@@ -17,7 +17,7 @@ from .const import (
     CONF_MIN_SOC,
     CONF_PCT_PER_HOUR,
     CONF_READY_HOUR,
-    CONF_NORDPOOL_SENSOR,
+    CONF_PRICE_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     DEFAULT_TARGET_SOC,
@@ -47,7 +47,7 @@ class EVSmartChargingCoordinator:
         self.sensor = None
         self.switch_active = None
         self.switch_apply_limit = None
-        self.nordpool_entity_id = None
+        self.price_entity_id = None
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
 
@@ -149,7 +149,7 @@ class EVSmartChargingCoordinator:
         """Set up sensor"""
         self.sensor = sensor
 
-        self.nordpool_entity_id = get_parameter(self.config_entry, CONF_NORDPOOL_SENSOR)
+        self.price_entity_id = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
         self.ev_soc_entity_id = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
         self.ev_target_soc_entity_id = get_parameter(
             self.config_entry, CONF_EV_TARGET_SOC_SENSOR
@@ -159,7 +159,7 @@ class EVSmartChargingCoordinator:
             async_track_state_change(
                 self.hass,
                 [
-                    self.nordpool_entity_id,
+                    self.price_entity_id,
                     self.ev_soc_entity_id,
                 ],
                 self.update_sensors,
@@ -200,24 +200,24 @@ class EVSmartChargingCoordinator:
     async def update_sensors(
         self, entity_id: str = None, old_state: State = None, new_state: State = None
     ):  # pylint: disable=unused-argument
-        """Nordpool or EV sensors have been updated."""
+        """Price or EV sensors have been updated."""
 
         _LOGGER.debug("EVSmartChargingCoordinator.update_sensors()")
         _LOGGER.debug("entity_id = %s", entity_id)
         # _LOGGER.debug("old_state = %s", old_state)
         _LOGGER.debug("new_state = %s", new_state)
 
-        nordpool_state = self.hass.states.get(self.nordpool_entity_id)
-        if Validator.is_nordpool_state(nordpool_state):
-            self.sensor.current_price = nordpool_state.attributes["current_price"]
-            self.raw_today = Raw(nordpool_state.attributes["raw_today"])
-            self.raw_tomorrow = Raw(nordpool_state.attributes["raw_tomorrow"])
+        price_state = self.hass.states.get(self.price_entity_id)
+        if Validator.is_price_state(price_state):
+            self.sensor.current_price = price_state.attributes["current_price"]
+            self.raw_today = Raw(price_state.attributes["raw_today"])
+            self.raw_tomorrow = Raw(price_state.attributes["raw_tomorrow"])
             self.tomorrow_valid = self.raw_tomorrow.is_valid()
             self.raw_two_days = self.raw_today.copy()
             self.raw_two_days.extend(self.raw_tomorrow)
             self.sensor.raw_two_days = self.raw_two_days.get_raw()
         else:
-            _LOGGER.error("Nordpool sensor not valid.")
+            _LOGGER.error("Price sensor not valid.")
 
         ev_soc_state = self.hass.states.get(self.ev_soc_entity_id)
         if Validator.is_soc_state(ev_soc_state):
@@ -266,9 +266,9 @@ class EVSmartChargingCoordinator:
     def validate_input_sensors(self) -> str:
         """Check that all input sensors returns values."""
 
-        nordpool = get_parameter(self.config_entry, CONF_NORDPOOL_SENSOR)
-        nordpool_state = self.hass.states.get(nordpool)
-        if nordpool_state is None:
+        price = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
+        price_state = self.hass.states.get(price)
+        if price_state is None:
             return "Input sensors not ready."
 
         ev_soc = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)

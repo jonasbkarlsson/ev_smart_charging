@@ -17,7 +17,7 @@ from ..const import (
     CONF_CHARGER_ENTITY,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
-    CONF_NORDPOOL_SENSOR,
+    CONF_PRICE_SENSOR,
     DOMAIN,
     NAME,
     PLATFORM_NORDPOOL,
@@ -43,22 +43,22 @@ class FlowValidator:
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
         entities = entity_registry.entities
 
-        # Validate Nordpool entity
-        nordpool_state = hass.states.get(user_input[CONF_NORDPOOL_SENSOR])
-        if nordpool_state is None:
-            return ("base", "nordpool_not_found")
-        entry: RegistryEntry = entities.get(user_input[CONF_NORDPOOL_SENSOR])
+        # Validate Price entity
+        price_state = hass.states.get(user_input[CONF_PRICE_SENSOR])
+        if price_state is None:
+            return ("base", "price_not_found")
+        entry: RegistryEntry = entities.get(user_input[CONF_PRICE_SENSOR])
         if entry.domain != SENSOR:
-            return ("base", "nordpool_not_sensor")
-        if not "current_price" in nordpool_state.attributes.keys():
-            _LOGGER.debug("No attribute current_price in nordpool sensor")
-            return ("base", "sensor_is_not_nordpool")
-        if not "raw_today" in nordpool_state.attributes.keys():
-            _LOGGER.debug("No attribute raw_today in nordpool sensor")
-            return ("base", "sensor_is_not_nordpool")
-        if not "raw_tomorrow" in nordpool_state.attributes.keys():
-            _LOGGER.debug("No attribute raw_tomorrow in nordpool sensor")
-            return ("base", "sensor_is_not_nordpool")
+            return ("base", "price_not_sensor")
+        if not "current_price" in price_state.attributes.keys():
+            _LOGGER.debug("No attribute current_price in price sensor")
+            return ("base", "sensor_is_not_price")
+        if not "raw_today" in price_state.attributes.keys():
+            _LOGGER.debug("No attribute raw_today in price sensor")
+            return ("base", "sensor_is_not_price")
+        if not "raw_tomorrow" in price_state.attributes.keys():
+            _LOGGER.debug("No attribute raw_tomorrow in price sensor")
+            return ("base", "sensor_is_not_price")
 
         # Validate EV SOC entity
         entity = hass.states.get(user_input[CONF_EV_SOC_SENSOR])
