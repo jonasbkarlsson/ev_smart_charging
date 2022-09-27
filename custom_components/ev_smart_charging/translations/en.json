@@ -15,7 +15,8 @@
                 "data": {
                     "pct_per_hour": "Assumed charging per hour expressed in percent",
                     "ready_hour": "Latest time for charging to be completed next day",
-                    "maximum_price": "Maximum price for charging. 0 = no limit."
+                    "maximum_price": "Maximum price for charging. 0 = no limit.",
+                    "min_soc": "Minimum EV SOC (independent of price)"
                 }
             }
         },
@@ -38,7 +39,8 @@
                 "data": {
                     "pct_per_hour": "Assumed charging per hour expressed in percent",
                     "ready_hour": "Latest time for charging to be completed next day",
-                    "maximum_price": "Maximum price for charging. 0 = no limit."
+                    "maximum_price": "Maximum price for charging. 0 = no limit.",
+                    "min_soc": "Minimum EV SOC (independent of price)"
                 }
             }
         }

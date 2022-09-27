@@ -92,7 +92,7 @@ class EVSmartChargingSwitchApplyLimit(EVSmartChargingSwitch):
         _LOGGER.debug("EVSmartChargingSwitchApplyLimit.__init__()")
         super().__init__(entry, coordinator)
         if self.is_on is None:
-            self._attr_is_on = False
+            self._attr_is_on = True
             self.update_ha_state()
         self.coordinator.switch_apply_limit = self.is_on
 

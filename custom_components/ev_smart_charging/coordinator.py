@@ -14,6 +14,7 @@ from homeassistant.const import STATE_ON, STATE_OFF
 from .const import (
     CONF_CHARGER_ENTITY,
     CONF_MAX_PRICE,
+    CONF_MIN_SOC,
     CONF_PCT_PER_HOUR,
     CONF_READY_HOUR,
     CONF_NORDPOOL_SENSOR,
@@ -49,7 +50,6 @@ class EVSmartChargingCoordinator:
         self.nordpool_entity_id = None
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
-        self.number_min_soc = None
 
         self.charger_switch = None
         if len(get_parameter(self.config_entry, CONF_CHARGER_ENTITY)) > 0:
@@ -70,6 +70,7 @@ class EVSmartChargingCoordinator:
             self.charging_pct_per_hour = 6.0
         self.ready_hour = int(get_parameter(self.config_entry, CONF_READY_HOUR)[0:2])
         self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE))
+        self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC))
 
         self.auto_charging_state = STATE_OFF
 
@@ -195,12 +196,6 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("switch_apply_limit_update = %s", state)
         await self.update_sensors()
 
-    async def number_min_soc_update(self, state: float):
-        """Handle the Min SOC number"""
-        self.number_min_soc = state
-        _LOGGER.debug("number_min_soc_update = %s", state)
-        await self.update_sensors()
-
     @callback
     async def update_sensors(
         self, entity_id: str = None, old_state: State = None, new_state: State = None
@@ -241,22 +236,24 @@ class EVSmartChargingCoordinator:
 
         # Calculate charging schedule if tomorrow's prices are available,
         # SOC and target SOC are available and if the auto charging state is off
+        scheduling_params = {
+            "ev_soc": self.ev_soc,
+            "ev_target_soc": self.ev_target_soc,
+            "min_soc": self.number_min_soc,
+            "charging_pct_per_hour": self.charging_pct_per_hour,
+            "ready_hour": self.ready_hour,
+            "switch_active": self.switch_active,
+            "switch_apply_limit": self.switch_apply_limit,
+            "max_price": self.max_price,
+        }
+
         if self.tomorrow_valid and self.auto_charging_state == STATE_OFF:
-            scheduling_params = {
-                "ev_soc": self.ev_soc,
-                "ev_target_soc": self.ev_target_soc,
-                "min_soc": self.number_min_soc,
-                "charging_pct_per_hour": self.charging_pct_per_hour,
-                "ready_hour": self.ready_hour,
-            }
             self.scheduler.create_base_schedule(scheduling_params, self.raw_two_days)
 
         if self.scheduler.base_schedule_exists() is True:
-            scheduling_params = {
-                "switch_active": self.switch_active,
-                "switch_apply_limit": self.switch_apply_limit,
-                "max_price": self.max_price,
-            }
+            scheduling_params.update(
+                {"value_in_graph": self.raw_two_days.max_value() * 0.75}
+            )
             new_charging = self.scheduler.get_schedule(scheduling_params)
             if new_charging is not None:
                 self._charging_schedule = new_charging
