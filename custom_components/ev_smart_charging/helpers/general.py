@@ -1,11 +1,14 @@
 """General helpers"""
 
 # pylint: disable=relative-beyond-top-level
+import logging
 from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import State
 
 from .coordinator import Raw
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Validator:
@@ -18,6 +21,8 @@ class Validator:
             float(element)
             return True
         except ValueError:
+            return False
+        except TypeError:
             return False
 
     @staticmethod
@@ -38,13 +43,22 @@ class Validator:
         if price_state is not None:
             if price_state.state != "unavailable":
                 # Check current_price
-                if not Validator.is_float(price_state.attributes["current_price"]):
+                try:
+                    if not Validator.is_float(price_state.attributes["current_price"]):
+                        return False
+                except KeyError:
                     return False
                 # Check raw_today
-                if not Raw(price_state.attributes["raw_today"]).is_valid():
+                try:
+                    if not Raw(price_state.attributes["raw_today"]).is_valid():
+                        return False
+                except KeyError:
+                    return False
+                except TypeError:
                     return False
                 # Don't check raw_tomorrow. It can be missing.
-        return True
+                return True
+        return False
 
 
 def get_parameter(config_entry: ConfigEntry, parameter: str, default_val: Any = None):
