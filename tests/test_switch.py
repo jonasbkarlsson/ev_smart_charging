@@ -1,5 +1,4 @@
 """Test ev_smart_charging switch."""
-import asyncio
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from homeassistant.core import HomeAssistant
@@ -21,7 +20,7 @@ from custom_components.ev_smart_charging.switch import (
     async_setup_entry as switch_async_setup_entry,
 )
 
-from .const import MOCK_CONFIG_NO_CHARGER
+from .const import MOCK_CONFIG_USER_NO_CHARGER
 
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
 # for a given test. We can also leverage fixtures and mocks that are available in
@@ -34,7 +33,7 @@ async def test_switch(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_NO_CHARGER, entry_id="test"
+        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test"
     )
 
     # Set up the entry and assert that the values set during setup are where we expect
@@ -87,7 +86,7 @@ async def test_switch_restore(hass: HomeAssistant, bypass_validate_input_sensors
 
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_NO_CHARGER, entry_id="test"
+        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test"
     )
     await async_setup_entry(hass, config_entry)
 
@@ -96,22 +95,8 @@ async def test_switch_restore(hass: HomeAssistant, bypass_validate_input_sensors
 
     await sensor_async_setup_entry(hass, config_entry, dummy)
     await switch_async_setup_entry(hass, config_entry, dummy)
+    await hass.async_block_till_done()
 
-    async def entity_available(hass, platform: str, entity_str: str):
-        done = False
-        while not done:
-            await asyncio.sleep(0.5)
-            print("sleep 0.5")
-            entity = hass.data["entity_components"][platform].get_entity(entity_str)
-            if entity is not None:
-                done = True
-
-    async def wait_for_ha():
-        await asyncio.wait_for(
-            entity_available(hass, SWITCH, "switch.none_smart_charging_activated"), 2
-        )
-
-    await wait_for_ha()
     switch_active: EVSmartChargingSwitchActive = hass.data["entity_components"][
         SWITCH
     ].get_entity("switch.none_smart_charging_activated")
@@ -119,21 +104,18 @@ async def test_switch_restore(hass: HomeAssistant, bypass_validate_input_sensors
     await switch_active.async_turn_on()
     assert switch_active.is_on is True
     switch_active.update_ha_state()
-    await asyncio.sleep(1)
+    await hass.async_block_till_done()
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)
-    # await hass.data["entity_components"][SWITCH].async_remove_entity(
-    #     "switch.none_smart_charging_activated"
-    # )
 
     # Test Restore state
 
     await async_setup_entry(hass, config_entry)
     await sensor_async_setup_entry(hass, config_entry, dummy)
     await switch_async_setup_entry(hass, config_entry, dummy)
+    await hass.async_block_till_done()
 
-    await wait_for_ha()
     switch_active = hass.data["entity_components"][SWITCH].get_entity(
         "switch.none_smart_charging_activated"
     )
@@ -143,7 +125,7 @@ async def test_switch_restore(hass: HomeAssistant, bypass_validate_input_sensors
     await switch_active.async_turn_off()
     assert switch_active.is_on is False
     switch_active.update_ha_state()
-    await asyncio.sleep(1)
+    await hass.async_block_till_done()
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)
@@ -153,11 +135,10 @@ async def test_switch_restore(hass: HomeAssistant, bypass_validate_input_sensors
     await async_setup_entry(hass, config_entry)
     await sensor_async_setup_entry(hass, config_entry, dummy)
     await switch_async_setup_entry(hass, config_entry, dummy)
+    await hass.async_block_till_done()
 
-    await wait_for_ha()
     switch_active = hass.data["entity_components"][SWITCH].get_entity(
         "switch.none_smart_charging_activated"
     )
 
-    await switch_active.async_added_to_hass()
     assert switch_active.is_on is False

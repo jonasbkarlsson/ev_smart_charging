@@ -22,7 +22,7 @@ from custom_components.ev_smart_charging.sensor import (
     async_setup_entry as sensor_async_setup_entry,
 )
 
-from .const import MOCK_CONFIG_NO_CHARGER
+from .const import MOCK_CONFIG_USER_NO_CHARGER
 
 
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
@@ -36,7 +36,7 @@ async def test_button(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_NO_CHARGER, entry_id="test"
+        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test"
     )
 
     # Set up the entry and assert that the values set during setup are where we expect
