@@ -66,8 +66,6 @@ class EVSmartChargingCoordinator:
         self.raw_two_days = None
         self._charging_schedule = None
         self.charging_pct_per_hour = get_parameter(self.config_entry, CONF_PCT_PER_HOUR)
-        if self.charging_pct_per_hour is None or self.charging_pct_per_hour <= 0.0:
-            self.charging_pct_per_hour = 6.0
         self.ready_hour = int(get_parameter(self.config_entry, CONF_READY_HOUR)[0:2])
         self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE))
         self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC))
@@ -268,18 +266,18 @@ class EVSmartChargingCoordinator:
 
         price = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
         price_state = self.hass.states.get(price)
-        if price_state is None:
+        if price_state is None or price_state.state is None:
             return "Input sensors not ready."
 
         ev_soc = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
-        ev_soc_state = self.hass.states.get(ev_soc).state
-        if ev_soc_state is None:
+        ev_soc_state = self.hass.states.get(ev_soc)
+        if ev_soc_state is None or ev_soc_state.state is None:
             return "Input sensors not ready."
 
         ev_target_soc = get_parameter(self.config_entry, CONF_EV_TARGET_SOC_SENSOR)
         if len(ev_target_soc) > 0:  # Check if the sensor exists
-            ev_target_soc_state = self.hass.states.get(ev_target_soc).state
-            if ev_target_soc_state is None:
+            ev_target_soc_state = self.hass.states.get(ev_target_soc)
+            if ev_target_soc_state is None or ev_target_soc_state.state is None:
                 return "Input sensors not ready."
 
         return None

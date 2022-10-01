@@ -31,59 +31,12 @@ from tests.const import (
     MOCK_CONFIG_USER_WRONG_CHARGER,
     MOCK_CONFIG_USER_WRONG_PRICE,
 )
-
-
-def create_price_entity(hass, entity_registry):
-    """Create a correct price entity"""
-    entity_registry.async_get_or_create(
-        domain=SENSOR,
-        platform=PLATFORM_NORDPOOL,
-        unique_id="kwh_se3_sek_2_10_0",
-    )
-    hass.states.async_set(
-        "sensor.nordpool_kwh_se3_sek_2_10_0",
-        "123",
-        {"current_price": 123, "raw_today": None, "raw_tomorrow": None},
-    )
-
-
-def create_soc_entity(hass, entity_registry):
-    """Create a correct soc entity"""
-    entity_registry.async_get_or_create(
-        domain=SENSOR,
-        platform=PLATFORM_VW,
-        unique_id="state_of_charge",
-    )
-    hass.states.async_set(
-        "sensor.volkswagen_we_connect_id_state_of_charge",
-        "55",
-    )
-
-
-def create_target_soc_entity(hass, entity_registry):
-    """Create a correct target soc entity"""
-    entity_registry.async_get_or_create(
-        domain=SENSOR,
-        platform=PLATFORM_VW,
-        unique_id="target_state_of_charge",
-    )
-    hass.states.async_set(
-        "sensor.volkswagen_we_connect_id_target_state_of_charge",
-        "80",
-    )
-
-
-def create_charge_control(hass, entity_registry):
-    """Create a correct charge control entity"""
-    entity_registry.async_get_or_create(
-        domain=SWITCH,
-        platform=PLATFORM_OCPP,
-        unique_id="charge_control",
-    )
-    hass.states.async_set(
-        "switch.ocpp_charge_control",
-        "55",
-    )
+from tests.helpers.helpers import (
+    MockChargerEntity,
+    MockPriceEntity,
+    MockSOCEntity,
+    MockTargetSOCEntity,
+)
 
 
 async def test_validate_step_user_price(hass: HomeAssistant):
@@ -161,7 +114,7 @@ async def test_validate_step_user_soc(hass: HomeAssistant):
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
 
     # First create a price entity
-    create_price_entity(hass, entity_registry)
+    MockPriceEntity.create(hass, entity_registry)
 
     # Check with no soc entity
     assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) == (
@@ -224,8 +177,8 @@ async def test_validate_step_user_target_soc(hass: HomeAssistant):
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
 
     # First create a price and soc entities
-    create_price_entity(hass, entity_registry)
-    create_soc_entity(hass, entity_registry)
+    MockPriceEntity.create(hass, entity_registry)
+    MockSOCEntity.create(hass, entity_registry)
 
     # Check with no target soc entity
     assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) == (
@@ -288,9 +241,9 @@ async def test_validate_step_user_charger(hass: HomeAssistant):
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
 
     # First create a price, soc and target soc entities
-    create_price_entity(hass, entity_registry)
-    create_soc_entity(hass, entity_registry)
-    create_target_soc_entity(hass, entity_registry)
+    MockPriceEntity.create(hass, entity_registry)
+    MockSOCEntity.create(hass, entity_registry)
+    MockTargetSOCEntity.create(hass, entity_registry)
 
     assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER_NO_CHARGER) is None
     assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) == (
@@ -335,13 +288,13 @@ async def test_find_entity(hass: HomeAssistant):
 
     # First create a couple of entities
     assert FindEntity.find_nordpool_sensor(hass) == ""
-    create_price_entity(hass, entity_registry)
+    MockPriceEntity.create(hass, entity_registry)
     assert FindEntity.find_vw_soc_sensor(hass) == ""
-    create_soc_entity(hass, entity_registry)
+    MockSOCEntity.create(hass, entity_registry)
     assert FindEntity.find_vw_target_soc_sensor(hass) == ""
-    create_target_soc_entity(hass, entity_registry)
+    MockTargetSOCEntity.create(hass, entity_registry)
     assert FindEntity.find_ocpp_device(hass) == ""
-    create_charge_control(hass, entity_registry)
+    MockChargerEntity.create(hass, entity_registry)
 
     # Now test and confirm that all can be found
     assert FindEntity.find_nordpool_sensor(hass) != ""
