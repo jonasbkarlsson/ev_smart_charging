@@ -7,7 +7,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.const import STATE_ON, STATE_OFF
 from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
 from homeassistant.helpers.entity_registry import EntityRegistry
-from homeassistant.util import dt as dt_util
 
 from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
@@ -29,17 +28,6 @@ from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_NO_TARGET_SOC
 def skip_service_calls_fixture():
     """Skip service calls."""
     with patch("homeassistant.core.ServiceRegistry.async_call"):
-        yield
-
-
-# This fixture is used to set CET time zone.
-@pytest.fixture(name="set_cet_timezone")
-def set_cet_timezone_fixture():
-    """Set CET timezone."""
-    with patch(
-        "homeassistant.util.dt.DEFAULT_TIME_ZONE",
-        dt_util.get_time_zone("Europe/Stockholm"),
-    ):
         yield
 
 

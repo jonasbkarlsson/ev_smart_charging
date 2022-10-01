@@ -1,6 +1,5 @@
 """Helper functions"""
 
-from typing import List
 from homeassistant.const import STATE_OFF
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import EntityRegistry
@@ -33,8 +32,8 @@ class MockPriceEntity:
     def set_state(
         hass: HomeAssistant,
         new_price: float,
-        new_raw_today: List,
-        new_raw_tomorrow: List,
+        new_raw_today: list,
+        new_raw_tomorrow: list,
     ):
         """Set state"""
         hass.states.async_set(
