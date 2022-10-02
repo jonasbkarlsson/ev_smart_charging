@@ -1,5 +1,7 @@
 """Constants file"""
 
+from homeassistant.const import Platform
+
 NAME = "EV Smart Charging"
 DOMAIN = "ev_smart_charging"
 DOMAIN_DATA = f"{DOMAIN}_data"
@@ -13,9 +15,9 @@ ICON_START = "mdi:play-circle-outline"
 ICON_STOP = "mdi:stop-circle-outline"
 
 # Platforms
-SENSOR = "sensor"
-SWITCH = "switch"
-BUTTON = "button"
+SENSOR = Platform.SENSOR
+SWITCH = Platform.SWITCH
+BUTTON = Platform.BUTTON
 PLATFORMS = [SWITCH, SENSOR, BUTTON]
 PLATFORM_NORDPOOL = "nordpool"
 PLATFORM_VW = "volkswagen_we_connect_id"
