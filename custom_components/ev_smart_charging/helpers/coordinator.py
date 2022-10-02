@@ -299,7 +299,7 @@ class Scheduler:
         return result
 
 
-def main():
+def main():  # pragma: no cover
     """Main function to test code."""
 
     result = []
@@ -319,5 +319,5 @@ def main():
     print("lowest = " + str(lowest))
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

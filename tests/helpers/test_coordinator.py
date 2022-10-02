@@ -6,8 +6,10 @@ from homeassistant.util import dt as dt_util
 
 from custom_components.ev_smart_charging.helpers.coordinator import (
     Raw,
+    get_charging_hours,
     get_charging_original,
     get_charging_update,
+    get_charging_value,
     get_lowest_hours,
 )
 from tests.price import PRICE_20220930, PRICE_20221001
@@ -133,6 +135,29 @@ async def test_get_charging_update(hass):
     assert result[28]["value"] == 99
     assert result[30]["value"] == 99
     assert result[31]["value"] == 0
+
+
+async def test_get_charging_hours(hass):
+    """Test get_charging_hours()"""
+
+    ev_soc = 50
+    ev_target_soc = 80
+    charing_pct_per_hour = 8
+    assert get_charging_hours(ev_soc, ev_target_soc, charing_pct_per_hour) == 4
+
+
+@pytest.mark.freeze_time
+async def test_get_charging_value(hass, set_cet_timezone, freezer):
+    """Test get_charging_value()"""
+
+    charging: list = MOCK_SCHEDULE_20220930
+
+    freezer.move_to("2022-10-01T02:10:00+0200")
+    assert get_charging_value(charging) == 0
+    freezer.move_to("2022-10-01T03:10:00+0200")
+    assert get_charging_value(charging) == 24.2
+    freezer.move_to("2022-10-02T00:00:00+0200")
+    assert get_charging_value(charging) is None
 
 
 # TODO: Add more tests
