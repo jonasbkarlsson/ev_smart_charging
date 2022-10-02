@@ -41,7 +41,7 @@ class Raw:
 
     def extend(self, raw2):
         """Extend raw data with data from raw2."""
-        if self.valid and raw2.is_valid():
+        if self.valid and raw2 is not None and raw2.is_valid():
             self.data.extend(raw2.get_raw())
 
     def max_value(self) -> float:
@@ -71,7 +71,7 @@ class Raw:
         return None
 
 
-def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int):
+def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int) -> list:
     """From the two-day prices, calculate the cheapest continues set of hours
 
     A continues range of hours will be choosen."""
@@ -299,7 +299,7 @@ class Scheduler:
         return result
 
 
-def main():
+def main():  # pragma: no cover
     """Main function to test code."""
 
     result = []
@@ -319,5 +319,5 @@ def main():
     print("lowest = " + str(lowest))
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

@@ -1,6 +1,5 @@
 {
     "name": "EV Smart Charging",
-    "hacs": "1.27.0",
     "homeassistant": "2022.8.0",
     "zip_release": true,
     "filename": "ev_smart_charging.zip",

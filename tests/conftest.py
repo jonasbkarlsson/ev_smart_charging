@@ -15,6 +15,7 @@
 # See here for more info: https://docs.pytest.org/en/latest/fixture.html (note that
 # pytest includes fixtures OOB which you can use as defined on this page)
 from unittest.mock import patch
+from homeassistant.util import dt as dt_util
 
 import pytest
 
@@ -66,5 +67,16 @@ def bypass_validate_step_user_fixture():
     with patch(
         "custom_components.ev_smart_charging.helpers.config_flow.FlowValidator.validate_step_user",
         return_value=None,
+    ):
+        yield
+
+
+# This fixture is used to set CET time zone.
+@pytest.fixture(name="set_cet_timezone")
+def set_cet_timezone_fixture():
+    """Set CET timezone."""
+    with patch(
+        "homeassistant.util.dt.DEFAULT_TIME_ZONE",
+        dt_util.get_time_zone("Europe/Stockholm"),
     ):
         yield
