@@ -50,7 +50,6 @@ async def test_setup_unload_and_reload_entry(hass, bypass_validate_input_sensors
     assert config_entry.entry_id not in hass.data[DOMAIN]
 
 
-# pylint: disable=unused-argument
 async def test_setup_entry_exception(hass):
     """Test ConfigEntryNotReady when validate_input_sensors returns an error message."""
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")

@@ -14,18 +14,21 @@ class Raw:
     """Class to handle raw data
 
     Array of item = {
-        "start": start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "end": end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "start": start_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "end": end_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "value": float,
     }"""
 
     def __init__(self, raw) -> None:
 
         self.data = []
-        for item in raw:
-            if item["value"] is not None:
-                self.data.append(item)
-        self.valid = len(self.data) > 0
+        if raw:
+            for item in raw:
+                if item["value"] is not None:
+                    self.data.append(item)
+            self.valid = len(self.data) > 0
+        else:
+            self.valid = False
 
     def get_raw(self):
         """Get raw data"""
@@ -200,9 +203,9 @@ class Scheduler:
         """Create the base schedule"""
 
         if (
-            params["ev_soc"] is None
-            or params["ev_target_soc"] is None
-            or params["min_soc"] is None
+            "ev_soc" not in params
+            or "ev_target_soc" not in params
+            or "min_soc" not in params
         ):
             return
 
@@ -245,7 +248,7 @@ class Scheduler:
     def get_schedule(self, params: dict[str, Any]) -> list | None:
         """Get the schedule"""
 
-        if params["switch_active"] is None or params["switch_apply_limit"] is None:
+        if "switch_active" not in params or "switch_apply_limit" not in params:
             return None
 
         schedule = get_charging_update(

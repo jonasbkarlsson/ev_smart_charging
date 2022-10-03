@@ -11,9 +11,6 @@ from custom_components.ev_smart_charging.coordinator import (
 )
 from custom_components.ev_smart_charging.const import DOMAIN
 from custom_components.ev_smart_charging.sensor import EVSmartChargingSensor
-from custom_components.ev_smart_charging.sensor import (
-    async_setup_entry as sensor_async_setup_entry,
-)
 
 from .const import MOCK_CONFIG_ALL
 
@@ -34,24 +31,18 @@ async def test_sensor(hass, bypass_validate_input_sensors):
     # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
     # call, no code from custom_components/integration_blueprint/api.py actually runs.
     assert await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
+
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
     assert isinstance(
         hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
     )
-
-    def dummy(var1):
-        pass
-
-    await sensor_async_setup_entry(hass, config_entry, dummy)
-    assert hass.data[DOMAIN][config_entry.entry_id] is not None
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
     assert coordinator.sensor is not None
     assert isinstance(coordinator.sensor, EVSmartChargingSensor)
+    sensor = coordinator.sensor
 
-    # coordinator = hass.data[DOMAIN][config_entry.entry_id]
-    sensor = EVSmartChargingSensor(config_entry)
-    assert isinstance(sensor, EVSmartChargingSensor)
-
+    # Test the sensor
     sensor.native_value = STATE_OFF
     assert sensor.native_value == STATE_OFF
     sensor.native_value = STATE_ON

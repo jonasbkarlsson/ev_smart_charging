@@ -1,11 +1,11 @@
 """Test ev_smart_charging/helpers/coordinator.py"""
 from datetime import datetime
-import pytest
 
 from homeassistant.util import dt as dt_util
 
 from custom_components.ev_smart_charging.helpers.coordinator import (
     Raw,
+    Scheduler,
     get_charging_hours,
     get_charging_original,
     get_charging_update,
@@ -20,6 +20,7 @@ from tests.schedule import MOCK_SCHEDULE_20220930
 # Home Assistant using the pytest_homeassistant_custom_component plugin.
 # Assertions allow you to verify that the return value of whatever is on the left
 # side of the assertion matches with the right side.
+
 
 # pylint: disable=unused-argument
 async def test_raw(hass):
@@ -48,8 +49,6 @@ async def test_raw(hass):
     assert price.number_of_nonzero() == 48
 
 
-# pylint: disable=unused-argument
-@pytest.mark.freeze_time
 async def test_get_lowest_hours(hass, set_cet_timezone, freezer):
     """Test get_lowest_hours()"""
 
@@ -57,19 +56,19 @@ async def test_get_lowest_hours(hass, set_cet_timezone, freezer):
     raw2: Raw = Raw(PRICE_20221001)
     raw_two_days.extend(raw2)
 
-    freezer.move_to("2022-09-30 15:10:00+02:00")
+    freezer.move_to("2022-09-30T15:10:00+02:00")
     ready_hour: int = 8
     hours: int = 5
     assert get_lowest_hours(ready_hour, raw_two_days, hours) == [27, 28, 29, 30, 31]
     hours = 0
     assert not get_lowest_hours(ready_hour, raw_two_days, hours)
 
-    freezer.move_to("2022-09-30 15:10:00+02:00")
+    freezer.move_to("2022-09-30T15:10:00+02:00")
     ready_hour: int = 6
     hours: int = 5
     assert get_lowest_hours(ready_hour, raw_two_days, hours) == [25, 26, 27, 28, 29]
 
-    freezer.move_to("2022-09-30 23:10:00+02:00")
+    freezer.move_to("2022-09-30T23:10:00+02:00")
     ready_hour: int = 6
     hours: int = 10
     assert get_lowest_hours(ready_hour, raw_two_days, hours) == [
@@ -83,8 +82,6 @@ async def test_get_lowest_hours(hass, set_cet_timezone, freezer):
     ]
 
 
-# pylint: disable=unused-argument
-@pytest.mark.freeze_time
 async def test_get_charging_original(hass, set_cet_timezone, freezer):
     """Test get_charging_original()"""
 
@@ -92,7 +89,7 @@ async def test_get_charging_original(hass, set_cet_timezone, freezer):
     raw2: Raw = Raw(PRICE_20221001)
     raw_two_days.extend(raw2)
 
-    freezer.move_to("2022-09-30 15:10:00+02:00")
+    freezer.move_to("2022-09-30T15:10:00+02:00")
     lowest_hours = [27, 28, 29, 30, 31]
     result: list = get_charging_original(lowest_hours, raw_two_days)
     assert result[26]["value"] == 0
@@ -146,7 +143,6 @@ async def test_get_charging_hours(hass):
     assert get_charging_hours(ev_soc, ev_target_soc, charing_pct_per_hour) == 4
 
 
-@pytest.mark.freeze_time
 async def test_get_charging_value(hass, set_cet_timezone, freezer):
     """Test get_charging_value()"""
 
@@ -160,4 +156,70 @@ async def test_get_charging_value(hass, set_cet_timezone, freezer):
     assert get_charging_value(charging) is None
 
 
-# TODO: Add more tests
+async def test_scheduler(hass, set_cet_timezone, freezer):
+    """Test Scheduler"""
+
+    new_raw_today = Raw(PRICE_20220930)
+    new_raw_tomorrow = Raw(PRICE_20221001)
+    raw_two_days = new_raw_today.copy()
+    raw_two_days.extend(new_raw_tomorrow)
+
+    scheduler = Scheduler()
+    freezer.move_to("2022-09-30T14:10:00+0200")
+    scheduling_params = {}
+    scheduler.create_base_schedule(scheduling_params, raw_two_days)
+    assert not scheduler.base_schedule_exists()
+
+    scheduling_params = {
+        "ev_soc": 50,
+        "ev_target_soc": 80,
+        "min_soc": 0,
+        "charging_pct_per_hour": 4,
+        "ready_hour": 7,
+        "switch_active": True,
+        "max_price": 30,
+    }
+    scheduler.create_base_schedule(scheduling_params, raw_two_days)
+    assert scheduler.base_schedule_exists()
+    assert scheduler.schedule_base
+    assert not scheduler.schedule_base_min_soc
+
+    scheduling_params.update({"min_soc": 40})
+
+    scheduler.create_base_schedule(scheduling_params, raw_two_days)
+    assert scheduler.base_schedule_exists()
+    assert scheduler.schedule_base
+    assert scheduler.schedule_base_min_soc
+
+    scheduling_params.update({"value_in_graph": 300})
+
+    new_charging: list = scheduler.get_schedule(scheduling_params)
+    assert not new_charging
+
+    scheduling_params.update({"switch_apply_limit": True})
+
+    new_charging: list = scheduler.get_schedule(scheduling_params)
+    assert new_charging
+    assert new_charging[26]["value"] == 0
+    assert new_charging[27]["value"] == 300
+
+    scheduling_params.update({"min_soc": 80})
+    scheduler.create_base_schedule(scheduling_params, raw_two_days)
+    new_charging: list = scheduler.get_schedule(scheduling_params)
+    assert new_charging
+    assert new_charging[22]["value"] == 0
+    assert new_charging[23]["value"] == 300
+
+
+async def test_get_empty_schedule(hass, set_cet_timezone, freezer):
+    """Test Scheduler.get_empty_schedule()"""
+
+    freezer.move_to("2022-10-01T02:10:00+0200")
+    empty_schedule: list = Scheduler.get_empty_schedule()
+    assert len(empty_schedule) == 48
+    assert empty_schedule[0]["start"] == "2022-10-01T00:00:00+0200"
+    assert empty_schedule[0]["end"] == "2022-10-01T01:00:00+0200"
+    assert empty_schedule[0]["value"] == 0
+    assert empty_schedule[47]["start"] == "2022-10-02T23:00:00+0200"
+    assert empty_schedule[47]["end"] == "2022-10-03T00:00:00+0200"
+    assert empty_schedule[47]["value"] == 0
