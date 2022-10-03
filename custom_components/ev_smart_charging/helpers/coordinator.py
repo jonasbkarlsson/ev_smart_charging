@@ -14,8 +14,8 @@ class Raw:
     """Class to handle raw data
 
     Array of item = {
-        "start": start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "end": end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "start": start_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "end": end_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "value": float,
     }"""
 

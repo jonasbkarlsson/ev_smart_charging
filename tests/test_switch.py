@@ -78,7 +78,6 @@ async def test_switch(hass, bypass_validate_input_sensors):
     assert config_entry.entry_id not in hass.data[DOMAIN]
 
 
-# pylint: disable=unused-argument
 async def test_switch_restore(hass: HomeAssistant, bypass_validate_input_sensors):
     """Test sensor properties."""
     # TODO: This seems not to test what is intendend. The async_get_last_state() call

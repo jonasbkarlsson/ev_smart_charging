@@ -32,11 +32,12 @@ def skip_service_calls_fixture():
 
 
 # pylint: disable=unused-argument
-@pytest.mark.freeze_time("2022-09-30 14:00:00+02:00")  # 14:00 CEST time
 async def test_coordinator(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
 ):
     """Test sensor properties."""
+
+    freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     MockSOCEntity.create(hass, entity_registry, "55")
@@ -90,28 +91,28 @@ async def test_coordinator(
     assert coordinator.sensor.state == STATE_OFF
 
     # Move time to scheduled charging time
-    freezer.move_to("2022-10-01 03:00:00+02:00")
+    freezer.move_to("2022-10-01T03:00:00+02:00")
     await coordinator.update_state()
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
 
     # Move time to after scheduled charging time
-    freezer.move_to("2022-10-01 08:00:00+02:00")
+    freezer.move_to("2022-10-01T08:00:00+02:00")
     await coordinator.update_state()
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
 
     # Move back time to recreate the schedule
-    freezer.move_to("2022-09-30 20:00:00+02:00")
+    freezer.move_to("2022-09-30T20:00:00+02:00")
     await coordinator.update_state()
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
 
     # Move time to scheduled charging time
-    freezer.move_to("2022-10-01 03:00:00+02:00")
+    freezer.move_to("2022-10-01T03:00:00+02:00")
     await coordinator.update_state()
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
@@ -124,7 +125,6 @@ async def test_coordinator(
     assert coordinator.sensor.state == STATE_OFF
 
 
-# pylint: disable=unused-argument
 async def test_validate_input_sensors(hass: HomeAssistant):
     """Test validate_input_sensors()"""
 
