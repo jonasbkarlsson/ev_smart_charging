@@ -22,10 +22,13 @@ class Raw:
     def __init__(self, raw) -> None:
 
         self.data = []
-        for item in raw:
-            if item["value"] is not None:
-                self.data.append(item)
-        self.valid = len(self.data) > 0
+        if raw:
+            for item in raw:
+                if item["value"] is not None:
+                    self.data.append(item)
+            self.valid = len(self.data) > 0
+        else:
+            self.valid = False
 
     def get_raw(self):
         """Get raw data"""

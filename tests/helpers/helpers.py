@@ -3,6 +3,7 @@
 from homeassistant.const import STATE_OFF
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import EntityRegistry
+from homeassistant.util import dt as dt_util
 
 from custom_components.ev_smart_charging.const import (
     PLATFORM_NORDPOOL,
@@ -11,6 +12,7 @@ from custom_components.ev_smart_charging.const import (
     SENSOR,
     SWITCH,
 )
+from custom_components.ev_smart_charging.helpers.coordinator import Raw
 
 
 class MockPriceEntity:
@@ -26,16 +28,26 @@ class MockPriceEntity:
             platform=PLATFORM_NORDPOOL,
             unique_id="kwh_se3_sek_2_10_0",
         )
-        MockPriceEntity.set_state(hass, price, None, None)
+        MockPriceEntity.set_state(hass, None, None, price)
 
     @staticmethod
     def set_state(
         hass: HomeAssistant,
-        new_price: float,
         new_raw_today: list,
         new_raw_tomorrow: list,
+        new_price: float = None,
     ):
-        """Set state"""
+        """Set state of MockPriceEntity"""
+
+        # Find current price
+        if new_price is None:
+            new_price = "unavailable"
+            if price := Raw(new_raw_today).get_value(dt_util.now()):
+                new_price = price
+            if price := Raw(new_raw_tomorrow).get_value(dt_util.now()):
+                new_price = price
+
+        # Set state
         hass.states.async_set(
             "sensor.nordpool_kwh_se3_sek_2_10_0",
             f"{new_price}",
