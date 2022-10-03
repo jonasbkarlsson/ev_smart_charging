@@ -200,9 +200,9 @@ class Scheduler:
         """Create the base schedule"""
 
         if (
-            params["ev_soc"] is None
-            or params["ev_target_soc"] is None
-            or params["min_soc"] is None
+            "ev_soc" not in params
+            or "ev_target_soc" not in params
+            or "min_soc" not in params
         ):
             return
 
@@ -245,7 +245,7 @@ class Scheduler:
     def get_schedule(self, params: dict[str, Any]) -> list | None:
         """Get the schedule"""
 
-        if params["switch_active"] is None or params["switch_apply_limit"] is None:
+        if "switch_active" not in params or "switch_apply_limit" not in params:
             return None
 
         schedule = get_charging_update(

@@ -156,7 +156,59 @@ async def test_get_charging_value(hass, set_cet_timezone, freezer):
     assert get_charging_value(charging) is None
 
 
-# TODO: Add test for class Scheduler
+async def test_scheduler(hass, set_cet_timezone, freezer):
+    """Test Scheduler"""
+
+    new_raw_today = Raw(PRICE_20220930)
+    new_raw_tomorrow = Raw(PRICE_20221001)
+    raw_two_days = new_raw_today.copy()
+    raw_two_days.extend(new_raw_tomorrow)
+
+    scheduler = Scheduler()
+    freezer.move_to("2022-09-30T14:10:00+0200")
+    scheduling_params = {}
+    scheduler.create_base_schedule(scheduling_params, raw_two_days)
+    assert not scheduler.base_schedule_exists()
+
+    scheduling_params = {
+        "ev_soc": 50,
+        "ev_target_soc": 80,
+        "min_soc": 0,
+        "charging_pct_per_hour": 4,
+        "ready_hour": 7,
+        "switch_active": True,
+        "max_price": 30,
+    }
+    scheduler.create_base_schedule(scheduling_params, raw_two_days)
+    assert scheduler.base_schedule_exists()
+    assert scheduler.schedule_base
+    assert not scheduler.schedule_base_min_soc
+
+    scheduling_params.update({"min_soc": 40})
+
+    scheduler.create_base_schedule(scheduling_params, raw_two_days)
+    assert scheduler.base_schedule_exists()
+    assert scheduler.schedule_base
+    assert scheduler.schedule_base_min_soc
+
+    scheduling_params.update({"value_in_graph": 300})
+
+    new_charging: list = scheduler.get_schedule(scheduling_params)
+    assert not new_charging
+
+    scheduling_params.update({"switch_apply_limit": True})
+
+    new_charging: list = scheduler.get_schedule(scheduling_params)
+    assert new_charging
+    assert new_charging[26]["value"] == 0
+    assert new_charging[27]["value"] == 300
+
+    scheduling_params.update({"min_soc": 80})
+    scheduler.create_base_schedule(scheduling_params, raw_two_days)
+    new_charging: list = scheduler.get_schedule(scheduling_params)
+    assert new_charging
+    assert new_charging[22]["value"] == 0
+    assert new_charging[23]["value"] == 300
 
 
 async def test_get_empty_schedule(hass, set_cet_timezone, freezer):
