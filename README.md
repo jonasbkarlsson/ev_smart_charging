@@ -64,75 +64,97 @@ Entity | Type | Description
 
 [ApexCharts Card](https://github.com/RomRider/apexcharts-card) can be used to create the follow type of graph.
 
-![Chart](assets/ev_smart_graph.png)
+![Chart](assets/ev_smart_charging_lovelace.png)
 ```
-type: custom:apexcharts-card
-now:
-  show: true
-  label: Now
-  color: '#ffc0cb'
-locale: en
-header:
-  show: true
-  title: EV Smart Charging
-  show_states: true
-graph_span: 2d
-yaxis:
-  - min: ~0
-    apex_config:
-      forceNiceScale: true
-span:
-  start: day
-apex_config:
-  legend:
-    show: false
-  xaxis:
-    labels:
+type: vertical-stack
+cards:
+  - type: custom:apexcharts-card
+    now:
       show: true
-      format: HH
-      rotate: -45
-      rotateAlways: true
-      hideOverlappingLabels: true
-      style:
-        fontSize: 10
-        fontWeight: 10
-series:
-  - entity: sensor.ev_smart_charging_charging
-    name: Electricty price
-    unit: ' öre/kWh'
-    data_generator: >
-      return entity.attributes.raw_two_days.map((entry) => { return [new
-      Date(entry.start), entry.value]; });
-    type: line
-    float_precision: 0
-    show:
-      in_header: before_now
-    extend_to: false
-    color_threshold:
-      - value: -100
-        color: '#039BE5'
-      - value: 0
+      label: Now
+      color: '#ffc0cb'
+    locale: en
+    header:
+      show: true
+      title: EV Smart Charging
+      show_states: true
+    graph_span: 2d
+    yaxis:
+      - min: ~0
+        apex_config:
+          forceNiceScale: true
+    span:
+      start: day
+    apex_config:
+      legend:
+        show: false
+      xaxis:
+        labels:
+          show: true
+          format: HH
+          rotate: -45
+          rotateAlways: true
+          hideOverlappingLabels: true
+          style:
+            fontSize: 10
+            fontWeight: 10
+    series:
+      - entity: sensor.ev_smart_charging_charging
+        name: Electricty price
+        unit: ' öre/kWh'
+        data_generator: >
+          return entity.attributes.raw_two_days.map((entry) => { return [new
+          Date(entry.start), entry.value]; });
+        type: line
+        float_precision: 0
+        show:
+          in_header: before_now
+        extend_to: false
+        color_threshold:
+          - value: -100
+            color: '#039BE5'
+          - value: 0
+            color: '#0da035'
+          - value: 40
+            color: '#f39c12'
+          - value: 100
+            color: '#c0392b'
+          - value: 200
+            color: '#B600CE'
+          - value: 500
+            color: '#414141'
+      - entity: sensor.ev_smart_charging_charging
+        name: Charging
+        data_generator: >
+          return entity.attributes.charging_schedule.map((entry) => { return
+          [new Date(entry.start), entry.value]; });
+        type: area
         color: '#0da035'
-      - value: 40
-        color: '#f39c12'
-      - value: 100
-        color: '#c0392b'
-      - value: 200
-        color: '#B600CE'
-      - value: 500
-        color: '#404040'
-  - entity: sensor.ev_smart_charging_charging
-    name: Charging
-    data_generator: >
-      return entity.attributes.charging_schedule.map((entry) => { return [new
-      Date(entry.start), entry.value]; });
-    type: area
-    color: '#0da035'
-    show:
-      in_header: false
-    extend_to: false
-experimental:
-  color_threshold: true
+        show:
+          in_header: false
+        extend_to: false
+    experimental:
+      color_threshold: true
+  - type: entities
+    entities:
+      - entity: sensor.ev_smart_charging_charging
+        name: Charging
+      - entity: switch.ev_smart_charging_smart_charging_activated
+        name: Smart charging activated
+      - entity: switch.ev_smart_charging_apply_price_limit
+        name: Apply price limit
+      - entity: button.ev_smart_charging_manually_start_charging
+        name: Manually start charging
+      - entity: button.ev_smart_charging_manually_stop_charging
+        name: Manually stop charging
+    title: EV Smart Charging
+    show_header_toggle: false
+  - type: entity
+    entity: sensor.ev_smart_charging_charging
+    attribute: EV SOC
+    name: EV SOC
+    icon: mdi:battery-70
+    unit: '%'
 ```
 Depending on the price unit used, modify the settings for `unit`, `float_precision` and `value`.
 
