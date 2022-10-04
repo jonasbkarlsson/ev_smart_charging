@@ -1,5 +1,6 @@
 """Test ev_smart_charging/helpers/general.py"""
 
+from datetime import datetime
 from homeassistant.core import State
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -81,7 +82,13 @@ async def test_is_price_state(hass):
     )
     assert Validator.is_price_state(price_state) is False
 
-    one_list = [{"value": 0.0}]
+    one_list = [
+        {
+            "value": 0.0,
+            "start": datetime(2022, 10, 1, 14),
+            "stop": datetime(2022, 10, 1, 15),
+        }
+    ]
 
     price_state = State(
         entity_id="sensor.test",

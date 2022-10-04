@@ -14,17 +14,17 @@ class Raw:
     """Class to handle raw data
 
     Array of item = {
-        "start": start_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-        "end": end_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "start": datetime,
+        "end": datetime,
         "value": float,
     }"""
 
-    def __init__(self, raw) -> None:
+    def __init__(self, raw: list[dict[str, Any]]) -> None:
 
         self.data = []
         if raw:
             for item in raw:
-                if item["value"] is not None:
+                if item["value"] is not None and isinstance(item["start"], datetime):
                     self.data.append(item)
             self.valid = len(self.data) > 0
         else:
@@ -71,6 +71,13 @@ class Raw:
         for item in self.data:
             if item["start"] <= time < item["end"]:
                 return item["value"]
+        return None
+
+    def get_item(self, time: datetime) -> dict[str, Any]:
+        """Get the item at time dt"""
+        for item in self.data:
+            if item["start"] <= time < item["end"]:
+                return item
         return None
 
 
@@ -127,15 +134,12 @@ def get_charging_original(lowest_hours: list[int], raw_two_days: Raw) -> list:
     end_time = start_time + timedelta(hours=1)
     result = []
     for hour in range(48):
-        value = 0
-        if hour in lowest_hours:
-            value = raw_two_days.get_value(start_time)
-        item = {
-            "start": start_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-            "end": end_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-            "value": value,
-        }
-        result.append(item)
+        item = raw_two_days.get_item(start_time)
+        if item:
+            new_item = deepcopy(item)
+            if hour not in lowest_hours:
+                new_item["value"] = 0
+            result.append(new_item)
         start_time = start_time + timedelta(hours=1)
         end_time = end_time + timedelta(hours=1)
 
@@ -179,11 +183,7 @@ def get_charging_value(charging):
     """Get value for charging now"""
     time_now = dt.now()
     for item in charging:
-        if (
-            datetime.strptime(item["start"], "%Y-%m-%dT%H:%M:%S%z")
-            <= time_now
-            < datetime.strptime(item["end"], "%Y-%m-%dT%H:%M:%S%z")
-        ):
+        if item["start"] <= time_now < item["end"]:
             return item["value"]
     return None
 
@@ -291,8 +291,8 @@ class Scheduler:
         result = []
         for hour in range(48):  # pylint: disable=unused-variable
             item = {
-                "start": start_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                "end": end_time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                "start": start_time,
+                "end": end_time,
                 "value": 0.0,
             }
             result.append(item)

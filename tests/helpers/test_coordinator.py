@@ -37,10 +37,20 @@ async def test_raw(hass):
         2022, 9, 30, 8, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
     assert price.get_value(time) == 388.65
+    assert price.get_item(time) == {
+        "start": datetime(
+            2022, 9, 30, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+        ),
+        "end": datetime(
+            2022, 9, 30, 9, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+        ),
+        "value": 388.65,
+    }
     time = datetime(
         2022, 9, 29, 8, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
     assert price.get_value(time) is None
+    assert price.get_item(time) is None
 
     price2 = Raw(PRICE_20221001)
     price.extend(None)
@@ -96,7 +106,9 @@ async def test_get_charging_original(hass, set_cet_timezone, freezer):
     assert result[27]["value"] != 0
     assert result[31]["value"] != 0
     assert result[32]["value"] == 0
-    assert result[27]["start"] == "2022-10-01T03:00:00+0200"
+    assert result[27]["start"] == datetime(
+        2022, 10, 1, 3, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
 
 
 async def test_get_charging_update(hass):
@@ -217,9 +229,17 @@ async def test_get_empty_schedule(hass, set_cet_timezone, freezer):
     freezer.move_to("2022-10-01T02:10:00+0200")
     empty_schedule: list = Scheduler.get_empty_schedule()
     assert len(empty_schedule) == 48
-    assert empty_schedule[0]["start"] == "2022-10-01T00:00:00+0200"
-    assert empty_schedule[0]["end"] == "2022-10-01T01:00:00+0200"
+    assert empty_schedule[0]["start"] == datetime(
+        2022, 10, 1, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+    assert empty_schedule[0]["end"] == datetime(
+        2022, 10, 1, 1, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
     assert empty_schedule[0]["value"] == 0
-    assert empty_schedule[47]["start"] == "2022-10-02T23:00:00+0200"
-    assert empty_schedule[47]["end"] == "2022-10-03T00:00:00+0200"
+    assert empty_schedule[47]["start"] == datetime(
+        2022, 10, 2, 23, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+    assert empty_schedule[47]["end"] == datetime(
+        2022, 10, 3, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
     assert empty_schedule[47]["value"] == 0
