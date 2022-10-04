@@ -112,24 +112,24 @@ cards:
         extend_to: false
         color_threshold:
           - value: -100
-            color: '#039BE5'
+            color: cyan
           - value: 0
-            color: '#0da035'
+            color: green
           - value: 40
-            color: '#f39c12'
+            color: orange
           - value: 100
-            color: '#c0392b'
+            color: red
           - value: 200
-            color: '#B600CE'
+            color: magenta
           - value: 500
-            color: '#414141'
+            color: black
       - entity: sensor.ev_smart_charging_charging
         name: Charging
         data_generator: >
           return entity.attributes.charging_schedule.map((entry) => { return
           [new Date(entry.start), entry.value]; });
         type: area
-        color: '#0da035'
+        color: green
         show:
           in_header: false
         extend_to: false
