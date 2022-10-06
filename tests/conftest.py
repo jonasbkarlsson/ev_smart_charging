@@ -80,3 +80,11 @@ def set_cet_timezone_fixture():
         dt_util.get_time_zone("Europe/Stockholm"),
     ):
         yield
+
+
+# This fixture is used to prevent HomeAssistant from doing Service Calls.
+@pytest.fixture(name="skip_service_calls")
+def skip_service_calls_fixture():
+    """Skip service calls."""
+    with patch("homeassistant.core.ServiceRegistry.async_call"):
+        yield
