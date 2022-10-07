@@ -40,12 +40,13 @@ class Raw:
 
     def copy(self):
         """Get a copy of Raw"""
-        return Raw(self.data)
+        return Raw(deepcopy(self.data))
 
     def extend(self, raw2):
         """Extend raw data with data from raw2."""
         if self.valid and raw2 is not None and raw2.is_valid():
             self.data.extend(raw2.get_raw())
+        return self
 
     def max_value(self) -> float:
         """Return the largest value"""
@@ -80,12 +81,25 @@ class Raw:
                 return item
         return None
 
+    def to_utc(self):
+        """Change to UTC timezone"""
+        for item in self.data:
+            item["start"] = dt.as_utc(item["start"])
+            item["end"] = dt.as_utc(item["end"])
+        return self
 
-def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int) -> list:
+    def to_local(self):
+        """Change to local timezone"""
+        for item in self.data:
+            item["start"] = dt.as_local(item["start"])
+            item["end"] = dt.as_local(item["end"])
+        return self
+
+
+def get_lowest_hours(ready_hour: datetime, raw_two_days: Raw, hours: int) -> list:
     """From the two-day prices, calculate the cheapest continues set of hours
 
     A continues range of hours will be choosen."""
-    # TODO: Make this work with daylight saving time
 
     _LOGGER.debug("ready_hour = %s", ready_hour)
 
@@ -97,10 +111,11 @@ def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int) -> list:
         price.append(item["value"])
     lowest_index = None
     lowest_price = None
-    time_now = dt.now()
-    time_end = dt.now().replace(
-        hour=ready_hour, minute=0, second=0, microsecond=0
-    ) + timedelta(days=1)
+    time_now = dt.utcnow()
+    time_end = ready_hour
+    # time_end = dt.now().replace(
+    #     hour=ready_hour, minute=0, second=0, microsecond=0
+    # ) + timedelta(days=1)
     time_now_index = None
     time_end_index = None
     for index in range(len(price)):
@@ -130,18 +145,14 @@ def get_lowest_hours(ready_hour: int, raw_two_days: Raw, hours: int) -> list:
 def get_charging_original(lowest_hours: list[int], raw_two_days: Raw) -> list:
     """Calculate charging information"""
 
-    start_time = dt.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    end_time = start_time + timedelta(hours=1)
     result = []
-    for hour in range(48):
-        item = raw_two_days.get_item(start_time)
-        if item:
-            new_item = deepcopy(item)
-            if hour not in lowest_hours:
-                new_item["value"] = 0
-            result.append(new_item)
-        start_time = start_time + timedelta(hours=1)
-        end_time = end_time + timedelta(hours=1)
+    hour = 0
+    for item in raw_two_days.get_raw():
+        new_item = deepcopy(item)
+        if hour not in lowest_hours:
+            new_item["value"] = None
+        result.append(new_item)
+        hour = hour + 1
 
     return result
 
@@ -157,8 +168,8 @@ def get_charging_update(
 
     result = deepcopy(charging_original)  # Make a copy, not a reference.
     for item in result:
-        if item["value"] == 0.0:
-            pass
+        if item["value"] is None:
+            item["value"] = 0.0
         elif not active:
             item["value"] = 0.0
         elif apply_limit and item["value"] > max_price > 0.0:
@@ -186,6 +197,19 @@ def get_charging_value(charging):
         if item["start"] <= time_now < item["end"]:
             return item["value"]
     return None
+
+
+def get_ready_hour_utc(ready_hour_local: int) -> datetime:
+    """Get the UTC time for the ready hour"""
+
+    # This function is only called when coordinator.tomorrow_valid is True
+    # Assume this is true only if local time is between 8:00 and 04:00 (the next day)
+    # This means that dt.now() + 18 hours is for sure tomorrow local time
+    time_local: datetime = dt.now() + timedelta(hours=18)
+    time_local = time_local.replace(
+        hour=ready_hour_local, minute=0, second=0, microsecond=0
+    )
+    return dt.as_utc(time_local)
 
 
 class Scheduler:

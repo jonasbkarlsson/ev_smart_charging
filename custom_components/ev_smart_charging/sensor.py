@@ -85,12 +85,12 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
         self.update_ha_state()
 
     @property
-    def raw_two_days(self):
+    def raw_two_days_local(self):
         """Getter for raw_two_days."""
         return self._raw_two_days
 
-    @raw_two_days.setter
-    def raw_two_days(self, new_value):
+    @raw_two_days_local.setter
+    def raw_two_days_local(self, new_value):
         self._raw_two_days = new_value
         self.update_ha_state()
 

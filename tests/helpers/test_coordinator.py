@@ -11,6 +11,7 @@ from custom_components.ev_smart_charging.helpers.coordinator import (
     get_charging_update,
     get_charging_value,
     get_lowest_hours,
+    get_ready_hour_utc,
 )
 from tests.price import PRICE_20220930, PRICE_20221001
 from tests.schedule import MOCK_SCHEDULE_20220930
@@ -23,7 +24,7 @@ from tests.schedule import MOCK_SCHEDULE_20220930
 
 
 # pylint: disable=unused-argument
-async def test_raw(hass):
+async def test_raw(hass, set_cet_timezone):
     """Test Raw"""
 
     price = Raw(PRICE_20220930)
@@ -58,6 +59,21 @@ async def test_raw(hass):
     price.extend(price2)
     assert price.number_of_nonzero() == 48
 
+    start = price.data[0]["start"]
+    assert start.tzinfo == dt_util.get_time_zone("Europe/Stockholm")
+    assert start.hour == 0
+    price_utc = price.copy().to_utc()
+    start = price_utc.data[0]["start"]
+    assert start.tzinfo == dt_util.UTC
+    assert start.hour == 22
+    price_local = price_utc.copy().to_local()
+    start = price_local.data[0]["start"]
+    assert start.tzinfo == dt_util.get_time_zone("Europe/Stockholm")
+    assert start.hour == 0
+
+    price = Raw([])
+    assert not price.is_valid()
+
 
 async def test_get_lowest_hours(hass, set_cet_timezone, freezer):
     """Test get_lowest_hours()"""
@@ -69,19 +85,31 @@ async def test_get_lowest_hours(hass, set_cet_timezone, freezer):
     freezer.move_to("2022-09-30T15:10:00+02:00")
     ready_hour: int = 8
     hours: int = 5
-    assert get_lowest_hours(ready_hour, raw_two_days, hours) == [27, 28, 29, 30, 31]
+    assert get_lowest_hours(get_ready_hour_utc(ready_hour), raw_two_days, hours) == [
+        27,
+        28,
+        29,
+        30,
+        31,
+    ]
     hours = 0
-    assert not get_lowest_hours(ready_hour, raw_two_days, hours)
+    assert not get_lowest_hours(get_ready_hour_utc(ready_hour), raw_two_days, hours)
 
     freezer.move_to("2022-09-30T15:10:00+02:00")
     ready_hour: int = 6
     hours: int = 5
-    assert get_lowest_hours(ready_hour, raw_two_days, hours) == [25, 26, 27, 28, 29]
+    assert get_lowest_hours(get_ready_hour_utc(ready_hour), raw_two_days, hours) == [
+        25,
+        26,
+        27,
+        28,
+        29,
+    ]
 
     freezer.move_to("2022-09-30T23:10:00+02:00")
     ready_hour: int = 6
     hours: int = 10
-    assert get_lowest_hours(ready_hour, raw_two_days, hours) == [
+    assert get_lowest_hours(get_ready_hour_utc(ready_hour), raw_two_days, hours) == [
         23,
         24,
         25,
@@ -102,10 +130,10 @@ async def test_get_charging_original(hass, set_cet_timezone, freezer):
     freezer.move_to("2022-09-30T15:10:00+02:00")
     lowest_hours = [27, 28, 29, 30, 31]
     result: list = get_charging_original(lowest_hours, raw_two_days)
-    assert result[26]["value"] == 0
-    assert result[27]["value"] != 0
-    assert result[31]["value"] != 0
-    assert result[32]["value"] == 0
+    assert result[26]["value"] is None
+    assert result[27]["value"] is not None
+    assert result[31]["value"] is not None
+    assert result[32]["value"] is None
     assert result[27]["start"] == datetime(
         2022, 10, 1, 3, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
@@ -187,7 +215,7 @@ async def test_scheduler(hass, set_cet_timezone, freezer):
         "ev_target_soc": 80,
         "min_soc": 0,
         "charging_pct_per_hour": 4,
-        "ready_hour": 7,
+        "ready_hour": get_ready_hour_utc(7),
         "switch_active": True,
         "max_price": 30,
     }

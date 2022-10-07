@@ -1,6 +1,4 @@
 """Test ev_smart_charging coordinator."""
-from unittest.mock import patch
-import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from homeassistant.core import HomeAssistant
@@ -22,14 +20,6 @@ from tests.helpers.helpers import (
 )
 from tests.price import PRICE_20220930, PRICE_20221001
 from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_MIN_SOC, MOCK_CONFIG_NO_TARGET_SOC
-
-# This fixture is used to prevent HomeAssistant from doing Service Calls.
-@pytest.fixture(name="skip_service_calls")
-def skip_service_calls_fixture():
-    """Skip service calls."""
-    with patch("homeassistant.core.ServiceRegistry.async_call"):
-        yield
-
 
 # pylint: disable=unused-argument
 async def test_coordinator(
