@@ -27,6 +27,7 @@ from .helpers.coordinator import (
     Raw,
     Scheduler,
     get_charging_value,
+    get_ready_hour_utc,
 )
 from .helpers.general import Validator, get_parameter
 from .sensor import EVSmartChargingSensor
@@ -59,14 +60,16 @@ class EVSmartChargingCoordinator:
 
         self.ev_soc = None
         self.ev_target_soc = None
-        self.raw_today = None
-        self.raw_tomorrow = None
+        self.raw_today_local = None
+        self.raw_tomorrow_local = None
         self.tomorrow_valid = False
 
         self.raw_two_days = None
         self._charging_schedule = None
         self.charging_pct_per_hour = get_parameter(self.config_entry, CONF_PCT_PER_HOUR)
-        self.ready_hour = int(get_parameter(self.config_entry, CONF_READY_HOUR)[0:2])
+        self.ready_hour_local = int(
+            get_parameter(self.config_entry, CONF_READY_HOUR)[0:2]
+        )
         self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE))
         self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC))
 
@@ -208,12 +211,16 @@ class EVSmartChargingCoordinator:
         price_state = self.hass.states.get(self.price_entity_id)
         if Validator.is_price_state(price_state):
             self.sensor.current_price = price_state.attributes["current_price"]
-            self.raw_today = Raw(price_state.attributes["raw_today"])
-            self.raw_tomorrow = Raw(price_state.attributes["raw_tomorrow"])
-            self.tomorrow_valid = self.raw_tomorrow.is_valid()
-            self.raw_two_days = self.raw_today.copy()
-            self.raw_two_days.extend(self.raw_tomorrow)
-            self.sensor.raw_two_days = self.raw_two_days.get_raw()
+            self.raw_today_local = Raw(price_state.attributes["raw_today"])
+            self.raw_tomorrow_local = Raw(price_state.attributes["raw_tomorrow"])
+            self.tomorrow_valid = self.raw_tomorrow_local.is_valid()
+            # Change to UTC time
+            self.raw_two_days = self.raw_today_local.copy().to_utc()
+            self.raw_two_days.extend(self.raw_tomorrow_local.copy().to_utc())
+            # Change to local time
+            self.sensor.raw_two_days_local = (
+                self.raw_two_days.copy().to_local().get_raw()
+            )
         else:
             _LOGGER.error("Price sensor not valid.")
 
@@ -239,7 +246,7 @@ class EVSmartChargingCoordinator:
             "ev_target_soc": self.ev_target_soc,
             "min_soc": self.number_min_soc,
             "charging_pct_per_hour": self.charging_pct_per_hour,
-            "ready_hour": self.ready_hour,
+            "ready_hour": get_ready_hour_utc(self.ready_hour_local),
             "switch_active": self.switch_active,
             "switch_apply_limit": self.switch_apply_limit,
             "max_price": self.max_price,
@@ -255,7 +262,9 @@ class EVSmartChargingCoordinator:
             new_charging = self.scheduler.get_schedule(scheduling_params)
             if new_charging is not None:
                 self._charging_schedule = new_charging
-                self.sensor.charging_schedule = self._charging_schedule
+                self.sensor.charging_schedule = (
+                    Raw(self._charging_schedule).copy().to_local().get_raw()
+                )
 
         _LOGGER.debug("self._max_price = %s", self.max_price)
         _LOGGER.debug("Current price = %s", self.sensor.current_price)

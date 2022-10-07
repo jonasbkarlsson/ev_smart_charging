@@ -335,37 +335,37 @@ PRICE_20220326 = [
         "end": datetime(2022, 3, 26, 17, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 233.7,
     },
-    {
+    {  # UTC 2022-03-26 16:00
         "start": datetime(2022, 3, 26, 17, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "end": datetime(2022, 3, 26, 18, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 322.5,
     },
-    {
+    {  # UTC 2022-03-26 17:00
         "start": datetime(2022, 3, 26, 18, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "end": datetime(2022, 3, 26, 19, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 289.67,
     },
-    {
+    {  # UTC 2022-03-26 18:00
         "start": datetime(2022, 3, 26, 19, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "end": datetime(2022, 3, 26, 20, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 121.58,
     },
-    {
+    {  # UTC 2022-03-26 19:00
         "start": datetime(2022, 3, 26, 20, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "end": datetime(2022, 3, 26, 21, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 89.57,
     },
-    {
+    {  # UTC 2022-03-26 20:00
         "start": datetime(2022, 3, 26, 21, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "end": datetime(2022, 3, 26, 22, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 76.63,
     },
-    {
+    {  # UTC 2022-03-26 21:00
         "start": datetime(2022, 3, 26, 22, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "end": datetime(2022, 3, 26, 23, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 54.27,
     },
-    {
+    {  # UTC 2022-03-26 22:00
         "start": datetime(2022, 3, 26, 23, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "end": datetime(2022, 3, 27, 0, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 49.64,
@@ -373,12 +373,12 @@ PRICE_20220326 = [
 ]
 
 PRICE_20220327 = [
-    {
+    {  # UTC 2022-03-26 23:00
         "start": datetime(2022, 3, 27, 0, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "end": datetime(2022, 3, 27, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 104.95,
     },
-    {
+    {  # UTC 2022-03-27 00:00
         "start": datetime(2022, 3, 27, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "end": datetime(2022, 3, 27, 2, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 99.74,
@@ -389,17 +389,17 @@ PRICE_20220327 = [
     #     "end": datetime(2022, 3, 27, 3, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
     #     "value": 93.42,
     # },
-    {
+    {  # UTC 2022-03-27 01:00
         "start": datetime(2022, 3, 27, 3, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "end": datetime(2022, 3, 27, 4, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 93.25,
     },
-    {
+    {  # UTC 2022-03-27 02:00
         "start": datetime(2022, 3, 27, 4, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "end": datetime(2022, 3, 27, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 96.9,
     },
-    {
+    {  # UTC 2022-03-27 03:00
         "start": datetime(2022, 3, 27, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "end": datetime(2022, 3, 27, 6, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         "value": 137.17,

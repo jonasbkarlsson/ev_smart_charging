@@ -59,8 +59,8 @@ async def test_sensor(hass, bypass_validate_input_sensors):
 
     one_list = [{"value": 1.0}]
 
-    sensor.raw_two_days = one_list
-    assert sensor.raw_two_days == one_list
+    sensor.raw_two_days_local = one_list
+    assert sensor.raw_two_days_local == one_list
 
     sensor.charging_schedule = one_list
     assert sensor.charging_schedule == one_list
