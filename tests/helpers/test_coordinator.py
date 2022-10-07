@@ -24,7 +24,7 @@ from tests.schedule import MOCK_SCHEDULE_20220930
 
 
 # pylint: disable=unused-argument
-async def test_raw(hass):
+async def test_raw(hass, set_cet_timezone):
     """Test Raw"""
 
     price = Raw(PRICE_20220930)
@@ -58,6 +58,21 @@ async def test_raw(hass):
     assert price.get_raw() == PRICE_20220930
     price.extend(price2)
     assert price.number_of_nonzero() == 48
+
+    start = price.data[0]["start"]
+    assert start.tzinfo == dt_util.get_time_zone("Europe/Stockholm")
+    assert start.hour == 0
+    price_utc = price.copy().to_utc()
+    start = price_utc.data[0]["start"]
+    assert start.tzinfo == dt_util.UTC
+    assert start.hour == 22
+    price_local = price_utc.copy().to_local()
+    start = price_local.data[0]["start"]
+    assert start.tzinfo == dt_util.get_time_zone("Europe/Stockholm")
+    assert start.hour == 0
+
+    price = Raw([])
+    assert not price.is_valid()
 
 
 async def test_get_lowest_hours(hass, set_cet_timezone, freezer):

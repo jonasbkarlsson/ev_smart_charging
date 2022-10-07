@@ -89,7 +89,7 @@ class Raw:
         return self
 
     def to_local(self):
-        """Change to UTC timezone"""
+        """Change to local timezone"""
         for item in self.data:
             item["start"] = dt.as_local(item["start"])
             item["end"] = dt.as_local(item["end"])
