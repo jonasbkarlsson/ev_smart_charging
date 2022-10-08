@@ -11,7 +11,7 @@
 
 The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration, and can automatically detect the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Integrations for other car makers and charger makers can be configured manually.
 
-The integration calculates the continous set of hours that will give the lowest price. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET and midnight). When the automatic charging has started, changes of settings will no have any effect. The automatic charging is stopped when the end time of the scheduled charging is reached, or when the target SOC is reached.
+The integration calculates the continous set of hours that will give the lowest price. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight). When the automatic charging has started, changes of settings will not have any effect. The automatic charging is stopped when the end time of the scheduled charging is reached, or when the target SOC is reached.
 
 ## Requirements
 - The [Nordpool](https://github.com/custom-components/nordpool) integration.
@@ -26,9 +26,9 @@ The integration calculates the continous set of hours that will give the lowest 
 ## Installation
 
 ### HACS
-1. In Home Assistant go to "HACS" -> "Integrations". Click on the three dots in the upper-right corner and select "Custom repositories". Paste [ev_smart_charging] into the Repository field. In "Category" select "Integration". Click on "ADD".
-2. In Home Assistant go to "HACS" -> "Integrations". Click on "+ Explore & Download Repositories" and search for "EV Smart Charging".
-3. In Home Assistant go to "Settings" -> "Devices & Services" -> "Integrations" click "+ Add integration" and search for "EV Smart Charging".
+1. In Home Assistant go to HACS -> Integrations. Click on the three dots in the upper-right corner and select "Custom repositories". Paste [ev_smart_charging] into the Repository field. In Category select Integration. Click on ADD.
+2. In Home Assistant go to HACS -> Integrations. Click on "+ Explore & Download Repositories" and search for "EV Smart Charging".
+3. In Home Assistant go to Settings -> Devices & Services -> Integrations. Click on "+ Add integration" and search for "EV Smart Charging".
 
 ### Manual
 
@@ -38,7 +38,7 @@ The integration calculates the continous set of hours that will give the lowest 
 4. Download _all_ the files from the `custom_components/ev_smart_charging/` directory (folder) in this repository.
 5. Place the files you downloaded in the new directory (folder) you created.
 6. Restart Home Assistant.
-7. In Home Assistant go to "Settings" -> "Devices & Services" -> "Integrations" click "+ Add integration" and search for "EV Smart Charging".
+7. In Home Assistant go to Settings -> Devices & Services -> Integrations. Click on "+ Add integration" and search for "EV Smart Charging".
 
 ## Configuration
 
@@ -52,7 +52,7 @@ EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 a
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control switch entity | No | If provided, the integration will set the state of this entity to 'on' and 'off'.
 
-The second form contain parameters that affects how the charging will be done. These parameters can be changed after intial configuration in "Settings" -> "Devices & Services" -> "Integrations".
+The second form contain parameters that affects how the charging will be done. These parameters can be changed after intial configuration in Settings -> Devices & Services -> Integrations.
 Parameter | Required | Description
 -- | -- | --
 Percent per hour | Yes | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you!
