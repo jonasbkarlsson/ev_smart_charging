@@ -9,26 +9,37 @@
 
 ![Icon](assets/icon.png)
 
-The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration, and can automatically detect the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Integrations for other car makers and charger makers can be used with manual configurations.
+The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration.
 
-The integration calculates the continous set of hours that will give the lowest price. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET and midnight). When the automatic charging has started, changes of settings will no have any effect. The automatic charging is stopped when the end time of the scheduled charging is reached, or when the target SOC is reached.
+The integration calculates the continous set of hours that will give the lowest price. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight). When the automatic charging has started, changes of settings will not have any effect. The automatic charging is stopped when the end time of the scheduled charging is reached, or when the target SOC is reached.
+
+## Requirements
+- The [Nordpool](https://github.com/custom-components/nordpool) integration.
+- Home Assistant version 20xx.y or newer.
+
+## Features
+- Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) integration.
+- Configuraton of the latest time tomorrow for the charging to be completed.
+- Optional setting of minimum SOC level that should be reached each night indepently of the electrity price.
+- Optional setting to only charge when the electricty price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
+- Automatically detects and connects to the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Connnections to other EV and charger integrations can be configured manually.
 
 ## Installation
 
 ### HACS
-1. In Home Assistant go to "HACS" -> "Integrations". Click on the three dots in the upper-right corner and select "Custom repositories". Paste [ev_smart_charging] into the Repository field. In "Category" select "Integration". Click on "ADD".
-2. In Home Assistant go to "HACS" -> "Integrations". Click on "+ Explore & Download Repositories" and search for "EV Smart Charging".
-3. In Home Assistant go to "Settings" -> "Devices & Services" -> "Integrations" click "+ Add integration" and search for "EV Smart Charging".
+1. In Home Assistant go to HACS -> Integrations. Click on the three dots in the upper-right corner and select "Custom repositories". Paste the URL  [ev_smart_charging] into the Repository field. In Category select Integration. Click on ADD.
+2. In Home Assistant go to HACS -> Integrations. Click on "+ Explore & Download Repositories" and search for "EV Smart Charging".
+3. In Home Assistant go to Settings -> Devices & Services -> Integrations. Click on "+ Add integration" and search for "EV Smart Charging".
 
 ### Manual
 
-1. Using the tool of choice open the directory (folder) for your Home Assistant configuration (where you find `configuration.yaml`).
-2. If you do not have a `custom_components` directory (folder) there, you need to create it.
-3. In the `custom_components` directory (folder) create a new folder called `ev_smart_charging`.
-4. Download _all_ the files from the `custom_components/ev_smart_charging/` directory (folder) in this repository.
-5. Place the files you downloaded in the new directory (folder) you created.
+1. Using the tool of choice open the folder for your Home Assistant configuration (where you find `configuration.yaml`).
+2. If you do not have a `custom_components` folder there, you need to create it.
+3. In the `custom_components` folder create a new folder called `ev_smart_charging`.
+4. Download _all_ the files from the `custom_components/ev_smart_charging/` folder in this repository.
+5. Place the files you downloaded in the new folder you created.
 6. Restart Home Assistant.
-7. In Home Assistant go to "Settings" -> "Devices & Services" -> "Integrations" click "+ Add integration" and search for "EV Smart Charging".
+7. In Home Assistant go to Settings -> Devices & Services -> Integrations. Click on "+ Add integration" and search for "EV Smart Charging".
 
 ## Configuration
 
@@ -40,29 +51,29 @@ Parameter | Required | Description
 Electricity price entity | Yes | The Nordpool integration sensor entity.
 EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
-Charger control switch entity | No | If provided, the integration will set the state of this entity to 'on' and 'off'.
+Charger control switch entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'.
 
-The second form contain parameters that affects how the charging will be done. These parameters can be changed after intial configuration in "Settings" -> "Devices & Services" -> "Integrations".
+The second form contains parameters that affects how the charging will be performed. These parameters can be changed after intial configuration in Settings -> Devices & Services -> Integrations.
 Parameter | Required | Description
 -- | -- | --
-Percent per hour | Yes | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you!
-Typical departure time | Yes | The lastest time tomorrow for the charging to reach the target State-of-Charge. Note, the idea is to set this to a time that is reasonable in most cases, and not to updated this every day.
-Electricity price limit | Yes | If non-zero value is provided, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge.
+Charging speed | Yes | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you!
+Charge completion time | Yes | The lastest time tomorrow for the charging to reach the target State-of-Charge. Note, the idea is to set this to a time that is reasonable in most cases, and not to updated this every day.
+Electricity price limit | Yes | If the `apply_price_limit` switch is activated, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge. Also if the price limit is set to zero, there will be no limitations.
 Minimum EV SOC | Yes | The minimum State-of-Charge that should be charged, independently of the electricity price.
 
 ## Entities
 
 Entity | Type | Description
 -- | -- | --
-`sensor.ev_smart_charging_charging` | Sensor | State "on" or "off". Can be used with automations to control the EV charger.
+`sensor.ev_smart_charging_charging` | Sensor | The state is "on" or "off". Can be used with automations to control the EV charger.
 `switch.ev_smart_charging_smart_charging_activated` | Switch | Turns the EV Smart Charging integration on and off.
 `switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit, if set to a non-zero value in the configuration form.
-`button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. Is totally independent of the automatic charging.
-`button.ev_smart_charging_manually_stop_charging` | Button | Manually stop charging. Is totally independent of the automatic charging.
+`button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. This is totally independent of the automatic charging.
+`button.ev_smart_charging_manually_stop_charging` | Button | Manually stop charging. This is totally independent of the automatic charging.
 
 ## Lovelace UI
 
-[ApexCharts Card](https://github.com/RomRider/apexcharts-card) can be used to create the follow type of graph.
+[ApexCharts Card](https://github.com/RomRider/apexcharts-card) can be used to create the follow type of graph. The black line shows when the automatic charging will be done.
 
 ![Chart](assets/ev_smart_charging_lovelace.png)
 ```
@@ -129,7 +140,7 @@ cards:
           return entity.attributes.charging_schedule.map((entry) => { return
           [new Date(entry.start), entry.value]; });
         type: area
-        color: green
+        color: black
         show:
           in_header: false
         extend_to: false
@@ -157,6 +168,59 @@ cards:
     unit: '%'
 ```
 Depending on the price unit used, modify the settings for `unit`, `float_precision` and `value`.
+
+## Integrating with EVs
+
+### EV SOC entity
+A lot the functionality in this integration relies on knowing the EV SOC. However, if this information is not available, then it is still possible to use this integration to control a charger with very basic functionality. In this case, create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`), and then use this entity when configuring the integration.
+
+For example, if the SOC entity is set 60, the Target SOC entity is set to 100 (or not configured) and the `Charging speed` parameter is set to 10, then there will be 4 hours of charging each night, (100-60)/10 = 4.
+
+### EV Target SOC entity
+If you don't have an integration that provides an entity for the EV Target SOC, one can create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "Target SOC" that typically will create an entity `input_number.target_soc`), and then use this entity when configuring the integration.
+
+## Integrating with chargers
+If your charger's integration does not provide a swicth entity that this integration can use for control, then the connection between this integration and your charger's integration can in many cases be made with automations.
+
+### Example of automation to start charging
+```
+alias: EV Smart Charging - Start
+description: ""
+mode: single
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.ev_smart_charging_charging
+    from: "off"
+    to: "on"
+condition: []
+action:
+  - service: easee.start
+    data:
+      charger_id: "EH123456"
+```
+
+Please replace the contents of `action:` with suitable contents for your charger.
+
+### Example of automation to stop charging
+```
+alias: EV Smart Charging - Stop
+description: ""
+mode: single
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.ev_smart_charging_charging
+    from: "on"
+    to: "off"
+condition: []
+action:
+  - service: easee.stop
+    data:
+      charger_id: "EH123456"
+```
+
+Please replace the contents of `action:` with suitable contents for your charger.
 
 [ev_smart_charging]: https://github.com/jonasbkarlsson/ev_smart_charging
 [releases-shield]: https://img.shields.io/github/v/release/jonasbkarlsson/ev_smart_charging?style=for-the-badge
