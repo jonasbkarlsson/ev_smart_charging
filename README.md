@@ -73,7 +73,7 @@ Entity | Type | Description
 
 ## Lovelace UI
 
-[ApexCharts Card](https://github.com/RomRider/apexcharts-card) can be used to create the follow type of graph.
+[ApexCharts Card](https://github.com/RomRider/apexcharts-card) can be used to create the follow type of graph. The black line shows when the automatic charging will be done.
 
 ![Chart](assets/ev_smart_charging_lovelace.png)
 ```
