@@ -9,13 +9,19 @@
 
 ![Icon](assets/icon.png)
 
-The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration, and can automatically detect the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Integrations for other car makers and charger makers can be used with manual configurations.
+The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration, and can automatically detect the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Integrations for other car makers and charger makers can be configured manually.
 
 The integration calculates the continous set of hours that will give the lowest price. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET and midnight). When the automatic charging has started, changes of settings will no have any effect. The automatic charging is stopped when the end time of the scheduled charging is reached, or when the target SOC is reached.
 
 ## Requirements
-- The [Nordpool](https://github.com/custom-components/nordpool) integration
-- Home Assistant version 20xx.y or newer
+- The [Nordpool](https://github.com/custom-components/nordpool) integration.
+- Home Assistant version 20xx.y or newer.
+
+## Features
+- Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) integration.
+- Configuraton of the latest time tomorrow for the charging to be completed.
+- Optional setting of minimum SOC level that should be reached each night indepently of the electrity price.
+- Optional setting to only charge when the electricty price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
 
 ## Installation
 
