@@ -9,7 +9,7 @@
 
 ![Icon](assets/icon.png)
 
-The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration, and can automatically detect the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Integrations for other car makers and charger makers can be configured manually.
+The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration.
 
 The integration calculates the continous set of hours that will give the lowest price. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight). When the automatic charging has started, changes of settings will not have any effect. The automatic charging is stopped when the end time of the scheduled charging is reached, or when the target SOC is reached.
 
@@ -22,6 +22,7 @@ The integration calculates the continous set of hours that will give the lowest 
 - Configuraton of the latest time tomorrow for the charging to be completed.
 - Optional setting of minimum SOC level that should be reached each night indepently of the electrity price.
 - Optional setting to only charge when the electricty price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
+- Automatically detects and connects to the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Connnections to other integrations can be configured manually.
 
 ## Installation
 
