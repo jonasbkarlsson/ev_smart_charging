@@ -79,6 +79,9 @@ class FlowValidator:
         if len(user_input[CONF_EV_TARGET_SOC_SENSOR]) > 0:
             entity = hass.states.get(user_input[CONF_EV_TARGET_SOC_SENSOR])
             if entity is None:
+                # Work around for https://github.com/home-assistant/core/issues/30381
+                # It's not possible for the user to input an emtpy string on the second attempt
+                user_input[CONF_EV_TARGET_SOC_SENSOR] = ""
                 return ("base", "ev_target_soc_not_found")
             if not Validator.is_float(entity.state):
                 _LOGGER.debug("EV Target SOC state is not float")
@@ -93,6 +96,9 @@ class FlowValidator:
         if len(user_input[CONF_CHARGER_ENTITY]) > 0:
             entity = hass.states.get(user_input[CONF_CHARGER_ENTITY])
             if entity is None:
+                # Work around for https://github.com/home-assistant/core/issues/30381
+                # It's not possible for the user to input an emtpy string on the second attempt
+                user_input[CONF_CHARGER_ENTITY] = ""
                 return ("base", "charger_control_switch_not_found")
             entry: RegistryEntry = entities.get(user_input[CONF_CHARGER_ENTITY])
             if entry.domain != SWITCH:
