@@ -26,17 +26,17 @@ The integration calculates the continous set of hours that will give the lowest 
 ## Installation
 
 ### HACS
-1. In Home Assistant go to HACS -> Integrations. Click on the three dots in the upper-right corner and select "Custom repositories". Paste [ev_smart_charging] into the Repository field. In Category select Integration. Click on ADD.
+1. In Home Assistant go to HACS -> Integrations. Click on the three dots in the upper-right corner and select "Custom repositories". Paste the URL  [ev_smart_charging] into the Repository field. In Category select Integration. Click on ADD.
 2. In Home Assistant go to HACS -> Integrations. Click on "+ Explore & Download Repositories" and search for "EV Smart Charging".
 3. In Home Assistant go to Settings -> Devices & Services -> Integrations. Click on "+ Add integration" and search for "EV Smart Charging".
 
 ### Manual
 
-1. Using the tool of choice open the directory (folder) for your Home Assistant configuration (where you find `configuration.yaml`).
-2. If you do not have a `custom_components` directory (folder) there, you need to create it.
-3. In the `custom_components` directory (folder) create a new folder called `ev_smart_charging`.
-4. Download _all_ the files from the `custom_components/ev_smart_charging/` directory (folder) in this repository.
-5. Place the files you downloaded in the new directory (folder) you created.
+1. Using the tool of choice open the folder for your Home Assistant configuration (where you find `configuration.yaml`).
+2. If you do not have a `custom_components` folder there, you need to create it.
+3. In the `custom_components` folder create a new folder called `ev_smart_charging`.
+4. Download _all_ the files from the `custom_components/ev_smart_charging/` folder in this repository.
+5. Place the files you downloaded in the new folder you created.
 6. Restart Home Assistant.
 7. In Home Assistant go to Settings -> Devices & Services -> Integrations. Click on "+ Add integration" and search for "EV Smart Charging".
 
