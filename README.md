@@ -57,18 +57,18 @@ Parameter | Required | Description
 -- | -- | --
 Charging speed | Yes | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you!
 Charge completion time | Yes | The lastest time tomorrow for the charging to reach the target State-of-Charge. Note, the idea is to set this to a time that is reasonable in most cases, and not to updated this every day.
-Electricity price limit | Yes | If non-zero value is provided, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge.
+Electricity price limit | Yes | If the `apply_price_limit` switch is activated, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge. Also if the price limit is set to zero, there will be no limitaions.
 Minimum EV SOC | Yes | The minimum State-of-Charge that should be charged, independently of the electricity price.
 
 ## Entities
 
 Entity | Type | Description
 -- | -- | --
-`sensor.ev_smart_charging_charging` | Sensor | State "on" or "off". Can be used with automations to control the EV charger.
+`sensor.ev_smart_charging_charging` | Sensor | The state is "on" or "off". Can be used with automations to control the EV charger.
 `switch.ev_smart_charging_smart_charging_activated` | Switch | Turns the EV Smart Charging integration on and off.
 `switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit, if set to a non-zero value in the configuration form.
-`button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. Is totally independent of the automatic charging.
-`button.ev_smart_charging_manually_stop_charging` | Button | Manually stop charging. Is totally independent of the automatic charging.
+`button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. This is totally independent of the automatic charging.
+`button.ev_smart_charging_manually_stop_charging` | Button | Manually stop charging. This is totally independent of the automatic charging.
 
 ## Lovelace UI
 
@@ -171,13 +171,15 @@ Depending on the price unit used, modify the settings for `unit`, `float_precisi
 ## Integrating with EVs
 
 ### EV SOC entity
-A lot the functionality in this integration relies on knowing the EV SOC. However, if this information is not available, then it is still possible to use this integration to control a charger with very basic functionality. In this case, create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`), and then use this entity when configuring this integration.
+A lot the functionality in this integration relies on knowing the EV SOC. However, if this information is not available, then it is still possible to use this integration to control a charger with very basic functionality. In this case, create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`), and then use this entity when configuring the integration.
+
+For example, if the SOC entity is set 60, the Target SOC entity is set to 100 (or not configured) and the `Charging speed` parameter is set to 10, then there will be 4 hours of charging each night, (100-60)/10 = 4.
 
 ### EV Target SOC entity
-If you don't have an integration that provides an entity for the EV Target SOC, one can create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "Target SOC" that typically will create an entity `input_number.target_soc`), and then use this entity when configuring this integration.
+If you don't have an integration that provides an entity for the EV Target SOC, one can create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "Target SOC" that typically will create an entity `input_number.target_soc`), and then use this entity when configuring the integration.
 
 ## Integrating with chargers
-If your charger integration does not provide a swicth entity that this integration can use for control, then the connection between this integration and your charger integration can in many cases be made with automations.
+If your charger's integration does not provide a swicth entity that this integration can use for control, then the connection between this integration and your charger's integration can in many cases be made with automations.
 
 ### Example of automation to start charging
 ```
