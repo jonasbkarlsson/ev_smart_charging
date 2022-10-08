@@ -50,13 +50,13 @@ Parameter | Required | Description
 Electricity price entity | Yes | The Nordpool integration sensor entity.
 EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
-Charger control switch entity | No | If provided, the integration will set the state of this entity to 'on' and 'off'.
+Charger control switch entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'.
 
-The second form contain parameters that affects how the charging will be done. These parameters can be changed after intial configuration in Settings -> Devices & Services -> Integrations.
+The second form contains parameters that affects how the charging will be performed. These parameters can be changed after intial configuration in Settings -> Devices & Services -> Integrations.
 Parameter | Required | Description
 -- | -- | --
-Percent per hour | Yes | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you!
-Typical departure time | Yes | The lastest time tomorrow for the charging to reach the target State-of-Charge. Note, the idea is to set this to a time that is reasonable in most cases, and not to updated this every day.
+Charging speed | Yes | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you!
+Charge completion time | Yes | The lastest time tomorrow for the charging to reach the target State-of-Charge. Note, the idea is to set this to a time that is reasonable in most cases, and not to updated this every day.
 Electricity price limit | Yes | If non-zero value is provided, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge.
 Minimum EV SOC | Yes | The minimum State-of-Charge that should be charged, independently of the electricity price.
 
