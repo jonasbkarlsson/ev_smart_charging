@@ -13,6 +13,10 @@ The EV Smart Charging integration will automatically charge the electric vehicle
 
 The integration calculates the continous set of hours that will give the lowest price. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET and midnight). When the automatic charging has started, changes of settings will no have any effect. The automatic charging is stopped when the end time of the scheduled charging is reached, or when the target SOC is reached.
 
+## Requirements
+- The [Nordpool](https://github.com/custom-components/nordpool) integration
+- Home Assistant version 20xx.y or newer
+
 ## Installation
 
 ### HACS
@@ -129,7 +133,7 @@ cards:
           return entity.attributes.charging_schedule.map((entry) => { return
           [new Date(entry.start), entry.value]; });
         type: area
-        color: green
+        color: black
         show:
           in_header: false
         extend_to: false
@@ -157,6 +161,57 @@ cards:
     unit: '%'
 ```
 Depending on the price unit used, modify the settings for `unit`, `float_precision` and `value`.
+
+## Integrating with EVs
+
+### EV SOC entity
+A lot the functionality in this integration relies on knowing the EV SOC. However, if this information is not available, then it is still possible to use this integration to control a charger with very basic functionality. In this case, create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`), and then use this entity when configuring this integration.
+
+### EV Target SOC entity
+If you don't have an integration that provides an entity for the EV Target SOC, one can create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "Target SOC" that typically will create an entity `input_number.target_soc`), and then use this entity when configuring this integration.
+
+## Integrating with chargers
+If your charger integration does not provide a swicth entity that this integration can use for control, then the connection between this integration and your charger integration can in many cases be made with automations.
+
+### Example of automation to start charging
+```
+alias: EV Smart Charging - Start
+description: ""
+mode: single
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.ev_smart_charging_charging
+    from: "off"
+    to: "on"
+condition: []
+action:
+  - service: easee.start
+    data:
+      charger_id: "EH123456"
+```
+
+Please replace the contents of `action:` with suitable contents for your charger.
+
+### Example of automation to stop charging
+```
+alias: EV Smart Charging - Stop
+description: ""
+mode: single
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.ev_smart_charging_charging
+    from: "on"
+    to: "off"
+condition: []
+action:
+  - service: easee.stop
+    data:
+      charger_id: "EH123456"
+```
+
+Please replace the contents of `action:` with suitable contents for your charger.
 
 [ev_smart_charging]: https://github.com/jonasbkarlsson/ev_smart_charging
 [releases-shield]: https://img.shields.io/github/v/release/jonasbkarlsson/ev_smart_charging?style=for-the-badge
