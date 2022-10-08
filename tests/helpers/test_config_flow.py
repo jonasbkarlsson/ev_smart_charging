@@ -1,5 +1,6 @@
 """Test ev_smart_charging/helpers/config_flow.py"""
 
+from copy import deepcopy
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import async_get as async_device_registry_get
 from homeassistant.helpers.device_registry import DeviceRegistry
@@ -165,7 +166,7 @@ async def test_validate_step_user_soc(hass: HomeAssistant):
         "sensor.volkswagen_we_connect_id_state_of_charge",
         "55",
     )
-    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) == (
+    assert FlowValidator.validate_step_user(hass, deepcopy(MOCK_CONFIG_USER)) == (
         "base",
         "ev_target_soc_not_found",
     )
@@ -181,7 +182,7 @@ async def test_validate_step_user_target_soc(hass: HomeAssistant):
     MockSOCEntity.create(hass, entity_registry)
 
     # Check with no target soc entity
-    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) == (
+    assert FlowValidator.validate_step_user(hass, deepcopy(MOCK_CONFIG_USER)) == (
         "base",
         "ev_target_soc_not_found",
     )
@@ -229,7 +230,7 @@ async def test_validate_step_user_target_soc(hass: HomeAssistant):
         "sensor.volkswagen_we_connect_id_target_state_of_charge",
         "55",
     )
-    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) == (
+    assert FlowValidator.validate_step_user(hass, deepcopy(MOCK_CONFIG_USER)) == (
         "base",
         "charger_control_switch_not_found",
     )
@@ -246,7 +247,7 @@ async def test_validate_step_user_charger(hass: HomeAssistant):
     MockTargetSOCEntity.create(hass, entity_registry)
 
     assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER_NO_CHARGER) is None
-    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) == (
+    assert FlowValidator.validate_step_user(hass, deepcopy(MOCK_CONFIG_USER)) == (
         "base",
         "charger_control_switch_not_found",
     )

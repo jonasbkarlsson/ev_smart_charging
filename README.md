@@ -15,7 +15,7 @@ The integration calculates the continous set of hours that will give the lowest 
 
 ## Requirements
 - The [Nordpool](https://github.com/custom-components/nordpool) integration.
-- Home Assistant version 20xx.y or newer.
+- Home Assistant version 2022.7 or newer.
 
 ## Features
 - Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) integration.
