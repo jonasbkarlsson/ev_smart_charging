@@ -172,12 +172,36 @@ Depending on the price unit used, modify the settings for `unit`, `float_precisi
 ## Integrating with EVs
 
 ### EV SOC entity
+If the EV SOC is not available as the state of an entity but as a state attribute, e.g. a sensor called `sensor.my_ev` with an attribute `EV SOC`, then it can be configured to be used by the following three steps.
+1. Creating a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`)
+2. Creating an automation that sets the value of this Number Helper with the value of the state attribute.
+3. Use the Helper entity `input_number.soc` when providing the `EV SOC entity` in the configuration of this integration.
+```
+alias: EV SOC
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.my_ev
+    attribute: EV SOC
+condition: []
+action:
+  - service: input_number.set_value
+    data:
+      value: "{{ state_attr('sensor.my_ev', 'EV SOC') }}"
+    target:
+      entity_id: input_number.soc
+mode: single
+```
+
 A lot the functionality in this integration relies on knowing the EV SOC. However, if this information is not available, then it is still possible to use this integration to control a charger with very basic functionality. In this case, create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`), and then use this entity when configuring the integration.
 
 For example, if the SOC entity is set 60, the Target SOC entity is set to 100 (or not configured) and the `Charging speed` parameter is set to 10, then there will be 4 hours of charging each night, (100-60)/10 = 4.
 
 ### EV Target SOC entity
-If you don't have an integration that provides an entity for the EV Target SOC, one can create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "Target SOC" that typically will create an entity `input_number.target_soc`), and then use this entity when configuring the integration.
+If the EV Target SOC is available as a state attribute, then a similar solution as for EV SOC above can be used.
+
+If there is no integration that provides the EV Target SOC, one can create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "Target SOC" that typically will create an entity `input_number.target_soc`), and then use this entity when configuring the integration.
 
 ## Integrating with chargers
 If your charger's integration does not provide a swicth entity that this integration can use for control, then the connection between this integration and your charger's integration can in many cases be made with automations.
