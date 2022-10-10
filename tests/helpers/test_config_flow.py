@@ -200,9 +200,9 @@ async def test_validate_step_user_target_soc(hass: HomeAssistant):
         "sensor.volkswagen_we_connect_id_target_state_of_charge",
         "abc",
     )
-    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) == (
+    assert FlowValidator.validate_step_user(hass, deepcopy(MOCK_CONFIG_USER)) == (
         "base",
-        "ev_soc_target_invalid_data",
+        "ev_target_soc_invalid_data",
     )
 
     # Check with out-of-range float target soc entity
@@ -210,9 +210,9 @@ async def test_validate_step_user_target_soc(hass: HomeAssistant):
         "sensor.volkswagen_we_connect_id_target_state_of_charge",
         "100.1",
     )
-    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) == (
+    assert FlowValidator.validate_step_user(hass, deepcopy(MOCK_CONFIG_USER)) == (
         "base",
-        "ev_soc_target_invalid_data",
+        "ev_target_soc_invalid_data",
     )
 
     # Check with out-of-range float target soc entity
@@ -220,9 +220,9 @@ async def test_validate_step_user_target_soc(hass: HomeAssistant):
         "sensor.volkswagen_we_connect_id_target_state_of_charge",
         "-0.1",
     )
-    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) == (
+    assert FlowValidator.validate_step_user(hass, deepcopy(MOCK_CONFIG_USER)) == (
         "base",
-        "ev_soc_target_invalid_data",
+        "ev_target_soc_invalid_data",
     )
 
     # Check with correct target soc entity
@@ -263,7 +263,9 @@ async def test_validate_step_user_charger(hass: HomeAssistant):
         "button.ocpp_charge_control",
         "55",
     )
-    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER_WRONG_CHARGER) == (
+    assert FlowValidator.validate_step_user(
+        hass, deepcopy(MOCK_CONFIG_USER_WRONG_CHARGER)
+    ) == (
         "base",
         "charger_control_switch_not_switch",
     )
