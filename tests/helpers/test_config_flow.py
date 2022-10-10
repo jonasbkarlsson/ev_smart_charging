@@ -173,7 +173,7 @@ async def test_validate_step_user_soc(hass: HomeAssistant):
 
 
 async def test_validate_step_user_target_soc(hass: HomeAssistant):
-    """Test the soc entities in test_validate_step_user."""
+    """Test the target soc entities in test_validate_step_user."""
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
 
