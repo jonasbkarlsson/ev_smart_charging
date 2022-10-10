@@ -85,10 +85,12 @@ class FlowValidator:
                 return ("base", "ev_target_soc_not_found")
             if not Validator.is_float(entity.state):
                 _LOGGER.debug("EV Target SOC state is not float")
-                return ("base", "ev_soc_target_invalid_data")
+                user_input[CONF_EV_TARGET_SOC_SENSOR] = ""
+                return ("base", "ev_target_soc_invalid_data")
             if not 0.0 <= float(entity.state) <= 100.0:
                 _LOGGER.debug("EV Target SOC state is between 0 and 100")
-                return ("base", "ev_soc_target_invalid_data")
+                user_input[CONF_EV_TARGET_SOC_SENSOR] = ""
+                return ("base", "ev_target_soc_invalid_data")
 
         # Validate Charger control switch entity
         # If the set value is only whitespaces, the value will be set to ""
@@ -101,7 +103,11 @@ class FlowValidator:
                 user_input[CONF_CHARGER_ENTITY] = ""
                 return ("base", "charger_control_switch_not_found")
             entry: RegistryEntry = entities.get(user_input[CONF_CHARGER_ENTITY])
+            if entry is None:
+                user_input[CONF_CHARGER_ENTITY] = ""
+                return ("base", "charger_control_switch_not_found")
             if entry.domain != SWITCH:
+                user_input[CONF_CHARGER_ENTITY] = ""
                 return ("base", "charger_control_switch_not_switch")
 
         return None
