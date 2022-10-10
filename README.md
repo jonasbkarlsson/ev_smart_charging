@@ -172,9 +172,9 @@ Depending on the price unit used, modify the settings for `unit`, `float_precisi
 ## Integrating with EVs
 
 ### EV SOC entity
-If the EV SOC is not available as the state of an entity but as a state attribute, e.g. a sensor called `sensor.my_ev` with an attribute `EV SOC`, then it can be configured to be used by
+If the EV SOC is not available as the state of an entity but as a state attribute, e.g. a sensor called `sensor.my_ev` with an attribute `EV SOC`, then it can be configured to be used by the following two steps.
 1. Creating a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`)
-2. Create an automation that sets the value of this Number Helper with the value of the state attribute.
+2. Creating an automation that sets the value of this Number Helper with the value of the state attribute.
 ```
 alias: EV SOC
 description: ""
