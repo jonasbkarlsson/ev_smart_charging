@@ -45,9 +45,9 @@ class FlowValidator:
 
         # Validate Price entity
         price_state = hass.states.get(user_input[CONF_PRICE_SENSOR])
-        if price_state is None:
-            return ("base", "price_not_found")
         entry: RegistryEntry = entities.get(user_input[CONF_PRICE_SENSOR])
+        if price_state is None or entry is None:
+            return ("base", "price_not_found")
         if entry.domain != SENSOR:
             return ("base", "price_not_sensor")
         if not "current_price" in price_state.attributes.keys():
@@ -97,13 +97,10 @@ class FlowValidator:
         user_input[CONF_CHARGER_ENTITY] = user_input[CONF_CHARGER_ENTITY].strip()
         if len(user_input[CONF_CHARGER_ENTITY]) > 0:
             entity = hass.states.get(user_input[CONF_CHARGER_ENTITY])
-            if entity is None:
+            entry: RegistryEntry = entities.get(user_input[CONF_CHARGER_ENTITY])
+            if entity is None or entry is None:
                 # Work around for https://github.com/home-assistant/core/issues/30381
                 # It's not possible for the user to input an emtpy string on the second attempt
-                user_input[CONF_CHARGER_ENTITY] = ""
-                return ("base", "charger_control_switch_not_found")
-            entry: RegistryEntry = entities.get(user_input[CONF_CHARGER_ENTITY])
-            if entry is None:
                 user_input[CONF_CHARGER_ENTITY] = ""
                 return ("base", "charger_control_switch_not_found")
             if entry.domain != SWITCH:
