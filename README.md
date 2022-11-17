@@ -75,6 +75,27 @@ Entity | Type | Description
 
 [ApexCharts Card](https://github.com/RomRider/apexcharts-card) can be used to create the follow type of graph. The black line shows when the automatic charging will be done.
 
+Depending on the price unit used, modify the settings for `unit`, `float_precision` and `color_threshold`. For example, if the price unit `SEK/kWh` is used, change the follow lines in the example below.
+```
+        unit: ' SEK/kWh'
+
+        float_precision: 2
+
+        color_threshold:
+          - value: -1
+            color: cyan
+          - value: 0
+            color: green
+          - value: 0.4
+            color: orange
+          - value: 1
+            color: red
+          - value: 2
+            color: magenta
+          - value: 5
+            color: black
+```
+
 ![Chart](assets/ev_smart_charging_lovelace.png)
 ```
 type: vertical-stack
@@ -167,7 +188,6 @@ cards:
     icon: mdi:battery-70
     unit: '%'
 ```
-Depending on the price unit used, modify the settings for `unit`, `float_precision` and `value`.
 
 ## Integrating with EVs
 
