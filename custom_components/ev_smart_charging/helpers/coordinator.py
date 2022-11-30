@@ -269,7 +269,7 @@ class Scheduler:
         """Return true if base schedule exists"""
         return len(self.schedule_base) > 0
 
-    def get_schedule(self, params: dict[str, Any]) -> list | None:
+    def get_schedule(self, params: dict[str, Any]) -> list:
         """Get the schedule"""
 
         if "switch_active" not in params or "switch_apply_limit" not in params:
