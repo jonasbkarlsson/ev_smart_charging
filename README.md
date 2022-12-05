@@ -78,8 +78,8 @@ The sensor `sensor.ev_smart_charging_charging` has the following attributes.
 Attribute | Description
 -- | --
 `Current price` | The current price from the electricity price entity.
-`EV SOC` | The current SOC of the electric vehicule.
-`EV target SOC` | The current target SOC of the electric vehicule.
+`EV SOC` | The current SOC of the electric vehicle.
+`EV target SOC` | The current target SOC of the electric vehicle.
 `Charging is planned` | `true` if charging is planned, otherwise `false`. Is set to `false` after charging is completed.
 `Charging start time` | If charging is planned, the date and time when the charging will start.
 `Charging stop time` | If charging is planned, the date and time when the charging will stop.
