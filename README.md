@@ -71,6 +71,22 @@ Entity | Type | Description
 `button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. This is totally independent of the automatic charging.
 `button.ev_smart_charging_manually_stop_charging` | Button | Manually stop charging. This is totally independent of the automatic charging.
 
+## Sensor attributes
+
+The sensor `sensor.ev_smart_charging_charging` has the following attributes.
+
+Attribute | Description
+-- | --
+`Current price` | The current price from the electricity price entity.
+`EV SOC` | The current SOC of the electric vehicle, as reported by the EV SOC entity.
+`EV target SOC` | The target SOC of the electric vehicle, as reported by the EV target SOC entity.
+`Charging is planned` | `true` if charging is planned, otherwise `false`. Is set to `false` after charging is completed.
+`Charging start time` | If charging is planned, the date and time when the charging will start.
+`Charging stop time` | If charging is planned, the date and time when the charging will stop.
+`Charging number of hours` | If charging is planned, the number of hours that charging will be done. This might be less than the number of hours between the start and stop times, if the `apply_price_limit` switch is activated.
+`Raw two days` | The electricty price today and tomorrow from the electricity price entity.
+`Charging schedule` | The calculated charging schedule. Can be used by an ApexCharts card to visulize the planned charging, see below.
+
 ## Lovelace UI
 
 [ApexCharts Card](https://github.com/RomRider/apexcharts-card) can be used to create the follow type of graph. The black line shows when the automatic charging will be done.

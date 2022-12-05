@@ -233,19 +233,22 @@ async def test_scheduler(hass, set_cet_timezone, freezer):
 
     scheduling_params.update({"value_in_graph": 300})
 
-    new_charging: list = scheduler.get_schedule(scheduling_params)
+    scheduler.calc_schedule(scheduling_params)
+    new_charging: list = scheduler.get_schedule()
     assert not new_charging
 
     scheduling_params.update({"switch_apply_limit": True})
 
-    new_charging: list = scheduler.get_schedule(scheduling_params)
+    scheduler.calc_schedule(scheduling_params)
+    new_charging: list = scheduler.get_schedule()
     assert new_charging
     assert new_charging[26]["value"] == 0
     assert new_charging[27]["value"] == 300
 
     scheduling_params.update({"min_soc": 80})
     scheduler.create_base_schedule(scheduling_params, raw_two_days)
-    new_charging: list = scheduler.get_schedule(scheduling_params)
+    scheduler.calc_schedule(scheduling_params)
+    new_charging: list = scheduler.get_schedule()
     assert new_charging
     assert new_charging[22]["value"] == 0
     assert new_charging[23]["value"] == 300

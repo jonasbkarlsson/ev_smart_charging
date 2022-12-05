@@ -10,6 +10,7 @@ from homeassistant.helpers.event import (
     async_track_time_change,
 )
 from homeassistant.const import STATE_ON, STATE_OFF
+from homeassistant.util import dt
 
 from .const import (
     CONF_CHARGER_ENTITY,
@@ -119,6 +120,13 @@ class EVSmartChargingCoordinator:
                 # Turn off charging
                 self.auto_charging_state = STATE_OFF
                 await self.turn_off_charging()
+                if self.scheduler.get_charging_is_planned():
+                    time_now = dt.now()
+                    if time_now > self.scheduler.charging_stop_time:
+                        self.sensor.charging_is_planned = False
+                        self.sensor.charging_start_time = None
+                        self.sensor.charging_stop_time = None
+                        self.sensor.charging_number_of_hours = 0
 
     async def turn_on_charging(self):
         """Turn on charging"""
@@ -259,11 +267,22 @@ class EVSmartChargingCoordinator:
             scheduling_params.update(
                 {"value_in_graph": self.raw_two_days.max_value() * 0.75}
             )
-            new_charging = self.scheduler.get_schedule(scheduling_params)
+            self.scheduler.calc_schedule(scheduling_params)
+            new_charging = self.scheduler.get_schedule()
             if new_charging is not None:
                 self._charging_schedule = new_charging
                 self.sensor.charging_schedule = (
                     Raw(self._charging_schedule).copy().to_local().get_raw()
+                )
+                self.sensor.charging_is_planned = (
+                    self.scheduler.get_charging_is_planned()
+                )
+                self.sensor.charging_start_time = (
+                    self.scheduler.get_charging_start_time()
+                )
+                self.sensor.charging_stop_time = self.scheduler.get_charging_stop_time()
+                self.sensor.charging_number_of_hours = (
+                    self.scheduler.get_charging_number_of_hours()
                 )
 
         _LOGGER.debug("self._max_price = %s", self.max_price)
