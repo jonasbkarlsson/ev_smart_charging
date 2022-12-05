@@ -218,6 +218,11 @@ class Scheduler:
     def __init__(self) -> None:
         self.schedule_base = []
         self.schedule_base_min_soc = []
+        self.schedule = None
+        self.charging_is_planned = False
+        self.charging_start_time = None
+        self.charging_stop_time = None
+        self.charging_number_of_hours = None
 
     def create_base_schedule(
         self,
@@ -269,11 +274,13 @@ class Scheduler:
         """Return true if base schedule exists"""
         return len(self.schedule_base) > 0
 
-    def get_schedule(self, params: dict[str, Any]) -> list:
-        """Get the schedule"""
+    def calc_schedule(self, params: dict[str, Any]):
+        """Calculate the schedule"""
 
         if "switch_active" not in params or "switch_apply_limit" not in params:
-            return None
+            self.schedule = None
+            self.calc_schedule_summary()
+            return
 
         schedule = get_charging_update(
             self.schedule_base,
@@ -301,10 +308,52 @@ class Scheduler:
             < Raw(schedule_min_soc).number_of_nonzero()
         ):
             _LOGGER.debug("Use schedule_min_soc")
-            return schedule_min_soc
+            self.schedule = schedule_min_soc
+            self.calc_schedule_summary()
+            return
 
         _LOGGER.debug("Use schedule")
-        return schedule
+        self.schedule = schedule
+        self.calc_schedule_summary()
+
+    def calc_schedule_summary(self):
+        """Calculate summary of schedule"""
+
+        number_of_hours = 0
+        first_start = None
+        last_stop = None
+        if self.schedule is not None:
+            for item in self.schedule:
+                if item["value"] != 0.0:
+                    number_of_hours = number_of_hours + 1
+                    last_stop = dt.as_local(item["end"])
+                    if first_start is None:
+                        first_start = dt.as_local(item["start"])
+
+        self.charging_is_planned = number_of_hours != 0
+        self.charging_number_of_hours = number_of_hours
+        self.charging_start_time = first_start
+        self.charging_stop_time = last_stop
+
+    def get_schedule(self) -> list:
+        """Get the schedule"""
+        return self.schedule
+
+    def get_charging_is_planned(self):
+        """Get charging_is_planned"""
+        return self.charging_is_planned
+
+    def get_charging_start_time(self):
+        """Get charging_start_time"""
+        return self.charging_start_time
+
+    def get_charging_stop_time(self):
+        """Get charging_stop_time"""
+        return self.charging_stop_time
+
+    def get_charging_number_of_hours(self):
+        """Get charging_number_of_hours"""
+        return self.charging_number_of_hours
 
     @staticmethod
     def get_empty_schedule() -> list:

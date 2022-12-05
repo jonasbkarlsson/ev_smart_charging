@@ -38,6 +38,11 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
         self._raw_two_days = None
         self._charging_schedule = None
 
+        self._charging_is_planned = False
+        self._charging_start_time = None
+        self._charging_stop_time = None
+        self._charging_number_of_hours = None
+
     @SensorEntity.native_value.setter
     def native_value(self, new_value):
         """Return the value reported by the sensor."""
@@ -50,6 +55,10 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
             "current_price": self._current_price,
             "EV SOC": self._ev_soc,
             "EV target SOC": self._ev_target_soc,
+            "Charging is planned": self._charging_is_planned,
+            "Charging start time": self._charging_start_time,
+            "Charging stop time": self._charging_stop_time,
+            "Charging number of hours": self._charging_number_of_hours,
             "raw_two_days": self._raw_two_days,
             "charging_schedule": self._charging_schedule,
         }
@@ -102,4 +111,44 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
     @charging_schedule.setter
     def charging_schedule(self, new_value):
         self._charging_schedule = new_value
+        self.update_ha_state()
+
+    @property
+    def charging_is_planned(self):
+        """Getter for charging_is_planned."""
+        return self._charging_is_planned
+
+    @charging_is_planned.setter
+    def charging_is_planned(self, new_value):
+        self._charging_is_planned = new_value
+        self.update_ha_state()
+
+    @property
+    def charging_start_time(self):
+        """Getter for charging_start_time."""
+        return self._charging_start_time
+
+    @charging_start_time.setter
+    def charging_start_time(self, new_value):
+        self._charging_start_time = new_value
+        self.update_ha_state()
+
+    @property
+    def charging_stop_time(self):
+        """Getter for charging_stop_time."""
+        return self._charging_stop_time
+
+    @charging_stop_time.setter
+    def charging_stop_time(self, new_value):
+        self._charging_stop_time = new_value
+        self.update_ha_state()
+
+    @property
+    def charging_number_of_hours(self):
+        """Getter for charging_number_of_hours."""
+        return self._charging_number_of_hours
+
+    @charging_number_of_hours.setter
+    def charging_number_of_hours(self, new_value):
+        self._charging_number_of_hours = new_value
         self.update_ha_state()
