@@ -120,13 +120,29 @@ class EVSmartChargingCoordinator:
                 # Turn off charging
                 self.auto_charging_state = STATE_OFF
                 await self.turn_off_charging()
-                if self.scheduler.get_charging_is_planned():
-                    time_now = dt.now()
-                    if time_now > self.scheduler.charging_stop_time:
-                        self.sensor.charging_is_planned = False
-                        self.sensor.charging_start_time = None
-                        self.sensor.charging_stop_time = None
-                        self.sensor.charging_number_of_hours = 0
+
+            time_now = dt.now()
+            if (
+                self.scheduler.charging_stop_time is not None
+                and time_now < self.scheduler.charging_stop_time
+            ):
+                _LOGGER.debug("Charging summary shown")
+                self.sensor.charging_is_planned = (
+                    self.scheduler.get_charging_is_planned()
+                )
+                self.sensor.charging_start_time = (
+                    self.scheduler.get_charging_start_time()
+                )
+                self.sensor.charging_stop_time = self.scheduler.get_charging_stop_time()
+                self.sensor.charging_number_of_hours = (
+                    self.scheduler.get_charging_number_of_hours()
+                )
+            else:
+                _LOGGER.debug("Charging summary removed")
+                self.sensor.charging_is_planned = False
+                self.sensor.charging_start_time = None
+                self.sensor.charging_stop_time = None
+                self.sensor.charging_number_of_hours = 0
 
     async def turn_on_charging(self):
         """Turn on charging"""
@@ -273,16 +289,6 @@ class EVSmartChargingCoordinator:
                 self._charging_schedule = new_charging
                 self.sensor.charging_schedule = (
                     Raw(self._charging_schedule).copy().to_local().get_raw()
-                )
-                self.sensor.charging_is_planned = (
-                    self.scheduler.get_charging_is_planned()
-                )
-                self.sensor.charging_start_time = (
-                    self.scheduler.get_charging_start_time()
-                )
-                self.sensor.charging_stop_time = self.scheduler.get_charging_stop_time()
-                self.sensor.charging_number_of_hours = (
-                    self.scheduler.get_charging_number_of_hours()
                 )
 
         _LOGGER.debug("self._max_price = %s", self.max_price)

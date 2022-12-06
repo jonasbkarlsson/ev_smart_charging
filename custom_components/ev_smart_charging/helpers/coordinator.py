@@ -222,7 +222,7 @@ class Scheduler:
         self.charging_is_planned = False
         self.charging_start_time = None
         self.charging_stop_time = None
-        self.charging_number_of_hours = None
+        self.charging_number_of_hours = 0
 
     def create_base_schedule(
         self,
