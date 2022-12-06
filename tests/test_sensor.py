@@ -1,4 +1,7 @@
 """Test ev_smart_charging sensor."""
+from zoneinfo import ZoneInfo
+from datetime import datetime
+
 from homeassistant.const import STATE_OFF, STATE_ON
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -65,10 +68,38 @@ async def test_sensor(hass, bypass_validate_input_sensors):
     sensor.charging_schedule = one_list
     assert sensor.charging_schedule == one_list
 
+    sensor.charging_is_planned = True
+    assert sensor.charging_is_planned is True
+
+    sensor.charging_start_time = datetime(
+        2022, 9, 30, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
+    )
+    assert sensor.charging_start_time == datetime(
+        2022, 9, 30, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
+    )
+
+    sensor.charging_stop_time = datetime(
+        2022, 9, 30, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
+    )
+    assert sensor.charging_stop_time == datetime(
+        2022, 9, 30, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
+    )
+
+    sensor.charging_number_of_hours = 4
+    assert sensor.charging_number_of_hours == 4
+
     extra = sensor.extra_state_attributes
     assert extra["current_price"] == 12.1
     assert extra["EV SOC"] == 56
     assert extra["EV target SOC"] == 80
+    assert extra["Charging is planned"] is True
+    assert extra["Charging start time"] == datetime(
+        2022, 9, 30, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
+    )
+    assert extra["Charging stop time"] == datetime(
+        2022, 9, 30, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
+    )
+    assert extra["Charging number of hours"] == 4
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)
