@@ -1,10 +1,13 @@
 """Test ev_smart_charging coordinator."""
+from datetime import datetime
+
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from homeassistant.core import HomeAssistant
 from homeassistant.const import STATE_ON, STATE_OFF
 from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
 from homeassistant.helpers.entity_registry import EntityRegistry
+from homeassistant.util import dt as dt_util
 
 from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
@@ -218,6 +221,15 @@ async def test_coordinator_min_soc2(
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
 
+    assert coordinator.sensor.charging_is_planned is True
+    assert coordinator.sensor.charging_start_time == datetime(
+        2022, 10, 1, 3, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+    assert coordinator.sensor.charging_stop_time == datetime(
+        2022, 10, 1, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+    assert coordinator.sensor.charging_number_of_hours == 5
+
     # Move time to scheduled charging time
     freezer.move_to("2022-10-01T03:00:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20221001, None)
@@ -232,6 +244,11 @@ async def test_coordinator_min_soc2(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
+
+    assert coordinator.sensor.charging_is_planned is False
+    assert coordinator.sensor.charging_start_time is None
+    assert coordinator.sensor.charging_stop_time is None
+    assert coordinator.sensor.charging_number_of_hours == 0
 
 
 async def test_validate_input_sensors(hass: HomeAssistant):
