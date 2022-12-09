@@ -233,25 +233,40 @@ async def test_scheduler(hass, set_cet_timezone, freezer):
 
     scheduling_params.update({"value_in_graph": 300})
 
-    scheduler.calc_schedule(scheduling_params)
-    new_charging: list = scheduler.get_schedule()
+    new_charging: list = scheduler.get_schedule(scheduling_params)
     assert not new_charging
 
     scheduling_params.update({"switch_apply_limit": True})
 
-    scheduler.calc_schedule(scheduling_params)
-    new_charging: list = scheduler.get_schedule()
+    new_charging: list = scheduler.get_schedule(scheduling_params)
     assert new_charging
     assert new_charging[26]["value"] == 0
     assert new_charging[27]["value"] == 300
 
+    assert scheduler.get_charging_is_planned() is True
+    assert scheduler.get_charging_start_time() == datetime(
+        2022, 10, 1, 3, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+    assert scheduler.get_charging_stop_time() == datetime(
+        2022, 10, 1, 7, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+    assert scheduler.get_charging_number_of_hours() == 4
+
     scheduling_params.update({"min_soc": 80})
     scheduler.create_base_schedule(scheduling_params, raw_two_days)
-    scheduler.calc_schedule(scheduling_params)
-    new_charging: list = scheduler.get_schedule()
+    new_charging: list = scheduler.get_schedule(scheduling_params)
     assert new_charging
     assert new_charging[22]["value"] == 0
     assert new_charging[23]["value"] == 300
+
+    assert scheduler.get_charging_is_planned() is True
+    assert scheduler.get_charging_start_time() == datetime(
+        2022, 9, 30, 23, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+    assert scheduler.get_charging_stop_time() == datetime(
+        2022, 10, 1, 7, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+    assert scheduler.get_charging_number_of_hours() == 8
 
 
 async def test_get_empty_schedule(hass, set_cet_timezone, freezer):

@@ -274,13 +274,13 @@ class Scheduler:
         """Return true if base schedule exists"""
         return len(self.schedule_base) > 0
 
-    def calc_schedule(self, params: dict[str, Any]):
+    def get_schedule(self, params: dict[str, Any]) -> list:
         """Calculate the schedule"""
 
         if "switch_active" not in params or "switch_apply_limit" not in params:
             self.schedule = None
             self.calc_schedule_summary()
-            return
+            return self.schedule
 
         schedule = get_charging_update(
             self.schedule_base,
@@ -310,11 +310,12 @@ class Scheduler:
             _LOGGER.debug("Use schedule_min_soc")
             self.schedule = schedule_min_soc
             self.calc_schedule_summary()
-            return
+            return self.schedule
 
         _LOGGER.debug("Use schedule")
         self.schedule = schedule
         self.calc_schedule_summary()
+        return self.schedule
 
     def calc_schedule_summary(self):
         """Calculate summary of schedule"""
@@ -334,10 +335,6 @@ class Scheduler:
         self.charging_number_of_hours = number_of_hours
         self.charging_start_time = first_start
         self.charging_stop_time = last_stop
-
-    def get_schedule(self) -> list:
-        """Get the schedule"""
-        return self.schedule
 
     def get_charging_is_planned(self):
         """Get charging_is_planned"""

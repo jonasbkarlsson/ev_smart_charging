@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# https://github.com/home-assistant/core
+# https://github.com/MatthewFlamm/pytest-homeassistant-custom-component
+
 # echo
 # pip3 install homeassistant~=2022.6.0 pytest-homeassistant-custom-component~=0.9.0
 # pip3 list 2>/dev/null | grep homeassistant | grep -v "\-home"
@@ -38,7 +41,13 @@ pip3 list 2>/dev/null | grep pytest-homeassistant-custom-component
 pytest -q --no-summary tests
 
 echo
-pip3 install -qq homeassistant~=2022.11.0 pytest-homeassistant-custom-component~=0.12.0
+pip3 install -qq homeassistant==2022.11.4 pytest-homeassistant-custom-component==0.12.21
+pip3 list 2>/dev/null | grep homeassistant | grep -v "\-home"
+pip3 list 2>/dev/null | grep pytest-homeassistant-custom-component
+pytest -q --no-summary tests
+
+echo
+pip3 install -qq homeassistant~=2022.12.0 pytest-homeassistant-custom-component~=0.12.0
 pip3 list 2>/dev/null | grep homeassistant | grep -v "\-home"
 pip3 list 2>/dev/null | grep pytest-homeassistant-custom-component
 pytest -q --no-summary tests

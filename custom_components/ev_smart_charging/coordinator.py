@@ -283,8 +283,7 @@ class EVSmartChargingCoordinator:
             scheduling_params.update(
                 {"value_in_graph": self.raw_two_days.max_value() * 0.75}
             )
-            self.scheduler.calc_schedule(scheduling_params)
-            new_charging = self.scheduler.get_schedule()
+            new_charging = self.scheduler.get_schedule(scheduling_params)
             if new_charging is not None:
                 self._charging_schedule = new_charging
                 self.sensor.charging_schedule = (
