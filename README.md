@@ -192,6 +192,8 @@ cards:
         name: Smart charging activated
       - entity: switch.ev_smart_charging_apply_price_limit
         name: Apply price limit
+      - entity: switch.ev_smart_charging_continuous_charging_preferred
+        name: Continuous charging preferred
       - entity: button.ev_smart_charging_manually_start_charging
         name: Manually start charging
       - entity: button.ev_smart_charging_manually_stop_charging
