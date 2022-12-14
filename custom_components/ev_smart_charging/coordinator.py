@@ -49,6 +49,7 @@ class EVSmartChargingCoordinator:
         self.sensor = None
         self.switch_active = None
         self.switch_apply_limit = None
+        self.switch_continuous = None
         self.price_entity_id = None
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
@@ -221,6 +222,12 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("switch_apply_limit_update = %s", state)
         await self.update_sensors()
 
+    async def switch_continuous_update(self, state: bool):
+        """Handle the Active switch"""
+        self.switch_continuous = state
+        _LOGGER.debug("switch_continuous_update = %s", state)
+        await self.update_sensors()
+
     @callback
     async def update_sensors(
         self, entity_id: str = None, old_state: State = None, new_state: State = None
@@ -273,6 +280,7 @@ class EVSmartChargingCoordinator:
             "ready_hour": get_ready_hour_utc(self.ready_hour_local),
             "switch_active": self.switch_active,
             "switch_apply_limit": self.switch_apply_limit,
+            "switch_continuous": self.switch_continuous,
             "max_price": self.max_price,
         }
 
