@@ -246,6 +246,8 @@ If there is no integration that provides the EV Target SOC, one can create a Num
 ## Integrating with chargers
 If your charger's integration does not provide a swicth entity that this integration can use for control, then the connection between this integration and your charger's integration can in many cases be made with automations.
 
+Also, if information about the EV being connected to the charger is available, an automation can provide that information to the integration in order to improve the handling of the case when the car is not connected to the charger at the time charging is planned to start.
+
 ### Example of automation to start charging
 ```
 alias: EV Smart Charging - Start
@@ -288,7 +290,7 @@ action:
 
 Please replace the contents of `action:` with suitable contents for your charger.
 
-### Exmaple of automation to inform when the EV is connected to the charger
+### Example of automation to inform when the EV is connected to the charger
 ```
 alias: EV Connected
 description: ""
