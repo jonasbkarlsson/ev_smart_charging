@@ -20,8 +20,10 @@ The integration calculates the continous set of hours that will give the lowest 
 ## Features
 - Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) integration.
 - Configuraton of the latest time tomorrow for the charging to be completed.
+- Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
 - Optional setting of minimum SOC level that should be reached each night indepently of the electrity price.
 - Optional setting to only charge when the electricty price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
+- Optional possibility to provide information to the integration about when the EV is connected to the charger.
 - Automatically detects and connects to the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Connnections to other EV and charger integrations can be configured manually.
 
 ## Installation
