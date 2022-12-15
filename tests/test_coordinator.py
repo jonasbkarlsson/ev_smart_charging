@@ -75,6 +75,8 @@ async def test_coordinator(
     # Turn on switches
     await coordinator.switch_active_update(True)
     await coordinator.switch_apply_limit_update(True)
+    await coordinator.switch_continuous_update(True)
+    await coordinator.switch_ev_connected_update(True)
     await hass.async_block_till_done()
 
     assert coordinator.auto_charging_state == STATE_OFF
@@ -153,6 +155,8 @@ async def test_coordinator_min_soc1(
     # Turn on switches
     await coordinator.switch_active_update(True)
     await coordinator.switch_apply_limit_update(True)
+    await coordinator.switch_continuous_update(True)
+    await coordinator.switch_ev_connected_update(True)
 
     # Move time to just before scheduled charging time
     freezer.move_to("2022-10-01T02:50:00+02:00")
@@ -212,6 +216,8 @@ async def test_coordinator_min_soc2(
     # Turn on switches
     await coordinator.switch_active_update(True)
     await coordinator.switch_apply_limit_update(True)
+    await coordinator.switch_continuous_update(True)
+    await coordinator.switch_ev_connected_update(True)
 
     # Move time to just before scheduled charging time
     freezer.move_to("2022-10-01T02:50:00+02:00")

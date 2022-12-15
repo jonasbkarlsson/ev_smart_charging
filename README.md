@@ -20,8 +20,10 @@ The integration calculates the continous set of hours that will give the lowest 
 ## Features
 - Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) integration.
 - Configuraton of the latest time tomorrow for the charging to be completed.
+- Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
 - Optional setting of minimum SOC level that should be reached each night indepently of the electrity price.
 - Optional setting to only charge when the electricty price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
+- Optional possibility to provide information to the integration about when the EV is connected to the charger.
 - Automatically detects and connects to the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Connnections to other EV and charger integrations can be configured manually.
 
 ## Installation
@@ -69,6 +71,7 @@ Entity | Type | Description
 `switch.ev_smart_charging_smart_charging_activated` | Switch | Turns the EV Smart Charging integration on and off.
 `switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit, if set to a non-zero value in the configuration form.
 `switch.ev_smart_charging_continuous_charging_preferred` | Switch | If turned on, will as basis schedule one continuous charging session. If turned off, will schedule charging on the hours with lowest electricity price, even if they are not continuous.
+`switch.ev_smart_charging_ev_connected` | Switch | Tells the integration that the EV is connected to the charger. Is preferable controlled by automations (see example below). Can avoid problems occuring when the EV is not connected to the charger at the time the charging should start.
 `button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. This is totally independent of the automatic charging.
 `button.ev_smart_charging_manually_stop_charging` | Button | Manually stop charging. This is totally independent of the automatic charging.
 
@@ -245,6 +248,8 @@ If there is no integration that provides the EV Target SOC, one can create a Num
 ## Integrating with chargers
 If your charger's integration does not provide a swicth entity that this integration can use for control, then the connection between this integration and your charger's integration can in many cases be made with automations.
 
+Also, if information about the EV being connected to the charger is available, an automation can provide that information to the integration in order to improve the handling of the case when the car is not connected to the charger at the time charging is planned to start.
+
 ### Example of automation to start charging
 ```
 alias: EV Smart Charging - Start
@@ -258,9 +263,10 @@ trigger:
     to: "on"
 condition: []
 action:
-  - service: easee.start
+  - service: easee.set_circuit_dynamic_limit
     data:
-      charger_id: "EH123456"
+      device_id: "b40f1f45d28b0891fe8d" (replace with your own device id)
+      currentP1: 16 (replace with your preferred charging current)
 ```
 
 Please replace the contents of `action:` with suitable contents for your charger.
@@ -278,12 +284,40 @@ trigger:
     to: "off"
 condition: []
 action:
-  - service: easee.stop
+  - service: easee.set_circuit_dynamic_limit
     data:
-      charger_id: "EH123456"
+      device_id: "b40f1f45d28b0891fe8d" (replace with your own device id)
+      currentP1: 0 (something below 6 to make the charging stop)
 ```
 
 Please replace the contents of `action:` with suitable contents for your charger.
+
+### Example of automation to inform when the EV is connected to the charger
+```
+alias: EV Connected
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.ev_charger_status (to be replaced with your entity)
+condition: []
+action:
+  - if:
+      - condition: state
+        entity_id: sensor.ev_charger_status (to be replaced with your entity)
+        state: "connected" (to be replaced with suitable state for your charger)
+    then:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.ev_smart_charging_ev_connected
+    else:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.ev_smart_charging_ev_connected
+mode: single
+```
 
 [ev_smart_charging]: https://github.com/jonasbkarlsson/ev_smart_charging
 [releases-shield]: https://img.shields.io/github/v/release/jonasbkarlsson/ev_smart_charging?style=for-the-badge

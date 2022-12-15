@@ -50,6 +50,7 @@ class EVSmartChargingCoordinator:
         self.switch_active = None
         self.switch_apply_limit = None
         self.switch_continuous = None
+        self.switch_ev_connected = None
         self.price_entity_id = None
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
@@ -102,6 +103,7 @@ class EVSmartChargingCoordinator:
                     or self.switch_apply_limit is False
                     or self.ev_soc < self.number_min_soc
                 )
+                and self.switch_ev_connected is True
             )
             if (
                 self.ev_soc is not None
@@ -217,15 +219,21 @@ class EVSmartChargingCoordinator:
         await self.update_sensors()
 
     async def switch_apply_limit_update(self, state: bool):
-        """Handle the Active switch"""
+        """Handle the Apply Limit switch"""
         self.switch_apply_limit = state
         _LOGGER.debug("switch_apply_limit_update = %s", state)
         await self.update_sensors()
 
     async def switch_continuous_update(self, state: bool):
-        """Handle the Active switch"""
+        """Handle the Continuous switch"""
         self.switch_continuous = state
         _LOGGER.debug("switch_continuous_update = %s", state)
+        await self.update_sensors()
+
+    async def switch_ev_connected_update(self, state: bool):
+        """Handle the EV Connected switch"""
+        self.switch_ev_connected = state
+        _LOGGER.debug("switch_ev_connected_update = %s", state)
         await self.update_sensors()
 
     @callback
