@@ -17,6 +17,7 @@ from custom_components.ev_smart_charging.coordinator import (
 from custom_components.ev_smart_charging.switch import (
     EVSmartChargingSwitchActive,
     EVSmartChargingSwitchApplyLimit,
+    EVSmartChargingSwitchContinuous,
 )
 
 from .const import MOCK_CONFIG_USER_NO_CHARGER
@@ -54,10 +55,15 @@ async def test_switch(hass, bypass_validate_input_sensors):
     switch_limit: EVSmartChargingSwitchApplyLimit = hass.data["entity_components"][
         SWITCH
     ].get_entity("switch.none_apply_price_limit")
+    switch_continuous: EVSmartChargingSwitchContinuous = hass.data["entity_components"][
+        SWITCH
+    ].get_entity("switch.none_continuous_charging_preferred")
     assert switch_active
     assert switch_limit
+    assert switch_continuous
     assert isinstance(switch_active, EVSmartChargingSwitchActive)
     assert isinstance(switch_limit, EVSmartChargingSwitchApplyLimit)
+    assert isinstance(switch_continuous, EVSmartChargingSwitchContinuous)
 
     # Test the switches
     await switch_active.async_turn_on()
@@ -73,6 +79,13 @@ async def test_switch(hass, bypass_validate_input_sensors):
     assert coordinator.switch_apply_limit is False
     await switch_limit.async_turn_on()
     assert coordinator.switch_apply_limit is True
+
+    await switch_continuous.async_turn_on()
+    assert coordinator.switch_continuous is True
+    await switch_continuous.async_turn_off()
+    assert coordinator.switch_continuous is False
+    await switch_continuous.async_turn_on()
+    assert coordinator.switch_continuous is True
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)
