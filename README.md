@@ -68,6 +68,7 @@ Entity | Type | Description
 `sensor.ev_smart_charging_charging` | Sensor | The state is "on" or "off". Can be used with automations to control the EV charger.
 `switch.ev_smart_charging_smart_charging_activated` | Switch | Turns the EV Smart Charging integration on and off.
 `switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit, if set to a non-zero value in the configuration form.
+`switch.ev_smart_charging_continuous_charging_preferred` | Switch | If turned on, will as basis schedule one continuous charging session. If turned off, will schedule charging on the hours with lowest electricity price, even if they are not continuous.
 `button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. This is totally independent of the automatic charging.
 `button.ev_smart_charging_manually_stop_charging` | Button | Manually stop charging. This is totally independent of the automatic charging.
 
@@ -191,6 +192,8 @@ cards:
         name: Smart charging activated
       - entity: switch.ev_smart_charging_apply_price_limit
         name: Apply price limit
+      - entity: switch.ev_smart_charging_continuous_charging_preferred
+        name: Continuous charging preferred
       - entity: button.ev_smart_charging_manually_start_charging
         name: Manually start charging
       - entity: button.ev_smart_charging_manually_stop_charging

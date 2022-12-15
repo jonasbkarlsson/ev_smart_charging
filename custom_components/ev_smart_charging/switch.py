@@ -11,6 +11,7 @@ from .const import (
     DOMAIN,
     ENTITY_NAME_ACTIVE_SWITCH,
     ENTITY_NAME_APPLY_LIMIT_SWITCH,
+    ENTITY_NAME_CONTINUOUS_SWITCH,
     SWITCH,
 )
 from .coordinator import EVSmartChargingCoordinator
@@ -28,6 +29,7 @@ async def async_setup_entry(
     switches = []
     switches.append(EVSmartChargingSwitchActive(entry, coordinator))
     switches.append(EVSmartChargingSwitchApplyLimit(entry, coordinator))
+    switches.append(EVSmartChargingSwitchContinuous(entry, coordinator))
     async_add_devices(switches)
 
 
@@ -60,7 +62,7 @@ class EVSmartChargingSwitch(EVSmartChargingEntity, SwitchEntity, RestoreEntity):
 
 
 class EVSmartChargingSwitchActive(EVSmartChargingSwitch):
-    """EV Smart Charging switch class."""
+    """EV Smart Charging active switch class."""
 
     _attr_name = ENTITY_NAME_ACTIVE_SWITCH
 
@@ -84,7 +86,7 @@ class EVSmartChargingSwitchActive(EVSmartChargingSwitch):
 
 
 class EVSmartChargingSwitchApplyLimit(EVSmartChargingSwitch):
-    """EV Smart Charging switch class."""
+    """EV Smart Charging apply limit switch class."""
 
     _attr_name = ENTITY_NAME_APPLY_LIMIT_SWITCH
 
@@ -105,3 +107,27 @@ class EVSmartChargingSwitchApplyLimit(EVSmartChargingSwitch):
         """Turn the entity off."""
         await super().async_turn_off(**kwargs)
         await self.coordinator.switch_apply_limit_update(False)
+
+
+class EVSmartChargingSwitchContinuous(EVSmartChargingSwitch):
+    """EV Smart Charging continuous switch class."""
+
+    _attr_name = ENTITY_NAME_CONTINUOUS_SWITCH
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSwitchContinuous.__init__()")
+        super().__init__(entry, coordinator)
+        if self.is_on is None:
+            self._attr_is_on = True
+            self.update_ha_state()
+        self.coordinator.switch_continuous = self.is_on
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+        await super().async_turn_on(**kwargs)
+        await self.coordinator.switch_continuous_update(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""
+        await super().async_turn_off(**kwargs)
+        await self.coordinator.switch_continuous_update(False)

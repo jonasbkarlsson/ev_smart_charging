@@ -96,7 +96,58 @@ class Raw:
         return self
 
 
-def get_lowest_hours(ready_hour: datetime, raw_two_days: Raw, hours: int) -> list:
+def get_lowest_hours(
+    ready_hour: datetime, continuous: bool, raw_two_days: Raw, hours: int
+) -> list:
+    """From the two-day prices, calculate the cheapest set of hours"""
+
+    if continuous:
+        return get_lowest_hours_continuous(ready_hour, raw_two_days, hours)
+
+    return get_lowest_hours_non_continuous(ready_hour, raw_two_days, hours)
+
+
+def get_lowest_hours_non_continuous(
+    ready_hour: datetime, raw_two_days: Raw, hours: int
+) -> list:
+    """From the two-day prices, calculate the cheapest non-continues set of hours
+
+    A non-continues range of hours will be choosen."""
+
+    _LOGGER.debug("ready_hour = %s", ready_hour)
+
+    if hours == 0:
+        return []
+
+    price = []
+    for item in raw_two_days.get_raw():
+        price.append(item["value"])
+    time_now = dt.utcnow()
+    time_end = ready_hour
+    time_now_index = None
+    time_end_index = None
+    for index in range(len(price)):
+        item = raw_two_days.get_raw()[index]
+        if item["end"] > time_now and time_now_index is None:
+            time_now_index = index
+        if item["start"] < time_end:
+            time_end_index = index
+
+    if (time_end_index - time_now_index) < hours:
+        return list(range(time_now_index, time_end_index + 1))
+
+    lowest_price_list = sorted(price[time_now_index : time_end_index + 1])
+    lowest_price = lowest_price_list[hours - 1]
+    lowest_hours = []
+    for index in range(time_now_index, time_end_index + 1):
+        if price[index] <= lowest_price:
+            lowest_hours.append(index)
+    return lowest_hours
+
+
+def get_lowest_hours_continuous(
+    ready_hour: datetime, raw_two_days: Raw, hours: int
+) -> list:
     """From the two-day prices, calculate the cheapest continues set of hours
 
     A continues range of hours will be choosen."""
@@ -246,6 +297,7 @@ class Scheduler:
         _LOGGER.debug("charging_hours = %s", charging_hours)
         lowest_hours = get_lowest_hours(
             params["ready_hour"],
+            params["switch_continuous"],
             raw_two_days,
             charging_hours,
         )
@@ -264,6 +316,7 @@ class Scheduler:
         _LOGGER.debug("charging_hours_min_soc = %s", charging_hours)
         lowest_hours = get_lowest_hours(
             params["ready_hour"],
+            params["switch_continuous"],
             raw_two_days,
             charging_hours,
         )
@@ -388,7 +441,10 @@ def main():  # pragma: no cover
         result.append(item)
     raw2 = Raw(result)
     print("r2.raw = " + str(raw2.get_raw()))
-    lowest = get_lowest_hours(start_time.hour, raw2, 3)
+    print("price = ", value)
+    lowest = get_lowest_hours_continuous(end_time, raw2, 3)
+    print("lowest = " + str(lowest))
+    lowest = get_lowest_hours_non_continuous(end_time, raw2, 3)
     print("lowest = " + str(lowest))
 
 

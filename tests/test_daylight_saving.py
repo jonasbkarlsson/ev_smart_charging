@@ -54,6 +54,7 @@ async def test_to_daylight_saving_time(
     await coordinator.add_sensor(sensor)
     await coordinator.switch_active_update(True)
     await coordinator.switch_apply_limit_update(True)
+    await coordinator.switch_continuous_update(True)
 
     # Provide price
     MockPriceEntity.set_state(hass, PRICE_20220326, PRICE_20220327)
@@ -174,6 +175,7 @@ async def test_from_daylight_saving_time(
     await coordinator.add_sensor(sensor)
     await coordinator.switch_active_update(True)
     await coordinator.switch_apply_limit_update(True)
+    await coordinator.switch_continuous_update(True)
 
     # Provide price
     MockPriceEntity.set_state(hass, PRICE_20221029, PRICE_20221030)
