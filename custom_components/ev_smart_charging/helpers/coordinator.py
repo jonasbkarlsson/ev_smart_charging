@@ -26,7 +26,7 @@ class Raw:
             for item in raw:
                 if item["value"] is not None and isinstance(item["start"], datetime):
                     self.data.append(item)
-            self.valid = len(self.data) > 0
+            self.valid = len(self.data) > 12
         else:
             self.valid = False
 

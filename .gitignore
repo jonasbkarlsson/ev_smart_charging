@@ -4,6 +4,7 @@ venv
 .venv
 .coverage
 .idea
+issues
 
 # Ignore other folders than ev_smart_charging
 custom_components/*
