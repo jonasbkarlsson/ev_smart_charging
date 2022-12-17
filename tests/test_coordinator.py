@@ -120,6 +120,33 @@ async def test_coordinator(
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
 
+    # Move back time to recreate the schedule
+    MockSOCEntity.set_state(hass, "55")
+    freezer.move_to("2022-09-30T20:00:00+02:00")
+    MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
+    assert coordinator.auto_charging_state == STATE_OFF
+    assert coordinator.sensor.state == STATE_OFF
+
+    # Disconnect EV from charger
+    await coordinator.switch_ev_connected_update(False)
+    await hass.async_block_till_done()
+
+    # Move time to scheduled charging time
+    freezer.move_to("2022-10-01T03:00:00+02:00")
+    MockPriceEntity.set_state(hass, PRICE_20221001, None)
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
+    assert coordinator.auto_charging_state == STATE_OFF
+    assert coordinator.sensor.state == STATE_OFF
+
+    # Connect EV to charger
+    await coordinator.switch_ev_connected_update(True)
+    await hass.async_block_till_done()
+    assert coordinator.auto_charging_state == STATE_ON
+    assert coordinator.sensor.state == STATE_ON
+
 
 async def test_coordinator_min_soc1(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
