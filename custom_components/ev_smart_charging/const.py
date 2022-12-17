@@ -14,6 +14,7 @@ ICON = "mdi:flash"
 ICON_MIN_SOC = "mdi:battery-charging-30"
 ICON_START = "mdi:play-circle-outline"
 ICON_STOP = "mdi:stop-circle-outline"
+ICON_CONNECTION = "mdi:connection"
 
 # Platforms
 SENSOR = Platform.SENSOR

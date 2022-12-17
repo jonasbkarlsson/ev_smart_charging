@@ -13,6 +13,7 @@ from .const import (
     ENTITY_NAME_APPLY_LIMIT_SWITCH,
     ENTITY_NAME_CONTINUOUS_SWITCH,
     ENTITY_NAME_EV_CONNECTED_SWITCH,
+    ICON_CONNECTION,
     SWITCH,
 )
 from .coordinator import EVSmartChargingCoordinator
@@ -139,6 +140,7 @@ class EVSmartChargingSwitchEVConnected(EVSmartChargingSwitch):
     """EV Smart Charging continuous switch class."""
 
     _attr_name = ENTITY_NAME_EV_CONNECTED_SWITCH
+    _attr_icon = ICON_CONNECTION
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingSwitchEVConnected.__init__()")
