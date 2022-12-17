@@ -294,28 +294,33 @@ Please replace the contents of `action:` with suitable contents for your charger
 
 ### Example of automation to inform when the EV is connected to the charger
 ```
-alias: EV Connected
+alias: EV Smart Charging - EV connected
 description: ""
 trigger:
   - platform: state
     entity_id:
-      - sensor.ev_charger_status (to be replaced with your entity)
+      - sensor.ocpp_status_connector
 condition: []
 action:
   - if:
       - condition: state
-        entity_id: sensor.ev_charger_status (to be replaced with your entity)
-        state: "connected" (to be replaced with suitable state for your charger)
+        entity_id: sensor.ocpp_status_connector
+        state: Preparing
     then:
       - service: switch.turn_on
         data: {}
         target:
           entity_id: switch.ev_smart_charging_ev_connected
     else:
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id: switch.ev_smart_charging_ev_connected
+      - if:
+          - condition: state
+            entity_id: sensor.ocpp_status_connector
+            state: Available
+        then:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.ev_smart_charging_ev_connected
 mode: single
 ```
 
