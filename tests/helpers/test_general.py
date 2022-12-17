@@ -90,17 +90,99 @@ async def test_is_price_state(hass):
         }
     ]
 
+    thirteen_list = [
+        {
+            "value": 1.0,
+            "start": datetime(2022, 10, 1, 1),
+            "stop": datetime(2022, 10, 1, 2),
+        },
+        {
+            "value": 2.0,
+            "start": datetime(2022, 10, 1, 2),
+            "stop": datetime(2022, 10, 1, 3),
+        },
+        {
+            "value": 3.0,
+            "start": datetime(2022, 10, 1, 3),
+            "stop": datetime(2022, 10, 1, 4),
+        },
+        {
+            "value": 4.0,
+            "start": datetime(2022, 10, 1, 4),
+            "stop": datetime(2022, 10, 1, 5),
+        },
+        {
+            "value": 5.0,
+            "start": datetime(2022, 10, 1, 5),
+            "stop": datetime(2022, 10, 1, 6),
+        },
+        {
+            "value": 6.0,
+            "start": datetime(2022, 10, 1, 6),
+            "stop": datetime(2022, 10, 1, 7),
+        },
+        {
+            "value": 7.0,
+            "start": datetime(2022, 10, 1, 7),
+            "stop": datetime(2022, 10, 1, 8),
+        },
+        {
+            "value": 8.0,
+            "start": datetime(2022, 10, 1, 8),
+            "stop": datetime(2022, 10, 1, 9),
+        },
+        {
+            "value": 9.0,
+            "start": datetime(2022, 10, 1, 9),
+            "stop": datetime(2022, 10, 1, 10),
+        },
+        {
+            "value": 10.0,
+            "start": datetime(2022, 10, 1, 10),
+            "stop": datetime(2022, 10, 1, 11),
+        },
+        {
+            "value": 11.0,
+            "start": datetime(2022, 10, 1, 11),
+            "stop": datetime(2022, 10, 1, 12),
+        },
+        {
+            "value": 12.0,
+            "start": datetime(2022, 10, 1, 12),
+            "stop": datetime(2022, 10, 1, 13),
+        },
+        {
+            "value": 13.0,
+            "start": datetime(2022, 10, 1, 13),
+            "stop": datetime(2022, 10, 1, 14),
+        },
+    ]
+
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
         attributes={"current_price": 12.1, "raw_today": one_list},
+    )
+    assert Validator.is_price_state(price_state) is False
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={"current_price": None, "raw_today": one_list},
+    )
+    assert Validator.is_price_state(price_state) is False
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={"current_price": 12.1, "raw_today": thirteen_list},
     )
     assert Validator.is_price_state(price_state) is True
 
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": None, "raw_today": one_list},
+        attributes={"current_price": None, "raw_today": thirteen_list},
     )
     assert Validator.is_price_state(price_state) is False
 
