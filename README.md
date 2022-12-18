@@ -292,7 +292,7 @@ action:
 
 Please replace the contents of `action:` with suitable contents for your charger.
 
-### Example of automation to inform when the EV is connected to the charger
+### Example of automation to inform the integration that the EV is connected to the charger
 ```
 alias: EV Smart Charging - EV connected
 description: ""
