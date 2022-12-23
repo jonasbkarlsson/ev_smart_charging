@@ -253,6 +253,17 @@ class EVSmartChargingCoordinator:
             self.raw_today_local = Raw(price_state.attributes["raw_today"])
             self.raw_tomorrow_local = Raw(price_state.attributes["raw_tomorrow"])
             self.tomorrow_valid = self.raw_tomorrow_local.is_valid()
+
+            # Fix to take care of Nordpool bug
+            # https://github.com/custom-components/nordpool/issues/235
+            if self.tomorrow_valid:
+                datetime_today = self.raw_today_local.get_raw()[0]["start"]
+                datetime_tomorrow = self.raw_tomorrow_local.get_raw()[0]["start"]
+                if datetime_today == datetime_tomorrow:
+                    _LOGGER.debug("Nordpool bug detected and avoided.")
+                    self.raw_tomorrow_local = Raw([])
+                    self.tomorrow_valid = False
+
             # Change to UTC time
             self.raw_two_days = self.raw_today_local.copy().to_utc()
             self.raw_two_days.extend(self.raw_tomorrow_local.copy().to_utc())
