@@ -51,6 +51,7 @@ class EVSmartChargingCoordinator:
         self.switch_apply_limit = None
         self.switch_continuous = None
         self.switch_ev_connected = None
+        self.switch_keep_on = None
         self.price_entity_id = None
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
@@ -112,8 +113,30 @@ class EVSmartChargingCoordinator:
             ):
                 turn_on_charging = False
 
-            _LOGGER.debug("turn_on_charging = %s", turn_on_charging)
+            time_now = dt.now()
             current_value = self.auto_charging_state == STATE_ON
+
+            # Handle self.switch_keep_on
+            if self.switch_keep_on:
+                # Only if price limit is not used and the EV is connected
+                if (
+                    self.switch_apply_limit is False or self.max_price == 0.0
+                ) and self.switch_ev_connected:
+                    # Only if SOC has reached Target SOC or there are no more scheduled charging
+                    if (
+                        self.ev_soc is not None
+                        and self.ev_target_soc is not None
+                        and self.ev_soc >= self.ev_target_soc
+                        or (
+                            self.scheduler.charging_stop_time is not None
+                            and time_now >= self.scheduler.charging_stop_time
+                        )
+                    ):
+                        # Don't turn off charger
+                        if not turn_on_charging and current_value:
+                            turn_on_charging = True
+
+            _LOGGER.debug("turn_on_charging = %s", turn_on_charging)
             _LOGGER.debug("current_value = %s", current_value)
             if turn_on_charging and not current_value:
                 # Turn on charging
@@ -124,7 +147,6 @@ class EVSmartChargingCoordinator:
                 self.auto_charging_state = STATE_OFF
                 await self.turn_off_charging()
 
-            time_now = dt.now()
             if (
                 self.scheduler.charging_stop_time is not None
                 and time_now < self.scheduler.charging_stop_time
@@ -234,6 +256,12 @@ class EVSmartChargingCoordinator:
         """Handle the EV Connected switch"""
         self.switch_ev_connected = state
         _LOGGER.debug("switch_ev_connected_update = %s", state)
+        await self.update_sensors()
+
+    async def switch_keep_on_update(self, state: bool):
+        """Handle the Keep charger on switch"""
+        self.switch_keep_on = state
+        _LOGGER.debug("switch_keep_on_update = %s", state)
         await self.update_sensors()
 
     @callback
