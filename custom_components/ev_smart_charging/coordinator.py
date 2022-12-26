@@ -141,9 +141,8 @@ class EVSmartChargingCoordinator:
                             and time_now >= self.scheduler.charging_stop_time
                         )
                     ):
-                        # Don't turn off charger
-                        if not turn_on_charging and current_value:
-                            turn_on_charging = True
+                        # Turn on charger.
+                        turn_on_charging = True
 
             _LOGGER.debug("turn_on_charging = %s", turn_on_charging)
             _LOGGER.debug("current_value = %s", current_value)
@@ -370,8 +369,6 @@ class EVSmartChargingCoordinator:
             else:
                 _LOGGER.error("Target SOC sensor not valid: %s", ev_target_soc_state)
 
-        # Calculate charging schedule if tomorrow's prices are available,
-        # SOC and target SOC are available and if the auto charging state is off
         scheduling_params = {
             "ev_soc": self.ev_soc,
             "ev_target_soc": self.ev_target_soc,
@@ -384,7 +381,16 @@ class EVSmartChargingCoordinator:
             "max_price": self.max_price,
         }
 
-        if self.tomorrow_valid and self.auto_charging_state == STATE_OFF:
+        # Calculate charging schedule if tomorrow's prices are available,
+        # and (SOC has reached target SOC) or if the auto charging state is off
+        if self.tomorrow_valid and (
+            self.auto_charging_state == STATE_OFF
+            or (
+                self.ev_soc is not None
+                and self.ev_target_soc is not None
+                and self.ev_soc >= self.ev_target_soc
+            )
+        ):
             self.scheduler.create_base_schedule(scheduling_params, self.raw_two_days)
 
         if self.scheduler.base_schedule_exists() is True:
