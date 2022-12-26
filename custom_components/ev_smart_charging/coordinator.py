@@ -9,6 +9,11 @@ from homeassistant.helpers.event import (
     async_track_state_change,
     async_track_time_change,
 )
+from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
+from homeassistant.helpers.entity_registry import (
+    EntityRegistry,
+    async_entries_for_config_entry,
+)
 from homeassistant.const import STATE_ON, STATE_OFF
 from homeassistant.util import dt
 
@@ -49,9 +54,13 @@ class EVSmartChargingCoordinator:
         self.sensor = None
         self.switch_active = None
         self.switch_apply_limit = None
+        self.switch_apply_limit_entity_id = None
+        self.switch_apply_limit_unique_id = None
         self.switch_continuous = None
         self.switch_ev_connected = None
         self.switch_keep_on = None
+        self.switch_keep_on_entity_id = None
+        self.switch_keep_on_unique_id = None
         self.price_entity_id = None
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
@@ -244,6 +253,28 @@ class EVSmartChargingCoordinator:
         """Handle the Apply Limit switch"""
         self.switch_apply_limit = state
         _LOGGER.debug("switch_apply_limit_update = %s", state)
+        # If state is True and Keep charger on is True, then turn off Keep charger on
+        if state and self.switch_keep_on:
+            # Get the entity_id
+            if self.switch_keep_on_entity_id is None:
+                entity_registry: EntityRegistry = async_entity_registry_get(self.hass)
+                all_entities = async_entries_for_config_entry(
+                    entity_registry, self.config_entry.entry_id
+                )
+                entity = [
+                    entity
+                    for entity in all_entities
+                    if entity.unique_id == self.switch_keep_on_unique_id
+                ]
+                if len(entity) == 1:
+                    self.switch_keep_on_entity_id = entity[0].entity_id
+            # Turn off Keep charger on
+            if self.switch_keep_on_entity_id is not None:
+                await self.hass.services.async_call(
+                    domain=SWITCH,
+                    service=SERVICE_TURN_OFF,
+                    target={"entity_id": self.switch_keep_on_entity_id},
+                )
         await self.update_sensors()
 
     async def switch_continuous_update(self, state: bool):
@@ -262,6 +293,28 @@ class EVSmartChargingCoordinator:
         """Handle the Keep charger on switch"""
         self.switch_keep_on = state
         _LOGGER.debug("switch_keep_on_update = %s", state)
+        # If state is True and Apply price limit is True, then turn off Apply price limit
+        if state and self.switch_apply_limit:
+            # Get the entity_id
+            if self.switch_apply_limit_entity_id is None:
+                entity_registry: EntityRegistry = async_entity_registry_get(self.hass)
+                all_entities = async_entries_for_config_entry(
+                    entity_registry, self.config_entry.entry_id
+                )
+                entity = [
+                    entity
+                    for entity in all_entities
+                    if entity.unique_id == self.switch_apply_limit_unique_id
+                ]
+                if len(entity) == 1:
+                    self.switch_apply_limit_entity_id = entity[0].entity_id
+            # Turn off Apply price limit
+            if self.switch_apply_limit_entity_id is not None:
+                await self.hass.services.async_call(
+                    domain=SWITCH,
+                    service=SERVICE_TURN_OFF,
+                    target={"entity_id": self.switch_apply_limit_entity_id},
+                )
         await self.update_sensors()
 
     @callback
