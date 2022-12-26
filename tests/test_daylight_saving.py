@@ -21,7 +21,7 @@ from tests.helpers.helpers import (
     MockSOCEntity,
     MockTargetSOCEntity,
 )
-from tests.price import (
+from tests.price_daylight_saving import (
     PRICE_20220326,
     PRICE_20220327,
     PRICE_20220328,
