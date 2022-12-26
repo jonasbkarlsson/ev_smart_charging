@@ -321,6 +321,7 @@ async def test_coordinator_keep_on_connect(
 
     # Connect EV with less SOC. The charging should not start.
     # Should lead to a schedule 02-09.
+    freezer.move_to("2022-10-01T16:00:00+02:00")
     MockSOCEntity.set_state(hass, "40")
     await coordinator.switch_ev_connected_update(True)
     await hass.async_block_till_done()
@@ -328,14 +329,14 @@ async def test_coordinator_keep_on_connect(
     assert coordinator.sensor.state == STATE_OFF
 
     # Move time to just before scheduled charging time
-    freezer.move_to("2022-10-01T01:00:00+02:00")
+    freezer.move_to("2022-10-02T01:00:00+02:00")
     await coordinator.update_sensors()
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
 
     # Move time to just after start of scheduled charging time
-    freezer.move_to("2022-10-01T02:00:00+02:00")
+    freezer.move_to("2022-10-02T02:00:00+02:00")
     await coordinator.update_sensors()
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
