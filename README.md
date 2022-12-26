@@ -72,7 +72,7 @@ Entity | Type | Description
 `switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit, if set to a non-zero value in the configuration form.
 `switch.ev_smart_charging_continuous_charging_preferred` | Switch | If turned on, will as basis schedule one continuous charging session. If turned off, will schedule charging on the hours with lowest electricity price, even if they are not continuous.
 `switch.ev_smart_charging_ev_connected` | Switch | Tells the integration that the EV is connected to the charger. Is preferable controlled by automations (see example below). Can avoid problems occuring when the EV is not connected to the charger at the time the charging should start.
-`switch.ev_smart_charging_keep_charger_on` | Switch | If "ON" the charger control will not turn off after completed charge cycle. The feature is intended to be used for preconditioning and preheating/cooling can be done from the power grid instead of the battery. This option cannot be used if `switch.ev_smart_charging_apply_price_limit` is "on" nor if `Electricity price limit` has triggered. *NOTE* - Please make sure that there is a logic in place to turn off the `Charger control switch` when you have unplugged the vehicle. If your charger doesnt support this you will need to create an automation to ensure the functionality of this component. 
+`switch.ev_smart_charging_keep_charger_on` | Switch | If "on" the charger control will not turn off after completed charge cycle. The feature is intended to be used for preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery. If this option is used, the feature `Electricity price limit` will be turned off. *NOTE* - Please make sure that there is an automation in place to turn off the `switch.ev_smart_charging_ev_connected` when you have unplugged the vehicle. Otherwise there is a risk that charging will start directly after reconnecting to the charger.
 `button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. This is totally independent of the automatic charging.
 `button.ev_smart_charging_manually_stop_charging` | Button | Manually stop charging. This is totally independent of the automatic charging.
 
@@ -198,6 +198,8 @@ cards:
         name: Apply price limit
       - entity: switch.ev_smart_charging_continuous_charging_preferred
         name: Continuous charging preferred
+      - entity: switch.ev_smart_charging_keep_charger_on
+        name: Keep charger on
       - entity: button.ev_smart_charging_manually_start_charging
         name: Manually start charging
       - entity: button.ev_smart_charging_manually_stop_charging
