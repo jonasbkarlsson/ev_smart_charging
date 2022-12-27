@@ -340,7 +340,7 @@ class EVSmartChargingCoordinator:
                 datetime_today = self.raw_today_local.get_raw()[0]["start"]
                 datetime_tomorrow = self.raw_tomorrow_local.get_raw()[0]["start"]
                 if datetime_today == datetime_tomorrow:
-                    _LOGGER.debug("Nordpool bug detected and avoided.")
+                    _LOGGER.debug("Nordpool bug detected and avoided")
                     self.raw_tomorrow_local = Raw([])
                     self.tomorrow_valid = False
 
@@ -352,7 +352,7 @@ class EVSmartChargingCoordinator:
                 self.raw_two_days.copy().to_local().get_raw()
             )
         else:
-            _LOGGER.error("Price sensor not valid.")
+            _LOGGER.error("Price sensor not valid")
 
         ev_soc_state = self.hass.states.get(self.ev_soc_entity_id)
         if Validator.is_soc_state(ev_soc_state):
