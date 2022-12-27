@@ -506,6 +506,27 @@ async def test_coordinator_keep_on_connect3(
 
     # Lower the SOC. The charging should not start.
     freezer.move_to("2022-09-30T16:00:00+02:00")
+    await coordinator.update_state()
+    await hass.async_block_till_done()
+    MockSOCEntity.set_state(hass, "40")
+    await hass.async_block_till_done()
+    assert coordinator.auto_charging_state == STATE_OFF
+    assert coordinator.sensor.state == STATE_OFF
+
+    # Higer the SOC. The charging should not start.
+    freezer.move_to("2022-09-30T23:00:00+02:00")
+    await coordinator.update_state()
+    await hass.async_block_till_done()
+    MockSOCEntity.set_state(hass, "80")
+    await hass.async_block_till_done()
+    assert coordinator.auto_charging_state == STATE_ON
+    assert coordinator.sensor.state == STATE_ON
+
+    # Lower the SOC. The charging should not start.
+    freezer.move_to("2022-10-01T11:00:00+02:00")
+    MockPriceEntity.set_state(hass, PRICE_20221001, None)
+    await coordinator.update_state()
+    await hass.async_block_till_done()
     MockSOCEntity.set_state(hass, "40")
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
