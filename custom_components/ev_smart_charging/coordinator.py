@@ -80,12 +80,18 @@ class EVSmartChargingCoordinator:
         self.raw_two_days = None
         self._charging_schedule = None
         self.charging_pct_per_hour = get_parameter(self.config_entry, CONF_PCT_PER_HOUR)
-        self.ready_hour_local = int(
-            get_parameter(self.config_entry, CONF_READY_HOUR)[0:2]
-        )
+
+        try:
+            self.ready_hour_local = int(
+                get_parameter(self.config_entry, CONF_READY_HOUR)[0:2]
+            )
+        except ValueError:
+            # Don't use ready_hour. Select a time in the far future.
+            self.ready_hour_local = 72
         if self.ready_hour_local == 0:
             # Treat 00:00 as 24:00
             self.ready_hour_local = 24
+
         self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE))
         self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC))
 

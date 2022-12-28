@@ -260,6 +260,8 @@ def get_ready_hour_utc(ready_hour_local: int) -> datetime:
     time_local: datetime = dt.now()
     if time_local.hour >= ready_hour_local or ready_hour_local == 24:
         time_local = time_local + timedelta(days=1)
+    if ready_hour_local == 72:
+        time_local = time_local + timedelta(days=3)
     time_local = time_local.replace(
         hour=ready_hour_local % 24, minute=0, second=0, microsecond=0
     )

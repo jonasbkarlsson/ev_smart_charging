@@ -48,6 +48,7 @@ CONF_MAX_PRICE = "maximum_price"
 CONF_MIN_SOC = "min_soc"
 
 HOURS = [
+    "None",
     "00:00",
     "01:00",
     "02:00",
