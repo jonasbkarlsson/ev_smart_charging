@@ -79,6 +79,30 @@ async def test_get_lowest_hours_non_continuous(hass, set_cet_timezone, freezer):
     """Test get_lowest_hours()"""
 
     raw_two_days: Raw = Raw(PRICE_20220930)
+
+    freezer.move_to("2022-09-30T00:10:00+02:00")
+    ready_hour: int = 8
+    hours: int = 2
+    assert get_lowest_hours(
+        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+    ) == [
+        2,
+        3,
+    ]
+
+    freezer.move_to("2022-09-30T15:10:00+02:00")
+    ready_hour: int = 8
+    hours: int = 5
+    assert get_lowest_hours(
+        get_ready_hour_utc(ready_hour), True, raw_two_days, hours
+    ) == [
+        19,
+        20,
+        21,
+        22,
+        23,
+    ]
+
     raw2: Raw = Raw(PRICE_20221001)
     raw_two_days.extend(raw2)
 
@@ -137,11 +161,58 @@ async def test_get_lowest_hours_non_continuous(hass, set_cet_timezone, freezer):
         27,
     ]
 
+    freezer.move_to("2022-09-30T00:10:00+02:00")
+    ready_hour: int = 8
+    hours: int = 5
+    assert get_lowest_hours(
+        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+    ) == [
+        0,
+        1,
+        2,
+        3,
+        4,
+    ]
+
+    freezer.move_to("2022-09-30T00:10:00+02:00")
+    ready_hour: int = 8
+    hours: int = 2
+    assert get_lowest_hours(
+        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+    ) == [
+        2,
+        3,
+    ]
+
 
 async def test_get_lowest_hours_continuous(hass, set_cet_timezone, freezer):
     """Test get_lowest_hours()"""
 
     raw_two_days: Raw = Raw(PRICE_20220930)
+
+    freezer.move_to("2022-09-30T00:10:00+02:00")
+    ready_hour: int = 8
+    hours: int = 2
+    assert get_lowest_hours(
+        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+    ) == [
+        2,
+        3,
+    ]
+
+    freezer.move_to("2022-09-30T15:10:00+02:00")
+    ready_hour: int = 8
+    hours: int = 5
+    assert get_lowest_hours(
+        get_ready_hour_utc(ready_hour), True, raw_two_days, hours
+    ) == [
+        19,
+        20,
+        21,
+        22,
+        23,
+    ]
+
     raw2: Raw = Raw(PRICE_20221001)
     raw_two_days.extend(raw2)
 
@@ -200,6 +271,29 @@ async def test_get_lowest_hours_continuous(hass, set_cet_timezone, freezer):
         25,
         26,
         27,
+    ]
+
+    freezer.move_to("2022-09-30T00:10:00+02:00")
+    ready_hour: int = 8
+    hours: int = 5
+    assert get_lowest_hours(
+        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+    ) == [
+        0,
+        1,
+        2,
+        3,
+        4,
+    ]
+
+    freezer.move_to("2022-09-30T00:10:00+02:00")
+    ready_hour: int = 8
+    hours: int = 2
+    assert get_lowest_hours(
+        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+    ) == [
+        2,
+        3,
     ]
 
 
@@ -373,3 +467,29 @@ async def test_get_empty_schedule(hass, set_cet_timezone, freezer):
         2022, 10, 3, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
     assert empty_schedule[47]["value"] == 0
+
+
+async def test_get_ready_hour_utc(hass, set_cet_timezone, freezer):
+    """Test get_ready_hour_utc()"""
+
+    freezer.move_to("2022-10-01T12:00:00+0200")
+
+    datetime1 = get_ready_hour_utc(4)
+    assert datetime1 == datetime(
+        2022, 10, 2, 4, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+
+    datetime1 = get_ready_hour_utc(14)
+    assert datetime1 == datetime(
+        2022, 10, 1, 14, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+
+    datetime1 = get_ready_hour_utc(24)
+    assert datetime1 == datetime(
+        2022, 10, 2, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+
+    datetime1 = get_ready_hour_utc(72)
+    assert datetime1 == datetime(
+        2022, 10, 4, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )

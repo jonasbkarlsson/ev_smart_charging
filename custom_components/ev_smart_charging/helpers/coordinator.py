@@ -253,12 +253,17 @@ def get_charging_value(charging):
 def get_ready_hour_utc(ready_hour_local: int) -> datetime:
     """Get the UTC time for the ready hour"""
 
-    # This function is only called when coordinator.tomorrow_valid is True
-    # Assume this is true only if local time is between 8:00 and 04:00 (the next day)
-    # This means that dt.now() + 18 hours is for sure tomorrow local time
-    time_local: datetime = dt.now() + timedelta(hours=18)
+    # if now_local <= ready_hour_local THEN ready_hour_utc is today
+    # if now_local > ready_hour_local THEN ready_hour_utc is tomorrow
+    # What happens if now_local > ready_hour_local AND tomorrow_valid is False???
+
+    time_local: datetime = dt.now()
+    if time_local.hour >= ready_hour_local or ready_hour_local == 24:
+        time_local = time_local + timedelta(days=1)
+    if ready_hour_local == 72:
+        time_local = time_local + timedelta(days=3)
     time_local = time_local.replace(
-        hour=ready_hour_local, minute=0, second=0, microsecond=0
+        hour=ready_hour_local % 24, minute=0, second=0, microsecond=0
     )
     return dt.as_utc(time_local)
 

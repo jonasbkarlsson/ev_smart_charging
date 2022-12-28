@@ -80,9 +80,18 @@ class EVSmartChargingCoordinator:
         self.raw_two_days = None
         self._charging_schedule = None
         self.charging_pct_per_hour = get_parameter(self.config_entry, CONF_PCT_PER_HOUR)
-        self.ready_hour_local = int(
-            get_parameter(self.config_entry, CONF_READY_HOUR)[0:2]
-        )
+
+        try:
+            self.ready_hour_local = int(
+                get_parameter(self.config_entry, CONF_READY_HOUR)[0:2]
+            )
+        except ValueError:
+            # Don't use ready_hour. Select a time in the far future.
+            self.ready_hour_local = 72
+        if self.ready_hour_local == 0:
+            # Treat 00:00 as 24:00
+            self.ready_hour_local = 24
+
         self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE))
         self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC))
 
@@ -381,17 +390,49 @@ class EVSmartChargingCoordinator:
             "max_price": self.max_price,
         }
 
-        # Calculate charging schedule if tomorrow's prices are available,
-        # and (SOC has reached target SOC) or if the auto charging state is off
-        if self.tomorrow_valid and (
-            self.auto_charging_state == STATE_OFF
+        time_now_hour_local = dt.now().hour
+        if (self.ev_soc is not None and self.ev_target_soc is not None) and (
+            (self.ev_soc >= self.ev_target_soc)
             or (
-                self.ev_soc is not None
-                and self.ev_target_soc is not None
-                and self.ev_soc >= self.ev_target_soc
+                (self.tomorrow_valid or time_now_hour_local < self.ready_hour_local)
+                and self.auto_charging_state == STATE_OFF
             )
         ):
             self.scheduler.create_base_schedule(scheduling_params, self.raw_two_days)
+
+        # if self.ready_hour_local <= 12:
+        #     # Calculate charging schedule if tomorrow's prices are available,
+        #     # and (SOC has reached target SOC) or if the auto charging state is off
+        #     if self.tomorrow_valid and (
+        #         self.auto_charging_state == STATE_OFF
+        #         or (
+        #             self.ev_soc is not None
+        #             and self.ev_target_soc is not None
+        #             and self.ev_soc >= self.ev_target_soc
+        #         )
+        #     ):
+        #         self.scheduler.create_base_schedule(
+        #             scheduling_params, self.raw_two_days
+        #         )
+        # else:
+        #     # Calculate charging schedule if the time is after ready_hour (and tomorrow's
+        #     # prices are available) or if the time is before 12:00,
+        #     # and (SOC has reached target SOC) or if the auto charging state is off
+        #     if (
+        #         (time_now_hour_local >= self.ready_hour_local and self.tomorrow_valid)
+        #         or time_now_hour_local < 12
+        #         or True
+        #     ) and (
+        #         self.auto_charging_state == STATE_OFF
+        #         or (
+        #             self.ev_soc is not None
+        #             and self.ev_target_soc is not None
+        #             and self.ev_soc >= self.ev_target_soc
+        #         )
+        #     ):
+        #         self.scheduler.create_base_schedule(
+        #             scheduling_params, self.raw_two_days
+        #         )
 
         if self.scheduler.base_schedule_exists() is True:
             scheduling_params.update(

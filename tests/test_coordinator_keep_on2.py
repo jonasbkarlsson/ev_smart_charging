@@ -268,18 +268,16 @@ async def test_coordinator_keep_on_connect(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
-    # The day should now be 2022-09-30
     assert coordinator.sensor.charging_schedule is not None
-    assert coordinator.sensor.charging_schedule[0]["start"].day == 30
+    assert coordinator.sensor.charging_schedule[0]["start"].day == 1
 
     # Connect EV
     await coordinator.switch_ev_connected_update(True)
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
-    # The day should now be 2022-09-30
     assert coordinator.sensor.charging_schedule is not None
-    assert coordinator.sensor.charging_schedule[0]["start"].day == 30
+    assert coordinator.sensor.charging_schedule[0]["start"].day == 1
 
     # Move time to after prices for next day has been published
     freezer.move_to("2022-10-01T14:00:00+02:00")
@@ -290,7 +288,6 @@ async def test_coordinator_keep_on_connect(
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
 
-    # The day should now be 2022-10-01, and not 2022-09-30
     assert coordinator.sensor.charging_schedule is not None
     assert coordinator.sensor.charging_schedule[0]["start"].day == 1
 
@@ -299,7 +296,6 @@ async def test_coordinator_keep_on_connect(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
-    # The day should now be 2022-10-01
     assert coordinator.sensor.charging_schedule is not None
     assert coordinator.sensor.charging_schedule[0]["start"].day == 1
 
@@ -472,6 +468,8 @@ async def test_coordinator_keep_on_connect3(
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
+    # Provide price
+    MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
 
     # Test with max price 0.0 and 6.0 PCT/h.
     # For the case with non-continuous charging
@@ -486,9 +484,6 @@ async def test_coordinator_keep_on_connect3(
     sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
     assert sensor is not None
     await coordinator.add_sensor(sensor)
-
-    # Provide price
-    MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
     await coordinator.update_sensors()
     await hass.async_block_till_done()
     assert coordinator.tomorrow_valid
