@@ -217,7 +217,7 @@ async def test_coordinator_late_ready2(
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
     MockPriceEntity.set_state(hass, PRICE_20220930, None)
 
-    # Ready by 24:00
+    # Ready by 00:00, that is 24:00
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_LATE24, entry_id="test"
     )
@@ -283,7 +283,7 @@ async def test_coordinator_late_ready3(
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
 
-    # Ready by 24:00
+    # Ready by 00:00, that is 24:00
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_LATE24, entry_id="test"
     )
@@ -309,8 +309,7 @@ async def test_coordinator_late_ready3(
 
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
-    assert coordinator.sensor.charging_is_planned is False
-    # TODO: Would it be better if a schedule is made here?
+    assert coordinator.sensor.charging_is_planned is True
 
     # Move time to after midnight
     # This should give a 5h schedule, 03:00-08:00 schedule

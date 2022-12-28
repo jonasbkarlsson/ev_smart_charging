@@ -563,6 +563,8 @@ async def test_coordinator_keep_on5(
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
 
+    MockSOCEntity.set_state(hass, "45")  # Charge so that the schedule will not change
+
     # Move time to scheduled charging time of continuous charging
     freezer.move_to("2022-10-01T02:00:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20221001, None)
@@ -587,6 +589,7 @@ async def test_coordinator_keep_on5(
 
     # Move back time to recreate the schedule
     freezer.move_to("2022-09-30T20:00:00+02:00")
+    MockSOCEntity.set_state(hass, "40")  # Restore SOC
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
     await coordinator.switch_keep_on_update(True)
     await coordinator.update_sensors()
@@ -600,6 +603,8 @@ async def test_coordinator_keep_on5(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
+
+    MockSOCEntity.set_state(hass, "45")  # Charge so that the schedule will not change
 
     # Move time to scheduled charging time of continuous charging
     freezer.move_to("2022-10-01T02:00:00+02:00")
@@ -719,6 +724,8 @@ async def test_coordinator_keep_on6(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
+
+    MockSOCEntity.set_state(hass, "45")  # Charge so that the schedule will not change
 
     # Move time to scheduled charging time of continuous charging
     freezer.move_to("2022-10-01T02:00:00+02:00")
