@@ -40,6 +40,8 @@ async def async_setup_entry(
 class EVSmartChargingNumber(EVSmartChargingEntity, NumberEntity):
     """EV Smart Charging switch class."""
 
+    _attr_native_value: float | None = None  # To support HA 2022.7
+
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingNumber.__init__()")
         super().__init__(entry)
