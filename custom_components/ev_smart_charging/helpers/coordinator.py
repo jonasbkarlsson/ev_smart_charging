@@ -410,6 +410,13 @@ class Scheduler:
         """Get charging_number_of_hours"""
         return self.charging_number_of_hours
 
+    def set_empty_schedule(self):
+        """Create an empty schedule"""
+        self.schedule_base = []
+        self.schedule_base_min_soc = []
+        self.schedule = None
+        self.calc_schedule_summary()
+
     @staticmethod
     def get_empty_schedule() -> list:
         """Create empty charging information"""
