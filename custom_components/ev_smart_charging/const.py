@@ -11,16 +11,21 @@ ISSUE_URL = "https://github.com/jonasbkarlsson/ev_smart_charging/issues"
 
 # Icons
 ICON = "mdi:flash"
+ICON_BATTERY_50 = "mdi:battery-50"
+ICON_CASH = "mdi:cash"
+ICON_CONNECTION = "mdi:connection"
 ICON_MIN_SOC = "mdi:battery-charging-30"
 ICON_START = "mdi:play-circle-outline"
 ICON_STOP = "mdi:stop-circle-outline"
-ICON_CONNECTION = "mdi:connection"
+ICON_TIME = "mdi:clock-time-four-outline"
 
 # Platforms
 SENSOR = Platform.SENSOR
 SWITCH = Platform.SWITCH
 BUTTON = Platform.BUTTON
-PLATFORMS = [SWITCH, SENSOR, BUTTON]
+NUMBER = Platform.NUMBER
+SELECT = Platform.SELECT
+PLATFORMS = [SWITCH, SENSOR, BUTTON, NUMBER, SELECT]
 PLATFORM_NORDPOOL = "nordpool"
 PLATFORM_VW = "volkswagen_we_connect_id"
 PLATFORM_OCPP = "ocpp"
@@ -34,7 +39,10 @@ ENTITY_NAME_EV_CONNECTED_SWITCH = "EV connected"
 ENTITY_NAME_KEEP_ON_SWITCH = "Keep charger on"
 ENTITY_NAME_START_BUTTON = "Manually start charging"
 ENTITY_NAME_STOP_BUTTON = "Manually stop charging"
-ENTITY_NAME_MIN_SOC_NUMBER = "Minimum SOC"
+ENTITY_NAME_CONF_PCT_PER_HOUR_NUMBER = "Charging speed"
+ENTITY_NAME_CONF_MAX_PRICE_NUMBER = "Electricity price limit"
+ENTITY_NAME_CONF_MIN_SOC_NUMBER = "Minimum EV SOC"
+ENTITY_NAME_CONF_READY_HOUR = "Charge completion time"
 
 # Configuration and options
 CONF_DEVICE_NAME = "device_name"
