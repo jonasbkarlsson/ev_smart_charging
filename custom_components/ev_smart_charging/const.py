@@ -23,7 +23,8 @@ SENSOR = Platform.SENSOR
 SWITCH = Platform.SWITCH
 BUTTON = Platform.BUTTON
 NUMBER = Platform.NUMBER
-PLATFORMS = [SWITCH, SENSOR, BUTTON, NUMBER]
+SELECT = Platform.SELECT
+PLATFORMS = [SWITCH, SENSOR, BUTTON, NUMBER, SELECT]
 PLATFORM_NORDPOOL = "nordpool"
 PLATFORM_VW = "volkswagen_we_connect_id"
 PLATFORM_OCPP = "ocpp"
@@ -40,6 +41,7 @@ ENTITY_NAME_STOP_BUTTON = "Manually stop charging"
 ENTITY_NAME_CONF_PCT_PER_HOUR_NUMBER = "Charging speed"
 ENTITY_NAME_CONF_MAX_PRICE_NUMBER = "Electricity price limit"
 ENTITY_NAME_CONF_MIN_SOC_NUMBER = "Minimum EV SOC"
+ENTITY_NAME_CONF_READY_HOUR = "Charge completion time"
 
 # Configuration and options
 CONF_DEVICE_NAME = "device_name"
