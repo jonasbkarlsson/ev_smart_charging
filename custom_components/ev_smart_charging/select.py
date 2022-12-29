@@ -10,6 +10,7 @@ from .const import (
     DOMAIN,
     ENTITY_NAME_CONF_READY_HOUR,
     HOURS,
+    ICON_TIME,
     SELECT,
 )
 from .coordinator import EVSmartChargingCoordinator
@@ -51,6 +52,7 @@ class EVSmartChargingSelectReadyHour(EVSmartChargingSelect):
     """EV Smart Charging active switch class."""
 
     _attr_name = ENTITY_NAME_CONF_READY_HOUR
+    _attr_icon = ICON_TIME
     _attr_entity_category = EntityCategory.CONFIG
     _attr_options = HOURS
 
