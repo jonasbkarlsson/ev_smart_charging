@@ -11,7 +11,7 @@
 
 The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration.
 
-The integration calculates the continous set of hours that will give the lowest price. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight). When the automatic charging has started, changes of settings will not have any effect. The automatic charging is stopped when the end time of the scheduled charging is reached, or when the target SOC is reached.
+The integration calculates the set of hours that will give the lowest price, by default restricted to a continuous set. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight) or when the time of the day is before the configured charge completion time. When the automatic charging has started, changes of settings will not have any effect.
 
 ## Requirements
 - The [Nordpool](https://github.com/custom-components/nordpool) integration.
@@ -19,11 +19,12 @@ The integration calculates the continous set of hours that will give the lowest 
 
 ## Features
 - Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) integration.
-- Configuraton of the latest time tomorrow for the charging to be completed.
+- Configuraton of the latest time of the day when the charging should be completed.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
-- Optional setting of minimum SOC level that should be reached each night indepently of the electrity price.
+- Optional setting of minimum SOC level that should be reached indepently of the electrity price.
 - Optional setting to only charge when the electricty price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
 - Optional possibility to provide information to the integration about when the EV is connected to the charger.
+- Optional possibility to keep the charger on after completed charging, to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery.
 - Automatically detects and connects to the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Connnections to other EV and charger integrations can be configured manually.
 
 ## Installation
@@ -59,7 +60,7 @@ The second form contains parameters that affects how the charging will be perfor
 Parameter | Required | Description
 -- | -- | --
 Charging speed | Yes | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you!
-Charge completion time | Yes | The lastest time tomorrow for the charging to reach the target State-of-Charge. Note, the idea is to set this to a time that is reasonable in most cases, and not to updated this every day.
+Charge completion time | Yes | The lastest time of the day for charging to reach the target State-of-Charge. Note, the idea is to set this to a time that is reasonable in most cases, and not to updated this every day. If `None` is selected, charging will be optimized using all hours with available price information.
 Electricity price limit | Yes | If the `apply_price_limit` switch is activated, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge. Also if the price limit is set to zero, there will be no limitations.
 Minimum EV SOC | Yes | The minimum State-of-Charge that should be charged, independently of the electricity price.
 
@@ -72,9 +73,20 @@ Entity | Type | Description
 `switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit, if set to a non-zero value in the configuration form.
 `switch.ev_smart_charging_continuous_charging_preferred` | Switch | If turned on, will as basis schedule one continuous charging session. If turned off, will schedule charging on the hours with lowest electricity price, even if they are not continuous.
 `switch.ev_smart_charging_ev_connected` | Switch | Tells the integration that the EV is connected to the charger. Is preferable controlled by automations (see example below). Can avoid problems occuring when the EV is not connected to the charger at the time the charging should start. Using it will also ensure that the `sensor.ev_smart_charging_charging` is set to "off" when the EV is not connected to the charger.
-`switch.ev_smart_charging_keep_charger_on` | Switch | If "on", the `sensor.ev_smart_charging_charging` will not turn off after completed charge cycle. The feature is intended to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery. If this option is used, the feature `Electricity price limit` will be turned off, and vice versa. *NOTE* There is an assumption made that the EV itself will stop its charging when reaching the target SOC.
+`switch.ev_smart_charging_keep_charger_on` | Switch | If "on", the `sensor.ev_smart_charging_charging` will not turn off after completed charge cycle. The feature is intended to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery. If this option is used, the feature `Electricity price limit` will be turned off, and vice versa. *NOTE* It is required that `switch.ev_smart_charging_ev_connected` is controlled in a proper way in order for this feature to work. Also, there is an assumption made that the EV itself will stop its charging when reaching the target SOC.
 `button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. This is totally independent of the automatic charging.
 `button.ev_smart_charging_manually_stop_charging` | Button | Manually stop charging. This is totally independent of the automatic charging.
+
+### Configuration entities
+
+The configuration parameters that affects how the charging will be performed are also available as configuration entities. This means they can be found grouped together in the integration's device view and that they can be controlled by service calls. After reload of the integration, or after restart of Home Assistant, the values will be set to the values set during configuration. For descriptions of each parameter, see the Configuration section above.
+
+Entity | Type | Valid value ranges and service calls
+-- | -- | --
+`select.ev_smart_charging_charge_completion_time` | Select | Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
+`number.ev_smart_charging_charging_speed` | Number | Valid values min=0.1, step=0.1, max=100. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_electricity_price_limit` | Number | Valid values min=0, step=0.01, max=10000. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_minimum_ev_soc` | Number | Valid values min=0, step=1, max=100. Can be set by service call `number.set_value`.
 
 ## Sensor attributes
 
