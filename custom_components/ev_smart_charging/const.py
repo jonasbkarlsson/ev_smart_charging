@@ -82,6 +82,7 @@ HOURS = [
     "22:00",
     "23:00",
 ]
+READY_HOUR_NONE = 72
 
 # Defaults
 DEFAULT_NAME = DOMAIN
