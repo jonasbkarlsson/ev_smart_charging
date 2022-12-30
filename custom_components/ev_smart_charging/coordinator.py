@@ -27,6 +27,7 @@ from .const import (
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     DEFAULT_TARGET_SOC,
+    READY_HOUR_NONE,
     SWITCH,
 )
 from .helpers.coordinator import (
@@ -72,10 +73,13 @@ class EVSmartChargingCoordinator:
         self.scheduler = Scheduler()
 
         self.ev_soc = None
+        self.ev_soc_before_last_charging = -1
+        self.ev_soc_previous = -1
         self.ev_target_soc = None
         self.raw_today_local = None
         self.raw_tomorrow_local = None
         self.tomorrow_valid = False
+        self.tomorrow_valid_previous = False
 
         self.raw_two_days = None
         self._charging_schedule = None
@@ -87,10 +91,11 @@ class EVSmartChargingCoordinator:
             )
         except ValueError:
             # Don't use ready_hour. Select a time in the far future.
-            self.ready_hour_local = 72
+            self.ready_hour_local = READY_HOUR_NONE
         if self.ready_hour_local == 0:
             # Treat 00:00 as 24:00
             self.ready_hour_local = 24
+        self.ready_hour_first = True  # True for first update_sensor the ready_hour
 
         self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE))
         self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC))
@@ -99,8 +104,16 @@ class EVSmartChargingCoordinator:
 
         # Update state once per hour.
         self.listeners.append(
-            async_track_time_change(hass, self.update_state, minute=0, second=0)
+            async_track_time_change(hass, self.update_hourly, minute=0, second=0)
         )
+
+    @callback
+    async def update_hourly(
+        self, date_time: datetime = None
+    ):  # pylint: disable=unused-argument
+        """Called every hour"""
+        _LOGGER.debug("EVSmartChargingCoordinator.update_hourly()")
+        await self.update_sensors()
 
     @callback
     async def update_state(
@@ -158,6 +171,7 @@ class EVSmartChargingCoordinator:
             if turn_on_charging and not current_value:
                 # Turn on charging
                 self.auto_charging_state = STATE_ON
+                self.ev_soc_before_last_charging = self.ev_soc
                 await self.turn_on_charging()
             if not turn_on_charging and current_value:
                 # Turn off charging
@@ -363,6 +377,12 @@ class EVSmartChargingCoordinator:
             self.sensor.raw_two_days_local = (
                 self.raw_two_days.copy().to_local().get_raw()
             )
+            # To handle non-live SOC
+            # Update self.ev_soc_last if new price and ready_hour == None
+            if self.tomorrow_valid and not self.tomorrow_valid_previous:
+                if self.ready_hour_local == READY_HOUR_NONE:
+                    self.ev_soc_before_last_charging = -1
+            self.tomorrow_valid_previous = self.tomorrow_valid
         else:
             _LOGGER.error("Price sensor not valid")
 
@@ -370,6 +390,10 @@ class EVSmartChargingCoordinator:
         if Validator.is_soc_state(ev_soc_state):
             self.sensor.ev_soc = ev_soc_state.state
             self.ev_soc = float(ev_soc_state.state)
+            # To handle non-live SOC
+            if self.ev_soc != self.ev_soc_previous:
+                self.ev_soc_previous = self.ev_soc
+                self.ev_soc_before_last_charging = -1
         else:
             _LOGGER.error("SOC sensor not valid: %s", ev_soc_state)
 
@@ -394,11 +418,25 @@ class EVSmartChargingCoordinator:
         }
 
         time_now_hour_local = dt.now().hour
-        if (self.ev_soc is not None and self.ev_target_soc is not None) and (
-            (self.ev_soc >= self.ev_target_soc)
-            or (
-                (self.tomorrow_valid or time_now_hour_local < self.ready_hour_local)
-                and self.auto_charging_state == STATE_OFF
+
+        # To handle non-live SOC
+        # # To enable rescheduling after ready_hour if no live SOC is available
+        if time_now_hour_local == self.ready_hour_local:
+            if self.ready_hour_first:
+                self.ev_soc_before_last_charging = -1
+                self.ready_hour_first = False
+        else:
+            self.ready_hour_first = True
+
+        if (
+            (self.ev_soc is not None and self.ev_target_soc is not None)
+            and (self.ev_soc > self.ev_soc_before_last_charging)
+            and (
+                (self.ev_soc >= self.ev_target_soc)
+                or (
+                    (self.tomorrow_valid or time_now_hour_local < self.ready_hour_local)
+                    and self.auto_charging_state == STATE_OFF
+                )
             )
         ):
             self.scheduler.create_base_schedule(scheduling_params, self.raw_two_days)

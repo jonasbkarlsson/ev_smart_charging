@@ -298,3 +298,79 @@ async def test_validate_input_sensors(hass: HomeAssistant):
     assert coordinator.validate_input_sensors() == "Input sensors not ready."
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     assert coordinator.validate_input_sensors() is None
+
+
+async def test_coordinator_fix_soc(
+    hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
+):
+    """Test Coordinator."""
+
+    freezer.move_to("2022-09-30T14:00:00+02:00")
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+    MockSOCEntity.create(hass, entity_registry, "70")
+    MockTargetSOCEntity.create(hass, entity_registry, "80")
+    MockPriceEntity.create(hass, entity_registry, 123)
+    MockChargerEntity.create(hass, entity_registry, STATE_OFF)
+
+    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    coordinator = EVSmartChargingCoordinator(hass, config_entry)
+    assert coordinator is not None
+
+    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    assert sensor is not None
+    await coordinator.add_sensor(sensor)
+    assert coordinator.ev_target_soc == 80
+
+    # Provide price
+    MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
+    assert coordinator.tomorrow_valid
+
+    # Turn on switches. Should give 2h schedule 05:00-07:00
+    await coordinator.switch_active_update(True)
+    await coordinator.switch_apply_limit_update(True)
+    await coordinator.switch_continuous_update(True)
+    await coordinator.switch_ev_connected_update(True)
+    await hass.async_block_till_done()
+
+    assert coordinator.auto_charging_state == STATE_OFF
+    assert coordinator.sensor.state == STATE_OFF
+
+    # Move time to before scheduled charging time
+    freezer.move_to("2022-10-01T04:00:00+02:00")
+    MockPriceEntity.set_state(hass, PRICE_20221001, None)
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
+    assert coordinator.auto_charging_state == STATE_OFF
+    assert coordinator.sensor.state == STATE_OFF
+
+    # Move time to scheduled charging time
+    freezer.move_to("2022-10-01T05:00:00+02:00")
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
+    assert coordinator.auto_charging_state == STATE_ON
+    assert coordinator.sensor.state == STATE_ON
+
+    # Move time to after scheduled charging time
+    freezer.move_to("2022-10-01T07:00:00+02:00")
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
+    assert coordinator.auto_charging_state == STATE_OFF
+    assert coordinator.sensor.state == STATE_OFF
+
+    # Move time to after scheduled charging time
+    freezer.move_to("2022-10-01T07:30:00+02:00")
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
+    assert coordinator.auto_charging_state == STATE_OFF
+    assert coordinator.sensor.state == STATE_OFF
+
+    # Move time to after ready_hour
+    freezer.move_to("2022-10-01T08:00:00+02:00")
+    MockPriceEntity.set_state(hass, PRICE_20221001, None)
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
+    assert coordinator.auto_charging_state == STATE_OFF
+    assert coordinator.sensor.state == STATE_OFF
