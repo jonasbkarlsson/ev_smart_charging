@@ -84,9 +84,9 @@ The configuration parameters that affects how the charging will be performed are
 Entity | Type | Valid value ranges and service calls
 -- | -- | --
 `select.ev_smart_charging_charge_completion_time` | Select | Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
-`number.ev_smart_charging_charging_speed` | Number | Valid values min=0.1, step=0.1, max=100.0. Can be set by service call `number.set_value`.
-`number.ev_smart_charging_electricity_price_limit` | Number | Valid values min=0.0, step=0.01, max=10000.0. Can be set by service call `number.set_value`.
-`number.ev_smart_charging_minimum_ev_soc` | Number | Valid values min=0.0, step=1.0, max=100.0. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_charging_speed` | Number | Valid values min=0.1, step=0.1, max=100. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_electricity_price_limit` | Number | Valid values min=0, step=0.01, max=10000. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_minimum_ev_soc` | Number | Valid values min=0, step=1, max=100. Can be set by service call `number.set_value`.
 
 ## Sensor attributes
 
