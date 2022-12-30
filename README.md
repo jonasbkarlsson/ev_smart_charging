@@ -11,7 +11,7 @@
 
 The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration.
 
-The integration calculates the set of hours that will give the lowest price, by default restricted to a continuous set. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight) or when the time of the day is before the configured Charge completion time. When the automatic charging has started, changes of settings will not have any effect.
+The integration calculates the set of hours that will give the lowest price, by default restricted to a continuous set. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight) or when the time of the day is before the configured charge completion time. When the automatic charging has started, changes of settings will not have any effect.
 
 ## Requirements
 - The [Nordpool](https://github.com/custom-components/nordpool) integration.
@@ -19,11 +19,12 @@ The integration calculates the set of hours that will give the lowest price, by 
 
 ## Features
 - Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) integration.
-- Configuraton of the latest time tomorrow for the charging to be completed.
+- Configuraton of the latest time of the day when the charging should be completed.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
-- Optional setting of minimum SOC level that should be reached each night indepently of the electrity price.
+- Optional setting of minimum SOC level that should be reached indepently of the electrity price.
 - Optional setting to only charge when the electricty price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
 - Optional possibility to provide information to the integration about when the EV is connected to the charger.
+- Optional possibility to keep the charger on after completed charging, to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery.
 - Automatically detects and connects to the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Connnections to other EV and charger integrations can be configured manually.
 
 ## Installation
@@ -78,9 +79,9 @@ Entity | Type | Description
 
 ### Configuration entities
 
-The configuration parameters that affects how the charging will be performed are also available as configuration entities. This means they can be found grouped together in the integration's device view and that they can be controlled by service calls. After reload of the integration, or after restart of Home Assistant, the values will be set to the values set during configuration.
+The configuration parameters that affects how the charging will be performed are also available as configuration entities. This means they can be found grouped together in the integration's device view and that they can be controlled by service calls. After reload of the integration, or after restart of Home Assistant, the values will be set to the values set during configuration. For descriptions of each parameter, see the Configuration section above.
 
-Entity | Type | Description
+Entity | Type | Valid value ranges and service calls
 -- | -- | --
 `select.ev_smart_charging_charge_completion_time` | Select | Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
 `number.ev_smart_charging_charging_speed` | Number | Valid values min=0.1, step=0.1, max=100.0. Can be set by service call `number.set_value`.
