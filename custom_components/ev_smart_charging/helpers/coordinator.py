@@ -138,12 +138,10 @@ def get_lowest_hours_non_continuous(
     if (time_end_index - time_now_index) < hours:
         return list(range(time_now_index, time_end_index + 1))
 
-    lowest_price_list = sorted(price[time_now_index : time_end_index + 1])
-    lowest_price = lowest_price_list[hours - 1]
-    lowest_hours = []
-    for index in range(time_now_index, time_end_index + 1):
-        if price[index] <= lowest_price:
-            lowest_hours.append(index)
+    prices = price[time_now_index : time_end_index + 1]
+    sorted_index = sorted(range(len(prices)), key=prices.__getitem__)
+    lowest_hours = [x + time_now_index for x in sorted(sorted_index[0:hours])]
+
     return lowest_hours
 
 
@@ -456,9 +454,9 @@ def main():  # pragma: no cover
     raw2 = Raw(result)
     print("r2.raw = " + str(raw2.get_raw()))
     print("price = ", value)
-    lowest = get_lowest_hours_continuous(end_time, raw2, 3)
+    lowest = get_lowest_hours_continuous(end_time, raw2, 2)
     print("lowest = " + str(lowest))
-    lowest = get_lowest_hours_non_continuous(end_time, raw2, 3)
+    lowest = get_lowest_hours_non_continuous(end_time, raw2, 2)
     print("lowest = " + str(lowest))
 
 
