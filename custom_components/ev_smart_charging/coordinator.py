@@ -26,8 +26,10 @@ from .const import (
     CONF_PRICE_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
+    CONF_START_HOUR,
     DEFAULT_TARGET_SOC,
     READY_HOUR_NONE,
+    START_HOUR_NONE,
     SWITCH,
 )
 from .helpers.coordinator import (
@@ -84,6 +86,14 @@ class EVSmartChargingCoordinator:
         self.raw_two_days = None
         self._charging_schedule = None
         self.charging_pct_per_hour = get_parameter(self.config_entry, CONF_PCT_PER_HOUR)
+
+        try:
+            self.start_hour_local = int(
+                get_parameter(self.config_entry, CONF_START_HOUR)[0:2]
+            )
+        except ValueError:
+            # Don't use start_hour. Select a time in the past.
+            self.start_hour_local = START_HOUR_NONE
 
         try:
             self.ready_hour_local = int(

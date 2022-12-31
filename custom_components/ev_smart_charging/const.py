@@ -42,6 +42,7 @@ ENTITY_NAME_STOP_BUTTON = "Manually stop charging"
 ENTITY_NAME_CONF_PCT_PER_HOUR_NUMBER = "Charging speed"
 ENTITY_NAME_CONF_MAX_PRICE_NUMBER = "Electricity price limit"
 ENTITY_NAME_CONF_MIN_SOC_NUMBER = "Minimum EV SOC"
+ENTITY_NAME_CONF_START_HOUR = "Charge start time"
 ENTITY_NAME_CONF_READY_HOUR = "Charge completion time"
 
 # Configuration and options
@@ -51,6 +52,7 @@ CONF_EV_SOC_SENSOR = "ev_soc_sensor"
 CONF_EV_TARGET_SOC_SENSOR = "ev_target_soc_sensor"
 CONF_CHARGER_ENTITY = "charger_entity"
 CONF_PCT_PER_HOUR = "pct_per_hour"
+CONF_START_HOUR = "start_hour"
 CONF_READY_HOUR = "ready_hour"
 CONF_MAX_PRICE = "maximum_price"
 CONF_MIN_SOC = "min_soc"
@@ -82,6 +84,7 @@ HOURS = [
     "22:00",
     "23:00",
 ]
+START_HOUR_NONE = -48
 READY_HOUR_NONE = 72
 
 # Defaults

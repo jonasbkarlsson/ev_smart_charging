@@ -7,11 +7,14 @@ from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
     CONF_READY_HOUR,
+    CONF_START_HOUR,
     DOMAIN,
     ENTITY_NAME_CONF_READY_HOUR,
+    ENTITY_NAME_CONF_START_HOUR,
     HOURS,
     ICON_TIME,
     SELECT,
+    START_HOUR_NONE,
 )
 from .coordinator import EVSmartChargingCoordinator
 from .entity import EVSmartChargingEntity
@@ -27,6 +30,7 @@ async def async_setup_entry(
     _LOGGER.debug("EVSmartCharging.select.py")
     coordinator = hass.data[DOMAIN][entry.entry_id]
     selects = []
+    selects.append(EVSmartChargingSelectStartHour(entry, coordinator))
     selects.append(EVSmartChargingSelectReadyHour(entry, coordinator))
     async_add_devices(selects)
 
@@ -48,8 +52,35 @@ class EVSmartChargingSelect(EVSmartChargingEntity, SelectEntity):
         self._attr_current_option = option
 
 
+class EVSmartChargingSelectStartHour(EVSmartChargingSelect):
+    """EV Smart Charging start_hour select class."""
+
+    _attr_name = ENTITY_NAME_CONF_START_HOUR
+    _attr_icon = ICON_TIME
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_options = HOURS
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSelectReadyHour.__init__()")
+        super().__init__(entry, coordinator)
+        if self.state is None:
+            self._attr_current_option = get_parameter(entry, CONF_START_HOUR)
+            self.update_ha_state()
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+        await super().async_select_option(option)
+        if self.state:
+            try:
+                self.coordinator.start_hour_local = int(self.state[0:2])
+            except ValueError:
+                # Don't use start_hour. Select a time in the past.
+                self.coordinator.start_hour_local = START_HOUR_NONE
+            await self.coordinator.update_sensors()
+
+
 class EVSmartChargingSelectReadyHour(EVSmartChargingSelect):
-    """EV Smart Charging active switch class."""
+    """EV Smart Charging ready_hour select class."""
 
     _attr_name = ENTITY_NAME_CONF_READY_HOUR
     _attr_icon = ICON_TIME
