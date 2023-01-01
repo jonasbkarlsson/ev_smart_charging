@@ -37,6 +37,7 @@ from .helpers.coordinator import (
     Scheduler,
     get_charging_value,
     get_ready_hour_utc,
+    get_start_hour_utc,
 )
 from .helpers.general import Validator, get_parameter
 from .sensor import EVSmartChargingSensor
@@ -420,6 +421,9 @@ class EVSmartChargingCoordinator:
             "ev_target_soc": self.ev_target_soc,
             "min_soc": self.number_min_soc,
             "charging_pct_per_hour": self.charging_pct_per_hour,
+            "start_hour": get_start_hour_utc(
+                self.start_hour_local, self.ready_hour_local
+            ),
             "ready_hour": get_ready_hour_utc(self.ready_hour_local),
             "switch_active": self.switch_active,
             "switch_apply_limit": self.switch_apply_limit,

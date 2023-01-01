@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from homeassistant.util import dt as dt_util
+from custom_components.ev_smart_charging.const import START_HOUR_NONE
 
 from custom_components.ev_smart_charging.helpers.coordinator import (
     Raw,
@@ -12,6 +13,7 @@ from custom_components.ev_smart_charging.helpers.coordinator import (
     get_charging_value,
     get_lowest_hours,
     get_ready_hour_utc,
+    get_start_hour_utc,
 )
 from tests.price import PRICE_20220930, PRICE_20221001
 from tests.schedule import MOCK_SCHEDULE_20220930
@@ -79,12 +81,17 @@ async def test_get_lowest_hours_non_continuous(hass, set_cet_timezone, freezer):
     """Test get_lowest_hours()"""
 
     raw_two_days: Raw = Raw(PRICE_20220930)
+    start_hour: int = START_HOUR_NONE
 
     freezer.move_to("2022-09-30T00:10:00+02:00")
     ready_hour: int = 8
     hours: int = 2
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        False,
+        raw_two_days,
+        hours,
     ) == [
         2,
         3,
@@ -94,7 +101,11 @@ async def test_get_lowest_hours_non_continuous(hass, set_cet_timezone, freezer):
     ready_hour: int = 8
     hours: int = 5
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), True, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        True,
+        raw_two_days,
+        hours,
     ) == [
         19,
         20,
@@ -110,7 +121,11 @@ async def test_get_lowest_hours_non_continuous(hass, set_cet_timezone, freezer):
     ready_hour: int = 8
     hours: int = 5
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        False,
+        raw_two_days,
+        hours,
     ) == [
         27,
         28,
@@ -120,14 +135,22 @@ async def test_get_lowest_hours_non_continuous(hass, set_cet_timezone, freezer):
     ]
     hours = 0
     assert not get_lowest_hours(
-        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        False,
+        raw_two_days,
+        hours,
     )
 
     freezer.move_to("2022-09-30T23:10:00+02:00")
     ready_hour: int = 4
     hours: int = 4
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        False,
+        raw_two_days,
+        hours,
     ) == [
         23,
         25,
@@ -139,7 +162,11 @@ async def test_get_lowest_hours_non_continuous(hass, set_cet_timezone, freezer):
     ready_hour: int = 4
     hours: int = 5
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        False,
+        raw_two_days,
+        hours,
     ) == [
         23,
         24,
@@ -152,7 +179,11 @@ async def test_get_lowest_hours_non_continuous(hass, set_cet_timezone, freezer):
     ready_hour: int = 4
     hours: int = 6
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        False,
+        raw_two_days,
+        hours,
     ) == [
         23,
         24,
@@ -165,7 +196,11 @@ async def test_get_lowest_hours_non_continuous(hass, set_cet_timezone, freezer):
     ready_hour: int = 8
     hours: int = 5
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        False,
+        raw_two_days,
+        hours,
     ) == [
         0,
         1,
@@ -178,7 +213,11 @@ async def test_get_lowest_hours_non_continuous(hass, set_cet_timezone, freezer):
     ready_hour: int = 8
     hours: int = 2
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        False,
+        raw_two_days,
+        hours,
     ) == [
         2,
         3,
@@ -189,12 +228,17 @@ async def test_get_lowest_hours_continuous(hass, set_cet_timezone, freezer):
     """Test get_lowest_hours()"""
 
     raw_two_days: Raw = Raw(PRICE_20220930)
+    start_hour: int = START_HOUR_NONE
 
     freezer.move_to("2022-09-30T00:10:00+02:00")
     ready_hour: int = 8
     hours: int = 2
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        False,
+        raw_two_days,
+        hours,
     ) == [
         2,
         3,
@@ -204,7 +248,11 @@ async def test_get_lowest_hours_continuous(hass, set_cet_timezone, freezer):
     ready_hour: int = 8
     hours: int = 5
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), True, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        True,
+        raw_two_days,
+        hours,
     ) == [
         19,
         20,
@@ -220,7 +268,11 @@ async def test_get_lowest_hours_continuous(hass, set_cet_timezone, freezer):
     ready_hour: int = 8
     hours: int = 5
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), True, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        True,
+        raw_two_days,
+        hours,
     ) == [
         27,
         28,
@@ -230,14 +282,22 @@ async def test_get_lowest_hours_continuous(hass, set_cet_timezone, freezer):
     ]
     hours = 0
     assert not get_lowest_hours(
-        get_ready_hour_utc(ready_hour), True, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        True,
+        raw_two_days,
+        hours,
     )
 
     freezer.move_to("2022-09-30T15:10:00+02:00")
     ready_hour: int = 6
     hours: int = 5
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), True, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        True,
+        raw_two_days,
+        hours,
     ) == [
         25,
         26,
@@ -250,7 +310,11 @@ async def test_get_lowest_hours_continuous(hass, set_cet_timezone, freezer):
     ready_hour: int = 6
     hours: int = 10
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), True, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        True,
+        raw_two_days,
+        hours,
     ) == [
         23,
         24,
@@ -265,7 +329,11 @@ async def test_get_lowest_hours_continuous(hass, set_cet_timezone, freezer):
     ready_hour: int = 4
     hours: int = 4
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), True, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        True,
+        raw_two_days,
+        hours,
     ) == [
         24,
         25,
@@ -277,7 +345,11 @@ async def test_get_lowest_hours_continuous(hass, set_cet_timezone, freezer):
     ready_hour: int = 8
     hours: int = 5
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        False,
+        raw_two_days,
+        hours,
     ) == [
         0,
         1,
@@ -290,7 +362,11 @@ async def test_get_lowest_hours_continuous(hass, set_cet_timezone, freezer):
     ready_hour: int = 8
     hours: int = 2
     assert get_lowest_hours(
-        get_ready_hour_utc(ready_hour), False, raw_two_days, hours
+        get_start_hour_utc(start_hour, ready_hour),
+        get_ready_hour_utc(ready_hour),
+        False,
+        raw_two_days,
+        hours,
     ) == [
         2,
         3,
@@ -392,6 +468,7 @@ async def test_scheduler(hass, set_cet_timezone, freezer):
         "ev_target_soc": 80,
         "min_soc": 0,
         "charging_pct_per_hour": 4,
+        "start_hour": get_start_hour_utc(START_HOUR_NONE, 7),
         "ready_hour": get_ready_hour_utc(7),
         "switch_active": True,
         "switch_continuous": True,
