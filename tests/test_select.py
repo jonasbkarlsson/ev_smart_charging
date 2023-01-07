@@ -7,14 +7,18 @@ from custom_components.ev_smart_charging import (
 )
 from custom_components.ev_smart_charging.const import (
     CONF_READY_HOUR,
+    CONF_START_HOUR,
     DOMAIN,
+    READY_HOUR_NONE,
     SELECT,
+    START_HOUR_NONE,
 )
 from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
 from custom_components.ev_smart_charging.select import (
     EVSmartChargingSelectReadyHour,
+    EVSmartChargingSelectStartHour,
 )
 
 from .const import MOCK_CONFIG_MIN_SOC
@@ -46,22 +50,35 @@ async def test_select(hass, bypass_validate_input_sensors):
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     # Get the selects
+    select_start_hour: EVSmartChargingSelectStartHour = hass.data["entity_components"][
+        SELECT
+    ].get_entity("select.none_charge_start_time")
     select_ready_hour: EVSmartChargingSelectReadyHour = hass.data["entity_components"][
         SELECT
     ].get_entity("select.none_charge_completion_time")
+    assert select_start_hour
     assert select_ready_hour
+    assert isinstance(select_start_hour, EVSmartChargingSelectStartHour)
     assert isinstance(select_ready_hour, EVSmartChargingSelectReadyHour)
 
     # Test the selects
 
+    assert select_start_hour.state == MOCK_CONFIG_MIN_SOC[CONF_START_HOUR]
     assert select_ready_hour.state == MOCK_CONFIG_MIN_SOC[CONF_READY_HOUR]
+
+    await select_start_hour.async_select_option("00:00")
+    assert coordinator.start_hour_local == 0
+    await select_start_hour.async_select_option("13:00")
+    assert coordinator.start_hour_local == 13
+    await select_start_hour.async_select_option("None")
+    assert coordinator.start_hour_local == START_HOUR_NONE
 
     await select_ready_hour.async_select_option("00:00")
     assert coordinator.ready_hour_local == 24
     await select_ready_hour.async_select_option("13:00")
     assert coordinator.ready_hour_local == 13
     await select_ready_hour.async_select_option("None")
-    assert coordinator.ready_hour_local == 72
+    assert coordinator.ready_hour_local == READY_HOUR_NONE
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)

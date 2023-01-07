@@ -18,6 +18,7 @@ from .const import (
     CONF_CHARGER_ENTITY,
     CONF_PCT_PER_HOUR,
     CONF_READY_HOUR,
+    CONF_START_HOUR,
     DOMAIN,
     HOURS,
     NAME,
@@ -31,7 +32,7 @@ _LOGGER = logging.getLogger(__name__)
 class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow."""
 
-    VERSION = 1
+    VERSION = 2
     user_input: Optional[dict[str, Any]]
 
     def __init__(self):
@@ -121,6 +122,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input = {}
         # Provide defaults for form
         user_input[CONF_PCT_PER_HOUR] = 6.0
+        user_input[CONF_START_HOUR] = "None"
         user_input[CONF_READY_HOUR] = "08:00"
         user_input[CONF_MAX_PRICE] = 0.0
         user_input[CONF_MIN_SOC] = 0.0
@@ -134,6 +136,9 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required(
                 CONF_PCT_PER_HOUR, default=user_input[CONF_PCT_PER_HOUR]
             ): cv.positive_float,
+            vol.Required(CONF_START_HOUR, default=user_input[CONF_START_HOUR]): vol.In(
+                HOURS
+            ),
             vol.Required(CONF_READY_HOUR, default=user_input[CONF_READY_HOUR]): vol.In(
                 HOURS
             ),
@@ -173,6 +178,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         CONF_PCT_PER_HOUR,
                         default=get_parameter(self.config_entry, CONF_PCT_PER_HOUR),
                     ): cv.positive_float,
+                    vol.Required(
+                        CONF_START_HOUR,
+                        default=get_parameter(self.config_entry, CONF_START_HOUR),
+                    ): vol.In(HOURS),
                     vol.Required(
                         CONF_READY_HOUR,
                         default=get_parameter(self.config_entry, CONF_READY_HOUR),

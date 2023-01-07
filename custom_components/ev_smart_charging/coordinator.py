@@ -26,8 +26,10 @@ from .const import (
     CONF_PRICE_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
+    CONF_START_HOUR,
     DEFAULT_TARGET_SOC,
     READY_HOUR_NONE,
+    START_HOUR_NONE,
     SWITCH,
 )
 from .helpers.coordinator import (
@@ -35,6 +37,7 @@ from .helpers.coordinator import (
     Scheduler,
     get_charging_value,
     get_ready_hour_utc,
+    get_start_hour_utc,
 )
 from .helpers.general import Validator, get_parameter
 from .sensor import EVSmartChargingSensor
@@ -84,6 +87,14 @@ class EVSmartChargingCoordinator:
         self.raw_two_days = None
         self._charging_schedule = None
         self.charging_pct_per_hour = get_parameter(self.config_entry, CONF_PCT_PER_HOUR)
+
+        try:
+            self.start_hour_local = int(
+                get_parameter(self.config_entry, CONF_START_HOUR)[0:2]
+            )
+        except ValueError:
+            # Don't use start_hour. Select a time in the past.
+            self.start_hour_local = START_HOUR_NONE
 
         try:
             self.ready_hour_local = int(
@@ -410,6 +421,9 @@ class EVSmartChargingCoordinator:
             "ev_target_soc": self.ev_target_soc,
             "min_soc": self.number_min_soc,
             "charging_pct_per_hour": self.charging_pct_per_hour,
+            "start_hour": get_start_hour_utc(
+                self.start_hour_local, self.ready_hour_local
+            ),
             "ready_hour": get_ready_hour_utc(self.ready_hour_local),
             "switch_active": self.switch_active,
             "switch_apply_limit": self.switch_apply_limit,

@@ -19,12 +19,13 @@ The integration calculates the set of hours that will give the lowest price, by 
 
 ## Features
 - Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) integration.
-- Configuraton of the latest time of the day when the charging should be completed.
+- Configuraton of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
 - Optional setting of minimum SOC level that should be reached indepently of the electrity price.
 - Optional setting to only charge when the electricty price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
 - Optional possibility to provide information to the integration about when the EV is connected to the charger.
 - Optional possibility to keep the charger on after completed charging, to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery.
+- Service calls to dynamically control all configuation parameters that affect charging.
 - Automatically detects and connects to the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Connnections to other EV and charger integrations can be configured manually.
 
 ## Installation
@@ -52,7 +53,7 @@ The first form contains the entities that the integration is interacting with.
 Parameter | Required | Description
 -- | -- | --
 Electricity price entity | Yes | The Nordpool integration sensor entity.
-EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100.
+EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100. Note that this entity is crucial for the integration. If live information about he SOC is not available, please carefully read the section below with more information about the EV SOC entity.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control switch entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'.
 
@@ -60,7 +61,8 @@ The second form contains parameters that affects how the charging will be perfor
 Parameter | Required | Description
 -- | -- | --
 Charging speed | Yes | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you!
-Charge completion time | Yes | The lastest time of the day for charging to reach the target State-of-Charge. Note, the idea is to set this to a time that is reasonable in most cases, and not to updated this every day. If `None` is selected, charging will be optimized using all hours with available price information.
+Charge start time | Yes | The earliest time of the day for the charging to start. If `None` is selected, there will be no explicit limitation of the starting time.
+Charge completion time | Yes | The lastest time of the day for charging to reach the target State-of-Charge. If `None` is selected, charging will be optimized using all hours with available price information.
 Electricity price limit | Yes | If the `apply_price_limit` switch is activated, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge. Also if the price limit is set to zero, there will be no limitations.
 Minimum EV SOC | Yes | The minimum State-of-Charge that should be charged, independently of the electricity price.
 
@@ -83,6 +85,7 @@ The configuration parameters that affects how the charging will be performed are
 
 Entity | Type | Valid value ranges and service calls
 -- | -- | --
+`select.ev_smart_charging_charge_start_time` | Select | Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
 `select.ev_smart_charging_charge_completion_time` | Select | Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
 `number.ev_smart_charging_charging_speed` | Number | Valid values min=0.1, step=0.1, max=100. Can be set by service call `number.set_value`.
 `number.ev_smart_charging_electricity_price_limit` | Number | Valid values min=0, step=0.01, max=10000. Can be set by service call `number.set_value`.
@@ -251,9 +254,9 @@ action:
 mode: single
 ```
 
-A lot the functionality in this integration relies on knowing the EV SOC. However, if this information is not available, then it is still possible to use this integration to control a charger with very basic functionality. In this case, create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`), and then use this entity when configuring the integration.
+A lot of the functionality in this integration relies on knowing the EV SOC. However, if this information is not available, then it is still possible to use this integration to control a charger. In this case, create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`), and then use this entity when configuring the integration. For the integration to work well, the value of the SOC should change between charging cycles. The recommended way to do this is to set the SOC value to 100 when charging is completed, and then set it to an appropriate value when starting next charging cycle.
 
-For example, if the SOC entity is set 60, the Target SOC entity is set to 100 (or not configured) and the `Charging speed` parameter is set to 10, then there will be 4 hours of charging each night, (100-60)/10 = 4.
+For example, if the SOC entity is set 60, the Target SOC entity is set to 100 (or not configured) and the `Charging speed` parameter is set to 10, then there will be 4 hours of charging, (100-60)/10 = 4.
 
 ### EV Target SOC entity
 If the EV Target SOC is available as a state attribute, then a similar solution as for EV SOC above can be used.

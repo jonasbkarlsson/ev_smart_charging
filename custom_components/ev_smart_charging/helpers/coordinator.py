@@ -7,7 +7,7 @@ from math import ceil
 from typing import Any
 from homeassistant.util import dt
 
-from custom_components.ev_smart_charging.const import READY_HOUR_NONE
+from custom_components.ev_smart_charging.const import READY_HOUR_NONE, START_HOUR_NONE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -99,18 +99,22 @@ class Raw:
 
 
 def get_lowest_hours(
-    ready_hour: datetime, continuous: bool, raw_two_days: Raw, hours: int
+    start_hour: datetime,
+    ready_hour: datetime,
+    continuous: bool,
+    raw_two_days: Raw,
+    hours: int,
 ) -> list:
     """From the two-day prices, calculate the cheapest set of hours"""
 
     if continuous:
-        return get_lowest_hours_continuous(ready_hour, raw_two_days, hours)
+        return get_lowest_hours_continuous(start_hour, ready_hour, raw_two_days, hours)
 
-    return get_lowest_hours_non_continuous(ready_hour, raw_two_days, hours)
+    return get_lowest_hours_non_continuous(start_hour, ready_hour, raw_two_days, hours)
 
 
 def get_lowest_hours_non_continuous(
-    ready_hour: datetime, raw_two_days: Raw, hours: int
+    start_hour: datetime, ready_hour: datetime, raw_two_days: Raw, hours: int
 ) -> list:
     """From the two-day prices, calculate the cheapest non-continues set of hours
 
@@ -124,29 +128,31 @@ def get_lowest_hours_non_continuous(
     price = []
     for item in raw_two_days.get_raw():
         price.append(item["value"])
-    time_now = dt.utcnow()
+    time_start = dt.utcnow()
+    if start_hour > time_start:
+        time_start = start_hour
     time_end = ready_hour
-    time_now_index = None
+    time_start_index = None
     time_end_index = None
     for index in range(len(price)):
         item = raw_two_days.get_raw()[index]
-        if item["end"] > time_now and time_now_index is None:
-            time_now_index = index
+        if item["end"] > time_start and time_start_index is None:
+            time_start_index = index
         if item["start"] < time_end:
             time_end_index = index
 
-    if (time_end_index - time_now_index) < hours:
-        return list(range(time_now_index, time_end_index + 1))
+    if (time_end_index - time_start_index) < hours:
+        return list(range(time_start_index, time_end_index + 1))
 
-    prices = price[time_now_index : time_end_index + 1]
+    prices = price[time_start_index : time_end_index + 1]
     sorted_index = sorted(range(len(prices)), key=prices.__getitem__)
-    lowest_hours = [x + time_now_index for x in sorted(sorted_index[0:hours])]
+    lowest_hours = [x + time_start_index for x in sorted(sorted_index[0:hours])]
 
     return lowest_hours
 
 
 def get_lowest_hours_continuous(
-    ready_hour: datetime, raw_two_days: Raw, hours: int
+    start_hour: datetime, ready_hour: datetime, raw_two_days: Raw, hours: int
 ) -> list:
     """From the two-day prices, calculate the cheapest continues set of hours
 
@@ -162,24 +168,26 @@ def get_lowest_hours_continuous(
         price.append(item["value"])
     lowest_index = None
     lowest_price = None
-    time_now = dt.utcnow()
+    time_start = dt.utcnow()
+    if start_hour > time_start:
+        time_start = start_hour
     time_end = ready_hour
     # time_end = dt.now().replace(
     #     hour=ready_hour, minute=0, second=0, microsecond=0
     # ) + timedelta(days=1)
-    time_now_index = None
+    time_start_index = None
     time_end_index = None
     for index in range(len(price)):
         item = raw_two_days.get_raw()[index]
-        if item["end"] > time_now and time_now_index is None:
-            time_now_index = index
+        if item["end"] > time_start and time_start_index is None:
+            time_start_index = index
         if item["start"] < time_end:
             time_end_index = index
 
-    if (time_end_index - time_now_index) < hours:
-        return list(range(time_now_index, time_end_index + 1))
+    if (time_end_index - time_start_index) < hours:
+        return list(range(time_start_index, time_end_index + 1))
 
-    for index in range(time_now_index, time_end_index - hours + 2):
+    for index in range(time_start_index, time_end_index - hours + 2):
         if lowest_index is None:
             lowest_index = index
             lowest_price = sum(price[index : (index + hours)])
@@ -255,7 +263,6 @@ def get_ready_hour_utc(ready_hour_local: int) -> datetime:
 
     # if now_local <= ready_hour_local THEN ready_hour_utc is today
     # if now_local > ready_hour_local THEN ready_hour_utc is tomorrow
-    # What happens if now_local > ready_hour_local AND tomorrow_valid is False???
 
     time_local: datetime = dt.now()
     if time_local.hour >= ready_hour_local or ready_hour_local == 24:
@@ -264,6 +271,29 @@ def get_ready_hour_utc(ready_hour_local: int) -> datetime:
         time_local = time_local + timedelta(days=3)
     time_local = time_local.replace(
         hour=ready_hour_local % 24, minute=0, second=0, microsecond=0
+    )
+    return dt.as_utc(time_local)
+
+
+def get_start_hour_utc(start_hour_local: int, ready_hour_local: int) -> datetime:
+    """Get the UTC time for the ready hour"""
+
+    # if now_local <= ready_hour_local THEN ready_hour_utc is today
+    # if now_local > ready_hour_local THEN ready_hour_utc is tomorrow
+
+    time_local: datetime = dt.now()
+    if start_hour_local == START_HOUR_NONE:
+        time_local = time_local + timedelta(days=-2)
+    elif ready_hour_local != READY_HOUR_NONE:
+        if start_hour_local < ready_hour_local:
+            if time_local.hour >= ready_hour_local:
+                time_local = time_local + timedelta(days=1)
+        else:
+            if time_local.hour < ready_hour_local:
+                time_local = time_local + timedelta(days=-1)
+
+    time_local = time_local.replace(
+        hour=start_hour_local % 24, minute=0, second=0, microsecond=0
     )
     return dt.as_utc(time_local)
 
@@ -301,6 +331,7 @@ class Scheduler:
         )
         _LOGGER.debug("charging_hours = %s", charging_hours)
         lowest_hours = get_lowest_hours(
+            params["start_hour"],
             params["ready_hour"],
             params["switch_continuous"],
             raw_two_days,
@@ -320,6 +351,7 @@ class Scheduler:
         )
         _LOGGER.debug("charging_hours_min_soc = %s", charging_hours)
         lowest_hours = get_lowest_hours(
+            params["start_hour"],
             params["ready_hour"],
             params["switch_continuous"],
             raw_two_days,
@@ -454,9 +486,9 @@ def main():  # pragma: no cover
     raw2 = Raw(result)
     print("r2.raw = " + str(raw2.get_raw()))
     print("price = ", value)
-    lowest = get_lowest_hours_continuous(end_time, raw2, 2)
+    lowest = get_lowest_hours_continuous(start_time, end_time, raw2, 2)
     print("lowest = " + str(lowest))
-    lowest = get_lowest_hours_non_continuous(end_time, raw2, 2)
+    lowest = get_lowest_hours_non_continuous(start_time, end_time, raw2, 2)
     print("lowest = " + str(lowest))
 
 

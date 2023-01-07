@@ -14,7 +14,8 @@
                 "description": "Setup of charging parameters",
                 "data": {
                     "pct_per_hour": "Assumed charging per hour expressed in percent",
-                    "ready_hour": "Latest time for charging to be completed next day",
+                    "start_hour": "Earliest time of the day for charging to be started",
+                    "ready_hour": "Latest time of the day for charging to be completed",
                     "maximum_price": "Maximum price for charging. 0 = no limit.",
                     "min_soc": "Minimum EV SOC (independent of price)"
                 }
@@ -38,7 +39,8 @@
                 "description": "Setup of charging parameters",
                 "data": {
                     "pct_per_hour": "Assumed charging per hour expressed in percent",
-                    "ready_hour": "Latest time for charging to be completed next day",
+                    "start_hour": "Earliest time of the day for charging to be started",
+                    "ready_hour": "Latest time of the day for charging to be completed",
                     "maximum_price": "Maximum price for charging. 0 = no limit.",
                     "min_soc": "Minimum EV SOC (independent of price)"
                 }

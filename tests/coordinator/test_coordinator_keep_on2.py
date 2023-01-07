@@ -21,7 +21,7 @@ from tests.helpers.helpers import (
     MockTargetSOCEntity,
 )
 from tests.price import PRICE_20220930, PRICE_20221001, PRICE_20221002
-from .const import (
+from tests.const import (
     MOCK_CONFIG_KEEP_ON1,
     MOCK_CONFIG_KEEP_ON2,
 )
