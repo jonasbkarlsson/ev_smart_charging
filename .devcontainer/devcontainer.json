@@ -11,7 +11,8 @@
 		"ms-python.python",
 		"github.vscode-pull-request-github",
 		"ryanluker.vscode-coverage-gutters",
-		"ms-python.vscode-pylance"
+		"ms-python.vscode-pylance",
+		"donjayamanne.githistory"
 	],
 	"settings": {
 		"files.eol": "\n",
