@@ -22,7 +22,7 @@ from tests.helpers.helpers import (
     MockTargetSOCEntity,
 )
 from tests.price import PRICE_20220930, PRICE_20221001, PRICE_20221002
-from .const import MOCK_CONFIG_LATE, MOCK_CONFIG_LATE24
+from tests.const import MOCK_CONFIG_LATE, MOCK_CONFIG_LATE24
 
 # pylint: disable=unused-argument
 async def test_coordinator_late_ready(

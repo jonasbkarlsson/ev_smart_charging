@@ -22,7 +22,7 @@ from tests.helpers.helpers import (
     MockTargetSOCEntity,
 )
 from tests.price import PRICE_20220930, PRICE_20221001
-from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_MIN_SOC, MOCK_CONFIG_NO_TARGET_SOC
+from tests.const import MOCK_CONFIG_ALL, MOCK_CONFIG_MIN_SOC, MOCK_CONFIG_NO_TARGET_SOC
 
 # pylint: disable=unused-argument
 async def test_coordinator(
