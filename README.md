@@ -19,7 +19,7 @@ The integration calculates the set of hours that will give the lowest price, by 
 
 ## Features
 - Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) integration.
-- Configuraton of the latest time of the day when the charging should be completed.
+- Configuraton of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
 - Optional setting of minimum SOC level that should be reached indepently of the electrity price.
 - Optional setting to only charge when the electricty price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
@@ -60,7 +60,8 @@ The second form contains parameters that affects how the charging will be perfor
 Parameter | Required | Description
 -- | -- | --
 Charging speed | Yes | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you!
-Charge completion time | Yes | The lastest time of the day for charging to reach the target State-of-Charge. Note, the idea is to set this to a time that is reasonable in most cases, and not to updated this every day. If `None` is selected, charging will be optimized using all hours with available price information.
+Charge start time | Yes | The earliest time of the day for the charging to start. If `None` is selected, there will be no explicit limitation of the starting time.
+Charge completion time | Yes | The lastest time of the day for charging to reach the target State-of-Charge. If `None` is selected, charging will be optimized using all hours with available price information.
 Electricity price limit | Yes | If the `apply_price_limit` switch is activated, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge. Also if the price limit is set to zero, there will be no limitations.
 Minimum EV SOC | Yes | The minimum State-of-Charge that should be charged, independently of the electricity price.
 
@@ -83,6 +84,7 @@ The configuration parameters that affects how the charging will be performed are
 
 Entity | Type | Valid value ranges and service calls
 -- | -- | --
+`select.ev_smart_charging_charge_start_time` | Select | Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
 `select.ev_smart_charging_charge_completion_time` | Select | Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
 `number.ev_smart_charging_charging_speed` | Number | Valid values min=0.1, step=0.1, max=100. Can be set by service call `number.set_value`.
 `number.ev_smart_charging_electricity_price_limit` | Number | Valid values min=0, step=0.01, max=10000. Can be set by service call `number.set_value`.
