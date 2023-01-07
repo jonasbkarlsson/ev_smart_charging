@@ -25,6 +25,7 @@ The integration calculates the set of hours that will give the lowest price, by 
 - Optional setting to only charge when the electricty price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
 - Optional possibility to provide information to the integration about when the EV is connected to the charger.
 - Optional possibility to keep the charger on after completed charging, to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery.
+- Service calls to dynamically control all configuation parameters that affect charging.
 - Automatically detects and connects to the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Connnections to other EV and charger integrations can be configured manually.
 
 ## Installation
