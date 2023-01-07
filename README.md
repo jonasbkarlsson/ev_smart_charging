@@ -253,7 +253,7 @@ action:
 mode: single
 ```
 
-A lot the functionality in this integration relies on knowing the EV SOC. However, if this information is not available, then it is still possible to use this integration to control a charger. In this case, create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`), and then use this entity when configuring the integration. For the integration to work well, the value of the EV SOC should change between charging cycles. The recommended way to do this is to set the EV SOC value to 100 when charging is completed, and then set it to an appropriate value when starting next charging cycle.
+A lot of the functionality in this integration relies on knowing the EV SOC. However, if this information is not available, then it is still possible to use this integration to control a charger. In this case, create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`), and then use this entity when configuring the integration. For the integration to work well, the value of the SOC should change between charging cycles. The recommended way to do this is to set the SOC value to 100 when charging is completed, and then set it to an appropriate value when starting next charging cycle.
 
 For example, if the SOC entity is set 60, the Target SOC entity is set to 100 (or not configured) and the `Charging speed` parameter is set to 10, then there will be 4 hours of charging, (100-60)/10 = 4.
 
