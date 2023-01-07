@@ -52,7 +52,7 @@ The first form contains the entities that the integration is interacting with.
 Parameter | Required | Description
 -- | -- | --
 Electricity price entity | Yes | The Nordpool integration sensor entity.
-EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100.
+EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100. Note that this entity is crucial for the integration. If live information about he SOC is not available, please carefully read the section below with more information about the EV SOC entity.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control switch entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'.
 
@@ -253,9 +253,9 @@ action:
 mode: single
 ```
 
-A lot the functionality in this integration relies on knowing the EV SOC. However, if this information is not available, then it is still possible to use this integration to control a charger with very basic functionality. In this case, create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`), and then use this entity when configuring the integration.
+A lot the functionality in this integration relies on knowing the EV SOC. However, if this information is not available, then it is still possible to use this integration to control a charger. In this case, create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`), and then use this entity when configuring the integration. For the integration to work well, the value of the EV SOC should change between charging cycles. The recommended way to do this is to set the EV SOC value to 100 when charging is completed, and then set it to an appropriate value when starting next charging cycle.
 
-For example, if the SOC entity is set 60, the Target SOC entity is set to 100 (or not configured) and the `Charging speed` parameter is set to 10, then there will be 4 hours of charging each night, (100-60)/10 = 4.
+For example, if the SOC entity is set 60, the Target SOC entity is set to 100 (or not configured) and the `Charging speed` parameter is set to 10, then there will be 4 hours of charging, (100-60)/10 = 4.
 
 ### EV Target SOC entity
 If the EV Target SOC is available as a state attribute, then a similar solution as for EV SOC above can be used.
