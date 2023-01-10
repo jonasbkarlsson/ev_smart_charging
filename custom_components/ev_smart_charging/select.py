@@ -1,5 +1,6 @@
 """Select platform for EV Smart Charging."""
 import logging
+from typing import Union
 
 from homeassistant.components.select import SelectEntity
 from homeassistant.core import HomeAssistant
@@ -38,7 +39,7 @@ async def async_setup_entry(
 class EVSmartChargingSelect(EVSmartChargingEntity, SelectEntity):
     """EV Smart Charging switch class."""
 
-    _attr_current_option: str | None = None
+    _attr_current_option: Union[str, None] = None  # Using Union to support Python 3.9
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingSelect.__init__()")

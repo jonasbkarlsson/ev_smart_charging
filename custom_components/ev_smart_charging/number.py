@@ -1,5 +1,6 @@
 """Number platform for EV Smart Charging."""
 import logging
+from typing import Union
 
 from homeassistant.components.number import NumberEntity
 from homeassistant.core import HomeAssistant
@@ -40,7 +41,8 @@ async def async_setup_entry(
 class EVSmartChargingNumber(EVSmartChargingEntity, NumberEntity):
     """EV Smart Charging switch class."""
 
-    _attr_native_value: float | None = None  # To support HA 2022.7
+    # To support HA 2022.7
+    _attr_native_value: Union[float, None] = None  # Using Union to support Python 3.9
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingNumber.__init__()")
