@@ -65,6 +65,7 @@ class EVSmartChargingCoordinator:
         self.switch_keep_on = None
         self.switch_keep_on_entity_id = None
         self.switch_keep_on_unique_id = None
+        self.switch_keep_on_completion_time = None
         self.price_entity_id = None
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
@@ -169,12 +170,15 @@ class EVSmartChargingCoordinator:
                         self.ev_soc is not None
                         and self.ev_target_soc is not None
                         and self.ev_soc >= self.ev_target_soc
-                        or (
-                            self.scheduler.charging_stop_time is not None
-                            and time_now >= self.scheduler.charging_stop_time
-                        )
                     ):
-                        # Turn on charger.
+                        # Keep charger on.
+                        self.switch_keep_on_completion_time = time_now
+                        turn_on_charging = True
+
+                    if self.switch_keep_on_completion_time is not None and (
+                        time_now >= self.switch_keep_on_completion_time
+                    ):
+                        # Keep charger on.
                         turn_on_charging = True
 
             _LOGGER.debug("turn_on_charging = %s", turn_on_charging)
@@ -183,6 +187,10 @@ class EVSmartChargingCoordinator:
                 # Turn on charging
                 self.auto_charging_state = STATE_ON
                 self.ev_soc_before_last_charging = self.ev_soc
+                if self.scheduler.get_charging_is_planned():
+                    self.switch_keep_on_completion_time = (
+                        self.scheduler.get_charging_stop_time()
+                    )
                 await self.turn_on_charging()
             if not turn_on_charging and current_value:
                 # Turn off charging
@@ -323,6 +331,7 @@ class EVSmartChargingCoordinator:
         if state:
             # Clear schedule when connected to charger
             self.scheduler.set_empty_schedule()
+            self.switch_keep_on_completion_time = None
         await self.update_sensors()
 
     async def switch_keep_on_update(self, state: bool):

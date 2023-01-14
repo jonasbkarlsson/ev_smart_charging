@@ -115,6 +115,9 @@ async def test_coordinator_keep_on1(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
+    MockSOCEntity.set_state(hass, "80")
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
 
     # Move time to after scheduled charging time
     freezer.move_to("2022-10-01T09:00:00+02:00")
