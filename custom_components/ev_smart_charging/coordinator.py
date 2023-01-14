@@ -166,7 +166,6 @@ class EVSmartChargingCoordinator:
                     self.switch_apply_limit is False or self.max_price == 0.0
                 ) and self.switch_ev_connected:
                     # Only if SOC has reached Target SOC or there are no more scheduled charging
-                    # TODO: Need to change this to fix issue 98
                     if (
                         self.ev_soc is not None
                         and self.ev_target_soc is not None
