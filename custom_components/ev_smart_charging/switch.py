@@ -14,6 +14,7 @@ from .const import (
     ENTITY_NAME_CONTINUOUS_SWITCH,
     ENTITY_NAME_EV_CONNECTED_SWITCH,
     ENTITY_NAME_KEEP_ON_SWITCH,
+    ENTITY_NAME_OPPORTUNISTIC_SWITCH,
     ICON_CONNECTION,
     SWITCH,
 )
@@ -35,6 +36,7 @@ async def async_setup_entry(
     switches.append(EVSmartChargingSwitchContinuous(entry, coordinator))
     switches.append(EVSmartChargingSwitchEVConnected(entry, coordinator))
     switches.append(EVSmartChargingSwitchKeepOn(entry, coordinator))
+    switches.append(EVSmartChargingSwitchOpportunistic(entry, coordinator))
     async_add_devices(switches)
 
 
@@ -187,3 +189,28 @@ class EVSmartChargingSwitchKeepOn(EVSmartChargingSwitch):
         """Turn the entity off."""
         await super().async_turn_off(**kwargs)
         await self.coordinator.switch_keep_on_update(False)
+
+
+class EVSmartChargingSwitchOpportunistic(EVSmartChargingSwitch):
+    """EV Smart Charging opportunistic switch class."""
+
+    _attr_name = ENTITY_NAME_OPPORTUNISTIC_SWITCH
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSwitchOpportunistic.__init__()")
+        super().__init__(entry, coordinator)
+        if self.is_on is None:
+            self._attr_is_on = False
+            self.update_ha_state()
+        self.coordinator.switch_opportunistic = self.is_on
+        self.coordinator.switch_opportunistic_unique_id = self._attr_unique_id
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+        await super().async_turn_on(**kwargs)
+        await self.coordinator.switch_opportunistic_update(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""
+        await super().async_turn_off(**kwargs)
+        await self.coordinator.switch_opportunistic_update(False)
