@@ -4,6 +4,7 @@ from custom_components.ev_smart_charging.const import (
     CONF_DEVICE_NAME,
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
+    CONF_OPPORTUNISTIC_LEVEL,
     CONF_PRICE_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
@@ -47,6 +48,7 @@ MOCK_CONFIG_CHARGER = {
     CONF_START_HOUR: "None",
     CONF_READY_HOUR: "08:00",
     CONF_MAX_PRICE: 0.0,
+    CONF_OPPORTUNISTIC_LEVEL: 50.0,
     CONF_MIN_SOC: 30.0,
 }
 
@@ -56,6 +58,7 @@ MOCK_CONFIG_CHARGER_EXTRA = {
     CONF_START_HOUR: "None",
     CONF_READY_HOUR: "08:00",
     CONF_MAX_PRICE: 0.0,
+    CONF_OPPORTUNISTIC_LEVEL: 50.0,
     CONF_MIN_SOC: 30.0,
 }
 
@@ -70,6 +73,18 @@ MOCK_CONFIG_ALL_V1 = {
     CONF_MIN_SOC: 30.0,
 }
 
+MOCK_CONFIG_ALL_V2 = {
+    CONF_PRICE_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0",
+    CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
+    CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
+    CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
+    CONF_PCT_PER_HOUR: 6.0,
+    CONF_START_HOUR: "None",
+    CONF_READY_HOUR: "08:00",
+    CONF_MAX_PRICE: 0.0,
+    CONF_MIN_SOC: 30.0,
+}
+
 MOCK_CONFIG_ALL = {
     CONF_PRICE_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0",
     CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
@@ -79,6 +94,7 @@ MOCK_CONFIG_ALL = {
     CONF_START_HOUR: "None",
     CONF_READY_HOUR: "08:00",
     CONF_MAX_PRICE: 0.0,
+    CONF_OPPORTUNISTIC_LEVEL: 50.0,
     CONF_MIN_SOC: 30.0,
 }
 

@@ -17,6 +17,7 @@
                     "start_hour": "Earliest time of the day for charging to be started",
                     "ready_hour": "Latest time of the day for charging to be completed",
                     "maximum_price": "Maximum price for charging. 0 = no limit.",
+                    "opportunistic_level": "Percentage of maximum price that will trigger opportunistic charging",
                     "min_soc": "Minimum EV SOC (independent of price)"
                 }
             }
@@ -42,6 +43,7 @@
                     "start_hour": "Earliest time of the day for charging to be started",
                     "ready_hour": "Latest time of the day for charging to be completed",
                     "maximum_price": "Maximum price for charging. 0 = no limit.",
+                    "opportunistic_level": "Percentage of maximum price that will trigger opportunistic charging",
                     "min_soc": "Minimum EV SOC (independent of price)"
                 }
             }
