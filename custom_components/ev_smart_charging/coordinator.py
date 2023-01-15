@@ -21,6 +21,7 @@ from .const import (
     CONF_CHARGER_ENTITY,
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
+    CONF_OPPORTUNISTIC_LEVEL,
     CONF_PCT_PER_HOUR,
     CONF_READY_HOUR,
     CONF_PRICE_SENSOR,
@@ -114,6 +115,9 @@ class EVSmartChargingCoordinator:
 
         self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE))
         self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC))
+        self.number_opportunistic_level = int(
+            get_parameter(self.config_entry, CONF_OPPORTUNISTIC_LEVEL)
+        )
 
         self.auto_charging_state = STATE_OFF
 

@@ -8,6 +8,7 @@ from custom_components.ev_smart_charging import (
 from custom_components.ev_smart_charging.const import (
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
+    CONF_OPPORTUNISTIC_LEVEL,
     CONF_PCT_PER_HOUR,
     DOMAIN,
     NUMBER,
@@ -17,6 +18,7 @@ from custom_components.ev_smart_charging.coordinator import (
 )
 from custom_components.ev_smart_charging.number import (
     EVSmartChargingNumberChargingSpeed,
+    EVSmartChargingNumberOpportunistic,
     EVSmartChargingNumberPriceLimit,
     EVSmartChargingNumberMinSOC,
 )
@@ -59,18 +61,27 @@ async def test_number(hass, bypass_validate_input_sensors):
     number_min_soc: EVSmartChargingNumberMinSOC = hass.data["entity_components"][
         NUMBER
     ].get_entity("number.none_minimum_ev_soc")
+    number_opportunistic: EVSmartChargingNumberOpportunistic = hass.data[
+        "entity_components"
+    ][NUMBER].get_entity("number.none_opportunistic_level")
     assert number_charging_speed
     assert number_price_limit
     assert number_min_soc
+    assert number_opportunistic
     assert isinstance(number_charging_speed, EVSmartChargingNumberChargingSpeed)
     assert isinstance(number_price_limit, EVSmartChargingNumberPriceLimit)
     assert isinstance(number_min_soc, EVSmartChargingNumberMinSOC)
+    assert isinstance(number_opportunistic, EVSmartChargingNumberOpportunistic)
 
     # Test the numbers
 
     assert number_charging_speed.native_value == MOCK_CONFIG_MIN_SOC[CONF_PCT_PER_HOUR]
     assert number_price_limit.native_value == MOCK_CONFIG_MIN_SOC[CONF_MAX_PRICE]
     assert number_min_soc.native_value == MOCK_CONFIG_MIN_SOC[CONF_MIN_SOC]
+    assert (
+        number_opportunistic.native_value
+        == MOCK_CONFIG_MIN_SOC[CONF_OPPORTUNISTIC_LEVEL]
+    )
 
     await number_charging_speed.async_set_native_value(3.2)
     assert coordinator.charging_pct_per_hour == 3.2
@@ -80,6 +91,9 @@ async def test_number(hass, bypass_validate_input_sensors):
 
     await number_min_soc.async_set_native_value(33)
     assert coordinator.number_min_soc == 33
+
+    await number_opportunistic.async_set_native_value(55)
+    assert coordinator.number_opportunistic_level == 55
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)
