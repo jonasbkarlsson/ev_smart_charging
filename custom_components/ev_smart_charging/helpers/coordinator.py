@@ -61,6 +61,13 @@ class Raw:
                 largest = item["value"]
         return largest
 
+    def last_value(self) -> float:
+        """Return the last value"""
+        if len(self.data) == 0:
+            return None
+        else:
+            return self.data[-1]["value"]
+
     def number_of_nonzero(self) -> int:
         """Return the number of nonzero values"""
         number_items = 0
