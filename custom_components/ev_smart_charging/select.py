@@ -57,7 +57,7 @@ class EVSmartChargingSelect(EVSmartChargingEntity, SelectEntity, RestoreEntity):
         """Run when entity about to be added to hass."""
         restored: State = await self.async_get_last_state()
         if restored is not None:
-            self._attr_current_option = restored.state
+            await self.async_select_option(restored.state)
 
 
 class EVSmartChargingSelectStartHour(EVSmartChargingSelect):

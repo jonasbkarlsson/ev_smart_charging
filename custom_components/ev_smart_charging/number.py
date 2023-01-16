@@ -66,7 +66,7 @@ class EVSmartChargingNumber(EVSmartChargingEntity, RestoreNumber):
         _LOGGER.debug("EVSmartChargingNumber.async_added_to_hass()")
         restored: NumberExtraStoredData = await self.async_get_last_number_data()
         if restored is not None:
-            self._attr_native_value = restored.native_value
+            await self.async_set_native_value(restored.native_value)
             _LOGGER.debug(
                 "EVSmartChargingNumber.async_added_to_hass() %s",
                 self._attr_native_value,
