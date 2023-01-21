@@ -93,7 +93,7 @@ class EVSmartChargingNumberChargingSpeed(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.charging_pct_per_hour = value
-        await self.coordinator.update_sensors()
+        await self.coordinator.update_configuration()
 
 
 class EVSmartChargingNumberPriceLimit(EVSmartChargingNumber):
@@ -117,7 +117,7 @@ class EVSmartChargingNumberPriceLimit(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.max_price = value
-        await self.coordinator.update_sensors()
+        await self.coordinator.update_configuration()
 
 
 class EVSmartChargingNumberMinSOC(EVSmartChargingNumber):
@@ -141,7 +141,7 @@ class EVSmartChargingNumberMinSOC(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.number_min_soc = value
-        await self.coordinator.update_sensors()
+        await self.coordinator.update_configuration()
 
 
 class EVSmartChargingNumberOpportunistic(EVSmartChargingNumber):
@@ -168,4 +168,4 @@ class EVSmartChargingNumberOpportunistic(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.number_opportunistic_level = value
-        await self.coordinator.update_sensors()
+        await self.coordinator.update_configuration()

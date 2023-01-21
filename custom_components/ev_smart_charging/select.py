@@ -84,7 +84,7 @@ class EVSmartChargingSelectStartHour(EVSmartChargingSelect):
             except ValueError:
                 # Don't use start_hour. Select a time in the past.
                 self.coordinator.start_hour_local = START_HOUR_NONE
-            await self.coordinator.update_sensors()
+            await self.coordinator.update_configuration()
 
 
 class EVSmartChargingSelectReadyHour(EVSmartChargingSelect):
@@ -114,4 +114,4 @@ class EVSmartChargingSelectReadyHour(EVSmartChargingSelect):
             if self.coordinator.ready_hour_local == 0:
                 # Treat 00:00 as 24:00
                 self.coordinator.ready_hour_local = 24
-            await self.coordinator.update_sensors()
+            await self.coordinator.update_configuration()
