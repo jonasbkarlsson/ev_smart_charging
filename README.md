@@ -50,7 +50,7 @@ The integration calculates the set of hours that will give the lowest price, by 
 
 The configuration is done in the Home Assistant user interface.
 
-The first form contains the entities that the integration is interacting with.
+The configuration form contains the entities that the integration is interacting with.
 Parameter | Required | Description
 -- | -- | --
 Electricity price entity | Yes | The Nordpool integration sensor entity.
@@ -58,14 +58,18 @@ EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 a
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control switch entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'.
 
-The second form contains parameters that affects how the charging will be performed. These parameters can be changed after intial configuration in Settings -> Devices & Services -> Integrations.
-Parameter | Required | Description
+Additional parameters that affects how the charging will be performed are available as configuration entities. These parameters can be changed after intial configuration in Settings -> Devices & Services -> Integrations -> EV Smart Charging -> 1 device -> Configuration. These entities can be placed in the dashboard and can be controlled using automations.
+
+### Configuration entities
+
+Entity | Type | Descriptions, valid value ranges and service calls
 -- | -- | --
-Charging speed | Yes | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you!
-Charge start time | Yes | The earliest time of the day for the charging to start. If `None` is selected, there will be no explicit limitation of the starting time.
-Charge completion time | Yes | The lastest time of the day for charging to reach the target State-of-Charge. If `None` is selected, charging will be optimized using all hours with available price information.
-Electricity price limit | Yes | If the `apply_price_limit` switch is activated, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge. Also if the price limit is set to zero, there will be no limitations.
-Minimum EV SOC | Yes | The minimum State-of-Charge that should be charged, independently of the electricity price.
+`select.ev_smart_charging_charge_start_time` | Select | The earliest time of the day for the charging to start. If `None` is selected, there will be no explicit limitation of the starting time. Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
+`select.ev_smart_charging_charge_completion_time` | Select | The lastest time of the day for charging to reach the target State-of-Charge. If `None` is selected, charging will be optimized using all hours with available price information. Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
+`number.ev_smart_charging_charging_speed` | Number | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you! Valid values min=0.1, step=0.1, max=100. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_electricity_price_limit` | Number | If the `apply_price_limit` switch is activated, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge. Also if the price limit is set to zero, there will be no limitations. Valid values min=0, step=0.01, max=10000. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_opportunistic_level` | Number | If the `switch.ev_smart_charging_opportunistic_charging` switch is activated, the price limit will be even further reduced if the price at the end of the day is lower than `Electricity price limit * Opportunistic level / 100`. For example, if the `Opportunistic level` is set to 50, the price limit will be set to 50% of the `Electricity price limit`. If the prices for tomorrow are available, the price at the end of the day tomorrow will be used as trigger. Valid values min=0, step=1, max=100. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_minimum_ev_soc` | Number | The minimum State-of-Charge that should be charged, independently of the electricity price. Valid values min=0, step=1, max=100. Can be set by service call `number.set_value`.
 
 ## Entities
 
@@ -74,25 +78,12 @@ Entity | Type | Description
 `sensor.ev_smart_charging_charging` | Sensor | The state is "on" or "off". Can be used with automations to control the EV charger.
 `switch.ev_smart_charging_smart_charging_activated` | Switch | Turns the EV Smart Charging integration on and off.
 `switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit, if set to a non-zero value in the configuration form.
-`switch.ev_smart_charging_opportunistic_charging` | Switch | Reduces the price limit even further if the price at the end of the day is lower than `Electricity price limit * Opportunistic level / 100`. For example, if the `Opportunistic level` is set to 50, the price limit will be set to 50% of the `Electricity price limit`. If the prices for tomorrow are available, the price at the end of the day tomorrow will be used as trigger.
+`switch.ev_smart_charging_opportunistic_charging` | Switch | Activates opportunistic charging. See the desciption of the configuration entity`number.ev_smart_charging_opportunistic_level`
 `switch.ev_smart_charging_continuous_charging_preferred` | Switch | If turned on, will as basis schedule one continuous charging session. If turned off, will schedule charging on the hours with lowest electricity price, even if they are not continuous.
-`switch.ev_smart_charging_ev_connected` | Switch | Tells the integration that the EV is connected to the charger. Is preferable controlled by automations (see example below). Can avoid problems occuring when the EV is not connected to the charger at the time the charging should start. Using it will also ensure that the `sensor.ev_smart_charging_charging` is set to "off" when the EV is not connected to the charger.
 `switch.ev_smart_charging_keep_charger_on` | Switch | If "on", the `sensor.ev_smart_charging_charging` will not turn off after completed charge cycle. The feature is intended to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery. If this option is used, the feature `Electricity price limit` will be turned off, and vice versa. *NOTE* It is required that `switch.ev_smart_charging_ev_connected` is controlled in a proper way in order for this feature to work. Also, there is an assumption made that the EV itself will stop its charging when reaching the target SOC.
+`switch.ev_smart_charging_ev_connected` | Switch | Tells the integration that the EV is connected to the charger. Is preferable controlled by automations (see example below). Can avoid problems occuring when the EV is not connected to the charger at the time the charging should start. Using it will also ensure that the `sensor.ev_smart_charging_charging` is set to "off" when the EV is not connected to the charger.
 `button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. This is totally independent of the automatic charging.
 `button.ev_smart_charging_manually_stop_charging` | Button | Manually stop charging. This is totally independent of the automatic charging.
-
-### Configuration entities
-
-The configuration parameters that affects how the charging will be performed are also available as configuration entities. This means they can be found grouped together in the integration's device view and that they can be controlled by service calls. After reload of the integration, or after restart of Home Assistant, the values will be set to the values set during configuration. For descriptions of each parameter, see the Configuration section above.
-
-Entity | Type | Valid value ranges and service calls
--- | -- | --
-`select.ev_smart_charging_charge_start_time` | Select | Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
-`select.ev_smart_charging_charge_completion_time` | Select | Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
-`number.ev_smart_charging_charging_speed` | Number | Valid values min=0.1, step=0.1, max=100. Can be set by service call `number.set_value`.
-`number.ev_smart_charging_electricity_price_limit` | Number | Valid values min=0, step=0.01, max=10000. Can be set by service call `number.set_value`.
-`number.ev_smart_charging_opportunistic_level` | Number | Valid values min=0, step=1, max=100. Can be set by service call `number.set_value`.
-`number.ev_smart_charging_minimum_ev_soc` | Number | Valid values min=0, step=1, max=100. Can be set by service call `number.set_value`.
 
 ## Sensor attributes
 
@@ -214,6 +205,8 @@ cards:
         name: Smart charging activated
       - entity: switch.ev_smart_charging_apply_price_limit
         name: Apply price limit
+      - entity: switch.ev_smart_charging_opportunistic_charging
+        name: Opportunistic charging
       - entity: switch.ev_smart_charging_continuous_charging_preferred
         name: Continuous charging preferred
       - entity: switch.ev_smart_charging_keep_charger_on

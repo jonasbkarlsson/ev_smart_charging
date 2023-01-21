@@ -86,7 +86,7 @@ class EVSmartChargingNumberChargingSpeed(EVSmartChargingNumber):
         _LOGGER.debug("EVSmartChargingNumberChargingSpeed.__init__()")
         super().__init__(entry, coordinator)
         if self.value is None:
-            self._attr_native_value = get_parameter(entry, CONF_PCT_PER_HOUR)
+            self._attr_native_value = get_parameter(entry, CONF_PCT_PER_HOUR, 6.0)
             self.update_ha_state()
 
     async def async_set_native_value(self, value: float) -> None:
@@ -110,7 +110,7 @@ class EVSmartChargingNumberPriceLimit(EVSmartChargingNumber):
         _LOGGER.debug("EVSmartChargingNumberPriceLimit.__init__()")
         super().__init__(entry, coordinator)
         if self.value is None:
-            self._attr_native_value = get_parameter(entry, CONF_MAX_PRICE)
+            self._attr_native_value = get_parameter(entry, CONF_MAX_PRICE, 0.0)
             self.update_ha_state()
 
     async def async_set_native_value(self, value: float) -> None:
@@ -134,7 +134,7 @@ class EVSmartChargingNumberMinSOC(EVSmartChargingNumber):
         _LOGGER.debug("EVSmartChargingNumberMinSOC.__init__()")
         super().__init__(entry, coordinator)
         if self.value is None:
-            self._attr_native_value = get_parameter(entry, CONF_MIN_SOC)
+            self._attr_native_value = get_parameter(entry, CONF_MIN_SOC, 0.0)
             self.update_ha_state()
 
     async def async_set_native_value(self, value: float) -> None:
@@ -157,7 +157,9 @@ class EVSmartChargingNumberOpportunistic(EVSmartChargingNumber):
         _LOGGER.debug("EVSmartChargingNumberOpportunistic.__init__()")
         super().__init__(entry, coordinator)
         if self.value is None:
-            self._attr_native_value = get_parameter(entry, CONF_OPPORTUNISTIC_LEVEL)
+            self._attr_native_value = get_parameter(
+                entry, CONF_OPPORTUNISTIC_LEVEL, 50.0
+            )
             _LOGGER.debug(
                 "EVSmartChargingNumberOpportunistic.__init__() %s",
                 self._attr_native_value,

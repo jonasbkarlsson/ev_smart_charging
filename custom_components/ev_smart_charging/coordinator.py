@@ -91,7 +91,9 @@ class EVSmartChargingCoordinator:
 
         self.raw_two_days = None
         self._charging_schedule = None
-        self.charging_pct_per_hour = get_parameter(self.config_entry, CONF_PCT_PER_HOUR)
+        self.charging_pct_per_hour = get_parameter(
+            self.config_entry, CONF_PCT_PER_HOUR, 6.0
+        )
 
         try:
             self.start_hour_local = int(
@@ -100,23 +102,27 @@ class EVSmartChargingCoordinator:
         except ValueError:
             # Don't use start_hour. Select a time in the past.
             self.start_hour_local = START_HOUR_NONE
+        except TypeError:
+            self.start_hour_local = START_HOUR_NONE
 
         try:
             self.ready_hour_local = int(
-                get_parameter(self.config_entry, CONF_READY_HOUR)[0:2]
+                get_parameter(self.config_entry, CONF_READY_HOUR, "08:00")[0:2]
             )
         except ValueError:
             # Don't use ready_hour. Select a time in the far future.
+            self.ready_hour_local = READY_HOUR_NONE
+        except TypeError:
             self.ready_hour_local = READY_HOUR_NONE
         if self.ready_hour_local == 0:
             # Treat 00:00 as 24:00
             self.ready_hour_local = 24
         self.ready_hour_first = True  # True for first update_sensor the ready_hour
 
-        self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE))
-        self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC))
+        self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE, 0.0))
+        self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC, 0.0))
         self.number_opportunistic_level = int(
-            get_parameter(self.config_entry, CONF_OPPORTUNISTIC_LEVEL)
+            get_parameter(self.config_entry, CONF_OPPORTUNISTIC_LEVEL, 50.0)
         )
 
         self.auto_charging_state = STATE_OFF

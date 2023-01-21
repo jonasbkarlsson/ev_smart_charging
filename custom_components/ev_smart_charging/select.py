@@ -72,7 +72,7 @@ class EVSmartChargingSelectStartHour(EVSmartChargingSelect):
         _LOGGER.debug("EVSmartChargingSelectReadyHour.__init__()")
         super().__init__(entry, coordinator)
         if self.state is None:
-            self._attr_current_option = get_parameter(entry, CONF_START_HOUR)
+            self._attr_current_option = get_parameter(entry, CONF_START_HOUR, "None")
             self.update_ha_state()
 
     async def async_select_option(self, option: str) -> None:
@@ -99,7 +99,7 @@ class EVSmartChargingSelectReadyHour(EVSmartChargingSelect):
         _LOGGER.debug("EVSmartChargingSelectReadyHour.__init__()")
         super().__init__(entry, coordinator)
         if self.state is None:
-            self._attr_current_option = get_parameter(entry, CONF_READY_HOUR)
+            self._attr_current_option = get_parameter(entry, CONF_READY_HOUR, "08:00")
             self.update_ha_state()
 
     async def async_select_option(self, option: str) -> None:

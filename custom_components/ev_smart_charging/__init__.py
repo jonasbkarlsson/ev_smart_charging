@@ -103,6 +103,17 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         config_entry.version = 3
         migration = True
 
+    if config_entry.version == 3:
+        config_entry.version = 4
+        migration = True
+
+    if config_entry.version > 4:
+        _LOGGER.error(
+            "Migration from version %s to a lower version is not possible",
+            config_entry.version,
+        )
+        return False
+
     if migration:
         hass.config_entries.async_update_entry(config_entry, data=new)
 
