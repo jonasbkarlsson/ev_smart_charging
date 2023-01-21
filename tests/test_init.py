@@ -125,3 +125,14 @@ async def test_setup_with_migration_v2(hass, bypass_validate_input_sensors):
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)
     assert config_entry.entry_id not in hass.data[DOMAIN]
+
+
+async def test_setup_with_migration_from_future(hass, bypass_validate_input_sensors):
+    """Test entry migration."""
+    # Create a mock entry so we don't have to go through config flow
+    config_entry = MockConfigEntry(
+        domain=DOMAIN, data=MOCK_CONFIG_ALL_V2, entry_id="test", version=9999
+    )
+
+    # Migrate from version 9999
+    assert not await async_migrate_entry(hass, config_entry)
