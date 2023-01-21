@@ -1,5 +1,10 @@
 """Test ev_smart_charging number."""
+from unittest.mock import patch
+import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+from homeassistant.core import HomeAssistant
+from homeassistant.components.number import NumberExtraStoredData
 
 from custom_components.ev_smart_charging import (
     async_setup_entry,
@@ -23,7 +28,7 @@ from custom_components.ev_smart_charging.number import (
     EVSmartChargingNumberMinSOC,
 )
 
-from .const import MOCK_CONFIG_MIN_SOC
+from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_MIN_SOC
 
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
 # for a given test. We can also leverage fixtures and mocks that are available in
@@ -98,3 +103,44 @@ async def test_number(hass, bypass_validate_input_sensors):
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)
     assert config_entry.entry_id not in hass.data[DOMAIN]
+
+
+@pytest.fixture(name="mock_last_state_number")
+def mock_last_state_number_fixture():
+    """Mock last state."""
+
+    restored: NumberExtraStoredData = NumberExtraStoredData.from_dict(
+        {
+            "native_max_value": 100,
+            "native_min_value": 0,
+            "native_step": 1,
+            "native_unit_of_measurement": None,
+            "native_value": 55,
+        }
+    )
+    with patch(
+        "homeassistant.components.number.RestoreNumber.async_get_last_number_data",
+        return_value=restored,
+    ):
+        yield
+
+
+async def test_number_restore(
+    hass: HomeAssistant, bypass_validate_input_sensors, mock_last_state_number
+):
+    """Test sensor properties."""
+
+    # Create a mock entry so we don't have to go through config flow
+    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
+
+    number_charging_speed: EVSmartChargingNumberChargingSpeed = hass.data[
+        "entity_components"
+    ][NUMBER].get_entity("number.none_charging_speed")
+
+    await number_charging_speed.async_set_native_value(45)
+    assert number_charging_speed.native_value == 45
+
+    await number_charging_speed.async_added_to_hass()
+    assert number_charging_speed.native_value == 55
