@@ -14,6 +14,7 @@ from .const import (
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
+    CONF_OPPORTUNISTIC_LEVEL,
     CONF_PRICE_SENSOR,
     CONF_CHARGER_ENTITY,
     CONF_PCT_PER_HOUR,
@@ -32,7 +33,7 @@ _LOGGER = logging.getLogger(__name__)
 class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow."""
 
-    VERSION = 2
+    VERSION = 3
     user_input: Optional[dict[str, Any]]
 
     def __init__(self):
@@ -125,6 +126,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input[CONF_START_HOUR] = "None"
         user_input[CONF_READY_HOUR] = "08:00"
         user_input[CONF_MAX_PRICE] = 0.0
+        user_input[CONF_OPPORTUNISTIC_LEVEL] = 50.0
         user_input[CONF_MIN_SOC] = 0.0
 
         return await self._show_config_form_charger(user_input)
@@ -145,6 +147,9 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required(
                 CONF_MAX_PRICE, default=user_input[CONF_MAX_PRICE]
             ): cv.positive_float,
+            vol.Required(
+                CONF_OPPORTUNISTIC_LEVEL, default=user_input[CONF_OPPORTUNISTIC_LEVEL]
+            ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
             vol.Required(CONF_MIN_SOC, default=user_input[CONF_MIN_SOC]): vol.All(
                 vol.Coerce(int), vol.Range(min=0, max=100)
             ),
@@ -190,6 +195,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         CONF_MAX_PRICE,
                         default=get_parameter(self.config_entry, CONF_MAX_PRICE),
                     ): cv.positive_float,
+                    vol.Required(
+                        CONF_OPPORTUNISTIC_LEVEL,
+                        default=get_parameter(
+                            self.config_entry, CONF_OPPORTUNISTIC_LEVEL
+                        ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                     vol.Required(
                         CONF_MIN_SOC,
                         default=get_parameter(self.config_entry, CONF_MIN_SOC),

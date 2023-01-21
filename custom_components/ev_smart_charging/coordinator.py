@@ -21,6 +21,7 @@ from .const import (
     CONF_CHARGER_ENTITY,
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
+    CONF_OPPORTUNISTIC_LEVEL,
     CONF_PCT_PER_HOUR,
     CONF_READY_HOUR,
     CONF_PRICE_SENSOR,
@@ -66,6 +67,9 @@ class EVSmartChargingCoordinator:
         self.switch_keep_on_entity_id = None
         self.switch_keep_on_unique_id = None
         self.switch_keep_on_completion_time = None
+        self.switch_opportunistic = None
+        self.switch_opportunistic_entity_id = None
+        self.switch_opportunistic_unique_id = None
         self.price_entity_id = None
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
@@ -111,6 +115,9 @@ class EVSmartChargingCoordinator:
 
         self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE))
         self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC))
+        self.number_opportunistic_level = int(
+            get_parameter(self.config_entry, CONF_OPPORTUNISTIC_LEVEL)
+        )
 
         self.auto_charging_state = STATE_OFF
 
@@ -148,6 +155,7 @@ class EVSmartChargingCoordinator:
                     or self.ev_soc < self.number_min_soc
                 )
                 and self.switch_ev_connected is True
+                and self.switch_active is True
             )
             if (
                 self.ev_soc is not None
@@ -288,7 +296,7 @@ class EVSmartChargingCoordinator:
         """Handle the Active switch"""
         self.switch_active = state
         _LOGGER.debug("switch_active_update = %s", state)
-        await self.update_sensors()
+        await self.update_configuration()
 
     async def switch_apply_limit_update(self, state: bool):
         """Handle the Apply Limit switch"""
@@ -298,17 +306,9 @@ class EVSmartChargingCoordinator:
         if state and self.switch_keep_on:
             # Get the entity_id
             if self.switch_keep_on_entity_id is None:
-                entity_registry: EntityRegistry = async_entity_registry_get(self.hass)
-                all_entities = async_entries_for_config_entry(
-                    entity_registry, self.config_entry.entry_id
+                self.switch_keep_on_entity_id = self.get_entity_id_from_unique_id(
+                    self.switch_keep_on_unique_id
                 )
-                entity = [
-                    entity
-                    for entity in all_entities
-                    if entity.unique_id == self.switch_keep_on_unique_id
-                ]
-                if len(entity) == 1:
-                    self.switch_keep_on_entity_id = entity[0].entity_id
             # Turn off Keep charger on
             if self.switch_keep_on_entity_id is not None:
                 await self.hass.services.async_call(
@@ -316,13 +316,27 @@ class EVSmartChargingCoordinator:
                     service=SERVICE_TURN_OFF,
                     target={"entity_id": self.switch_keep_on_entity_id},
                 )
-        await self.update_sensors()
+        # If state is True and Opportunistic is True, then turn off Opportunistic
+        if not state and self.switch_opportunistic:
+            # Get the entity_id
+            if self.switch_opportunistic_entity_id is None:
+                self.switch_opportunistic_entity_id = self.get_entity_id_from_unique_id(
+                    self.switch_opportunistic_unique_id
+                )
+            # Turn off Opportunistic
+            if self.switch_opportunistic_entity_id is not None:
+                await self.hass.services.async_call(
+                    domain=SWITCH,
+                    service=SERVICE_TURN_OFF,
+                    target={"entity_id": self.switch_opportunistic_entity_id},
+                )
+        await self.update_configuration()
 
     async def switch_continuous_update(self, state: bool):
         """Handle the Continuous switch"""
         self.switch_continuous = state
         _LOGGER.debug("switch_continuous_update = %s", state)
-        await self.update_sensors()
+        await self.update_configuration()
 
     async def switch_ev_connected_update(self, state: bool):
         """Handle the EV Connected switch"""
@@ -332,7 +346,7 @@ class EVSmartChargingCoordinator:
             # Clear schedule when connected to charger
             self.scheduler.set_empty_schedule()
             self.switch_keep_on_completion_time = None
-        await self.update_sensors()
+        await self.update_configuration()
 
     async def switch_keep_on_update(self, state: bool):
         """Handle the Keep charger on switch"""
@@ -342,17 +356,9 @@ class EVSmartChargingCoordinator:
         if state and self.switch_apply_limit:
             # Get the entity_id
             if self.switch_apply_limit_entity_id is None:
-                entity_registry: EntityRegistry = async_entity_registry_get(self.hass)
-                all_entities = async_entries_for_config_entry(
-                    entity_registry, self.config_entry.entry_id
+                self.switch_apply_limit_entity_id = self.get_entity_id_from_unique_id(
+                    self.switch_apply_limit_unique_id
                 )
-                entity = [
-                    entity
-                    for entity in all_entities
-                    if entity.unique_id == self.switch_apply_limit_unique_id
-                ]
-                if len(entity) == 1:
-                    self.switch_apply_limit_entity_id = entity[0].entity_id
             # Turn off Apply price limit
             if self.switch_apply_limit_entity_id is not None:
                 await self.hass.services.async_call(
@@ -360,11 +366,67 @@ class EVSmartChargingCoordinator:
                     service=SERVICE_TURN_OFF,
                     target={"entity_id": self.switch_apply_limit_entity_id},
                 )
-        await self.update_sensors()
+        # If state is True and Opportunistic is True, then turn off Opportunistic
+        if state and self.switch_opportunistic:
+            # Get the entity_id
+            if self.switch_opportunistic_entity_id is None:
+                self.switch_opportunistic_entity_id = self.get_entity_id_from_unique_id(
+                    self.switch_opportunistic_unique_id
+                )
+            # Turn off Opportunistic
+            if self.switch_opportunistic_entity_id is not None:
+                await self.hass.services.async_call(
+                    domain=SWITCH,
+                    service=SERVICE_TURN_OFF,
+                    target={"entity_id": self.switch_opportunistic_entity_id},
+                )
+        await self.update_configuration()
+
+    async def switch_opportunistic_update(self, state: bool):
+        """Handle the opportunistic charging switch"""
+        self.switch_opportunistic = state
+        _LOGGER.debug("switch_opportunistic_update = %s", state)
+        # If state is True and Apply price limit is False, then turn on Apply price limit
+        if state and not self.switch_apply_limit:
+            # Get the entity_id
+            if self.switch_apply_limit_entity_id is None:
+                self.switch_apply_limit_entity_id = self.get_entity_id_from_unique_id(
+                    self.switch_apply_limit_unique_id
+                )
+            # Turn on Apply price limit
+            if self.switch_apply_limit_entity_id is not None:
+                await self.hass.services.async_call(
+                    domain=SWITCH,
+                    service=SERVICE_TURN_ON,
+                    target={"entity_id": self.switch_apply_limit_entity_id},
+                )
+        # If state is True and Keep charger on is True, then turn off Keep charger on
+        if state and self.switch_keep_on:
+            # Get the entity_id
+            if self.switch_keep_on_entity_id is None:
+                self.switch_keep_on_entity_id = self.get_entity_id_from_unique_id(
+                    self.switch_keep_on_unique_id
+                )
+            # Turn off Keep charger on
+            if self.switch_keep_on_entity_id is not None:
+                await self.hass.services.async_call(
+                    domain=SWITCH,
+                    service=SERVICE_TURN_OFF,
+                    target={"entity_id": self.switch_keep_on_entity_id},
+                )
+        await self.update_configuration()
+
+    async def update_configuration(self):
+        """Called when the configuration has been updated"""
+        await self.update_sensors(configuration_updated=True)
 
     @callback
     async def update_sensors(
-        self, entity_id: str = None, old_state: State = None, new_state: State = None
+        self,
+        entity_id: str = None,
+        old_state: State = None,
+        new_state: State = None,
+        configuration_updated: bool = False,
     ):  # pylint: disable=unused-argument
         """Price or EV sensors have been updated."""
 
@@ -372,6 +434,10 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("entity_id = %s", entity_id)
         # _LOGGER.debug("old_state = %s", old_state)
         _LOGGER.debug("new_state = %s", new_state)
+
+        # To handle non-live SOC
+        if configuration_updated:
+            self.ev_soc_before_last_charging = -1
 
         price_state = self.hass.states.get(self.price_entity_id)
         if Validator.is_price_state(price_state):
@@ -425,6 +491,15 @@ class EVSmartChargingCoordinator:
             else:
                 _LOGGER.error("Target SOC sensor not valid: %s", ev_target_soc_state)
 
+        # Check if Opportunistic charging should be used
+        if self.switch_opportunistic is True and (
+            self.raw_two_days.last_value()
+            < (self.max_price * self.number_opportunistic_level / 100.0)
+        ):
+            max_price = self.max_price * self.number_opportunistic_level / 100.0
+        else:
+            max_price = self.max_price
+
         scheduling_params = {
             "ev_soc": self.ev_soc,
             "ev_target_soc": self.ev_target_soc,
@@ -437,7 +512,7 @@ class EVSmartChargingCoordinator:
             "switch_active": self.switch_active,
             "switch_apply_limit": self.switch_apply_limit,
             "switch_continuous": self.switch_continuous,
-            "max_price": self.max_price,
+            "max_price": max_price,
         }
 
         time_now_hour_local = dt.now().hour
@@ -478,6 +553,18 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("self._max_price = %s", self.max_price)
         _LOGGER.debug("Current price = %s", self.sensor.current_price)
         await self.update_state()  # Update the charging status
+
+    def get_entity_id_from_unique_id(self, unique_id: str) -> str:
+        """Get the Entity ID for the entity with the unique_id"""
+        entity_registry: EntityRegistry = async_entity_registry_get(self.hass)
+        all_entities = async_entries_for_config_entry(
+            entity_registry, self.config_entry.entry_id
+        )
+        entity = [entity for entity in all_entities if entity.unique_id == unique_id]
+        if len(entity) == 1:
+            return entity[0].entity_id
+
+        return None
 
     def validate_input_sensors(self) -> str:
         """Check that all input sensors returns values."""

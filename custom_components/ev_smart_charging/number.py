@@ -2,15 +2,20 @@
 import logging
 from typing import Union
 
-from homeassistant.components.number import NumberEntity
+from homeassistant.components.number import (
+    RestoreNumber,
+    NumberExtraStoredData,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
+    CONF_OPPORTUNISTIC_LEVEL,
     CONF_PCT_PER_HOUR,
     DOMAIN,
+    ENTITY_NAME_CONF_OPPORTUNISTIC_LEVEL_NUMBER,
     ENTITY_NAME_CONF_PCT_PER_HOUR_NUMBER,
     ENTITY_NAME_CONF_MAX_PRICE_NUMBER,
     ENTITY_NAME_CONF_MIN_SOC_NUMBER,
@@ -35,11 +40,12 @@ async def async_setup_entry(
     numbers.append(EVSmartChargingNumberChargingSpeed(entry, coordinator))
     numbers.append(EVSmartChargingNumberPriceLimit(entry, coordinator))
     numbers.append(EVSmartChargingNumberMinSOC(entry, coordinator))
+    numbers.append(EVSmartChargingNumberOpportunistic(entry, coordinator))
     async_add_devices(numbers)
 
 
-class EVSmartChargingNumber(EVSmartChargingEntity, NumberEntity):
-    """EV Smart Charging switch class."""
+class EVSmartChargingNumber(EVSmartChargingEntity, RestoreNumber):
+    """EV Smart Charging number class."""
 
     # To support HA 2022.7
     _attr_native_value: Union[float, None] = None  # Using Union to support Python 3.9
@@ -55,9 +61,20 @@ class EVSmartChargingNumber(EVSmartChargingEntity, NumberEntity):
         """Set new value."""
         self._attr_native_value = value
 
+    async def async_added_to_hass(self) -> None:
+        """Run when entity about to be added to hass."""
+        _LOGGER.debug("EVSmartChargingNumber.async_added_to_hass()")
+        restored: NumberExtraStoredData = await self.async_get_last_number_data()
+        if restored is not None:
+            await self.async_set_native_value(restored.native_value)
+            _LOGGER.debug(
+                "EVSmartChargingNumber.async_added_to_hass() %s",
+                self._attr_native_value,
+            )
+
 
 class EVSmartChargingNumberChargingSpeed(EVSmartChargingNumber):
-    """EV Smart Charging active switch class."""
+    """EV Smart Charging active number class."""
 
     _attr_name = ENTITY_NAME_CONF_PCT_PER_HOUR_NUMBER
     _attr_entity_category = EntityCategory.CONFIG
@@ -76,11 +93,11 @@ class EVSmartChargingNumberChargingSpeed(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.charging_pct_per_hour = value
-        await self.coordinator.update_sensors()
+        await self.coordinator.update_configuration()
 
 
 class EVSmartChargingNumberPriceLimit(EVSmartChargingNumber):
-    """EV Smart Charging apply limit switch class."""
+    """EV Smart Charging apply limit number class."""
 
     _attr_name = ENTITY_NAME_CONF_MAX_PRICE_NUMBER
     _attr_icon = ICON_CASH
@@ -100,11 +117,11 @@ class EVSmartChargingNumberPriceLimit(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.max_price = value
-        await self.coordinator.update_sensors()
+        await self.coordinator.update_configuration()
 
 
 class EVSmartChargingNumberMinSOC(EVSmartChargingNumber):
-    """EV Smart Charging continuous switch class."""
+    """EV Smart Charging continuous number class."""
 
     _attr_name = ENTITY_NAME_CONF_MIN_SOC_NUMBER
     _attr_icon = ICON_BATTERY_50
@@ -124,4 +141,31 @@ class EVSmartChargingNumberMinSOC(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.number_min_soc = value
-        await self.coordinator.update_sensors()
+        await self.coordinator.update_configuration()
+
+
+class EVSmartChargingNumberOpportunistic(EVSmartChargingNumber):
+    """EV Smart Charging opportunistic number class."""
+
+    _attr_name = ENTITY_NAME_CONF_OPPORTUNISTIC_LEVEL_NUMBER
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value = 0.0
+    _attr_native_max_value = 100.0
+    _attr_native_step = 1.0
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingNumberOpportunistic.__init__()")
+        super().__init__(entry, coordinator)
+        if self.value is None:
+            self._attr_native_value = get_parameter(entry, CONF_OPPORTUNISTIC_LEVEL)
+            _LOGGER.debug(
+                "EVSmartChargingNumberOpportunistic.__init__() %s",
+                self._attr_native_value,
+            )
+            self.update_ha_state()
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set new value."""
+        await super().async_set_native_value(value)
+        self.coordinator.number_opportunistic_level = value
+        await self.coordinator.update_configuration()

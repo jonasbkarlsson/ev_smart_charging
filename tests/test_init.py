@@ -14,7 +14,7 @@ from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
 
-from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_ALL_V1
+from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_ALL_V1, MOCK_CONFIG_ALL_V2
 
 
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
@@ -72,6 +72,39 @@ async def test_setup_with_migration_v1(hass, bypass_validate_input_sensors):
     # Migrate from version 1
     assert await async_migrate_entry(hass, config_entry)
     assert config_entry.data["start_hour"] == "None"
+    assert config_entry.data["opportunistic_level"] == 50.0
+
+    # Set up the entry and assert that the values set during setup are where we expect
+    # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
+    # call, no code from custom_components/integration_blueprint/api.py actually runs.
+    assert await async_setup_entry(hass, config_entry)
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+
+    # Reload the entry and assert that the data from above is still there
+    assert await async_reload_entry(hass, config_entry) is None
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+
+    # Unload the entry and verify that the data has been removed
+    assert await async_unload_entry(hass, config_entry)
+    assert config_entry.entry_id not in hass.data[DOMAIN]
+
+
+async def test_setup_with_migration_v2(hass, bypass_validate_input_sensors):
+    """Test entry migration."""
+    # Create a mock entry so we don't have to go through config flow
+    config_entry = MockConfigEntry(
+        domain=DOMAIN, data=MOCK_CONFIG_ALL_V2, entry_id="test", version=2
+    )
+
+    # Migrate from version 2
+    assert await async_migrate_entry(hass, config_entry)
+    assert config_entry.data["opportunistic_level"] == 50.0
 
     # Set up the entry and assert that the values set during setup are where we expect
     # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data

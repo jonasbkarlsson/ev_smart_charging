@@ -3,8 +3,9 @@ import logging
 from typing import Union
 
 from homeassistant.components.select import SelectEntity
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import (
     CONF_READY_HOUR,
@@ -36,7 +37,7 @@ async def async_setup_entry(
     async_add_devices(selects)
 
 
-class EVSmartChargingSelect(EVSmartChargingEntity, SelectEntity):
+class EVSmartChargingSelect(EVSmartChargingEntity, SelectEntity, RestoreEntity):
     """EV Smart Charging switch class."""
 
     _attr_current_option: Union[str, None] = None  # Using Union to support Python 3.9
@@ -51,6 +52,12 @@ class EVSmartChargingSelect(EVSmartChargingEntity, SelectEntity):
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
         self._attr_current_option = option
+
+    async def async_added_to_hass(self) -> None:
+        """Run when entity about to be added to hass."""
+        restored: State = await self.async_get_last_state()
+        if restored is not None:
+            await self.async_select_option(restored.state)
 
 
 class EVSmartChargingSelectStartHour(EVSmartChargingSelect):
@@ -77,7 +84,7 @@ class EVSmartChargingSelectStartHour(EVSmartChargingSelect):
             except ValueError:
                 # Don't use start_hour. Select a time in the past.
                 self.coordinator.start_hour_local = START_HOUR_NONE
-            await self.coordinator.update_sensors()
+            await self.coordinator.update_configuration()
 
 
 class EVSmartChargingSelectReadyHour(EVSmartChargingSelect):
@@ -107,4 +114,4 @@ class EVSmartChargingSelectReadyHour(EVSmartChargingSelect):
             if self.coordinator.ready_hour_local == 0:
                 # Treat 00:00 as 24:00
                 self.coordinator.ready_hour_local = 24
-            await self.coordinator.update_sensors()
+            await self.coordinator.update_configuration()

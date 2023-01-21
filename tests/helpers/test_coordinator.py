@@ -34,6 +34,7 @@ async def test_raw(hass, set_cet_timezone):
     assert price.is_valid()
     assert price.copy().get_raw() == PRICE_20220930
     assert price.max_value() == 388.65
+    assert price.last_value() == 49.64
     assert price.number_of_nonzero() == 24
 
     time = datetime(
@@ -75,6 +76,7 @@ async def test_raw(hass, set_cet_timezone):
 
     price = Raw([])
     assert not price.is_valid()
+    assert price.last_value() is None
 
 
 async def test_get_lowest_hours_non_continuous(hass, set_cet_timezone, freezer):
