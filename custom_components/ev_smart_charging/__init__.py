@@ -103,6 +103,10 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         config_entry.version = 3
         migration = True
 
+    if config_entry.version == 3:
+        config_entry.version = 4
+        migration = True
+
     if migration:
         hass.config_entries.async_update_entry(config_entry, data=new)
 
