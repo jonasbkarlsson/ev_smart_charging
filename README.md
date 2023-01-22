@@ -9,16 +9,16 @@
 
 ![Icon](assets/icon.png)
 
-The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) integration.
+The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) or the [Energi Data Service](https://github.com/MTrab/energidataservice) integration.
 
 The integration calculates the set of hours that will give the lowest price, by default restricted to a continuous set. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight) or when the time of the day is before the configured charge completion time. When the automatic charging has started, changes of settings will not have any effect.
 
 ## Requirements
-- The [Nordpool](https://github.com/custom-components/nordpool) integration.
+- The [Nordpool](https://github.com/custom-components/nordpool) or the [Energi Data Service](https://github.com/MTrab/energidataservice) integration.
 - Home Assistant version 2022.7 or newer.
 
 ## Features
-- Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) integration.
+- Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) or [Energi Data Service](https://github.com/MTrab/energidataservice) integrations.
 - Configuraton of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
 - Optional setting of minimum SOC level that should be reached indepently of the electrity price.
@@ -53,7 +53,7 @@ The configuration is done in the Home Assistant user interface.
 The configuration form contains the entities that the integration is interacting with.
 Parameter | Required | Description
 -- | -- | --
-Electricity price entity | Yes | The Nordpool integration sensor entity.
+Electricity price entity | Yes | The Nordpool or the Energi Data Service integration sensor entity.
 EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100. Note that this entity is crucial for the integration. If live information about he SOC is not available, please carefully read the section below with more information about the EV SOC entity.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control switch entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'.
