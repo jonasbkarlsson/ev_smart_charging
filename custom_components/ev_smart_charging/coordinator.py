@@ -33,6 +33,7 @@ from .const import (
     START_HOUR_NONE,
     SWITCH,
 )
+from .helpers.config_flow import get_platform
 from .helpers.coordinator import (
     Raw,
     Scheduler,
@@ -71,6 +72,7 @@ class EVSmartChargingCoordinator:
         self.switch_opportunistic_entity_id = None
         self.switch_opportunistic_unique_id = None
         self.price_entity_id = None
+        self.price_platform = None
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
 
@@ -264,6 +266,7 @@ class EVSmartChargingCoordinator:
         self.sensor = sensor
 
         self.price_entity_id = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
+        self.price_platform = get_platform(self.hass, self.price_entity_id)
         self.ev_soc_entity_id = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
         self.ev_target_soc_entity_id = get_parameter(
             self.config_entry, CONF_EV_TARGET_SOC_SENSOR
@@ -446,10 +449,14 @@ class EVSmartChargingCoordinator:
             self.ev_soc_before_last_charging = -1
 
         price_state = self.hass.states.get(self.price_entity_id)
-        if Validator.is_price_state(price_state):
+        if Validator.is_price_state(price_state, self.price_platform):
             self.sensor.current_price = price_state.attributes["current_price"]
-            self.raw_today_local = Raw(price_state.attributes["raw_today"])
-            self.raw_tomorrow_local = Raw(price_state.attributes["raw_tomorrow"])
+            self.raw_today_local = Raw(
+                price_state.attributes["raw_today"], self.price_platform
+            )
+            self.raw_tomorrow_local = Raw(
+                price_state.attributes["raw_tomorrow"], self.price_platform
+            )
             self.tomorrow_valid = self.raw_tomorrow_local.is_valid()
 
             # Fix to take care of Nordpool bug

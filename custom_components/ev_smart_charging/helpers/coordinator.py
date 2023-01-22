@@ -7,7 +7,12 @@ from math import ceil
 from typing import Any
 from homeassistant.util import dt
 
-from custom_components.ev_smart_charging.const import READY_HOUR_NONE, START_HOUR_NONE
+from custom_components.ev_smart_charging.const import (
+    PLATFORM_ENERGIDATASERVICE,
+    PLATFORM_NORDPOOL,
+    READY_HOUR_NONE,
+    START_HOUR_NONE,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,13 +26,26 @@ class Raw:
         "value": float,
     }"""
 
-    def __init__(self, raw: list[dict[str, Any]]) -> None:
+    def __init__(
+        self, raw: list[dict[str, Any]], platform: str = PLATFORM_NORDPOOL
+    ) -> None:
 
         self.data = []
         if raw:
             for item in raw:
-                if item["value"] is not None and isinstance(item["start"], datetime):
-                    self.data.append(item)
+                if platform == PLATFORM_NORDPOOL:
+                    if item["value"] is not None and isinstance(
+                        item["start"], datetime
+                    ):
+                        self.data.append(item)
+                if platform == PLATFORM_ENERGIDATASERVICE:
+                    if item["price"] is not None and isinstance(item["hour"], datetime):
+                        item_new = {}
+                        item_new["value"] = item["price"]
+                        item_new["start"] = item["hour"]
+                        item_new["end"] = item["hour"] + timedelta(hours=1)
+                        self.data.append(item_new)
+
             self.valid = len(self.data) > 12
         else:
             self.valid = False
