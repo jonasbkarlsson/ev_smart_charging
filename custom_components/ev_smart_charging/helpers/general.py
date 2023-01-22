@@ -39,7 +39,9 @@ class Validator:
         return False
 
     @staticmethod
-    def is_price_state(price_state: State, price_platform: str) -> bool:
+    def is_price_state(
+        price_state: State, price_platform: str = PLATFORM_NORDPOOL
+    ) -> bool:
         """Check that argument is a Price sensor state"""
         if price_state is not None:
             if price_state.state != "unavailable":
