@@ -2,7 +2,11 @@
 from datetime import datetime
 
 from homeassistant.util import dt as dt_util
-from custom_components.ev_smart_charging.const import READY_HOUR_NONE, START_HOUR_NONE
+from custom_components.ev_smart_charging.const import (
+    PLATFORM_ENERGIDATASERVICE,
+    READY_HOUR_NONE,
+    START_HOUR_NONE,
+)
 
 from custom_components.ev_smart_charging.helpers.coordinator import (
     Raw,
@@ -15,7 +19,12 @@ from custom_components.ev_smart_charging.helpers.coordinator import (
     get_ready_hour_utc,
     get_start_hour_utc,
 )
-from tests.price import PRICE_20220930, PRICE_20221001
+from tests.price import (
+    PRICE_20220930,
+    PRICE_20220930_ENERGIDATASERVICE,
+    PRICE_20221001,
+    PRICE_20221001_ENERGIDATASERVICE,
+)
 from tests.schedule import MOCK_SCHEDULE_20220930
 
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
@@ -75,6 +84,59 @@ async def test_raw(hass, set_cet_timezone):
     assert start.hour == 0
 
     price = Raw([])
+    assert not price.is_valid()
+    assert price.last_value() is None
+
+
+async def test_raw_energidataservice(hass, set_cet_timezone):
+    """Test Raw"""
+
+    price = Raw(PRICE_20220930_ENERGIDATASERVICE, PLATFORM_ENERGIDATASERVICE)
+    assert price.get_raw() == PRICE_20220930
+    assert price.is_valid()
+    assert price.copy().get_raw() == PRICE_20220930
+    assert price.max_value() == 388.65
+    assert price.last_value() == 49.64
+    assert price.number_of_nonzero() == 24
+
+    time = datetime(
+        2022, 9, 30, 8, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+    assert price.get_value(time) == 388.65
+    assert price.get_item(time) == {
+        "start": datetime(
+            2022, 9, 30, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+        ),
+        "end": datetime(
+            2022, 9, 30, 9, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+        ),
+        "value": 388.65,
+    }
+    time = datetime(
+        2022, 9, 29, 8, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+    assert price.get_value(time) is None
+    assert price.get_item(time) is None
+
+    price2 = Raw(PRICE_20221001_ENERGIDATASERVICE, PLATFORM_ENERGIDATASERVICE)
+    price.extend(None)
+    assert price.get_raw() == PRICE_20220930
+    price.extend(price2)
+    assert price.number_of_nonzero() == 48
+
+    start = price.data[0]["start"]
+    assert start.tzinfo == dt_util.get_time_zone("Europe/Stockholm")
+    assert start.hour == 0
+    price_utc = price.copy().to_utc()
+    start = price_utc.data[0]["start"]
+    assert start.tzinfo == dt_util.UTC
+    assert start.hour == 22
+    price_local = price_utc.copy().to_local()
+    start = price_local.data[0]["start"]
+    assert start.tzinfo == dt_util.get_time_zone("Europe/Stockholm")
+    assert start.hour == 0
+
+    price = Raw([], PLATFORM_ENERGIDATASERVICE)
     assert not price.is_valid()
     assert price.last_value() is None
 
