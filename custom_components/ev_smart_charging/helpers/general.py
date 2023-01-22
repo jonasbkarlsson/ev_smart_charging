@@ -6,6 +6,7 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import State
 
+from ..const import PLATFORM_NORDPOOL
 from .coordinator import Raw
 
 _LOGGER = logging.getLogger(__name__)
@@ -38,7 +39,9 @@ class Validator:
         return False
 
     @staticmethod
-    def is_price_state(price_state: State) -> bool:
+    def is_price_state(
+        price_state: State, price_platform: str = PLATFORM_NORDPOOL
+    ) -> bool:
         """Check that argument is a Price sensor state"""
         if price_state is not None:
             if price_state.state != "unavailable":
@@ -50,7 +53,9 @@ class Validator:
                     return False
                 # Check raw_today
                 try:
-                    if not Raw(price_state.attributes["raw_today"]).is_valid():
+                    if not Raw(
+                        price_state.attributes["raw_today"], price_platform
+                    ).is_valid():
                         return False
                 except KeyError:
                     return False

@@ -20,6 +20,7 @@ from ..const import (
     CONF_PRICE_SENSOR,
     DOMAIN,
     NAME,
+    PLATFORM_ENERGIDATASERVICE,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
     PLATFORM_VW,
@@ -126,6 +127,18 @@ class FindEntity:
         return ""
 
     @staticmethod
+    def find_energidataservice_sensor(hass: HomeAssistant) -> str:
+        """Find Energi Data Service sensor"""
+        entity_registry: EntityRegistry = async_entity_registry_get(hass)
+        registry_entries: UserDict[
+            str, RegistryEntry
+        ] = entity_registry.entities.items()
+        for entry in registry_entries:
+            if entry[1].platform == PLATFORM_ENERGIDATASERVICE:
+                return entry[1].entity_id
+        return ""
+
+    @staticmethod
     def find_vw_soc_sensor(hass: HomeAssistant) -> str:
         """Search for Volkswagen SOC sensor"""
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
@@ -202,3 +215,16 @@ class DeviceNameCreator:
                     pass
         # Add ONE to the highest value and append after NAME
         return f"{NAME} {higest+1}"
+
+
+def get_platform(hass: HomeAssistant, entity_id: str):
+    """Get the platform for the entity"""
+    if entity_id is None:
+        return None
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+    entities = entity_registry.entities
+    entry: RegistryEntry = entities.get(entity_id)
+    if entry is None:
+        return None
+    platform = entry.platform
+    return platform
