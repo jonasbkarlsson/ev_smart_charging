@@ -346,6 +346,7 @@ To verify that the integration is able to control the charging, go to Settings -
 3. Check that charging is started.
 4. PRESS the Manually stop charging.
 5. Check that charging is stopped.
+
 If the above works, the integration is able to control the charging.
 
 [ev_smart_charging]: https://github.com/jonasbkarlsson/ev_smart_charging
