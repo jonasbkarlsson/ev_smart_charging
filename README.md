@@ -338,6 +338,17 @@ action:
 mode: single
 ```
 
+## Verifying the configuration
+
+To verify that the integration is able to control the charging, go to Settings -> Devices & Services -> Integrations -> EV Smart Charging -> 1 device -> Controls.
+1. Connect the EV to the charger.
+2. PRESS the Manually start charging.
+3. Check that charging is started.
+4. PRESS the Manually stop charging.
+5. Check that charging is stopped.
+
+If the above works, the integration is able to control the charging.
+
 [ev_smart_charging]: https://github.com/jonasbkarlsson/ev_smart_charging
 [releases-shield]: https://img.shields.io/github/v/release/jonasbkarlsson/ev_smart_charging?style=for-the-badge
 [releases]: https://github.com/jonasbkarlsson/ev_smart_charging/releases
