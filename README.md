@@ -18,7 +18,7 @@ The integration calculates the set of hours that will give the lowest price, by 
 - Home Assistant version 2022.7 or newer.
 
 ## Features
-- Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) or [Energi Data Service](https://github.com/MTrab/energidataservice) integrations.
+- Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) or [Energi Data Service](https://github.com/MTrab/energidataservice) integration.
 - Configuraton of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
 - Optional setting of minimum SOC level that should be reached indepently of the electrity price.
