@@ -1,6 +1,7 @@
 # EV Smart Charging
 
 [![GitHub Release][releases-shield]][releases]
+[![Codecov][coverage-shield]][coverage]
 [![License][license-shield]][license]
 
 [![hacs][hacsbadge]][hacs]
@@ -18,7 +19,7 @@ The integration calculates the set of hours that will give the lowest price, by 
 - Home Assistant version 2022.7 or newer.
 
 ## Features
-- Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) or [Energi Data Service](https://github.com/MTrab/energidataservice) integrations.
+- Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) or [Energi Data Service](https://github.com/MTrab/energidataservice) integration.
 - Configuraton of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
 - Optional setting of minimum SOC level that should be reached indepently of the electrity price.
@@ -352,6 +353,8 @@ If the above works, the integration is able to control the charging.
 [ev_smart_charging]: https://github.com/jonasbkarlsson/ev_smart_charging
 [releases-shield]: https://img.shields.io/github/v/release/jonasbkarlsson/ev_smart_charging?style=for-the-badge
 [releases]: https://github.com/jonasbkarlsson/ev_smart_charging/releases
+[coverage-shield]: https://img.shields.io/codecov/c/gh/jonasbkarlsson/ev_smart_charging?style=for-the-badge
+[coverage]: https://app.codecov.io/gh/jonasbkarlsson/ev_smart_charging
 [license-shield]: https://img.shields.io/github/license/jonasbkarlsson/ev_smart_charging?style=for-the-badge
 [license]: https://github.com/jonasbkarlsson/ev_smart_charging/blob/main/LICENSE
 [hacs]: https://github.com/hacs/integration
