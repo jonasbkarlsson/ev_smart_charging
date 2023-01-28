@@ -101,20 +101,16 @@ class EVSmartChargingCoordinator:
             self.start_hour_local = int(
                 get_parameter(self.config_entry, CONF_START_HOUR)[0:2]
             )
-        except ValueError:
+        except (ValueError, TypeError):
             # Don't use start_hour. Select a time in the past.
-            self.start_hour_local = START_HOUR_NONE
-        except TypeError:
             self.start_hour_local = START_HOUR_NONE
 
         try:
             self.ready_hour_local = int(
                 get_parameter(self.config_entry, CONF_READY_HOUR, "08:00")[0:2]
             )
-        except ValueError:
+        except (ValueError, TypeError):
             # Don't use ready_hour. Select a time in the far future.
-            self.ready_hour_local = READY_HOUR_NONE
-        except TypeError:
             self.ready_hour_local = READY_HOUR_NONE
         if self.ready_hour_local == 0:
             # Treat 00:00 as 24:00
