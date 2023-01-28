@@ -280,7 +280,7 @@ condition: []
 action:
   - service: easee.set_circuit_dynamic_limit
     data:
-      device_id: "b40f1f45d28b0891fe8d" (replace with your own device id)
+      charger_id: exxxxxxx (replace with your charger id, which can be found in the Easee app (Charger Settings -> About -> Serial Number))
       currentP1: 16 (replace with your preferred charging current)
 ```
 
@@ -301,7 +301,7 @@ condition: []
 action:
   - service: easee.set_circuit_dynamic_limit
     data:
-      device_id: "b40f1f45d28b0891fe8d" (replace with your own device id)
+      charger_id: exxxxxxx (replace with your charger id, which can be found in the Easee app (Charger Settings -> About -> Serial Number))
       currentP1: 0 (something below 6 to make the charging stop)
 ```
 
