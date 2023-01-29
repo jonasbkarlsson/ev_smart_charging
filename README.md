@@ -353,7 +353,7 @@ If the above works, the integration is able to control the charging.
 [ev_smart_charging]: https://github.com/jonasbkarlsson/ev_smart_charging
 [releases-shield]: https://img.shields.io/github/v/release/jonasbkarlsson/ev_smart_charging?style=for-the-badge
 [releases]: https://github.com/jonasbkarlsson/ev_smart_charging/releases
-[coverage-shield]: https://img.shields.io/codecov/c/gh/jonasbkarlsson/ev_smart_charging?style=for-the-badge
+[coverage-shield]: https://img.shields.io/codecov/c/gh/jonasbkarlsson/ev_smart_charging?style=for-the-badge&logo=codecov
 [coverage]: https://app.codecov.io/gh/jonasbkarlsson/ev_smart_charging
 [license-shield]: https://img.shields.io/github/license/jonasbkarlsson/ev_smart_charging?style=for-the-badge
 [license]: https://github.com/jonasbkarlsson/ev_smart_charging/blob/main/LICENSE
