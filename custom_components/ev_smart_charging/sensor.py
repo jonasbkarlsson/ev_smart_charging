@@ -42,6 +42,7 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
         self._charging_start_time = None
         self._charging_stop_time = None
         self._charging_number_of_hours = None
+        self._charging_status = None
 
     @SensorEntity.native_value.setter
     def native_value(self, new_value):
@@ -55,6 +56,7 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
             "current_price": self._current_price,
             "EV SOC": self._ev_soc,
             "EV target SOC": self._ev_target_soc,
+            "Charging status": self._charging_status,
             "Charging is planned": self._charging_is_planned,
             "Charging start time": self._charging_start_time,
             "Charging stop time": self._charging_stop_time,
@@ -111,6 +113,16 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
     @charging_schedule.setter
     def charging_schedule(self, new_value):
         self._charging_schedule = new_value
+        self.update_ha_state()
+
+    @property
+    def charging_status(self):
+        """Getter for charging_status."""
+        return self._charging_status
+
+    @charging_status.setter
+    def charging_status(self, new_value):
+        self._charging_status = new_value
         self.update_ha_state()
 
     @property

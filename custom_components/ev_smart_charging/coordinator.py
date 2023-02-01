@@ -18,6 +18,11 @@ from homeassistant.const import STATE_ON, STATE_OFF
 from homeassistant.util import dt
 
 from .const import (
+    CHARGING_STATUS_CHARGING,
+    CHARGING_STATUS_KEEP_ON,
+    CHARGING_STATUS_NO_PLAN,
+    CHARGING_STATUS_WAITING_CHARGING,
+    CHARGING_STATUS_WAITING_NEW_PRICE,
     CONF_CHARGER_ENTITY,
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
@@ -224,12 +229,22 @@ class EVSmartChargingCoordinator:
                 self.sensor.charging_number_of_hours = (
                     self.scheduler.get_charging_number_of_hours()
                 )
+                if self.auto_charging_state == STATE_ON:
+                    self.sensor.charging_status = CHARGING_STATUS_CHARGING
+                else:
+                    self.sensor.charging_status = CHARGING_STATUS_WAITING_CHARGING
             else:
                 _LOGGER.debug("Charging summary removed")
                 self.sensor.charging_is_planned = False
                 self.sensor.charging_start_time = None
                 self.sensor.charging_stop_time = None
                 self.sensor.charging_number_of_hours = 0
+                if self.switch_keep_on:
+                    self.sensor.charging_status = CHARGING_STATUS_KEEP_ON
+                elif time_now.hour >= self.ready_hour_local and not self.tomorrow_valid:
+                    self.sensor.charging_status = CHARGING_STATUS_WAITING_NEW_PRICE
+                else:
+                    self.sensor.charging_status = CHARGING_STATUS_NO_PLAN
 
     async def turn_on_charging(self):
         """Turn on charging"""
