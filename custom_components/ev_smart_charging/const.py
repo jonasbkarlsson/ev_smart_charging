@@ -91,6 +91,14 @@ HOURS = [
 START_HOUR_NONE = -48
 READY_HOUR_NONE = 72
 
+CHARGING_STATUS_WAITING_NEW_PRICE = "Waiting for new prices"
+CHARGING_STATUS_NO_PLAN = "No charging planned"
+CHARGING_STATUS_WAITING_CHARGING = "Waiting for charging to begin"
+CHARGING_STATUS_CHARGING = "Charging"
+CHARGING_STATUS_KEEP_ON = "Keeping charger on"
+CHARGING_STATUS_DISCONNECTED = "Disconnected"
+CHARGING_STATUS_NOT_ACTIVE = "Smart charging not active"
+
 # Defaults
 DEFAULT_NAME = DOMAIN
 DEFAULT_TARGET_SOC = 100

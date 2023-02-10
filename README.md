@@ -95,6 +95,7 @@ Attribute | Description
 `Current price` | The current price from the electricity price entity.
 `EV SOC` | The current SOC of the electric vehicle, as reported by the EV SOC entity.
 `EV target SOC` | The target SOC of the electric vehicle, as reported by the EV target SOC entity.
+`Charging status` | One of the following, "Waiting for new prices", "No charging planned", "Waiting for charging to begin", "Charging", "Keeping charger on", "Disconnected" and "Smart charging not active".
 `Charging is planned` | `true` if charging is planned, otherwise `false`. Is set to `false` after charging is completed.
 `Charging start time` | If charging is planned, the date and time when the charging will start.
 `Charging stop time` | If charging is planned, the date and time when the charging will stop.
@@ -218,6 +219,10 @@ cards:
         name: Manually stop charging
     title: EV Smart Charging
     show_header_toggle: false
+  - type: entity
+    entity: sensor.ev_smart_charging_charging
+    attribute: Charging status
+    name: Status
   - type: entity
     entity: sensor.ev_smart_charging_charging
     attribute: EV SOC

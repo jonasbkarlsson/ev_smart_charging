@@ -12,7 +12,10 @@ from custom_components.ev_smart_charging import (
 from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
-from custom_components.ev_smart_charging.const import DOMAIN
+from custom_components.ev_smart_charging.const import (
+    CHARGING_STATUS_WAITING_CHARGING,
+    DOMAIN,
+)
 from custom_components.ev_smart_charging.sensor import EVSmartChargingSensor
 
 from .const import MOCK_CONFIG_ALL
@@ -68,6 +71,9 @@ async def test_sensor(hass, bypass_validate_input_sensors):
     sensor.charging_schedule = one_list
     assert sensor.charging_schedule == one_list
 
+    sensor.charging_status = CHARGING_STATUS_WAITING_CHARGING
+    assert sensor.charging_status == CHARGING_STATUS_WAITING_CHARGING
+
     sensor.charging_is_planned = True
     assert sensor.charging_is_planned is True
 
@@ -92,6 +98,7 @@ async def test_sensor(hass, bypass_validate_input_sensors):
     assert extra["current_price"] == 12.1
     assert extra["EV SOC"] == 56
     assert extra["EV target SOC"] == 80
+    assert extra["Charging status"] == CHARGING_STATUS_WAITING_CHARGING
     assert extra["Charging is planned"] is True
     assert extra["Charging start time"] == datetime(
         2022, 9, 30, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
