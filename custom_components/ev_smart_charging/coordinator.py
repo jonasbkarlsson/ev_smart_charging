@@ -35,6 +35,7 @@ from .const import (
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_START_HOUR,
+    DEBOUNCE_TIME,
     DEFAULT_TARGET_SOC,
     READY_HOUR_NONE,
     START_HOUR_NONE,
@@ -48,7 +49,7 @@ from .helpers.coordinator import (
     get_ready_hour_utc,
     get_start_hour_utc,
 )
-from .helpers.general import Validator, get_parameter
+from .helpers.general import Validator, debounce_async, get_parameter
 from .sensor import EVSmartChargingSensor
 
 _LOGGER = logging.getLogger(__name__)
@@ -254,31 +255,38 @@ class EVSmartChargingCoordinator:
                 self._charging_schedule = Scheduler.get_empty_schedule()
                 self.sensor.charging_schedule = self._charging_schedule
 
-    async def turn_on_charging(self):
+    @debounce_async(DEBOUNCE_TIME)
+    async def turn_on_charging(self, state: bool = True):
         """Turn on charging"""
-        _LOGGER.debug("Turn on charging")
-        self.sensor.native_value = STATE_ON
-        if self.charger_switch is not None:
-            _LOGGER.debug("Before service call switch.turn_on: %s", self.charger_switch)
-            await self.hass.services.async_call(
-                domain=SWITCH,
-                service=SERVICE_TURN_ON,
-                target={"entity_id": self.charger_switch},
-            )
+
+        if state is True:
+            _LOGGER.debug("Turn on charging")
+            self.sensor.native_value = STATE_ON
+            if self.charger_switch is not None:
+                _LOGGER.debug(
+                    "Before service call switch.turn_on: %s", self.charger_switch
+                )
+                await self.hass.services.async_call(
+                    domain=SWITCH,
+                    service=SERVICE_TURN_ON,
+                    target={"entity_id": self.charger_switch},
+                )
+        else:
+            _LOGGER.debug("Turn off charging")
+            self.sensor.native_value = STATE_OFF
+            if self.charger_switch is not None:
+                _LOGGER.debug(
+                    "Before service call switch.turn_off: %s", self.charger_switch
+                )
+                await self.hass.services.async_call(
+                    domain=SWITCH,
+                    service=SERVICE_TURN_OFF,
+                    target={"entity_id": self.charger_switch},
+                )
 
     async def turn_off_charging(self):
         """Turn off charging"""
-        _LOGGER.debug("Turn off charging")
-        self.sensor.native_value = STATE_OFF
-        if self.charger_switch is not None:
-            _LOGGER.debug(
-                "Before service call switch.turn_off: %s", self.charger_switch
-            )
-            await self.hass.services.async_call(
-                domain=SWITCH,
-                service=SERVICE_TURN_OFF,
-                target={"entity_id": self.charger_switch},
-            )
+        await self.turn_on_charging(False)
 
     async def add_sensor(self, sensor: EVSmartChargingSensor):
         """Set up sensor"""
