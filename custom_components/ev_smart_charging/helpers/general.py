@@ -85,8 +85,9 @@ def get_wait_time(time):
 # pylint: disable=unused-argument
 def debounce_async(wait_time):
     """
-    Decorator that will debounce an async function so that it is called after wait_time seconds
-    If it is called multiple times, will wait for the last call to be debounced and run only this one.
+    Decorator that will debounce an async function so that it is called
+    after wait_time seconds. If it is called multiple times, will wait
+    for the last call to be debounced and run only this one.
     """
 
     def decorator(function):
