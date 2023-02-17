@@ -15,9 +15,10 @@
 # See here for more info: https://docs.pytest.org/en/latest/fixture.html (note that
 # pytest includes fixtures OOB which you can use as defined on this page)
 from unittest.mock import patch
-from homeassistant.util import dt as dt_util
-
 import pytest
+from homeassistant.util import dt as dt_util
+from custom_components.ev_smart_charging.const import DEBOUNCE_TIME
+
 
 # pylint: disable=invalid-name
 pytest_plugins = "pytest_homeassistant_custom_component"
@@ -87,4 +88,27 @@ def set_cet_timezone_fixture():
 def skip_service_calls_fixture():
     """Skip service calls."""
     with patch("homeassistant.core.ServiceRegistry.async_call"):
+        yield
+
+
+def pytest_configure(config):
+    """Register a new marker"""
+    config.addinivalue_line("markers", "ensure_debounce")
+
+
+# This fixture is used to skip debounce.
+# Decorate test case with @pytest.mark.ensure_debounce if debounce should be done.
+@pytest.fixture(autouse=True)
+def skip_debounce_fixture(request):
+    """Skip debounce"""
+
+    debounce_time = 0.0
+
+    if "ensure_debounce" in request.keywords:
+        debounce_time = DEBOUNCE_TIME
+
+    with patch(
+        "custom_components.ev_smart_charging.helpers.general.get_wait_time",
+        return_value=debounce_time,
+    ):
         yield

@@ -1,7 +1,9 @@
 """General helpers"""
 
 # pylint: disable=relative-beyond-top-level
+import asyncio
 import logging
+import threading
 from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import State
@@ -73,3 +75,43 @@ def get_parameter(config_entry: ConfigEntry, parameter: str, default_val: Any = 
     if parameter in config_entry.data.keys():
         return config_entry.data.get(parameter)
     return default_val
+
+
+def get_wait_time(time):
+    """Function to be patched during tests"""
+    return time
+
+
+# pylint: disable=unused-argument
+def debounce_async(wait_time):
+    """
+    Decorator that will debounce an async function so that it is called
+    after wait_time seconds. If it is called multiple times, will wait
+    for the last call to be debounced and run only this one.
+    """
+
+    def decorator(function):
+        async def debounced(*args, **kwargs):
+            nonlocal wait_time
+
+            def call_function():
+                debounced.timer = None
+                return asyncio.run_coroutine_threadsafe(
+                    function(*args, **kwargs), loop=debounced.loop
+                )
+
+            # Used for patching during testing to disable debounce
+            wait_time = get_wait_time(wait_time)
+            if wait_time == 0.0:
+                return await function(*args, **kwargs)
+
+            debounced.loop = asyncio.get_running_loop()
+            if debounced.timer is not None:
+                debounced.timer.cancel()
+            debounced.timer = threading.Timer(wait_time, call_function)
+            debounced.timer.start()
+
+        debounced.timer = None
+        return debounced
+
+    return decorator
