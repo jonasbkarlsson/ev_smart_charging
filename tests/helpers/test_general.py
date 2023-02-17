@@ -209,6 +209,7 @@ async def test_get_wait_time(hass):
     """Test get_wait_time"""
 
     assert get_wait_time(1.0) == 1.0
+    assert get_wait_time(2.0) == 2.0
 
 
 TEST_DEBOUNCE_ASYNC_VALUE = 0

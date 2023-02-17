@@ -91,6 +91,11 @@ def skip_service_calls_fixture():
         yield
 
 
+def pytest_configure(config):
+    """Register a new marker"""
+    config.addinivalue_line("markers", "ensure_debounce")
+
+
 # This fixture is used to skip debounce.
 # Decorate test case with @pytest.mark.ensure_debounce if debounce should be done.
 @pytest.fixture(autouse=True)
