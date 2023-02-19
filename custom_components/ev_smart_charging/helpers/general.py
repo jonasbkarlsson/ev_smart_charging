@@ -95,6 +95,7 @@ def debounce_async(wait_time):
             nonlocal wait_time
 
             def call_function():
+                _LOGGER.info("debounced.call_function()")
                 debounced.timer = None
                 return asyncio.run_coroutine_threadsafe(
                     function(*args, **kwargs), loop=debounced.loop
@@ -102,6 +103,7 @@ def debounce_async(wait_time):
 
             # Used for patching during testing to disable debounce
             wait_time = get_wait_time(wait_time)
+            _LOGGER.info("debounced.wait_time= %s", wait_time)
             if wait_time == 0.0:
                 return await function(*args, **kwargs)
 

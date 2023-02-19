@@ -260,7 +260,7 @@ class EVSmartChargingCoordinator:
         """Turn on charging"""
 
         if state is True:
-            _LOGGER.debug("Turn on charging")
+            _LOGGER.info("Turn on charging")
             self.sensor.native_value = STATE_ON
             if self.charger_switch is not None:
                 _LOGGER.debug(
@@ -272,7 +272,7 @@ class EVSmartChargingCoordinator:
                     target={"entity_id": self.charger_switch},
                 )
         else:
-            _LOGGER.debug("Turn off charging")
+            _LOGGER.info("Turn off charging")
             self.sensor.native_value = STATE_OFF
             if self.charger_switch is not None:
                 _LOGGER.debug(
