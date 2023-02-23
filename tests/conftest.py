@@ -91,6 +91,16 @@ def skip_service_calls_fixture():
         yield
 
 
+# This fixture is used to prevent calls to update_hourly().
+@pytest.fixture(name="skip_update_hourly")
+def skip_update_hourly_fixture():
+    """Skip update_hourly."""
+    with patch(
+        "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.update_hourly"
+    ):
+        yield
+
+
 def pytest_configure(config):
     """Register a new marker"""
     config.addinivalue_line("markers", "ensure_debounce")
