@@ -31,7 +31,11 @@ from tests.price import PRICE_20220930
 @pytest.mark.ensure_debounce
 @freeze_time("2022-09-30T02:00:00+02:00", tick=True)
 async def test_coordinator_debounce(
-    hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
+    hass: HomeAssistant,
+    skip_service_calls,
+    set_cet_timezone,
+    freezer,
+    skip_update_hourly,
 ):
     """Test Coordinator debounce."""
 
