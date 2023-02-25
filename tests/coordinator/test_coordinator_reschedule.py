@@ -34,6 +34,7 @@ async def test_coordinator_reschedule(
     skip_service_calls,
     set_cet_timezone,
     freezer,
+    skip_update_hourly,
 ):
     """Test Coordinator reschedule."""
 
@@ -73,7 +74,7 @@ async def test_coordinator_reschedule(
 
     # Schedule 06-07
     await asyncio.sleep(5)
-    #    await coordinator.update_hourly()
+    await coordinator.update_sensors()
     await asyncio.sleep(5)
     assert coordinator.sensor.state == STATE_ON
     assert coordinator.sensor.charging_is_planned is True
