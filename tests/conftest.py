@@ -17,7 +17,6 @@
 from unittest.mock import patch
 import pytest
 from homeassistant.util import dt as dt_util
-from custom_components.ev_smart_charging.const import DEBOUNCE_TIME
 
 
 # pylint: disable=invalid-name
@@ -97,28 +96,5 @@ def skip_update_hourly_fixture():
     """Skip update_hourly."""
     with patch(
         "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.update_hourly"
-    ):
-        yield
-
-
-def pytest_configure(config):
-    """Register a new marker"""
-    config.addinivalue_line("markers", "ensure_debounce")
-
-
-# This fixture is used to skip debounce.
-# Decorate test case with @pytest.mark.ensure_debounce if debounce should be done.
-@pytest.fixture(autouse=True)
-def skip_debounce_fixture(request):
-    """Skip debounce"""
-
-    debounce_time = 0.0
-
-    if "ensure_debounce" in request.keywords:
-        debounce_time = DEBOUNCE_TIME
-
-    with patch(
-        "custom_components.ev_smart_charging.helpers.general.get_wait_time",
-        return_value=debounce_time,
     ):
         yield

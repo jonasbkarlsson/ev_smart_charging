@@ -1,10 +1,7 @@
 """Test ev_smart_charging/helpers/general.py"""
 
-import asyncio
 from datetime import datetime
-from freezegun import freeze_time
 from homeassistant.core import State
-import pytest
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -15,9 +12,7 @@ from custom_components.ev_smart_charging.const import (
 )
 from custom_components.ev_smart_charging.helpers.general import (
     Validator,
-    debounce_async,
     get_parameter,
-    get_wait_time,
 )
 
 from .const import MOCK_CONFIG_DATA, MOCK_CONFIG_OPTIONS
@@ -202,67 +197,4 @@ async def test_get_parameter(hass):
     assert get_parameter(config_entry, CONF_PCT_PER_HOUR) == 8.0
     assert get_parameter(config_entry, CONF_MIN_SOC) == 30.0
     assert get_parameter(config_entry, CONF_READY_HOUR) is None
-    assert get_parameter(config_entry, CONF_READY_HOUR, 12) is 12
-
-
-async def test_get_wait_time(hass):
-    """Test get_wait_time"""
-
-    assert get_wait_time(1.0) == 1.0
-    assert get_wait_time(2.0) == 2.0
-
-
-TEST_DEBOUNCE_ASYNC_VALUE = 0
-
-
-# pylint: disable=global-statement
-@debounce_async(1.0)
-async def mock_function(new_value):
-    """Function to be used for testing"""
-    global TEST_DEBOUNCE_ASYNC_VALUE
-    TEST_DEBOUNCE_ASYNC_VALUE = new_value
-
-
-@pytest.mark.ensure_debounce
-@freeze_time("2022-09-30T02:00:00+02:00", tick=True)
-async def test_debounce_async(hass):
-    """Test debounce_async"""
-
-    global TEST_DEBOUNCE_ASYNC_VALUE
-    TEST_DEBOUNCE_ASYNC_VALUE = 0
-
-    await mock_function(1)
-    await asyncio.sleep(2)
-    await hass.async_block_till_done()
-    assert TEST_DEBOUNCE_ASYNC_VALUE == 1
-
-    await mock_function(2)
-    await asyncio.sleep(0.1)
-    await hass.async_block_till_done()
-    assert TEST_DEBOUNCE_ASYNC_VALUE == 1
-    await mock_function(3)
-    await asyncio.sleep(2)
-    await hass.async_block_till_done()
-    assert TEST_DEBOUNCE_ASYNC_VALUE == 3
-
-
-@freeze_time("2022-09-30T02:00:00+02:00", tick=True)
-async def test_debounce_async2(hass):
-    """Test debounce_async"""
-
-    global TEST_DEBOUNCE_ASYNC_VALUE
-    TEST_DEBOUNCE_ASYNC_VALUE = 0
-
-    await mock_function(1)
-    await asyncio.sleep(2)
-    await hass.async_block_till_done()
-    assert TEST_DEBOUNCE_ASYNC_VALUE == 1
-
-    await mock_function(2)
-    await asyncio.sleep(0.1)
-    await hass.async_block_till_done()
-    assert TEST_DEBOUNCE_ASYNC_VALUE == 2
-    await mock_function(3)
-    await asyncio.sleep(2)
-    await hass.async_block_till_done()
-    assert TEST_DEBOUNCE_ASYNC_VALUE == 3
+    assert get_parameter(config_entry, CONF_READY_HOUR, 12) == 12
