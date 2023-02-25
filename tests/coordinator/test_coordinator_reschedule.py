@@ -1,7 +1,6 @@
 """Test ev_smart_charging coordinator."""
 from datetime import datetime
 import asyncio
-import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from freezegun import freeze_time
 
@@ -29,7 +28,6 @@ from tests.helpers.helpers import (
 from tests.price import PRICE_20220930, PRICE_20221001
 
 # pylint: disable=unused-argument
-@pytest.mark.ensure_debounce
 @freeze_time("2022-09-30T05:59:50+02:00", tick=True)
 async def test_coordinator_reschedule(
     hass: HomeAssistant,
@@ -37,7 +35,7 @@ async def test_coordinator_reschedule(
     set_cet_timezone,
     freezer,
 ):
-    """Test Coordinator debounce."""
+    """Test Coordinator reschedule."""
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     MockSOCEntity.create(hass, entity_registry, "75")
