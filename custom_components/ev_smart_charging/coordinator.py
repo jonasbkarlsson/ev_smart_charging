@@ -558,6 +558,7 @@ class EVSmartChargingCoordinator:
             "max_price": max_price,
         }
 
+        time_now_local = dt.now()
         time_now_hour_local = dt.now().hour
 
         # To handle non-live SOC
@@ -569,6 +570,33 @@ class EVSmartChargingCoordinator:
         else:
             self.ready_hour_first = True
 
+        not_charging = True
+        if self._charging_schedule is not None:
+            not_charging = (
+                get_charging_value(self._charging_schedule) is None
+                or get_charging_value(self._charging_schedule) == 0
+            )
+            # Handle self.switch_keep_on
+            if self.switch_keep_on:
+                # Only if price limit is not used and the EV is connected
+                if (
+                    self.switch_apply_limit is False or self.max_price == 0.0
+                ) and self.switch_ev_connected:
+                    # Only if SOC has reached Target SOC or there are no more scheduled charging
+                    if (
+                        self.ev_soc is not None
+                        and self.ev_target_soc is not None
+                        and self.ev_soc >= self.ev_target_soc
+                    ):
+                        # Don't reschedule due to keep_on
+                        not_charging = False
+
+                    if self.switch_keep_on_completion_time is not None and (
+                        time_now_local >= self.switch_keep_on_completion_time
+                    ):
+                        # Don't reschedule due to keep_on
+                        not_charging = False
+
         if (
             (self.ev_soc is not None and self.ev_target_soc is not None)
             and (self.ev_soc > self.ev_soc_before_last_charging)
@@ -576,7 +604,7 @@ class EVSmartChargingCoordinator:
                 (self.ev_soc >= self.ev_target_soc)
                 or (
                     (self.tomorrow_valid or time_now_hour_local < self.ready_hour_local)
-                    and self.auto_charging_state == STATE_OFF
+                    and not_charging
                 )
             )
         ):

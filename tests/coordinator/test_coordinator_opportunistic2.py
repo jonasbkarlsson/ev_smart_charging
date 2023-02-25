@@ -113,15 +113,16 @@ async def test_coordinator_opportunistic_1(
     assert coordinator.sensor.charging_number_of_hours == 8
 
     # Move time to next day
-    freezer.move_to("2022-10-01T02:00:00+02:00")
+    freezer.move_to("2022-10-01T00:30:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20221001A, None)
+    MockSOCEntity.set_state(hass, "72")
     await coordinator.update_sensors()
     await hass.async_block_till_done()
 
     # Ready_hour = 08:00, Max price 200. Opportunistic level 50%
     # 3 hours => 02:00-05:00
-    assert coordinator.auto_charging_state == STATE_ON
-    assert coordinator.sensor.state == STATE_ON
+    assert coordinator.auto_charging_state == STATE_OFF
+    assert coordinator.sensor.state == STATE_OFF
     assert coordinator.sensor.charging_is_planned is True
     assert coordinator.sensor.charging_start_time == datetime(
         2022, 10, 1, 2, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
@@ -130,3 +131,9 @@ async def test_coordinator_opportunistic_1(
         2022, 10, 1, 5, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
     assert coordinator.sensor.charging_number_of_hours == 3
+
+    freezer.move_to("2022-10-01T02:00:00+02:00")
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
+    assert coordinator.auto_charging_state == STATE_ON
+    assert coordinator.sensor.state == STATE_ON
