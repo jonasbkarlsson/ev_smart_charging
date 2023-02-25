@@ -144,8 +144,8 @@ async def test_coordinator_keep_on_issue104(
 ):
     """Test Coordinator."""
 
-    # Test a specific case with keep_on, where keep on is activated during charging if EV SOC reaches 98%
-    # and the wish is to keep the charger on beyond the planned charging period.
+    # Test a specific case with keep_on, where keep on is activated during charging if EV SOC
+    # reaches 98% and the wish is to keep the charger on beyond the planned charging period.
 
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
