@@ -104,3 +104,63 @@ async def test_coordinator_no_ready(
         2022, 10, 2, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
     assert coordinator.sensor.charging_number_of_hours == 20
+
+
+async def test_coordinator_no_ready2(
+    hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
+):
+    """Test Coordinator."""
+
+    freezer.move_to("2022-09-30T10:00:00+02:00")
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+    MockSOCEntity.create(hass, entity_registry, "66")
+    MockTargetSOCEntity.create(hass, entity_registry, "80")
+    MockPriceEntity.create(hass, entity_registry, 123)
+    MockChargerEntity.create(hass, entity_registry, STATE_OFF)
+    MockPriceEntity.set_state(hass, PRICE_20220930, None)
+
+    # Ready by None
+    config_entry = MockConfigEntry(
+        domain=DOMAIN, data=MOCK_CONFIG_NO_READY, entry_id="test"
+    )
+    coordinator = EVSmartChargingCoordinator(hass, config_entry)
+    assert coordinator is not None
+
+    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    assert sensor is not None
+    await coordinator.add_sensor(sensor)
+
+    # Provide price. This should give a 5h schedule, 19:00-24:00
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
+    assert coordinator.tomorrow_valid is False
+
+    # Turn on switches
+    await coordinator.switch_active_update(True)
+    await coordinator.switch_apply_limit_update(False)
+    await coordinator.switch_continuous_update(True)
+    await coordinator.switch_ev_connected_update(True)
+    await coordinator.switch_keep_on_update(False)
+    await hass.async_block_till_done()
+
+    assert coordinator.auto_charging_state == STATE_OFF
+    assert coordinator.sensor.state == STATE_OFF
+    assert coordinator.sensor.charging_is_planned is True
+    assert coordinator.sensor.charging_start_time == datetime(
+        2022, 9, 30, 19, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+    assert coordinator.sensor.charging_stop_time == datetime(
+        2022, 10, 1, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+    assert coordinator.sensor.charging_number_of_hours == 5
+
+    # Test that the schedule is removed if the ready_hour setting is changed to a time tomorrow
+    # when tomorrow's prices are not yet available.
+    coordinator.ready_hour_local = 8
+    await coordinator.update_configuration()
+    await hass.async_block_till_done()
+
+    assert coordinator.auto_charging_state == STATE_OFF
+    assert coordinator.sensor.state == STATE_OFF
+    assert coordinator.sensor.charging_is_planned is False

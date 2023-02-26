@@ -608,6 +608,15 @@ class EVSmartChargingCoordinator:
         ):
             self.scheduler.create_base_schedule(scheduling_params, self.raw_two_days)
 
+        # If the ready_hour is updated to next day before next day's prices are available,
+        # then remove the schedule
+        if (
+            not self.tomorrow_valid
+            and time_now_hour_local > self.ready_hour_local
+            and configuration_updated
+        ):
+            self.scheduler.set_empty_schedule()
+
         if self.scheduler.base_schedule_exists() is True:
             scheduling_params.update(
                 {"value_in_graph": self.raw_two_days.max_value() * 0.75}
