@@ -57,6 +57,7 @@ jobs:
             --timeout=45 \
             --durations=10 \
             -n auto \
+            --asyncio-mode=auto \
             --cov-report=xml \
             --cov-report=term \
             --cov custom_components.ev_smart_charging \
