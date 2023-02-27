@@ -4,7 +4,7 @@
 {
 	"name": "EV Smart Charging",
 	"image": "mcr.microsoft.com/vscode/devcontainers/python:0-3.10",
-	"postCreateCommand": "manage/setup",
+	"postCreateCommand": "scripts/setup",
 	"forwardPorts": [
 		8123
 	],
