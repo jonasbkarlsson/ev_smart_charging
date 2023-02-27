@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -e
+cd "$(dirname "$0")/../.devcontainer"
+
+# Copy config and custom_components
+cp configuration.yaml hass
+cp -r ../custom_components/ hass
+
+# Start Home Assistant
+hass -c hass --debug

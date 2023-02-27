@@ -11,5 +11,8 @@
         "--cov=custom_components.ev_smart_charging"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "python.analysis.extraPaths": [
+        "/home/vscode/.local/lib/python3.10/site-packages/homeassistant"
+    ]
 }
