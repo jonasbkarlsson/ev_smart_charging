@@ -1,4 +1,6 @@
 // See https://containers.dev/implementors/json_reference/ for format details.
+// Note that python:0-3.10-bullseye should be used for local arm64/Apple Silicon.
+// Depending on setup, "remoteUser": "vscode", might be preferred to add.
 {
 	"name": "EV Smart Charging",
 	"image": "mcr.microsoft.com/vscode/devcontainers/python:0-3.10",
