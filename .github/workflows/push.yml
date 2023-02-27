@@ -39,6 +39,11 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9", "3.10"]
+        include:
+          - python-version: "3.9"
+            requirements: "requirements_test39.txt"
+          - python-version: "3.10"
+            requirements: "requirements_test.txt"
     name: Run tests
     steps:
       - name: Check out code from GitHub
@@ -48,7 +53,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install requirements
-        run: python3 -m pip install -r requirements_test.txt
+        run: python3 -m pip install -r ${{ matrix.requirements }}
       - name: Run tests
         run: |
           pytest \
@@ -56,6 +61,7 @@ jobs:
             --timeout=45 \
             --durations=10 \
             -n auto \
+            --asyncio-mode=auto \
             --cov-report=xml \
             --cov-report=term \
             --cov custom_components.ev_smart_charging \
