@@ -58,9 +58,16 @@ pip3 list 2>/dev/null | grep homeassistant | grep -v "\-home"
 pip3 list 2>/dev/null | grep pytest-homeassistant-custom-component
 pytest -q --no-summary --asyncio-mode=auto tests 2>&1 | grep passed
 
-# As of 0.12.50, pytest-homeassistant-custom-component does not support Python 3.9.
+# As of HA 2023.2, Python 3.9 is not supported.
 echo
 pip3 install -qq homeassistant==2023.2.5 pytest-homeassistant-custom-component==0.12.57
+pip3 list 2>/dev/null | grep homeassistant | grep -v "\-home"
+pip3 list 2>/dev/null | grep pytest-homeassistant-custom-component
+pytest -q --no-summary --asyncio-mode=auto tests 2>&1 | grep passed
+
+# As of HA 2023.3, Python 3.11 is supported.
+echo
+pip3 install -qq homeassistant==2023.3.1 pytest-homeassistant-custom-component==0.13.5
 pip3 list 2>/dev/null | grep homeassistant | grep -v "\-home"
 pip3 list 2>/dev/null | grep pytest-homeassistant-custom-component
 pytest -q --no-summary --asyncio-mode=auto tests 2>&1 | grep passed
