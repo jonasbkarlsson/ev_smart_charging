@@ -2,8 +2,9 @@
     "config": {
         "step": {
             "user": {
-                "description": "Setup of external entities",
+                "description": "Configuration of name and external entities.",
                 "data": {
+                    "device_name": "Name",
                     "price_sensor": "Electricity price sensor",
                     "ev_soc_sensor": "EV SOC entity",
                     "ev_target_soc_sensor": "EV Target SOC entity",

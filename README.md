@@ -58,6 +58,7 @@ The configuration is done in the Home Assistant user interface.
 The configuration form contains the entities that the integration is interacting with.
 Parameter | Required | Description
 -- | -- | --
+Name | Yes | The name of the instance.
 Electricity price entity | Yes | The Nordpool or the Energi Data Service integration sensor entity.
 EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100. Note that this entity is crucial for the integration. If live information about he SOC is not available, please carefully read the section below with more information about the EV SOC entity.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
