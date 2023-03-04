@@ -33,6 +33,7 @@ from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_MIN_SOC
 # Assertions allow you to verify that the return value of whatever is on the left
 # side of the assertion matches with the right side.
 
+
 # pylint: disable=unused-argument
 async def test_select(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
@@ -115,7 +116,7 @@ async def test_select_restore(
 
     select_ready_hour: EVSmartChargingSelectReadyHour = hass.data["entity_components"][
         SELECT
-    ].get_entity("select.none_charge_completion_time")
+    ].get_entity("select.ev_smart_charging_charge_completion_time")
 
     await select_ready_hour.async_select_option("10:00")
     assert select_ready_hour.state == "10:00"
