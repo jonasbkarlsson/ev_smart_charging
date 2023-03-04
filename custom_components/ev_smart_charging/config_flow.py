@@ -13,7 +13,6 @@ from .const import (
     CONF_PRICE_SENSOR,
     CONF_CHARGER_ENTITY,
     DOMAIN,
-    NAME,
 )
 from .helpers.config_flow import DeviceNameCreator, FindEntity, FlowValidator
 
@@ -33,7 +32,6 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.user_input = {}
 
     async def async_step_user(self, user_input=None):
-
         _LOGGER.debug("EVChargingControlConfigFlow.async_step_user")
         self._errors = {}
 
@@ -44,6 +42,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is None:
             user_input = {}
             # Provide defaults for form
+            user_input[CONF_DEVICE_NAME] = DeviceNameCreator.create(self.hass)
             user_input[CONF_PRICE_SENSOR] = FindEntity.find_nordpool_sensor(self.hass)
             if len(user_input[CONF_PRICE_SENSOR]) == 0:
                 user_input[
@@ -63,12 +62,9 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             if not self._errors:
                 self.user_input = user_input
-                # process user_input
-                user_input[CONF_DEVICE_NAME] = DeviceNameCreator.create(
-                    self.hass
-                )  # Add device name
-                self.user_input.update(user_input)
-                return self.async_create_entry(title=NAME, data=self.user_input)
+                return self.async_create_entry(
+                    title=user_input[CONF_DEVICE_NAME], data=self.user_input
+                )
 
         return await self._show_config_form_user(user_input)
 
@@ -76,6 +72,9 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Show the configuration form."""
 
         user_schema = {
+            vol.Required(
+                CONF_DEVICE_NAME, default=user_input[CONF_DEVICE_NAME]
+            ): cv.string,
             vol.Required(
                 CONF_PRICE_SENSOR, default=user_input[CONF_PRICE_SENSOR]
             ): cv.string,
