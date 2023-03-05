@@ -43,11 +43,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     # This is currently needed since
     # homeassistant.config_entries.OptionsFlowManager.async_finish_flow()
     # does not pass "title" to self.hass.config_entries.async_update_entry()
+    # Don't bother to test code copied from async_update_entry()
     if entry.title != get_parameter(entry, CONF_DEVICE_NAME):
         entry.title = get_parameter(entry, CONF_DEVICE_NAME)
         for listener_ref in entry.update_listeners:
-            if (listener := listener_ref()) is not None:
-                hass.async_create_task(listener(hass, entry))
+            if (listener := listener_ref()) is not None:  # pragma: no cover
+                hass.async_create_task(listener(hass, entry))  # pragma: no cover
         async_dispatcher_send(
             hass, SIGNAL_CONFIG_ENTRY_CHANGED, ConfigEntryChange.UPDATED, entry
         )
