@@ -35,6 +35,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         _LOGGER.debug(STARTUP_MESSAGE)
 
     # Make sure the Integration name is the same as the Device name
+    # A reload of the dashboard is needed if it is a new name.
     entry.title = get_parameter(entry, CONF_DEVICE_NAME)
 
     coordinator = EVSmartChargingCoordinator(hass, entry)
