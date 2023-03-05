@@ -7,9 +7,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Config, HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
+from custom_components.ev_smart_charging.helpers.general import get_parameter
+
 from .coordinator import EVSmartChargingCoordinator
 from .const import (
-    CONF_PRICE_SENSOR,
+    CONF_DEVICE_NAME,
     DOMAIN,
     STARTUP_MESSAGE,
     PLATFORMS,
@@ -32,8 +34,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.data.setdefault(DOMAIN, {})
         _LOGGER.debug(STARTUP_MESSAGE)
 
-    test = entry.data.get(CONF_PRICE_SENSOR)
-    _LOGGER.debug("async_setup_entry Test = %s", test)
+    # Make sure the Integration name is the same as the Device name
+    # A reload of the dashboard is needed if it is a new name.
+    entry.title = get_parameter(entry, CONF_DEVICE_NAME)
 
     coordinator = EVSmartChargingCoordinator(hass, entry)
     validation_error = coordinator.validate_input_sensors()

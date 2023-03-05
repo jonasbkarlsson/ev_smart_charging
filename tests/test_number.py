@@ -36,6 +36,7 @@ from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_MIN_SOC
 # Assertions allow you to verify that the return value of whatever is on the left
 # side of the assertion matches with the right side.
 
+
 # pylint: disable=unused-argument
 async def test_number(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
@@ -137,7 +138,7 @@ async def test_number_restore(
 
     number_charging_speed: EVSmartChargingNumberChargingSpeed = hass.data[
         "entity_components"
-    ][NUMBER].get_entity("number.none_charging_speed")
+    ][NUMBER].get_entity("number.ev_smart_charging_charging_speed")
 
     await number_charging_speed.async_set_native_value(45)
     assert number_charging_speed.native_value == 45

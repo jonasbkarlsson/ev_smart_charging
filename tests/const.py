@@ -60,6 +60,14 @@ MOCK_CONFIG_CHARGER_EXTRA = {
     CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
 }
 
+MOCK_CONFIG_CHARGER_NEW = {
+    CONF_DEVICE_NAME: "new_name",
+    CONF_PRICE_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0_new",
+    CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge_new",
+    CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge_new",
+    CONF_CHARGER_ENTITY: "switch.ocpp_charge_control_new",
+}
+
 MOCK_CONFIG_ALL_V1 = {
     CONF_PRICE_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0",
     CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
@@ -84,6 +92,7 @@ MOCK_CONFIG_ALL_V2 = {
 }
 
 MOCK_CONFIG_ALL = {
+    CONF_DEVICE_NAME: "EV Smart Charging",
     CONF_PRICE_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0",
     CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
     CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
