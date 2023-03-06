@@ -17,6 +17,8 @@ from homeassistant.helpers.entity_registry import (
 from homeassistant.const import STATE_ON, STATE_OFF
 from homeassistant.util import dt
 
+from custom_components.ev_smart_charging.helpers.price_adaptor import PriceAdaptor
+
 from .const import (
     CHARGING_STATUS_CHARGING,
     CHARGING_STATUS_DISCONNECTED,
@@ -40,7 +42,6 @@ from .const import (
     START_HOUR_NONE,
     SWITCH,
 )
-from .helpers.config_flow import get_platform
 from .helpers.coordinator import (
     Raw,
     Scheduler,
@@ -48,7 +49,7 @@ from .helpers.coordinator import (
     get_ready_hour_utc,
     get_start_hour_utc,
 )
-from .helpers.general import Validator, get_parameter
+from .helpers.general import Validator, get_parameter, get_platform
 from .sensor import EVSmartChargingSensor
 
 _LOGGER = logging.getLogger(__name__)
@@ -477,13 +478,15 @@ class EVSmartChargingCoordinator:
             self.ev_soc_before_last_charging = -1
 
         price_state = self.hass.states.get(self.price_entity_id)
-        if Validator.is_price_state(price_state, self.price_platform):
-            self.sensor.current_price = price_state.attributes["current_price"]
-            self.raw_today_local = Raw(
-                price_state.attributes["raw_today"], self.price_platform
+        if PriceAdaptor.is_price_state(price_state, self.price_platform):
+            self.sensor.current_price = PriceAdaptor.get_current_price(
+                price_state, self.price_platform
             )
-            self.raw_tomorrow_local = Raw(
-                price_state.attributes["raw_tomorrow"], self.price_platform
+            self.raw_today_local = PriceAdaptor.get_raw_today_local(
+                price_state, self.price_platform
+            )
+            self.raw_tomorrow_local = PriceAdaptor.get_raw_tomorrow_local(
+                price_state, self.price_platform
             )
             self.tomorrow_valid = self.raw_tomorrow_local.is_valid()
 

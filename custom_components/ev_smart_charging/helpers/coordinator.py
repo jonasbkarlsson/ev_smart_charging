@@ -9,12 +9,64 @@ from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.const import (
     PLATFORM_ENERGIDATASERVICE,
+    PLATFORM_ENTSOE,
     PLATFORM_NORDPOOL,
     READY_HOUR_NONE,
     START_HOUR_NONE,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def convert_raw_item(
+    item: dict[str, Any], platform: str = PLATFORM_NORDPOOL
+) -> dict[str, Any]:
+    """Convert raw item to the internal format"""
+
+    # Array of item = {
+    #   "start": datetime,
+    #   "end": datetime,
+    #   "value": float,
+    # }
+    # {'start': datetime.datetime(2023, 3, 6, 0, 0,
+    #           tzinfo=zoneinfo.ZoneInfo(key='Europe/Stockholm')),
+    #  'end': datetime.datetime(2023, 3, 6, 1, 0,
+    #         tzinfo=zoneinfo.ZoneInfo(key='Europe/Stockholm')),
+    #  'value': 145.77}
+
+    if platform == PLATFORM_NORDPOOL:
+        if item["value"] is not None and isinstance(item["start"], datetime):
+            return item
+
+    # Array of item = {
+    #   "hour": datetime,
+    #   "price": float,
+    # }
+    # {'hour': datetime.datetime(2023, 3, 6, 0, 0,
+    #          tzinfo=<DstTzInfo 'Europe/Stockholm' CET+1:00:00 STD>),
+    #  'price': 146.96}
+    if platform == PLATFORM_ENERGIDATASERVICE:
+        if item["price"] is not None and isinstance(item["hour"], datetime):
+            item_new = {}
+            item_new["value"] = item["price"]
+            item_new["start"] = item["hour"]
+            item_new["end"] = item["hour"] + timedelta(hours=1)
+            return item_new
+
+    # Array of item = {
+    #   "time": datetime,
+    #   "price": float,
+    # }
+    # {'time': '2023-03-06 00:00:00+01:00', 'price': 0.1306} time is not datetime
+    if platform == PLATFORM_ENTSOE:
+        if item["price"] is not None and isinstance(item["time"], str):
+            item_new = {}
+            item_new["value"] = item["price"]
+            item_new["start"] = datetime.fromisoformat(item["time"])
+            item_new["end"] = item_new["start"] + timedelta(hours=1)
+            return item_new
+
+    return None
 
 
 class Raw:
@@ -29,22 +81,12 @@ class Raw:
     def __init__(
         self, raw: list[dict[str, Any]], platform: str = PLATFORM_NORDPOOL
     ) -> None:
-
         self.data = []
         if raw:
             for item in raw:
-                if platform == PLATFORM_NORDPOOL:
-                    if item["value"] is not None and isinstance(
-                        item["start"], datetime
-                    ):
-                        self.data.append(item)
-                if platform == PLATFORM_ENERGIDATASERVICE:
-                    if item["price"] is not None and isinstance(item["hour"], datetime):
-                        item_new = {}
-                        item_new["value"] = item["price"]
-                        item_new["start"] = item["hour"]
-                        item_new["end"] = item["hour"] + timedelta(hours=1)
-                        self.data.append(item_new)
+                item_new = convert_raw_item(item, platform)
+                if item_new is not None:
+                    self.data.append(item_new)
 
             self.valid = len(self.data) > 12
         else:

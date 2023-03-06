@@ -13,13 +13,11 @@ from custom_components.ev_smart_charging.helpers.config_flow import (
     DeviceNameCreator,
     FindEntity,
     FlowValidator,
-    get_platform,
 )
 from custom_components.ev_smart_charging.const import (
     BUTTON,
     DOMAIN,
     NAME,
-    PLATFORM_ENERGIDATASERVICE,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
     PLATFORM_VW,
@@ -352,23 +350,3 @@ async def test_device_name_creator(hass: HomeAssistant):
     )
     assert (name4 := DeviceNameCreator.create(hass)) not in names
     assert NAME in name4
-
-
-async def test_get_platform(hass: HomeAssistant):
-    """Test the get_platform."""
-
-    entity_registry: EntityRegistry = async_entity_registry_get(hass)
-
-    # First create a couple of entities
-    MockPriceEntity.create(hass, entity_registry)
-    MockPriceEntityEnergiDataService.create(hass, entity_registry)
-
-    assert get_platform(hass, None) is None
-    assert (
-        get_platform(hass, FindEntity.find_nordpool_sensor(hass)) == PLATFORM_NORDPOOL
-    )
-    assert (
-        get_platform(hass, FindEntity.find_energidataservice_sensor(hass))
-        == PLATFORM_ENERGIDATASERVICE
-    )
-    assert get_platform(hass, "Non existant entity") is None

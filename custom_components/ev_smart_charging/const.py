@@ -28,6 +28,7 @@ SELECT = Platform.SELECT
 PLATFORMS = [SWITCH, SENSOR, BUTTON, NUMBER, SELECT]
 PLATFORM_NORDPOOL = "nordpool"
 PLATFORM_ENERGIDATASERVICE = "energidataservice"
+PLATFORM_ENTSOE = "entsoe"
 PLATFORM_VW = "volkswagen_we_connect_id"
 PLATFORM_OCPP = "ocpp"
 
