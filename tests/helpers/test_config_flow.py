@@ -36,6 +36,7 @@ from tests.helpers.helpers import (
     MockChargerEntity,
     MockPriceEntity,
     MockPriceEntityEnergiDataService,
+    MockPriceEntityEntsoe,
     MockSOCEntity,
     MockTargetSOCEntity,
 )
@@ -291,10 +292,20 @@ async def test_find_entity(hass: HomeAssistant):
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
 
     # First create a couple of entities
-    assert FindEntity.find_nordpool_sensor(hass) == ""
-    MockPriceEntity.create(hass, entity_registry)
+    assert FindEntity.find_price_sensor(hass) == ""
+
+    assert FindEntity.find_entsoe_sensor(hass) == ""
+    MockPriceEntityEntsoe.create(hass, entity_registry)
+    assert FindEntity.find_price_sensor(hass).startswith("sensor.entsoe")
+
     assert FindEntity.find_energidataservice_sensor(hass) == ""
     MockPriceEntityEnergiDataService.create(hass, entity_registry)
+    assert FindEntity.find_price_sensor(hass).startswith("sensor.energidataservice")
+
+    assert FindEntity.find_nordpool_sensor(hass) == ""
+    MockPriceEntity.create(hass, entity_registry)
+    assert FindEntity.find_price_sensor(hass).startswith("sensor.nordpool")
+
     assert FindEntity.find_vw_soc_sensor(hass) == ""
     MockSOCEntity.create(hass, entity_registry)
     assert FindEntity.find_vw_target_soc_sensor(hass) == ""
@@ -305,6 +316,7 @@ async def test_find_entity(hass: HomeAssistant):
     # Now test and confirm that all can be found
     assert FindEntity.find_nordpool_sensor(hass) != ""
     assert FindEntity.find_energidataservice_sensor(hass) != ""
+    assert FindEntity.find_entsoe_sensor(hass) != ""
     assert FindEntity.find_vw_soc_sensor(hass) != ""
     assert FindEntity.find_vw_target_soc_sensor(hass) != ""
     assert FindEntity.find_ocpp_device(hass) != ""
