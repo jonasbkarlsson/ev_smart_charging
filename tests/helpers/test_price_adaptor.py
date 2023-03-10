@@ -18,33 +18,35 @@ from custom_components.ev_smart_charging.helpers.price_adaptor import PriceAdapt
 async def test_is_price_state(hass):
     """Test is_price_state"""
 
-    assert PriceAdaptor.is_price_state(None) is False
+    price_adaptor = PriceAdaptor()
+
+    assert price_adaptor.is_price_state(None) is False
     price_state = State(entity_id="sensor.test", state="unavailable")
-    assert PriceAdaptor.is_price_state(price_state) is False
+    assert price_adaptor.is_price_state(price_state) is False
     price_state = State(entity_id="sensor.test", state="12.1")
-    assert PriceAdaptor.is_price_state(price_state) is False
+    assert price_adaptor.is_price_state(price_state) is False
     price_state = State(
         entity_id="sensor.test", state="12.1", attributes={"current_price": 12.1}
     )
-    assert PriceAdaptor.is_price_state(price_state) is False
+    assert price_adaptor.is_price_state(price_state) is False
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
         attributes={"current_price": 12.1, "raw_today": None},
     )
-    assert PriceAdaptor.is_price_state(price_state) is False
+    assert price_adaptor.is_price_state(price_state) is False
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
         attributes={"current_price": 12.1, "raw_today": 12.1},
     )
-    assert PriceAdaptor.is_price_state(price_state) is False
+    assert price_adaptor.is_price_state(price_state) is False
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
         attributes={"current_price": 12.1, "raw_today": []},
     )
-    assert PriceAdaptor.is_price_state(price_state) is False
+    assert price_adaptor.is_price_state(price_state) is False
 
     one_list = [
         {
@@ -127,25 +129,25 @@ async def test_is_price_state(hass):
         state="12.1",
         attributes={"current_price": 12.1, "raw_today": one_list},
     )
-    assert PriceAdaptor.is_price_state(price_state) is False
+    assert price_adaptor.is_price_state(price_state) is False
 
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
         attributes={"current_price": None, "raw_today": one_list},
     )
-    assert PriceAdaptor.is_price_state(price_state) is False
+    assert price_adaptor.is_price_state(price_state) is False
 
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
         attributes={"current_price": 12.1, "raw_today": thirteen_list},
     )
-    assert PriceAdaptor.is_price_state(price_state) is True
+    assert price_adaptor.is_price_state(price_state) is True
 
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
         attributes={"current_price": None, "raw_today": thirteen_list},
     )
-    assert PriceAdaptor.is_price_state(price_state) is False
+    assert price_adaptor.is_price_state(price_state) is False

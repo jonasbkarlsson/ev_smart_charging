@@ -80,7 +80,7 @@ class EVSmartChargingCoordinator:
         self.switch_opportunistic_entity_id = None
         self.switch_opportunistic_unique_id = None
         self.price_entity_id = None
-        self.price_platform = None
+        self.price_adaptor = PriceAdaptor()
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
 
@@ -292,7 +292,9 @@ class EVSmartChargingCoordinator:
         self.sensor = sensor
 
         self.price_entity_id = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
-        self.price_platform = get_platform(self.hass, self.price_entity_id)
+        self.price_adaptor.set_price_platform(
+            get_platform(self.hass, self.price_entity_id)
+        )
         self.ev_soc_entity_id = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
         self.ev_target_soc_entity_id = get_parameter(
             self.config_entry, CONF_EV_TARGET_SOC_SENSOR
@@ -478,15 +480,13 @@ class EVSmartChargingCoordinator:
             self.ev_soc_before_last_charging = -1
 
         price_state = self.hass.states.get(self.price_entity_id)
-        if PriceAdaptor.is_price_state(price_state, self.price_platform):
-            self.sensor.current_price = PriceAdaptor.get_current_price(
-                price_state, self.price_platform
+        if self.price_adaptor.is_price_state(price_state):
+            self.sensor.current_price = self.price_adaptor.get_current_price(
+                price_state
             )
-            self.raw_today_local = PriceAdaptor.get_raw_today_local(
-                price_state, self.price_platform
-            )
-            self.raw_tomorrow_local = PriceAdaptor.get_raw_tomorrow_local(
-                price_state, self.price_platform
+            self.raw_today_local = self.price_adaptor.get_raw_today_local(price_state)
+            self.raw_tomorrow_local = self.price_adaptor.get_raw_tomorrow_local(
+                price_state
             )
             self.tomorrow_valid = self.raw_tomorrow_local.is_valid()
 
