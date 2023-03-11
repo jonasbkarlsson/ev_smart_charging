@@ -7,6 +7,7 @@ from homeassistant.util import dt as dt_util
 
 from custom_components.ev_smart_charging.const import (
     PLATFORM_ENERGIDATASERVICE,
+    PLATFORM_ENTSOE,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
     PLATFORM_VW,
@@ -73,7 +74,7 @@ class MockPriceEntityEnergiDataService:
             platform=PLATFORM_ENERGIDATASERVICE,
             unique_id="energi_data_service",
         )
-        MockPriceEntity.set_state(hass, None, None, price)
+        MockPriceEntityEnergiDataService.set_state(hass, None, None, price)
 
     @staticmethod
     def set_state(
@@ -98,12 +99,55 @@ class MockPriceEntityEnergiDataService:
 
         # Set state
         hass.states.async_set(
-            "sensor.energi_data_service",
+            "sensor.energidataservice_energi_data_service",
             f"{new_price}",
             {
                 "current_price": new_price,
                 "raw_today": new_raw_today,
                 "raw_tomorrow": new_raw_tomorrow,
+            },
+        )
+
+
+class MockPriceEntityEntsoe:
+    """Mockup for price entity Entsoe"""
+
+    @staticmethod
+    def create(
+        hass: HomeAssistant, entity_registry: EntityRegistry, price: float = 123
+    ):
+        """Create a correct price entity"""
+        entity_registry.async_get_or_create(
+            domain=SENSOR,
+            platform=PLATFORM_ENTSOE,
+            unique_id="average_electricity_price_today",
+        )
+        MockPriceEntityEntsoe.set_state(hass, None, None, price)
+
+    @staticmethod
+    def set_state(
+        hass: HomeAssistant,
+        new_raw_today: list,
+        new_raw_tomorrow: list,
+        new_price: float = None,
+    ):
+        """Set state of MockPriceEntity"""
+
+        # Find current price
+        if new_price is None:
+            new_price = "unavailable"
+            if price := Raw(new_raw_today, PLATFORM_ENTSOE).get_value(dt_util.now()):
+                new_price = price
+            if price := Raw(new_raw_tomorrow, PLATFORM_ENTSOE).get_value(dt_util.now()):
+                new_price = price
+
+        # Set state
+        hass.states.async_set(
+            "sensor.entsoe_average_electricity_price_today",
+            f"{new_price}",
+            {
+                "prices_today": new_raw_today,
+                "prices_tomorrow": new_raw_tomorrow,
             },
         )
 

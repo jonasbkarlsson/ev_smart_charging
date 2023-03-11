@@ -54,11 +54,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_input = {}
             # Provide defaults for form
             user_input[CONF_DEVICE_NAME] = DeviceNameCreator.create(self.hass)
-            user_input[CONF_PRICE_SENSOR] = FindEntity.find_nordpool_sensor(self.hass)
-            if len(user_input[CONF_PRICE_SENSOR]) == 0:
-                user_input[
-                    CONF_PRICE_SENSOR
-                ] = FindEntity.find_energidataservice_sensor(self.hass)
+            user_input[CONF_PRICE_SENSOR] = FindEntity.find_price_sensor(self.hass)
             user_input[CONF_EV_SOC_SENSOR] = FindEntity.find_vw_soc_sensor(self.hass)
             user_input[
                 CONF_EV_TARGET_SOC_SENSOR

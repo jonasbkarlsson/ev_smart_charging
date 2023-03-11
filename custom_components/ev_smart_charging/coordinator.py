@@ -17,6 +17,8 @@ from homeassistant.helpers.entity_registry import (
 from homeassistant.const import STATE_ON, STATE_OFF
 from homeassistant.util import dt
 
+from custom_components.ev_smart_charging.helpers.price_adaptor import PriceAdaptor
+
 from .const import (
     CHARGING_STATUS_CHARGING,
     CHARGING_STATUS_DISCONNECTED,
@@ -40,7 +42,6 @@ from .const import (
     START_HOUR_NONE,
     SWITCH,
 )
-from .helpers.config_flow import get_platform
 from .helpers.coordinator import (
     Raw,
     Scheduler,
@@ -48,7 +49,7 @@ from .helpers.coordinator import (
     get_ready_hour_utc,
     get_start_hour_utc,
 )
-from .helpers.general import Validator, get_parameter
+from .helpers.general import Validator, get_parameter, get_platform
 from .sensor import EVSmartChargingSensor
 
 _LOGGER = logging.getLogger(__name__)
@@ -79,7 +80,7 @@ class EVSmartChargingCoordinator:
         self.switch_opportunistic_entity_id = None
         self.switch_opportunistic_unique_id = None
         self.price_entity_id = None
-        self.price_platform = None
+        self.price_adaptor = PriceAdaptor()
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
 
@@ -291,7 +292,9 @@ class EVSmartChargingCoordinator:
         self.sensor = sensor
 
         self.price_entity_id = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
-        self.price_platform = get_platform(self.hass, self.price_entity_id)
+        self.price_adaptor.set_price_platform(
+            get_platform(self.hass, self.price_entity_id)
+        )
         self.ev_soc_entity_id = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
         self.ev_target_soc_entity_id = get_parameter(
             self.config_entry, CONF_EV_TARGET_SOC_SENSOR
@@ -477,13 +480,13 @@ class EVSmartChargingCoordinator:
             self.ev_soc_before_last_charging = -1
 
         price_state = self.hass.states.get(self.price_entity_id)
-        if Validator.is_price_state(price_state, self.price_platform):
-            self.sensor.current_price = price_state.attributes["current_price"]
-            self.raw_today_local = Raw(
-                price_state.attributes["raw_today"], self.price_platform
+        if self.price_adaptor.is_price_state(price_state):
+            self.sensor.current_price = self.price_adaptor.get_current_price(
+                price_state
             )
-            self.raw_tomorrow_local = Raw(
-                price_state.attributes["raw_tomorrow"], self.price_platform
+            self.raw_today_local = self.price_adaptor.get_raw_today_local(price_state)
+            self.raw_tomorrow_local = self.price_adaptor.get_raw_tomorrow_local(
+                price_state
             )
             self.tomorrow_valid = self.raw_tomorrow_local.is_valid()
 

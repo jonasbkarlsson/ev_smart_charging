@@ -12,19 +12,20 @@ from homeassistant.helpers.entity_registry import (
     RegistryEntry,
 )
 
+from custom_components.ev_smart_charging.helpers.price_adaptor import PriceAdaptor
+
 # pylint: disable=relative-beyond-top-level
 from ..const import (
     CONF_CHARGER_ENTITY,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
-    CONF_PRICE_SENSOR,
     DOMAIN,
     NAME,
     PLATFORM_ENERGIDATASERVICE,
+    PLATFORM_ENTSOE,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
     PLATFORM_VW,
-    SENSOR,
     SWITCH,
 )
 from .general import Validator
@@ -45,21 +46,9 @@ class FlowValidator:
         entities = entity_registry.entities
 
         # Validate Price entity
-        price_state = hass.states.get(user_input[CONF_PRICE_SENSOR])
-        entry: RegistryEntry = entities.get(user_input[CONF_PRICE_SENSOR])
-        if price_state is None or entry is None:
-            return ("base", "price_not_found")
-        if entry.domain != SENSOR:
-            return ("base", "price_not_sensor")
-        if not "current_price" in price_state.attributes.keys():
-            _LOGGER.debug("No attribute current_price in price sensor")
-            return ("base", "sensor_is_not_price")
-        if not "raw_today" in price_state.attributes.keys():
-            _LOGGER.debug("No attribute raw_today in price sensor")
-            return ("base", "sensor_is_not_price")
-        if not "raw_tomorrow" in price_state.attributes.keys():
-            _LOGGER.debug("No attribute raw_tomorrow in price sensor")
-            return ("base", "sensor_is_not_price")
+        result = PriceAdaptor.validate_price_entity(hass, user_input)
+        if result is not None:
+            return result
 
         # Validate EV SOC entity
         entity = hass.states.get(user_input[CONF_EV_SOC_SENSOR])
@@ -115,6 +104,18 @@ class FindEntity:
     """Find entities"""
 
     @staticmethod
+    def find_price_sensor(hass: HomeAssistant) -> str:
+        """Search for price sensor"""
+        sensor = ""
+        if len(sensor) == 0:
+            sensor = FindEntity.find_nordpool_sensor(hass)
+        if len(sensor) == 0:
+            sensor = FindEntity.find_energidataservice_sensor(hass)
+        if len(sensor) == 0:
+            sensor = FindEntity.find_entsoe_sensor(hass)
+        return sensor
+
+    @staticmethod
     def find_nordpool_sensor(hass: HomeAssistant) -> str:
         """Find Nordpool sensor"""
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
@@ -136,6 +137,20 @@ class FindEntity:
         for entry in registry_entries:
             if entry[1].platform == PLATFORM_ENERGIDATASERVICE:
                 return entry[1].entity_id
+        return ""
+
+    @staticmethod
+    def find_entsoe_sensor(hass: HomeAssistant) -> str:
+        """Search for Entso-e sensor"""
+        entity_registry: EntityRegistry = async_entity_registry_get(hass)
+        registry_entries: UserDict[
+            str, RegistryEntry
+        ] = entity_registry.entities.items()
+        for entry in registry_entries:
+            if entry[1].platform == PLATFORM_ENTSOE:
+                entity_id = entry[1].entity_id
+                if "average_electricity_price_today" in entity_id:
+                    return entity_id
         return ""
 
     @staticmethod
@@ -215,16 +230,3 @@ class DeviceNameCreator:
                     pass
         # Add ONE to the highest value and append after NAME
         return f"{NAME} {higest+1}"
-
-
-def get_platform(hass: HomeAssistant, entity_id: str):
-    """Get the platform for the entity"""
-    if entity_id is None:
-        return None
-    entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    entities = entity_registry.entities
-    entry: RegistryEntry = entities.get(entity_id)
-    if entry is None:
-        return None
-    platform = entry.platform
-    return platform
