@@ -29,6 +29,13 @@ MOCK_CONFIG_USER_WRONG_PRICE = {
     CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
 }
 
+MOCK_CONFIG_USER_ENTSOE = {
+    CONF_PRICE_SENSOR: "sensor.entsoe_average_electricity_price_today",
+    CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
+    CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
+    CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
+}
+
 MOCK_CONFIG_USER_NO_CHARGER = {
     CONF_PRICE_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0",
     CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",

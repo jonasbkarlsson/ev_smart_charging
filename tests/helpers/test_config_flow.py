@@ -18,6 +18,7 @@ from custom_components.ev_smart_charging.const import (
     BUTTON,
     DOMAIN,
     NAME,
+    PLATFORM_ENTSOE,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
     PLATFORM_VW,
@@ -27,6 +28,7 @@ from custom_components.ev_smart_charging.const import (
 
 from tests.const import (
     MOCK_CONFIG_ALL,
+    MOCK_CONFIG_USER_ENTSOE,
     MOCK_CONFIG_USER_NO_CHARGER,
     MOCK_CONFIG_USER,
     MOCK_CONFIG_USER_WRONG_CHARGER,
@@ -106,6 +108,49 @@ async def test_validate_step_user_price(hass: HomeAssistant):
         {"current_price": 123, "raw_today": None, "raw_tomorrow": None},
     )
     assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) == (
+        "base",
+        "ev_soc_not_found",
+    )
+
+
+async def test_validate_step_user_price_entsoe(hass: HomeAssistant):
+    """Test the price entity in test_validate_step_user."""
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+
+    # Check with price entity without attributes
+    entity_registry.async_get_or_create(
+        domain=SENSOR,
+        platform=PLATFORM_ENTSOE,
+        unique_id="average_electricity_price_today",
+    )
+    assert entity_registry.async_is_registered(
+        "sensor.entsoe_average_electricity_price_today"
+    )
+    hass.states.async_set("sensor.entsoe_average_electricity_price_today", "123")
+    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER_ENTSOE) == (
+        "base",
+        "sensor_is_not_price",
+    )
+
+    # Check with price entity with current_price and raw_today
+    hass.states.async_set(
+        "sensor.entsoe_average_electricity_price_today",
+        "123",
+        {"prices_today": None},
+    )
+    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER_ENTSOE) == (
+        "base",
+        "sensor_is_not_price",
+    )
+
+    # Check with price entity with current_price, raw_today and raw_tomorrow
+    hass.states.async_set(
+        "sensor.entsoe_average_electricity_price_today",
+        "123",
+        {"prices_today": None, "prices_tomorrow": None},
+    )
+    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER_ENTSOE) == (
         "base",
         "ev_soc_not_found",
     )

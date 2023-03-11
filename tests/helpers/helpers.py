@@ -74,7 +74,7 @@ class MockPriceEntityEnergiDataService:
             platform=PLATFORM_ENERGIDATASERVICE,
             unique_id="energi_data_service",
         )
-        MockPriceEntity.set_state(hass, None, None, price)
+        MockPriceEntityEnergiDataService.set_state(hass, None, None, price)
 
     @staticmethod
     def set_state(
@@ -99,7 +99,7 @@ class MockPriceEntityEnergiDataService:
 
         # Set state
         hass.states.async_set(
-            "sensor.energi_data_service",
+            "sensor.energidataservice_energi_data_service",
             f"{new_price}",
             {
                 "current_price": new_price,
@@ -122,7 +122,7 @@ class MockPriceEntityEntsoe:
             platform=PLATFORM_ENTSOE,
             unique_id="average_electricity_price_today",
         )
-        MockPriceEntity.set_state(hass, None, None, price)
+        MockPriceEntityEntsoe.set_state(hass, None, None, price)
 
     @staticmethod
     def set_state(
@@ -143,12 +143,11 @@ class MockPriceEntityEntsoe:
 
         # Set state
         hass.states.async_set(
-            "sensor.average_electricity_price_today",
+            "sensor.entsoe_average_electricity_price_today",
             f"{new_price}",
             {
-                "current_price": new_price,
-                "raw_today": new_raw_today,
-                "raw_tomorrow": new_raw_tomorrow,
+                "prices_today": new_raw_today,
+                "prices_tomorrow": new_raw_tomorrow,
             },
         )
 
