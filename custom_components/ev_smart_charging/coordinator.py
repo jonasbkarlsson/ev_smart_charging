@@ -160,6 +160,7 @@ class EVSmartChargingCoordinator:
                 and self.number_min_soc is not None
                 and charging_value is not None
                 and charging_value != 0
+                and self.sensor.current_price is not None
                 and (
                     self.sensor.current_price < self.max_price
                     or self.max_price == 0.0
