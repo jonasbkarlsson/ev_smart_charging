@@ -124,16 +124,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 self._errors[error[0]] = error[1]
 
             if not self._errors:
-                # Setting title here doesn't seem to have any effect.
                 return self.async_create_entry(
-                    title=user_input[CONF_DEVICE_NAME], data=user_input
+                    title=self.config_entry.title, data=user_input
                 )
 
         user_schema = {
-            vol.Required(
-                CONF_DEVICE_NAME,
-                default=get_parameter(self.config_entry, CONF_DEVICE_NAME),
-            ): cv.string,
             vol.Required(
                 CONF_PRICE_SENSOR,
                 default=get_parameter(self.config_entry, CONF_PRICE_SENSOR),

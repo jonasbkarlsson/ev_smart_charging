@@ -29,7 +29,6 @@
             "init": {
                 "description": "Configuration of name and external entities.",
                 "data": {
-                    "device_name": "Name",
                     "price_sensor": "Electricity price sensor",
                     "ev_soc_sensor": "EV SOC entity",
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",

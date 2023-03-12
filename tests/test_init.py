@@ -23,6 +23,7 @@ from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_ALL_V1, MOCK_CONFIG_ALL_V2
 # Assertions allow you to verify that the return value of whatever is on the left
 # side of the assertion matches with the right side.
 
+
 # pylint: disable=unused-argument
 # async def test_setup_unload_and_reload_entry(hass, bypass_get_data):
 async def test_setup_unload_and_reload_entry(hass, bypass_validate_input_sensors):
@@ -34,6 +35,7 @@ async def test_setup_unload_and_reload_entry(hass, bypass_validate_input_sensors
     # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
     # call, no code from custom_components/integration_blueprint/api.py actually runs.
     assert await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
     assert isinstance(
         hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
@@ -41,6 +43,7 @@ async def test_setup_unload_and_reload_entry(hass, bypass_validate_input_sensors
 
     # Reload the entry and assert that the data from above is still there
     assert await async_reload_entry(hass, config_entry) is None
+    await hass.async_block_till_done()
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
     assert isinstance(
         hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
@@ -48,6 +51,7 @@ async def test_setup_unload_and_reload_entry(hass, bypass_validate_input_sensors
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)
+    await hass.async_block_till_done()
     assert config_entry.entry_id not in hass.data[DOMAIN]
 
 
@@ -136,3 +140,54 @@ async def test_setup_with_migration_from_future(hass, bypass_validate_input_sens
 
     # Migrate from version 9999
     assert not await async_migrate_entry(hass, config_entry)
+
+
+async def test_setup_new_integration_name(hass, bypass_validate_input_sensors):
+    """Test entry setup with new integration name."""
+    # Create a mock entry so we don't have to go through config flow
+    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+
+    # Set up the entry and assert that the values set during setup are where we expect
+    # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
+    # call, no code from custom_components/integration_blueprint/api.py actually runs.
+    assert await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+
+    # Change title
+    config_entry.title = "New title"
+
+    # Reload the entry and assert that the data from above is still there
+    assert await async_reload_entry(hass, config_entry) is None
+    await hass.async_block_till_done()
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+
+    test = hass.data["device_registry"].devices
+    device = hass.data["device_registry"].devices[next(iter(test))]
+    assert device.name_by_user == "New title"
+
+    # Change a changed title
+    config_entry.title = "New title2"
+
+    # Reload the entry and assert that the data from above is still there
+    assert await async_reload_entry(hass, config_entry) is None
+    await hass.async_block_till_done()
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+
+    test = hass.data["device_registry"].devices
+    device = hass.data["device_registry"].devices[next(iter(test))]
+    assert device.name_by_user == "New title2"
+
+    # Unload the entry and verify that the data has been removed
+    assert await async_unload_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert config_entry.entry_id not in hass.data[DOMAIN]

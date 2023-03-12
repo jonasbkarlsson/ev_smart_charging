@@ -42,7 +42,7 @@ async def test_number(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test"
+        domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test", title="none"
     )
 
     # Set up the entry and assert that the values set during setup are where we expect
@@ -132,13 +132,15 @@ async def test_number_restore(
     """Test sensor properties."""
 
     # Create a mock entry so we don't have to go through config flow
-    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry = MockConfigEntry(
+        domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test", title="none"
+    )
     await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
 
     number_charging_speed: EVSmartChargingNumberChargingSpeed = hass.data[
         "entity_components"
-    ][NUMBER].get_entity("number.ev_smart_charging_charging_speed")
+    ][NUMBER].get_entity("number.none_charging_speed")
 
     await number_charging_speed.async_set_native_value(45)
     assert number_charging_speed.native_value == 45

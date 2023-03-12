@@ -24,12 +24,13 @@ from .const import MOCK_CONFIG_USER_NO_CHARGER
 # Assertions allow you to verify that the return value of whatever is on the left
 # side of the assertion matches with the right side.
 
+
 # pylint: disable=unused-argument
 async def test_button(hass, bypass_validate_input_sensors):
     """Test buttons."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test"
+        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test", title="none"
     )
 
     # Set up the entry and assert that the values set during setup are where we expect

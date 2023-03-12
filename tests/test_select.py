@@ -39,7 +39,7 @@ async def test_select(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test"
+        domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test", title="none"
     )
 
     # Set up the entry and assert that the values set during setup are where we expect
@@ -110,13 +110,15 @@ async def test_select_restore(
     """Test sensor properties."""
 
     # Create a mock entry so we don't have to go through config flow
-    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry = MockConfigEntry(
+        domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test", title="none"
+    )
     await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
 
     select_ready_hour: EVSmartChargingSelectReadyHour = hass.data["entity_components"][
         SELECT
-    ].get_entity("select.ev_smart_charging_charge_completion_time")
+    ].get_entity("select.none_charge_completion_time")
 
     await select_ready_hour.async_select_option("10:00")
     assert select_ready_hour.state == "10:00"

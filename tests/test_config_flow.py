@@ -107,13 +107,13 @@ async def test_successful_config_flow_option(
     assert result["step_id"] == "init"
 
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], user_input=MOCK_CONFIG_CHARGER_NEW
+        result["flow_id"], user_input=MOCK_CONFIG_USER
     )
 
     # Check that the option flow is complete and a new entry is created with
     # the input data
     assert result["type"] == data_entry_flow.RESULT_TYPE_CREATE_ENTRY
-    assert result["data"] == MOCK_CONFIG_CHARGER_NEW
+    assert result["data"] == MOCK_CONFIG_USER
     if "errors" in result.keys():
         assert len(result["errors"]) == 0
     assert result["result"]
@@ -138,7 +138,7 @@ async def test_unsuccessful_config_flow_option(hass: HomeAssistant):
     assert result["step_id"] == "init"
 
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], user_input=MOCK_CONFIG_CHARGER_NEW
+        result["flow_id"], user_input=MOCK_CONFIG_USER
     )
 
     # Check that the config flow is not complete and that there are errors

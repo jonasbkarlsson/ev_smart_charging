@@ -2,9 +2,14 @@
 
 from datetime import datetime
 import logging
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import (
+    ConfigEntry,
+)
 from homeassistant.const import SERVICE_TURN_ON, SERVICE_TURN_OFF
-from homeassistant.core import HomeAssistant, State, callback
+from homeassistant.core import HomeAssistant, State, callback, Event
+from homeassistant.helpers.device_registry import EVENT_DEVICE_REGISTRY_UPDATED
+from homeassistant.helpers.device_registry import async_get as async_device_registry_get
+from homeassistant.helpers.device_registry import DeviceRegistry
 from homeassistant.helpers.event import (
     async_track_state_change,
     async_track_time_change,
@@ -137,6 +142,34 @@ class EVSmartChargingCoordinator:
         self.listeners.append(
             async_track_time_change(hass, self.update_hourly, minute=0, second=0)
         )
+        # Listen for changes to the device.
+        self.listeners.append(
+            hass.bus.async_listen(EVENT_DEVICE_REGISTRY_UPDATED, self.device_updated)
+        )
+
+    @callback
+    async def device_updated(self, event: Event):  # pylint: disable=unused-argument
+        """Called when device is updated"""
+        _LOGGER.debug("EVSmartChargingCoordinator.device_updated()")
+        if "device_id" in event.data:
+            entity_registry: EntityRegistry = async_entity_registry_get(self.hass)
+            all_entities = async_entries_for_config_entry(
+                entity_registry, self.config_entry.entry_id
+            )
+            if all_entities:
+                device_id = all_entities[0].device_id
+                if event.data["device_id"] == device_id:
+                    if "changes" in event.data:
+                        if "name_by_user" in event.data["changes"]:
+                            # If the device name is changed, update the integration name
+                            device_registry: DeviceRegistry = async_device_registry_get(
+                                self.hass
+                            )
+                            device = device_registry.async_get(device_id)
+                            if device.name_by_user != self.config_entry.title:
+                                self.hass.config_entries.async_update_entry(
+                                    self.config_entry, title=device.name_by_user
+                                )
 
     @callback
     async def update_hourly(
