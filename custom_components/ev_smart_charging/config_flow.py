@@ -124,7 +124,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 self._errors[error[0]] = error[1]
 
             if not self._errors:
-                return self.async_create_entry(data=user_input)
+                return self.async_create_entry(
+                    title=self.config_entry.title, data=user_input
+                )
 
         user_schema = {
             vol.Required(
