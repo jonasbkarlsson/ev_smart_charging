@@ -55,7 +55,11 @@ from .helpers.coordinator import (
     get_start_hour_utc,
 )
 from .helpers.general import Validator, get_parameter, get_platform
-from .sensor import EVSmartChargingSensor
+from .sensor import (
+    EVSmartChargingSensor,
+    EVSmartChargingSensorCharging,
+    EVSmartChargingSensorStatus,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -71,6 +75,7 @@ class EVSmartChargingCoordinator:
         self.listeners = []
 
         self.sensor = None
+        self.sensor_status = None
         self.switch_active = None
         self.switch_apply_limit = None
         self.switch_apply_limit_entity_id = None
@@ -266,26 +271,35 @@ class EVSmartChargingCoordinator:
                 self.sensor.charging_number_of_hours = (
                     self.scheduler.get_charging_number_of_hours()
                 )
-                if self.auto_charging_state == STATE_ON:
-                    self.sensor.charging_status = CHARGING_STATUS_CHARGING
-                else:
-                    self.sensor.charging_status = CHARGING_STATUS_WAITING_CHARGING
+                if self.sensor_status:
+                    if self.auto_charging_state == STATE_ON:
+                        self.sensor_status.native_value = CHARGING_STATUS_CHARGING
+                    else:
+                        self.sensor_status.native_value = (
+                            CHARGING_STATUS_WAITING_CHARGING
+                        )
             else:
                 _LOGGER.debug("Charging summary removed")
                 self.sensor.charging_is_planned = False
                 self.sensor.charging_start_time = None
                 self.sensor.charging_stop_time = None
                 self.sensor.charging_number_of_hours = 0
-                if not self.switch_active:
-                    self.sensor.charging_status = CHARGING_STATUS_NOT_ACTIVE
-                elif not self.switch_ev_connected:
-                    self.sensor.charging_status = CHARGING_STATUS_DISCONNECTED
-                elif self.switch_keep_on and self.auto_charging_state == STATE_ON:
-                    self.sensor.charging_status = CHARGING_STATUS_KEEP_ON
-                elif time_now.hour >= self.ready_hour_local and not self.tomorrow_valid:
-                    self.sensor.charging_status = CHARGING_STATUS_WAITING_NEW_PRICE
-                else:
-                    self.sensor.charging_status = CHARGING_STATUS_NO_PLAN
+                if self.sensor_status:
+                    if not self.switch_active:
+                        self.sensor_status.native_value = CHARGING_STATUS_NOT_ACTIVE
+                    elif not self.switch_ev_connected:
+                        self.sensor_status.native_value = CHARGING_STATUS_DISCONNECTED
+                    elif self.switch_keep_on and self.auto_charging_state == STATE_ON:
+                        self.sensor_status.native_value = CHARGING_STATUS_KEEP_ON
+                    elif (
+                        time_now.hour >= self.ready_hour_local
+                        and not self.tomorrow_valid
+                    ):
+                        self.sensor_status.native_value = (
+                            CHARGING_STATUS_WAITING_NEW_PRICE
+                        )
+                    else:
+                        self.sensor_status.native_value = CHARGING_STATUS_NO_PLAN
                 self._charging_schedule = Scheduler.get_empty_schedule()
                 self.sensor.charging_schedule = self._charging_schedule
 
@@ -321,9 +335,13 @@ class EVSmartChargingCoordinator:
         """Turn off charging"""
         await self.turn_on_charging(False)
 
-    async def add_sensor(self, sensor: EVSmartChargingSensor):
+    async def add_sensor(self, sensors: list[EVSmartChargingSensor]):
         """Set up sensor"""
-        self.sensor = sensor
+        for sensor in sensors:
+            if isinstance(sensor, EVSmartChargingSensorCharging):
+                self.sensor = sensor
+            if isinstance(sensor, EVSmartChargingSensorStatus):
+                self.sensor_status = sensor
 
         self.price_entity_id = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
         self.price_adaptor.set_price_platform(

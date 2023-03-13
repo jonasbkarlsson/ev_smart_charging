@@ -6,7 +6,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.const import STATE_OFF
 
 
-from .const import DOMAIN, ENTITY_NAME_CHARGING_SENSOR, SENSOR
+from .const import (
+    CHARGING_STATUS_NOT_ACTIVE,
+    DOMAIN,
+    ENTITY_NAME_CHARGING_SENSOR,
+    ENTITY_NAME_STATUS_SENSOR,
+    SENSOR,
+)
 from .entity import EVSmartChargingEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -16,12 +22,30 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_devices):
     """Setup sensor platform."""
     _LOGGER.debug("EVSmartCharging.sensor.py")
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    sensor = EVSmartChargingSensor(entry)
-    async_add_devices([sensor])
-    await coordinator.add_sensor(sensor)
+    sensors = []
+    sensors.append(EVSmartChargingSensorCharging(entry))
+    sensors.append(EVSmartChargingSensorStatus(entry))
+    async_add_devices(sensors)
+    await coordinator.add_sensor(sensors)
 
 
 class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
+    """EV Smart Charging sensor class."""
+
+    def __init__(self, entry):
+        _LOGGER.debug("EVSmartChargingSensor.__init__()")
+        super().__init__(entry)
+        id_name = self._attr_name.replace(" ", "").lower()
+        self._attr_unique_id = ".".join([entry.entry_id, SENSOR, id_name])
+
+    @SensorEntity.native_value.setter
+    def native_value(self, new_value):
+        """Set the value reported by the sensor."""
+        self._attr_native_value = new_value
+        self.update_ha_state()
+
+
+class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""
 
     _attr_name = ENTITY_NAME_CHARGING_SENSOR
@@ -29,7 +53,9 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
     def __init__(self, entry):
         _LOGGER.debug("EVSmartChargingSensor.__init__()")
         super().__init__(entry)
-        self._attr_unique_id = ".".join([entry.entry_id, SENSOR])
+        self._attr_unique_id = ".".join(
+            [entry.entry_id, SENSOR]
+        )  # Keep to make it backward compatible.
         self._attr_native_value = STATE_OFF
 
         self._current_price = None
@@ -42,13 +68,6 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
         self._charging_start_time = None
         self._charging_stop_time = None
         self._charging_number_of_hours = None
-        self._charging_status = None
-
-    @SensorEntity.native_value.setter
-    def native_value(self, new_value):
-        """Return the value reported by the sensor."""
-        self._attr_native_value = new_value
-        self.update_ha_state()
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -56,7 +75,6 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
             "current_price": self._current_price,
             "EV SOC": self._ev_soc,
             "EV target SOC": self._ev_target_soc,
-            "Charging status": self._charging_status,
             "Charging is planned": self._charging_is_planned,
             "Charging start time": self._charging_start_time,
             "Charging stop time": self._charging_stop_time,
@@ -116,16 +134,6 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
         self.update_ha_state()
 
     @property
-    def charging_status(self):
-        """Getter for charging_status."""
-        return self._charging_status
-
-    @charging_status.setter
-    def charging_status(self, new_value):
-        self._charging_status = new_value
-        self.update_ha_state()
-
-    @property
     def charging_is_planned(self):
         """Getter for charging_is_planned."""
         return self._charging_is_planned
@@ -164,3 +172,15 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
     def charging_number_of_hours(self, new_value):
         self._charging_number_of_hours = new_value
         self.update_ha_state()
+
+
+class EVSmartChargingSensorStatus(EVSmartChargingSensor):
+    """EV Smart Charging sensor class."""
+
+    _attr_name = ENTITY_NAME_STATUS_SENSOR
+
+    def __init__(self, entry):
+        _LOGGER.debug("EVSmartChargingSensorStatus.__init__()")
+        super().__init__(entry)
+
+        self._attr_native_value = CHARGING_STATUS_NOT_ACTIVE

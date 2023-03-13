@@ -16,7 +16,7 @@ from custom_components.ev_smart_charging.coordinator import (
 from custom_components.ev_smart_charging.const import (
     DOMAIN,
 )
-from custom_components.ev_smart_charging.sensor import EVSmartChargingSensor
+from custom_components.ev_smart_charging.sensor import EVSmartChargingSensorCharging
 from tests.const import MOCK_CONFIG_ALL
 
 from tests.helpers.helpers import (
@@ -26,6 +26,7 @@ from tests.helpers.helpers import (
     MockTargetSOCEntity,
 )
 from tests.price import PRICE_20220930, PRICE_20221001
+
 
 # pylint: disable=unused-argument
 @freeze_time("2022-09-30T05:59:50+02:00", tick=True)
@@ -47,9 +48,9 @@ async def test_coordinator_reschedule(
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
-    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor(sensor)
+    await coordinator.add_sensor([sensor])
     coordinator.ready_hour_local = 8
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)

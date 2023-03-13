@@ -13,7 +13,7 @@ from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
 from custom_components.ev_smart_charging.const import DOMAIN
-from custom_components.ev_smart_charging.sensor import EVSmartChargingSensor
+from custom_components.ev_smart_charging.sensor import EVSmartChargingSensorCharging
 
 from tests.helpers.helpers import (
     MockChargerEntity,
@@ -23,6 +23,7 @@ from tests.helpers.helpers import (
 )
 from tests.price import PRICE_20220930, PRICE_20221001
 from tests.const import MOCK_CONFIG_NO_READY
+
 
 # pylint: disable=unused-argument
 async def test_coordinator_no_ready(
@@ -46,9 +47,9 @@ async def test_coordinator_no_ready(
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
-    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor(sensor)
+    await coordinator.add_sensor([sensor])
 
     # Provide price. This should give a 5h schedule, 19:00-24:00
     await coordinator.update_sensors()
@@ -127,9 +128,9 @@ async def test_coordinator_no_ready2(
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
-    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor(sensor)
+    await coordinator.add_sensor([sensor])
 
     # Provide price. This should give a 5h schedule, 19:00-24:00
     await coordinator.update_sensors()
