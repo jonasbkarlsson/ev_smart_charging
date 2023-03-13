@@ -13,7 +13,7 @@ from custom_components.ev_smart_charging.coordinator import (
 )
 from custom_components.ev_smart_charging.const import DOMAIN
 from custom_components.ev_smart_charging.helpers.coordinator import Raw
-from custom_components.ev_smart_charging.sensor import EVSmartChargingSensor
+from custom_components.ev_smart_charging.sensor import EVSmartChargingSensorCharging
 
 from tests.helpers.helpers import (
     MockChargerEntity,
@@ -30,6 +30,7 @@ from tests.price_daylight_saving import (
     PRICE_20221031,
 )
 from .const import MOCK_CONFIG_ALL
+
 
 # pylint: disable=unused-argument
 async def test_to_daylight_saving_time(
@@ -49,9 +50,9 @@ async def test_to_daylight_saving_time(
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator
 
-    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor(sensor)
+    await coordinator.add_sensor([sensor])
     await coordinator.switch_active_update(True)
     await coordinator.switch_apply_limit_update(True)
     await coordinator.switch_continuous_update(True)
@@ -170,9 +171,9 @@ async def test_from_daylight_saving_time(
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator
 
-    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor(sensor)
+    await coordinator.add_sensor([sensor])
     await coordinator.switch_active_update(True)
     await coordinator.switch_apply_limit_update(True)
     await coordinator.switch_continuous_update(True)

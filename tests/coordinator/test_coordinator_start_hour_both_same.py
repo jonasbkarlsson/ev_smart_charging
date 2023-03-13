@@ -13,7 +13,7 @@ from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
 from custom_components.ev_smart_charging.const import DOMAIN
-from custom_components.ev_smart_charging.sensor import EVSmartChargingSensor
+from custom_components.ev_smart_charging.sensor import EVSmartChargingSensorCharging
 
 from tests.helpers.helpers import (
     MockChargerEntity,
@@ -26,6 +26,7 @@ from tests.coordinator.const import (
     MOCK_CONFIG_START_HOUR_3A,
     MOCK_CONFIG_START_HOUR_3B,
 )
+
 
 # pylint: disable=unused-argument
 async def test_coordinator_start_hour_both_same_3a(
@@ -54,9 +55,9 @@ async def test_coordinator_start_hour_both_same_3a(
     )
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
-    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor(sensor)
+    await coordinator.add_sensor([sensor])
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
     await coordinator.switch_apply_limit_update(False)
@@ -140,9 +141,9 @@ async def test_coordinator_start_hour_both_same_3b(
     )
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
-    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor(sensor)
+    await coordinator.add_sensor([sensor])
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
     await coordinator.switch_apply_limit_update(False)

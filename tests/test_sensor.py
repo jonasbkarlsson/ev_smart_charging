@@ -13,10 +13,14 @@ from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
 from custom_components.ev_smart_charging.const import (
+    CHARGING_STATUS_CHARGING,
     CHARGING_STATUS_WAITING_CHARGING,
     DOMAIN,
 )
-from custom_components.ev_smart_charging.sensor import EVSmartChargingSensor
+from custom_components.ev_smart_charging.sensor import (
+    EVSmartChargingSensorCharging,
+    EVSmartChargingSensorStatus,
+)
 
 from .const import MOCK_CONFIG_ALL
 
@@ -26,6 +30,7 @@ from .const import MOCK_CONFIG_ALL
 # Home Assistant using the pytest_homeassistant_custom_component plugin.
 # Assertions allow you to verify that the return value of whatever is on the left
 # side of the assertion matches with the right side.
+
 
 # pylint: disable=unused-argument
 async def test_sensor(hass, bypass_validate_input_sensors):
@@ -45,8 +50,12 @@ async def test_sensor(hass, bypass_validate_input_sensors):
     )
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
     assert coordinator.sensor is not None
-    assert isinstance(coordinator.sensor, EVSmartChargingSensor)
+    assert isinstance(coordinator.sensor, EVSmartChargingSensorCharging)
     sensor = coordinator.sensor
+
+    assert coordinator.sensor_status is not None
+    assert isinstance(coordinator.sensor_status, EVSmartChargingSensorStatus)
+    sensor_status = coordinator.sensor_status
 
     # Test the sensor
     sensor.native_value = STATE_OFF
@@ -70,9 +79,6 @@ async def test_sensor(hass, bypass_validate_input_sensors):
 
     sensor.charging_schedule = one_list
     assert sensor.charging_schedule == one_list
-
-    sensor.charging_status = CHARGING_STATUS_WAITING_CHARGING
-    assert sensor.charging_status == CHARGING_STATUS_WAITING_CHARGING
 
     sensor.charging_is_planned = True
     assert sensor.charging_is_planned is True
@@ -98,7 +104,6 @@ async def test_sensor(hass, bypass_validate_input_sensors):
     assert extra["current_price"] == 12.1
     assert extra["EV SOC"] == 56
     assert extra["EV target SOC"] == 80
-    assert extra["Charging status"] == CHARGING_STATUS_WAITING_CHARGING
     assert extra["Charging is planned"] is True
     assert extra["Charging start time"] == datetime(
         2022, 9, 30, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
@@ -107,6 +112,12 @@ async def test_sensor(hass, bypass_validate_input_sensors):
         2022, 9, 30, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
     )
     assert extra["Charging number of hours"] == 4
+
+    # Test sensor_status
+    sensor_status.native_value = CHARGING_STATUS_WAITING_CHARGING
+    assert sensor_status.native_value == CHARGING_STATUS_WAITING_CHARGING
+    sensor_status.native_value = CHARGING_STATUS_CHARGING
+    assert sensor_status.native_value == CHARGING_STATUS_CHARGING
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)

@@ -12,7 +12,7 @@ from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
 from custom_components.ev_smart_charging.const import DOMAIN
-from custom_components.ev_smart_charging.sensor import EVSmartChargingSensor
+from custom_components.ev_smart_charging.sensor import EVSmartChargingSensorCharging
 
 from tests.helpers.helpers import (
     MockChargerEntity,
@@ -25,6 +25,7 @@ from tests.const import (
     MOCK_CONFIG_KEEP_ON1,
     MOCK_CONFIG_KEEP_ON2,
 )
+
 
 # pylint: disable=unused-argument
 async def test_coordinator_keep_on_get_entities(
@@ -116,9 +117,9 @@ async def test_coordinator_keep_on_schedule(
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
-    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor(sensor)
+    await coordinator.add_sensor([sensor])
 
     # Provide price
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
@@ -214,9 +215,9 @@ async def test_coordinator_keep_on_connect(
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
-    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor(sensor)
+    await coordinator.add_sensor([sensor])
 
     # Provide price
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
@@ -368,9 +369,9 @@ async def test_coordinator_keep_on_connect2(
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
-    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor(sensor)
+    await coordinator.add_sensor([sensor])
 
     # Provide price
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
@@ -486,9 +487,9 @@ async def test_coordinator_keep_on_connect3(
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
-    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
+    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor(sensor)
+    await coordinator.add_sensor([sensor])
     await coordinator.update_sensors()
     await hass.async_block_till_done()
     assert coordinator.tomorrow_valid
