@@ -10,16 +10,16 @@
 
 ![Icon](assets/icon.png)
 
-The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool) or the [Energi Data Service](https://github.com/MTrab/energidataservice) integration.
+The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice) or the [Entso-e](https://github.com/JaccoR/hass-entso-e) integration.
 
 The integration calculates the set of hours that will give the lowest price, by default restricted to a continuous set. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight) or when the time of the day is before the configured charge completion time. When the automatic charging has started, changes of settings will not have any effect.
 
 ## Requirements
-- The [Nordpool](https://github.com/custom-components/nordpool) or the [Energi Data Service](https://github.com/MTrab/energidataservice) integration.
+- The [Nordpool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice) or the [Entso-e](https://github.com/JaccoR/hass-entso-e) integration.
 - Home Assistant version 2022.7 or newer.
 
 ## Features
-- Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool) or [Energi Data Service](https://github.com/MTrab/energidataservice) integration.
+- Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool), [Energi Data Service](https://github.com/MTrab/energidataservice) or [Entso-e](https://github.com/JaccoR/hass-entso-e) integration.
 - Configuraton of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
 - Optional setting of minimum SOC level that should be reached indepently of the electrity price.
@@ -59,12 +59,14 @@ The configuration form contains the entities that the integration is interacting
 Parameter | Required | Description
 -- | -- | --
 Name | Yes | The name of the instance.
-Electricity price entity | Yes | The Nordpool or the Energi Data Service integration sensor entity.
+Electricity price entity | Yes | The Nordpool, the Energi Data Service or the Entso-e integration sensor entity. For the Entso-e integration, the entity called `sensor.average_electricity_price_today` should be used.
 EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100. Note that this entity is crucial for the integration. If live information about he SOC is not available, please carefully read the section below with more information about the EV SOC entity.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control switch entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'.
 
-Additional parameters that affects how the charging will be performed are available as configuration entities. These parameters can be changed after intial configuration in Settings -> Devices & Services -> Integrations -> EV Smart Charging -> 1 device -> Configuration. These entities can be placed in the dashboard and can be controlled using automations.
+With the exception of Name, the above configuration items can be changed after intial configuration in Settings -> Devices & Services -> Integrations -> EV Smart Charging -> 1 device -> Configure. To change Name, the native way to rename Integrations or Devices in Home Assistant can be used.
+
+Additional parameters that affects how the charging will be performed are available as configuration entities. These entities can be placed in the dashboard and can be controlled using automations.
 
 ### Configuration entities
 
@@ -82,6 +84,7 @@ Entity | Type | Descriptions, valid value ranges and service calls
 Entity | Type | Description
 -- | -- | --
 `sensor.ev_smart_charging_charging` | Sensor | The state is "on" or "off". Can be used with automations to control the EV charger.
+`sensor.ev_smart_charging_status` | Sensor | The state is one of the following, "Waiting for new prices", "No charging planned", "Waiting for charging to begin", "Charging", "Keeping charger on", "Disconnected" and "Smart charging not active".
 `switch.ev_smart_charging_smart_charging_activated` | Switch | Turns the EV Smart Charging integration on and off.
 `switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit, if set to a non-zero value in the configuration form.
 `switch.ev_smart_charging_opportunistic_charging` | Switch | Activates opportunistic charging. See the desciption of the configuration entity`number.ev_smart_charging_opportunistic_level`. This feature requires the feature `Electricity price limit` to be on.
@@ -100,7 +103,6 @@ Attribute | Description
 `Current price` | The current price from the electricity price entity.
 `EV SOC` | The current SOC of the electric vehicle, as reported by the EV SOC entity.
 `EV target SOC` | The target SOC of the electric vehicle, as reported by the EV target SOC entity.
-`Charging status` | One of the following, "Waiting for new prices", "No charging planned", "Waiting for charging to begin", "Charging", "Keeping charger on", "Disconnected" and "Smart charging not active".
 `Charging is planned` | `true` if charging is planned, otherwise `false`. Is set to `false` after charging is completed.
 `Charging start time` | If charging is planned, the date and time when the charging will start.
 `Charging stop time` | If charging is planned, the date and time when the charging will stop.
@@ -225,8 +227,7 @@ cards:
     title: EV Smart Charging
     show_header_toggle: false
   - type: entity
-    entity: sensor.ev_smart_charging_charging
-    attribute: Charging status
+    entity: sensor.ev_smart_charging_status
     name: Status
   - type: entity
     entity: sensor.ev_smart_charging_charging
@@ -357,6 +358,8 @@ To verify that the integration is able to control the charging, go to Settings -
 3. Check that charging is started.
 4. PRESS the Manually stop charging.
 5. Check that charging is stopped.
+6. PRESS the Manually start charging.
+7. Check that charging is started.
 
 If the above works, the integration is able to control the charging.
 
