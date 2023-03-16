@@ -436,8 +436,9 @@ class EVSmartChargingCoordinator:
             self.scheduler.set_empty_schedule()
             self.switch_keep_on_completion_time = None
         else:
-            # Make sure the charger is turned off
-            await self.turn_off_charging()
+            # Make sure the charger is turned off, but only if smart charging is active.
+            if self.switch_active is True:
+                await self.turn_off_charging()
         await self.update_configuration()
 
     async def switch_keep_on_update(self, state: bool):
