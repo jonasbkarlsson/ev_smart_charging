@@ -63,6 +63,7 @@ Electricity price entity | Yes | The Nordpool, the Energi Data Service or the En
 EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100. Note that this entity is crucial for the integration. If live information about he SOC is not available, please carefully read the section below with more information about the EV SOC entity.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control switch entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'.
+Charging control integration | Yes | Select this if a car integration (and not a charger integration) will be used to control start/stop of charging. Also, if a car integration is used to control start/stop of charging, it is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected`.
 
 With the exception of Name, the above configuration items can be changed after intial configuration in Settings -> Devices & Services -> Integrations -> EV Smart Charging -> 1 device -> Configure. To change Name, the native way to rename Integrations or Devices in Home Assistant can be used.
 

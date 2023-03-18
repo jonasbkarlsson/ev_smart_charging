@@ -34,8 +34,7 @@ async def test_button(hass, bypass_validate_input_sensors):
     )
 
     # Set up the entry and assert that the values set during setup are where we expect
-    # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
-    # call, no code from custom_components/integration_blueprint/api.py actually runs.
+    # them to be.
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
 

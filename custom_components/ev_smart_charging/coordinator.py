@@ -33,6 +33,7 @@ from .const import (
     CHARGING_STATUS_WAITING_CHARGING,
     CHARGING_STATUS_WAITING_NEW_PRICE,
     CONF_CHARGER_ENTITY,
+    CONF_EV_CONTROLLED,
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
     CONF_OPPORTUNISTIC_LEVEL,
@@ -82,6 +83,7 @@ class EVSmartChargingCoordinator:
         self.switch_apply_limit_unique_id = None
         self.switch_continuous = None
         self.switch_ev_connected = None
+        self.after_ev_connected = False
         self.switch_keep_on = None
         self.switch_keep_on_entity_id = None
         self.switch_keep_on_unique_id = None
@@ -239,6 +241,12 @@ class EVSmartChargingCoordinator:
                     ):
                         # Keep charger on.
                         turn_on_charging = True
+
+            # Handle conencted EV for EV controlled charging
+            if self.after_ev_connected:
+                self.after_ev_connected = False
+                # Make sure charging command is sent
+                current_value = not turn_on_charging
 
             _LOGGER.debug("turn_on_charging = %s", turn_on_charging)
             _LOGGER.debug("current_value = %s", current_value)
@@ -434,7 +442,13 @@ class EVSmartChargingCoordinator:
         if state:
             # Clear schedule when connected to charger
             self.scheduler.set_empty_schedule()
+            self._charging_schedule = Scheduler.get_empty_schedule()
             self.switch_keep_on_completion_time = None
+            # Make sure the charger is turned off, when connected to charger
+            # and the car is used to start/stop charging.
+            if self.switch_active is True:
+                if get_parameter(self.config_entry, CONF_EV_CONTROLLED):
+                    self.after_ev_connected = True
         else:
             # Make sure the charger is turned off, but only if smart charging is active.
             if self.switch_active is True:
