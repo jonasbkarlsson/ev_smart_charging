@@ -10,6 +10,7 @@ import homeassistant.helpers.config_validation as cv
 
 from .const import (
     CONF_DEVICE_NAME,
+    CONF_EV_CONTROLLED,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_PRICE_SENSOR,
@@ -25,7 +26,7 @@ _LOGGER = logging.getLogger(__name__)
 class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow."""
 
-    VERSION = 4
+    VERSION = 5
     user_input: Optional[dict[str, Any]]
 
     def __init__(self):
@@ -60,6 +61,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_EV_TARGET_SOC_SENSOR
             ] = FindEntity.find_vw_target_soc_sensor(self.hass)
             user_input[CONF_CHARGER_ENTITY] = FindEntity.find_ocpp_device(self.hass)
+            user_input[CONF_EV_CONTROLLED] = False
 
         else:
             # process user_input
@@ -94,6 +96,9 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Optional(
                 CONF_CHARGER_ENTITY, default=user_input[CONF_CHARGER_ENTITY]
             ): cv.string,
+            vol.Optional(
+                CONF_EV_CONTROLLED, default=user_input[CONF_EV_CONTROLLED]
+            ): cv.boolean,
         }
 
         return self.async_show_form(
@@ -145,6 +150,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_CHARGER_ENTITY,
                 default=get_parameter(self.config_entry, CONF_CHARGER_ENTITY),
             ): cv.string,
+            vol.Optional(
+                CONF_EV_CONTROLLED,
+                default=get_parameter(self.config_entry, CONF_EV_CONTROLLED),
+            ): cv.boolean,
         }
 
         return self.async_show_form(

@@ -16,6 +16,9 @@ from homeassistant.helpers.entity_registry import (
 
 from .coordinator import EVSmartChargingCoordinator
 from .const import (
+    CONF_EV_CONTROLLED,
+    CONF_OPPORTUNISTIC_LEVEL,
+    CONF_START_HOUR,
     DOMAIN,
     STARTUP_MESSAGE,
     PLATFORMS,
@@ -116,13 +119,13 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
     if config_entry.version == 1:
         # Set default values for new configuration parameters
-        new["start_hour"] = "None"
+        new[CONF_START_HOUR] = "None"
         config_entry.version = 2
         migration = True
 
     if config_entry.version == 2:
         # Set default values for new configuration parameters
-        new["opportunistic_level"] = 50.0
+        new[CONF_OPPORTUNISTIC_LEVEL] = 50.0
         config_entry.version = 3
         migration = True
 
@@ -130,7 +133,12 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         config_entry.version = 4
         migration = True
 
-    if config_entry.version > 4:
+    if config_entry.version == 4:
+        config_entry.version = 5
+        new[CONF_EV_CONTROLLED] = False
+        migration = True
+
+    if config_entry.version > 5:
         _LOGGER.error(
             "Migration from version %s to a lower version is not possible",
             config_entry.version,
