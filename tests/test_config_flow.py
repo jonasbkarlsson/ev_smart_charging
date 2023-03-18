@@ -13,7 +13,6 @@ from custom_components.ev_smart_charging.const import DOMAIN
 from .const import (
     MOCK_CONFIG_ALL,
     MOCK_CONFIG_CHARGER_EXTRA,
-    MOCK_CONFIG_CHARGER_NEW,
     MOCK_CONFIG_USER,
 )
 
