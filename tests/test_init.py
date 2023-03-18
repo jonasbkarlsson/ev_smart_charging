@@ -14,7 +14,12 @@ from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
 
-from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_ALL_V1, MOCK_CONFIG_ALL_V2
+from .const import (
+    MOCK_CONFIG_ALL,
+    MOCK_CONFIG_ALL_V1,
+    MOCK_CONFIG_ALL_V2,
+    MOCK_CONFIG_ALL_V3,
+)
 
 
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
@@ -32,8 +37,7 @@ async def test_setup_unload_and_reload_entry(hass, bypass_validate_input_sensors
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
 
     # Set up the entry and assert that the values set during setup are where we expect
-    # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
-    # call, no code from custom_components/integration_blueprint/api.py actually runs.
+    # them to be.
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
@@ -79,8 +83,7 @@ async def test_setup_with_migration_v1(hass, bypass_validate_input_sensors):
     assert config_entry.data["opportunistic_level"] == 50.0
 
     # Set up the entry and assert that the values set during setup are where we expect
-    # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
-    # call, no code from custom_components/integration_blueprint/api.py actually runs.
+    # them to be.
     assert await async_setup_entry(hass, config_entry)
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
     assert isinstance(
@@ -111,8 +114,38 @@ async def test_setup_with_migration_v2(hass, bypass_validate_input_sensors):
     assert config_entry.data["opportunistic_level"] == 50.0
 
     # Set up the entry and assert that the values set during setup are where we expect
-    # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
-    # call, no code from custom_components/integration_blueprint/api.py actually runs.
+    # them to be.
+    assert await async_setup_entry(hass, config_entry)
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+
+    # Reload the entry and assert that the data from above is still there
+    assert await async_reload_entry(hass, config_entry) is None
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+
+    # Unload the entry and verify that the data has been removed
+    assert await async_unload_entry(hass, config_entry)
+    assert config_entry.entry_id not in hass.data[DOMAIN]
+
+
+async def test_setup_with_migration_v3(hass, bypass_validate_input_sensors):
+    """Test entry migration."""
+    # Create a mock entry so we don't have to go through config flow
+    config_entry = MockConfigEntry(
+        domain=DOMAIN, data=MOCK_CONFIG_ALL_V3, entry_id="test", version=3
+    )
+
+    # Migrate from version 3
+    assert await async_migrate_entry(hass, config_entry)
+    assert config_entry.data["ev_controlled"] is False
+
+    # Set up the entry and assert that the values set during setup are where we expect
+    # them to be.
     assert await async_setup_entry(hass, config_entry)
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
     assert isinstance(
@@ -148,8 +181,7 @@ async def test_setup_new_integration_name(hass, bypass_validate_input_sensors):
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
 
     # Set up the entry and assert that the values set during setup are where we expect
-    # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
-    # call, no code from custom_components/integration_blueprint/api.py actually runs.
+    # them to be.
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]

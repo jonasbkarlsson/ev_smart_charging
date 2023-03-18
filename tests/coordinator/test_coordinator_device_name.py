@@ -30,8 +30,7 @@ async def test_coordinator_device_name(hass, bypass_validate_input_sensors):
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
 
     # Set up the entry and assert that the values set during setup are where we expect
-    # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
-    # call, no code from custom_components/integration_blueprint/api.py actually runs.
+    # them to be.
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
