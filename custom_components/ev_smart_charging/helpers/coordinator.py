@@ -298,7 +298,7 @@ def get_charging_update(
             item["value"] = 0.0
         elif not active:
             item["value"] = 0.0
-        elif apply_limit and item["value"] > max_price > 0.0:
+        elif apply_limit and item["value"] > max_price:
             item["value"] = 0.0
         else:
             item["value"] = value_in_graph

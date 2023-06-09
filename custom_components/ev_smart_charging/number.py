@@ -102,7 +102,7 @@ class EVSmartChargingNumberPriceLimit(EVSmartChargingNumber):
     _attr_name = ENTITY_NAME_CONF_MAX_PRICE_NUMBER
     _attr_icon = ICON_CASH
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value = 0.0
+    _attr_native_min_value = -10000.0
     _attr_native_max_value = 10000.0
     _attr_native_step = 0.01
 
