@@ -23,6 +23,7 @@ from tests.helpers.helpers import (
 from tests.price import PRICE_20220930, PRICE_20221001A
 from tests.const import MOCK_CONFIG_OPPORTUNISTIC
 
+
 # pylint: disable=unused-argument
 async def test_coordinator_opportunistic_1(
     hass: HomeAssistant, set_cet_timezone, freezer
@@ -137,3 +138,6 @@ async def test_coordinator_opportunistic_1(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()

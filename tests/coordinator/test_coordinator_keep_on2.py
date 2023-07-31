@@ -90,6 +90,9 @@ async def test_coordinator_keep_on_get_entities(
     assert coordinator.switch_apply_limit is False
     assert coordinator.switch_keep_on is True
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_keep_on_schedule(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -185,6 +188,9 @@ async def test_coordinator_keep_on_schedule(
     # The day should now be 2022-10-01, and not 2022-09-30
     assert coordinator.sensor.charging_schedule is not None
     assert coordinator.sensor.charging_schedule[0]["start"].day == 1
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
 
 
 async def test_coordinator_keep_on_connect(
@@ -341,6 +347,9 @@ async def test_coordinator_keep_on_connect(
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_keep_on_connect2(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -458,6 +467,9 @@ async def test_coordinator_keep_on_connect2(
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_keep_on_connect3(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -532,3 +544,6 @@ async def test_coordinator_keep_on_connect3(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()

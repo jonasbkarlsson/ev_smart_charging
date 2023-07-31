@@ -152,6 +152,11 @@ async def test_switch_off_restore(
     await switch_active.async_added_to_hass()
     assert switch_active.is_on is False
 
+    # Unload the entry and verify that the data has been removed
+    assert await async_unload_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert config_entry.entry_id not in hass.data[DOMAIN]
+
 
 @pytest.fixture(name="mock_last_state_on")
 def mock_last_state_on_fixture():
@@ -186,3 +191,8 @@ async def test_switch_on_restore(
 
     await switch_active.async_added_to_hass()
     assert switch_active.is_on is True
+
+    # Unload the entry and verify that the data has been removed
+    assert await async_unload_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert config_entry.entry_id not in hass.data[DOMAIN]
