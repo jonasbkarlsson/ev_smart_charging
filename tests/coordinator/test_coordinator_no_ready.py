@@ -106,6 +106,9 @@ async def test_coordinator_no_ready(
     )
     assert coordinator.sensor.charging_number_of_hours == 20
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_no_ready2(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -165,3 +168,6 @@ async def test_coordinator_no_ready2(
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
     assert coordinator.sensor.charging_is_planned is False
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()

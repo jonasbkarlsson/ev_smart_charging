@@ -52,6 +52,9 @@ async def test_coordinator(
 
     assert coordinator.ev_target_soc == 100
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
     # Test turn on and off charging
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
@@ -148,6 +151,9 @@ async def test_coordinator(
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_min_soc1(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -208,6 +214,9 @@ async def test_coordinator_min_soc1(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
 
 
 async def test_coordinator_min_soc2(
@@ -284,6 +293,9 @@ async def test_coordinator_min_soc2(
     assert coordinator.sensor.charging_stop_time is None
     assert coordinator.sensor.charging_number_of_hours == 0
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_validate_input_sensors(hass: HomeAssistant):
     """Test validate_input_sensors()"""
@@ -299,6 +311,9 @@ async def test_validate_input_sensors(hass: HomeAssistant):
     assert coordinator.validate_input_sensors() == "Input sensors not ready."
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     assert coordinator.validate_input_sensors() is None
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
 
 
 async def test_coordinator_fix_soc(
@@ -375,3 +390,6 @@ async def test_coordinator_fix_soc(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()

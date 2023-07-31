@@ -54,3 +54,7 @@ async def test_external_issue_nordpool_235(
     await coordinator.update_sensors()
     await hass.async_block_till_done()
     assert coordinator.tomorrow_valid is False
+
+    # Unsubscribe to listeners
+    for unsub in coordinator.listeners:
+        unsub()

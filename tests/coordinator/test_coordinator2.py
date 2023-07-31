@@ -24,6 +24,7 @@ from tests.const import (
     MOCK_CONFIG_ALL,
 )
 
+
 # pylint: disable=unused-argument
 async def test_coordinator_issue116(hass: HomeAssistant, set_cet_timezone, freezer):
     """Test Coordinator."""
@@ -85,3 +86,6 @@ async def test_coordinator_issue116(hass: HomeAssistant, set_cet_timezone, freez
     # Make sure the charger is still off after the ev has been reconnected.
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()

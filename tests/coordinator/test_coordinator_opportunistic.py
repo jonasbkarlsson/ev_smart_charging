@@ -22,6 +22,7 @@ from tests.helpers.helpers import (
 from tests.price import PRICE_20220930, PRICE_20221001
 from tests.const import MOCK_CONFIG_ALL
 
+
 # pylint: disable=unused-argument
 async def test_coordinator_opportunistic_switches(
     hass: HomeAssistant, set_cet_timezone, freezer
@@ -119,6 +120,9 @@ async def test_coordinator_opportunistic_switches(
     assert coordinator.switch_apply_limit is True
     assert coordinator.switch_keep_on is False
     assert coordinator.switch_opportunistic is False
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
 
 
 async def test_coordinator_opportunistic_switches2(
@@ -218,3 +222,6 @@ async def test_coordinator_opportunistic_switches2(
     assert coordinator.switch_apply_limit is True
     assert coordinator.switch_keep_on is False
     assert coordinator.switch_opportunistic is False
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()

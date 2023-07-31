@@ -136,6 +136,9 @@ async def test_coordinator_start_hour_start_before_end_1a(
     )
     assert coordinator.sensor.charging_number_of_hours == 5
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_start_hour_start_before_end_1b(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -247,6 +250,9 @@ async def test_coordinator_start_hour_start_before_end_1b(
     )
     assert coordinator.sensor.charging_number_of_hours == 5
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_start_hour_start_before_end_1c(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -357,3 +363,6 @@ async def test_coordinator_start_hour_start_before_end_1c(
         2022, 10, 2, 22, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
     assert coordinator.sensor.charging_number_of_hours == 5
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()

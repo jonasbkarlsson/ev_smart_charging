@@ -203,6 +203,9 @@ async def test_coordinator_late_ready(
     )
     assert coordinator.sensor.charging_number_of_hours == 2
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_late_ready2(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -268,6 +271,9 @@ async def test_coordinator_late_ready2(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
 
 
 async def test_coordinator_late_ready3(
@@ -335,3 +341,6 @@ async def test_coordinator_late_ready3(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()

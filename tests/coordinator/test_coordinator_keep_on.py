@@ -146,6 +146,9 @@ async def test_coordinator_keep_on1(
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_keep_on2(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -213,6 +216,9 @@ async def test_coordinator_keep_on2(
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
     # Test with max price 40.0 and 6.0 PCT/h.
     # This should give 5h charging, 03-08
     freezer.move_to("2022-09-30T14:00:00+02:00")
@@ -264,6 +270,9 @@ async def test_coordinator_keep_on2(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
 
 
 async def test_coordinator_keep_on3(
@@ -362,6 +371,9 @@ async def test_coordinator_keep_on3(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
 
 
 async def test_coordinator_keep_on4(
@@ -533,6 +545,9 @@ async def test_coordinator_keep_on4(
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_keep_on5(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -650,6 +665,9 @@ async def test_coordinator_keep_on5(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
 
 
 async def test_coordinator_keep_on6(
@@ -777,3 +795,6 @@ async def test_coordinator_keep_on6(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()

@@ -110,3 +110,6 @@ async def test_coordinator_status(
     MockSOCEntity.set_state(hass, "80")
     await hass.async_block_till_done()
     assert coordinator.sensor_status.native_value == CHARGING_STATUS_KEEP_ON
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()

@@ -114,6 +114,9 @@ async def test_coordinator_start_hour_both_same_3a(
     )
     assert coordinator.sensor.charging_number_of_hours == 5
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_start_hour_both_same_3b(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -203,3 +206,6 @@ async def test_coordinator_start_hour_both_same_3b(
         2022, 10, 2, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
     assert coordinator.sensor.charging_number_of_hours == 5
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()

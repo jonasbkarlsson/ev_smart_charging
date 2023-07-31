@@ -124,3 +124,8 @@ async def test_select_restore(
 
     await select_ready_hour.async_added_to_hass()
     assert select_ready_hour.state == "11:00"
+
+    # Unload the entry and verify that the data has been removed
+    assert await async_unload_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert config_entry.entry_id not in hass.data[DOMAIN]

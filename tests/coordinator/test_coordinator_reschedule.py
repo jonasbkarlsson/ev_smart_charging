@@ -95,3 +95,6 @@ async def test_coordinator_reschedule(
     assert coordinator.sensor.charging_is_planned is False
 
     await asyncio.sleep(2)
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
