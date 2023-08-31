@@ -551,6 +551,11 @@ class EVSmartChargingCoordinator:
         if configuration_updated:
             self.ev_soc_before_last_charging = -1
 
+        if self.price_entity_id is None:
+            # Set to "" in order to avoid error in self.hass.states.get()
+            self.price_entity_id = ""
+            _LOGGER.error("Price entity id not set.")
+
         price_state = self.hass.states.get(self.price_entity_id)
         if self.price_adaptor.is_price_state(price_state):
             self.sensor.current_price = self.price_adaptor.get_current_price(
