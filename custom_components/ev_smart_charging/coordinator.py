@@ -651,7 +651,8 @@ class EVSmartChargingCoordinator:
         not_charging = True
         if self._charging_schedule is not None:
             not_charging = (
-                get_charging_value(self._charging_schedule) is None
+                not self.switch_ev_connected
+                or get_charging_value(self._charging_schedule) is None
                 or get_charging_value(self._charging_schedule) == 0
             )
             # Handle self.switch_keep_on
