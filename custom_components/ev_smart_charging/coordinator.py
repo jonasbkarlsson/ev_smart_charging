@@ -154,6 +154,11 @@ class EVSmartChargingCoordinator:
             hass.bus.async_listen(EVENT_DEVICE_REGISTRY_UPDATED, self.device_updated)
         )
 
+    def unsubscribe_listeners(self):
+        """Unsubscribed to listeners"""
+        for unsub in self.listeners:
+            unsub()
+
     @callback
     async def device_updated(self, event: Event):  # pylint: disable=unused-argument
         """Called when device is updated"""
@@ -545,6 +550,11 @@ class EVSmartChargingCoordinator:
         # To handle non-live SOC
         if configuration_updated:
             self.ev_soc_before_last_charging = -1
+
+        if self.price_entity_id is None:
+            # Set to "" in order to avoid error in self.hass.states.get()
+            self.price_entity_id = ""
+            _LOGGER.error("Price entity id not set.")
 
         price_state = self.hass.states.get(self.price_entity_id)
         if self.price_adaptor.is_price_state(price_state):

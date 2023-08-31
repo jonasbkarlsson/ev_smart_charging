@@ -153,6 +153,10 @@ async def test_to_daylight_saving_time(
         == 0
     )
 
+    # Unsubscribe to listeners
+    for unsub in coordinator.listeners:
+        unsub()
+
 
 async def test_from_daylight_saving_time(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -273,3 +277,7 @@ async def test_from_daylight_saving_time(
         )
         == 0
     )
+
+    # Unsubscribe to listeners
+    for unsub in coordinator.listeners:
+        unsub()

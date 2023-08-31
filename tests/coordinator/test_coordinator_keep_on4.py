@@ -25,6 +25,7 @@ from tests.const import (
     MOCK_CONFIG_KEEP_ON2,
 )
 
+
 # pylint: disable=unused-argument
 async def test_coordinator_keep_on_issue98(
     hass: HomeAssistant, set_cet_timezone, freezer
@@ -138,6 +139,9 @@ async def test_coordinator_keep_on_issue98(
     assert coordinator.sensor.state == STATE_OFF
     assert coordinator.sensor.charging_is_planned is False
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_keep_on_issue104(
     hass: HomeAssistant, set_cet_timezone, freezer
@@ -228,3 +232,6 @@ async def test_coordinator_keep_on_issue104(
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()

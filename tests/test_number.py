@@ -146,3 +146,8 @@ async def test_number_restore(
 
     await number_charging_speed.async_added_to_hass()
     assert number_charging_speed.native_value == 55
+
+    # Unload the entry and verify that the data has been removed
+    assert await async_unload_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert config_entry.entry_id not in hass.data[DOMAIN]

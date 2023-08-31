@@ -201,6 +201,7 @@ cards:
           return entity.attributes.charging_schedule.map((entry) => { return
           [new Date(entry.start), entry.value]; });
         type: area
+        curve: stepline
         color: black
         show:
           in_header: false
