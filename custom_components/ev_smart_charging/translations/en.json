@@ -9,7 +9,7 @@
                     "ev_soc_sensor": "EV SOC entity",
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
                     "charger_entity": "Charger control switch (single space to remove)",
-                    "ev_controlled": "A car integration will control start/stop of charging"
+                    "ev_controlled": "An EV integration will control start/stop of charging"
                 }
             }
         },
@@ -34,7 +34,7 @@
                     "ev_soc_sensor": "EV SOC entity",
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
                     "charger_entity": "Charger control switch (single space to remove)",
-                    "ev_controlled": "A car integration will control start/stop of charging"
+                    "ev_controlled": "An EV integration will control start/stop of charging"
                 }
             }
         },
