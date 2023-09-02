@@ -78,7 +78,7 @@ async def test_coordinator(
 
     # Turn on switches
     await coordinator.switch_active_update(True)
-    await coordinator.switch_apply_limit_update(True)
+    await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
     await hass.async_block_till_done()
@@ -94,6 +94,8 @@ async def test_coordinator(
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
 
+    # If no change of SOC has been registred, turn of charging at
+    # the end of the charging schedule.
     # Move time to after scheduled charging time
     freezer.move_to("2022-10-01T08:00:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20221001, None)
@@ -346,7 +348,7 @@ async def test_coordinator_fix_soc(
 
     # Turn on switches. Should give 2h schedule 05:00-07:00
     await coordinator.switch_active_update(True)
-    await coordinator.switch_apply_limit_update(True)
+    await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
     await hass.async_block_till_done()

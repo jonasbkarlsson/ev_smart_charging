@@ -208,7 +208,6 @@ class EVSmartChargingCoordinator:
                 and self.sensor.current_price is not None
                 and (
                     self.sensor.current_price < self.max_price
-                    or self.max_price == 0.0
                     or self.switch_apply_limit is False
                     or self.ev_soc < self.number_min_soc
                 )
@@ -228,9 +227,8 @@ class EVSmartChargingCoordinator:
             # Handle self.switch_keep_on
             if self.switch_keep_on:
                 # Only if price limit is not used and the EV is connected
-                if (
-                    self.switch_apply_limit is False or self.max_price == 0.0
-                ) and self.switch_ev_connected:
+                # Note: if switch_keep_on is True, then switch_apply_limit should be False
+                if self.switch_apply_limit is False and self.switch_ev_connected:
                     # Only if SOC has reached Target SOC or there are no more scheduled charging
                     if (
                         self.ev_soc is not None
@@ -657,9 +655,8 @@ class EVSmartChargingCoordinator:
             # Handle self.switch_keep_on
             if self.switch_keep_on:
                 # Only if price limit is not used and the EV is connected
-                if (
-                    self.switch_apply_limit is False or self.max_price == 0.0
-                ) and self.switch_ev_connected:
+                # Note: if switch_keep_on is True, then switch_apply_limit should be False
+                if self.switch_apply_limit is False and self.switch_ev_connected:
                     # Only if SOC has reached Target SOC or there are no more scheduled charging
                     if (
                         self.ev_soc is not None
