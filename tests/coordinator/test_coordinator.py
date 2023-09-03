@@ -318,6 +318,23 @@ async def test_validate_input_sensors(hass: HomeAssistant):
     coordinator.unsubscribe_listeners()
 
 
+async def test_get_entity_id_from_unique_id(hass: HomeAssistant):
+    """Test get_entity_id_from_unique_id()"""
+
+    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    coordinator = EVSmartChargingCoordinator(hass, config_entry)
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+
+    MockPriceEntity.create(hass, entity_registry, 123)
+    MockSOCEntity.create(hass, entity_registry, "55")
+    MockTargetSOCEntity.create(hass, entity_registry, "80")
+
+    assert coordinator.get_entity_id_from_unique_id("foobar") is None
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
+
 async def test_coordinator_fix_soc(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
 ):
