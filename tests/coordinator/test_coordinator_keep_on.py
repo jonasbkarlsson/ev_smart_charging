@@ -22,7 +22,6 @@ from tests.helpers.helpers import (
 from tests.price import PRICE_20220930, PRICE_20221001
 from tests.const import (
     MOCK_CONFIG_KEEP_ON1,
-    MOCK_CONFIG_KEEP_ON2,
 )
 
 
