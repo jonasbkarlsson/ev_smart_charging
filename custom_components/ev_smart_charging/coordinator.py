@@ -34,6 +34,7 @@ from .const import (
     CHARGING_STATUS_WAITING_NEW_PRICE,
     CONF_CHARGER_ENTITY,
     CONF_EV_CONTROLLED,
+    CONF_IMMEDIATE_PRICE_LEVEL,
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
     CONF_OPPORTUNISTIC_LEVEL,
@@ -91,6 +92,7 @@ class EVSmartChargingCoordinator:
         self.switch_opportunistic = None
         self.switch_opportunistic_entity_id = None
         self.switch_opportunistic_unique_id = None
+        self.switch_immediate_price = None
         self.price_entity_id = None
         self.price_adaptor = PriceAdaptor()
         self.ev_soc_entity_id = None
@@ -141,6 +143,9 @@ class EVSmartChargingCoordinator:
         self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC, 0.0))
         self.number_opportunistic_level = int(
             get_parameter(self.config_entry, CONF_OPPORTUNISTIC_LEVEL, 50.0)
+        )
+        self.immediate_price = float(
+            get_parameter(self.config_entry, CONF_IMMEDIATE_PRICE_LEVEL, 0.0)
         )
 
         self.auto_charging_state = STATE_OFF
@@ -524,6 +529,12 @@ class EVSmartChargingCoordinator:
                     service=SERVICE_TURN_OFF,
                     target={"entity_id": self.switch_keep_on_entity_id},
                 )
+        await self.update_configuration()
+
+    async def switch_immediate_price_update(self, state: bool):
+        """Handle the immediate price charging switch"""
+        self.switch_immediate_price = state
+        _LOGGER.debug("switch_immediate_price_update = %s", state)
         await self.update_configuration()
 
     async def update_configuration(self):

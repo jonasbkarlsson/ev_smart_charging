@@ -10,11 +10,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
+    CONF_IMMEDIATE_PRICE_LEVEL,
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
     CONF_OPPORTUNISTIC_LEVEL,
     CONF_PCT_PER_HOUR,
     DOMAIN,
+    ENTITY_NAME_CONF_IMMEDIATE_PRICE_NUMBER,
     ENTITY_NAME_CONF_OPPORTUNISTIC_LEVEL_NUMBER,
     ENTITY_NAME_CONF_PCT_PER_HOUR_NUMBER,
     ENTITY_NAME_CONF_MAX_PRICE_NUMBER,
@@ -41,6 +43,7 @@ async def async_setup_entry(
     numbers.append(EVSmartChargingNumberPriceLimit(entry, coordinator))
     numbers.append(EVSmartChargingNumberMinSOC(entry, coordinator))
     numbers.append(EVSmartChargingNumberOpportunistic(entry, coordinator))
+    numbers.append(EVSmartChargingNumberImmediatePrice(entry, coordinator))
     async_add_devices(numbers)
 
 
@@ -170,4 +173,30 @@ class EVSmartChargingNumberOpportunistic(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.number_opportunistic_level = value
+        await self.coordinator.update_configuration()
+
+
+class EVSmartChargingNumberImmediatePrice(EVSmartChargingNumber):
+    """EV Smart Charging immediate price number class."""
+
+    _attr_name = ENTITY_NAME_CONF_IMMEDIATE_PRICE_NUMBER
+    _attr_icon = ICON_CASH
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value = -10000.0
+    _attr_native_max_value = 10000.0
+    _attr_native_step = 0.01
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingNumberImmediatePrice.__init__()")
+        super().__init__(entry, coordinator)
+        if self.value is None:
+            self._attr_native_value = get_parameter(
+                entry, CONF_IMMEDIATE_PRICE_LEVEL, 0.0
+            )
+            self.update_ha_state()
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set new value."""
+        await super().async_set_native_value(value)
+        self.coordinator.immediate_price = value
         await self.coordinator.update_configuration()

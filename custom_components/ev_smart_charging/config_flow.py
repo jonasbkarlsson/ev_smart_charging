@@ -26,7 +26,7 @@ _LOGGER = logging.getLogger(__name__)
 class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow."""
 
-    VERSION = 5
+    VERSION = 6
     user_input: Optional[dict[str, Any]]
 
     def __init__(self):
