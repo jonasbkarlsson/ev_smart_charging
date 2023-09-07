@@ -32,6 +32,7 @@ from .const import (
     CHARGING_STATUS_NOT_ACTIVE,
     CHARGING_STATUS_WAITING_CHARGING,
     CHARGING_STATUS_WAITING_NEW_PRICE,
+    CHARGING_STATUS_IMMEDIATE_PRICE,
     CONF_CHARGER_ENTITY,
     CONF_EV_CONTROLLED,
     CONF_IMMEDIATE_PRICE_LEVEL,
@@ -149,6 +150,7 @@ class EVSmartChargingCoordinator:
         )
 
         self.auto_charging_state = STATE_OFF
+        self.immediate_price_state = STATE_OFF
 
         # Update state once per hour.
         self.listeners.append(
@@ -219,12 +221,23 @@ class EVSmartChargingCoordinator:
                 and self.switch_ev_connected is True
                 and self.switch_active is True
             )
+
             if (
                 self.ev_soc is not None
                 and self.ev_target_soc is not None
                 and self.ev_soc >= self.ev_target_soc
             ):
                 turn_on_charging = False
+
+            if (
+                self.switch_immediate_price is True
+                and self.sensor.current_price is not None
+                and self.sensor.current_price <= self.immediate_price
+            ):
+                turn_on_charging = True
+                self.immediate_price_state = STATE_ON
+            else:
+                self.immediate_price_state = STATE_OFF
 
             time_now = dt.now()
             current_value = self.auto_charging_state == STATE_ON
@@ -305,6 +318,10 @@ class EVSmartChargingCoordinator:
                         self.sensor_status.native_value = CHARGING_STATUS_NOT_ACTIVE
                     elif not self.switch_ev_connected:
                         self.sensor_status.native_value = CHARGING_STATUS_DISCONNECTED
+                    elif self.immediate_price_state == STATE_ON:
+                        self.sensor_status.native_value = (
+                            CHARGING_STATUS_IMMEDIATE_PRICE
+                        )
                     elif self.switch_keep_on and self.auto_charging_state == STATE_ON:
                         self.sensor_status.native_value = CHARGING_STATUS_KEEP_ON
                     elif (
@@ -690,7 +707,7 @@ class EVSmartChargingCoordinator:
                 (self.ev_soc >= self.ev_target_soc)
                 or (
                     (self.tomorrow_valid or time_now_hour_local < self.ready_hour_local)
-                    and not_charging
+                    and (not_charging or configuration_updated)
                 )
             )
         ):
