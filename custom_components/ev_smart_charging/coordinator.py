@@ -238,6 +238,7 @@ class EVSmartChargingCoordinator:
 
             if (
                 self.switch_active is True
+                and self.switch_ev_connected is True
                 and self.switch_low_price_charging is True
                 and self.sensor.current_price is not None
                 and self.sensor.current_price <= self.low_price_charging
