@@ -143,7 +143,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
     if config_entry.version == 5:
         config_entry.version = 6
         new[CONF_LOW_PRICE_CHARGING_LEVEL] = 0.0
-        new[CONF_LOW_SOC_CHARGING_LEVEL] = 0.0
+        new[CONF_LOW_SOC_CHARGING_LEVEL] = 20.0
         migration = True
 
     if config_entry.version > 6:

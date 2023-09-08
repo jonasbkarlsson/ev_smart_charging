@@ -15,6 +15,7 @@ from .const import (
     ENTITY_NAME_EV_CONNECTED_SWITCH,
     ENTITY_NAME_LOW_PRICE_CHARGING_SWITCH,
     ENTITY_NAME_KEEP_ON_SWITCH,
+    ENTITY_NAME_LOW_SOC_CHARGING_SWITCH,
     ENTITY_NAME_OPPORTUNISTIC_SWITCH,
     ICON_CONNECTION,
     SWITCH,
@@ -39,6 +40,7 @@ async def async_setup_entry(
     switches.append(EVSmartChargingSwitchKeepOn(entry, coordinator))
     switches.append(EVSmartChargingSwitchOpportunistic(entry, coordinator))
     switches.append(EVSmartChargingSwitchLowPriceCharging(entry, coordinator))
+    switches.append(EVSmartChargingSwitchLowSocCharging(entry, coordinator))
     async_add_devices(switches)
 
 
@@ -240,3 +242,27 @@ class EVSmartChargingSwitchLowPriceCharging(EVSmartChargingSwitch):
         """Turn the entity off."""
         await super().async_turn_off(**kwargs)
         await self.coordinator.switch_low_price_charging_update(False)
+
+
+class EVSmartChargingSwitchLowSocCharging(EVSmartChargingSwitch):
+    """EV Smart Charging low SOC charging switch class."""
+
+    _attr_name = ENTITY_NAME_LOW_SOC_CHARGING_SWITCH
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSwitchLowSocCharging.__init__()")
+        super().__init__(entry, coordinator)
+        if self.is_on is None:
+            self._attr_is_on = False
+            self.update_ha_state()
+        self.coordinator.switch_low_soc_charging = self.is_on
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+        await super().async_turn_on(**kwargs)
+        await self.coordinator.switch_low_soc_charging_update(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""
+        await super().async_turn_off(**kwargs)
+        await self.coordinator.switch_low_soc_charging_update(False)
