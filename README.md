@@ -89,7 +89,7 @@ Entity | Type | Descriptions, valid value ranges and service calls
 Entity | Type | Description
 -- | -- | --
 `sensor.ev_smart_charging_charging` | Sensor | The state is "on" or "off". Can be used with automations to control the EV charger.
-`sensor.ev_smart_charging_status` | Sensor | The state is one of the following, "Waiting for new prices", "No charging planned", "Waiting for charging to begin", "Charging", "Keeping charger on", "Disconnected" and "Smart charging not active".
+`sensor.ev_smart_charging_status` | Sensor | The state is one of the following, "Waiting for new prices", "No charging planned", "Waiting for charging to begin", "Charging", "Keeping charger on", "Low price charging", "Low SOC charging", "Disconnected" and "Smart charging not active".
 `switch.ev_smart_charging_smart_charging_activated` | Switch | Turns the EV Smart Charging integration on and off.
 `switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit.
 `switch.ev_smart_charging_opportunistic_charging` | Switch | Activates opportunistic charging. See the desciption of the configuration entity`number.ev_smart_charging_opportunistic_level`. This feature requires the feature `Electricity price limit` to be on.
