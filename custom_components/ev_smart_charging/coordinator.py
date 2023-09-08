@@ -230,7 +230,8 @@ class EVSmartChargingCoordinator:
                 turn_on_charging = False
 
             if (
-                self.switch_immediate_price is True
+                self.switch_active is True
+                and self.switch_immediate_price is True
                 and self.sensor.current_price is not None
                 and self.sensor.current_price <= self.immediate_price
             ):
