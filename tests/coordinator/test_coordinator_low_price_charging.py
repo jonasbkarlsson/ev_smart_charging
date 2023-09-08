@@ -24,12 +24,12 @@ from tests.helpers.helpers import (
 )
 from tests.price import PRICE_20220930, PRICE_20221001
 from tests.const import (
-    MOCK_CONFIG_IMMEDIATE_PRICE,
+    MOCK_CONFIG_LOW_PRICE_CHARGING,
 )
 
 
 # pylint: disable=unused-argument
-async def test_coordinator_immediate_price1(
+async def test_coordinator_low_price_charging1(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
 ):
     """Test Coordinator."""
@@ -46,7 +46,7 @@ async def test_coordinator_immediate_price1(
     # This should give 7h charging, 01-08,
 
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_IMMEDIATE_PRICE, entry_id="test"
+        domain=DOMAIN, data=MOCK_CONFIG_LOW_PRICE_CHARGING, entry_id="test"
     )
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
@@ -69,7 +69,7 @@ async def test_coordinator_immediate_price1(
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
     await coordinator.switch_keep_on_update(False)
-    await coordinator.switch_immediate_price_update(False)
+    await coordinator.switch_low_price_charging_update(False)
     await hass.async_block_till_done()
 
     assert coordinator.auto_charging_state == STATE_OFF
@@ -88,7 +88,7 @@ async def test_coordinator_immediate_price1(
     freezer.move_to("2022-09-30T14:00:00+02:00")
     MockSOCEntity.set_state(hass, "40")
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
-    await coordinator.switch_immediate_price_update(True)
+    await coordinator.switch_low_price_charging_update(True)
     await coordinator.update_sensors()
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
