@@ -25,7 +25,7 @@ The integration calculates the set of hours that will give the lowest price, by 
 - Optional setting of minimum SOC level that should be reached indepently of the electrity price.
 - Optional setting to only charge when the electricty price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
 - Optional setting to lower the level of maximum electricity price even further if the electricity price is very low at the end of the day tomorrow.
-- Optional setting to start charging immediately if the electricity price is lower then a configured level.
+- Optional setting to start charging immediately if the electricity price is lower than a configured level.
 - Optional possibility to provide information to the integration about when the EV is connected to the charger.
 - Optional possibility to keep the charger on after completed charging, to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery.
 - Service calls to dynamically control all configuation parameters that affect charging.
