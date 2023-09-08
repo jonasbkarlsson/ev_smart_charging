@@ -227,5 +227,5 @@ class EVSmartChargingNumberLowSocCharging(EVSmartChargingNumber):
     async def async_set_native_value(self, value: float) -> None:
         """Set new value."""
         await super().async_set_native_value(value)
-        self.coordinator.low_price_charging = value
+        self.coordinator.low_soc_charging = value
         await self.coordinator.update_configuration()
