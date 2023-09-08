@@ -32,8 +32,10 @@ from .const import (
     CHARGING_STATUS_NOT_ACTIVE,
     CHARGING_STATUS_WAITING_CHARGING,
     CHARGING_STATUS_WAITING_NEW_PRICE,
+    CHARGING_STATUS_LOW_PRICE_CHARGING,
     CONF_CHARGER_ENTITY,
     CONF_EV_CONTROLLED,
+    CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
     CONF_OPPORTUNISTIC_LEVEL,
@@ -91,6 +93,7 @@ class EVSmartChargingCoordinator:
         self.switch_opportunistic = None
         self.switch_opportunistic_entity_id = None
         self.switch_opportunistic_unique_id = None
+        self.switch_low_price_charging = None
         self.price_entity_id = None
         self.price_adaptor = PriceAdaptor()
         self.ev_soc_entity_id = None
@@ -142,8 +145,12 @@ class EVSmartChargingCoordinator:
         self.number_opportunistic_level = int(
             get_parameter(self.config_entry, CONF_OPPORTUNISTIC_LEVEL, 50.0)
         )
+        self.low_price_charging = float(
+            get_parameter(self.config_entry, CONF_LOW_PRICE_CHARGING_LEVEL, 0.0)
+        )
 
         self.auto_charging_state = STATE_OFF
+        self.low_price_charging_state = STATE_OFF
 
         # Update state once per hour.
         self.listeners.append(
@@ -214,12 +221,24 @@ class EVSmartChargingCoordinator:
                 and self.switch_ev_connected is True
                 and self.switch_active is True
             )
+
             if (
                 self.ev_soc is not None
                 and self.ev_target_soc is not None
                 and self.ev_soc >= self.ev_target_soc
             ):
                 turn_on_charging = False
+
+            if (
+                self.switch_active is True
+                and self.switch_low_price_charging is True
+                and self.sensor.current_price is not None
+                and self.sensor.current_price <= self.low_price_charging
+            ):
+                turn_on_charging = True
+                self.low_price_charging_state = STATE_ON
+            else:
+                self.low_price_charging_state = STATE_OFF
 
             time_now = dt.now()
             current_value = self.auto_charging_state == STATE_ON
@@ -300,6 +319,10 @@ class EVSmartChargingCoordinator:
                         self.sensor_status.native_value = CHARGING_STATUS_NOT_ACTIVE
                     elif not self.switch_ev_connected:
                         self.sensor_status.native_value = CHARGING_STATUS_DISCONNECTED
+                    elif self.low_price_charging_state == STATE_ON:
+                        self.sensor_status.native_value = (
+                            CHARGING_STATUS_LOW_PRICE_CHARGING
+                        )
                     elif self.switch_keep_on and self.auto_charging_state == STATE_ON:
                         self.sensor_status.native_value = CHARGING_STATUS_KEEP_ON
                     elif (
@@ -526,6 +549,12 @@ class EVSmartChargingCoordinator:
                 )
         await self.update_configuration()
 
+    async def switch_low_price_charging_update(self, state: bool):
+        """Handle the low price charging switch"""
+        self.switch_low_price_charging = state
+        _LOGGER.debug("switch_low_price_charging_update = %s", state)
+        await self.update_configuration()
+
     async def update_configuration(self):
         """Called when the configuration has been updated"""
         await self.update_sensors(configuration_updated=True)
@@ -679,7 +708,7 @@ class EVSmartChargingCoordinator:
                 (self.ev_soc >= self.ev_target_soc)
                 or (
                     (self.tomorrow_valid or time_now_hour_local < self.ready_hour_local)
-                    and not_charging
+                    and (not_charging or configuration_updated)
                 )
             )
         ):
