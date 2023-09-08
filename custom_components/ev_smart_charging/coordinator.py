@@ -258,6 +258,16 @@ class EVSmartChargingCoordinator:
                 self.low_soc_charging_state = STATE_ON
             else:
                 self.low_soc_charging_state = STATE_OFF
+            if (
+                self.switch_active is True
+                and self.switch_ev_connected is True
+                and self.switch_low_soc_charging is True
+            ):
+                _LOGGER.debug("self.ev_soc = %s", self.ev_soc)
+                _LOGGER.debug("self.low_soc_charging = %s", self.low_soc_charging)
+                _LOGGER.debug(
+                    "self.low_soc_charging_state = %s", self.low_soc_charging_state
+                )
 
             time_now = dt.now()
             current_value = self.auto_charging_state == STATE_ON
