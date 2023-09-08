@@ -108,6 +108,7 @@ CHARGING_STATUS_KEEP_ON = "Keeping charger on"
 CHARGING_STATUS_DISCONNECTED = "Disconnected"
 CHARGING_STATUS_NOT_ACTIVE = "Smart charging not active"
 CHARGING_STATUS_LOW_PRICE_CHARGING = "Low price charging"
+CHARGING_STATUS_LOW_SOC_CHARGING = "Low SOC charging"
 
 # Defaults
 DEFAULT_NAME = DOMAIN
