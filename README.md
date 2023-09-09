@@ -228,6 +228,10 @@ cards:
         name: Continuous charging preferred
       - entity: switch.ev_smart_charging_keep_charger_on
         name: Keep charger on
+      - entity: switch.ev_smart_charging_low_price_charging
+        name: Low price charging
+      - entity: switch.ev_smart_charging_low_soc_charging
+        name: Low SOC charging
       - entity: button.ev_smart_charging_manually_start_charging
         name: Manually start charging
       - entity: button.ev_smart_charging_manually_stop_charging
