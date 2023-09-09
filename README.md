@@ -93,8 +93,8 @@ Entity | Type | Description
 `switch.ev_smart_charging_smart_charging_activated` | Switch | Turns the EV Smart Charging integration on and off.
 `switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit.
 `switch.ev_smart_charging_opportunistic_charging` | Switch | Activates opportunistic charging. See the desciption of the configuration entity`number.ev_smart_charging_opportunistic_level`. This feature requires the feature `Electricity price limit` to be on.
-`switch.ev_smart_charging_low_soc_charging` | Switch | Activates charging immediately if the EV SOC is lower than a configured level.
-`switch.ev_smart_charging_low_price_charging` | Switch | Activates charging immediately if the electricity price is lower than a configured level.
+`switch.ev_smart_charging_low_soc_charging` | Switch | Activates charging immediately if the EV SOC is lower than a configured level. It is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected` if this switch is set to on. Note that this charging is not shown as a scheduled charging. A typical use case is to charge the EV directly when returning home to a minimum level, and then do a complete charging using the scheduled charging when the price is lowest.
+`switch.ev_smart_charging_low_price_charging` | Switch | Activates charging immediately if the electricity price is lower than a configured level. It is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected` if this switch is set to on. Note that this charging is not shown as a scheduled charging.
 `switch.ev_smart_charging_continuous_charging_preferred` | Switch | If turned on, will as basis schedule one continuous charging session. If turned off, will schedule charging on the hours with lowest electricity price, even if they are not continuous.
 `switch.ev_smart_charging_keep_charger_on` | Switch | If "on", the `sensor.ev_smart_charging_charging` will not turn off after completed charge cycle. The feature is intended to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery. If this option is used, the feature `Electricity price limit` will be turned off, and vice versa. *NOTE* It is required that `switch.ev_smart_charging_ev_connected` is controlled in a proper way in order for this feature to work. Also, there is an assumption made that the EV itself will stop its charging when reaching the target SOC.
 `switch.ev_smart_charging_ev_connected` | Switch | Tells the integration that the EV is connected to the charger. Is preferable controlled by automations (see example below). Can avoid problems occuring when the EV is not connected to the charger at the time the charging should start. Using it will also ensure that the `sensor.ev_smart_charging_charging` is set to "off" when the EV is not connected to the charger.
@@ -228,6 +228,10 @@ cards:
         name: Continuous charging preferred
       - entity: switch.ev_smart_charging_keep_charger_on
         name: Keep charger on
+      - entity: switch.ev_smart_charging_low_price_charging
+        name: Low price charging
+      - entity: switch.ev_smart_charging_low_soc_charging
+        name: Low SOC charging
       - entity: button.ev_smart_charging_manually_start_charging
         name: Manually start charging
       - entity: button.ev_smart_charging_manually_stop_charging
