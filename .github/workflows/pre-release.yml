@@ -1,4 +1,4 @@
-name: Pre-release
+name: Pre-release actions
 
 on:
   workflow_dispatch:
