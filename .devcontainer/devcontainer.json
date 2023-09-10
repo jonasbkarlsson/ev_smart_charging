@@ -3,7 +3,7 @@
 // Depending on setup, "remoteUser": "vscode", might be preferred to add.
 {
 	"name": "EV Smart Charging",
-	"image": "mcr.microsoft.com/vscode/devcontainers/python:0-3.10",
+	"image": "mcr.microsoft.com/vscode/devcontainers/python:0-3.11",
 	"postCreateCommand": "scripts/setup",
 	"forwardPorts": [
 		8123
@@ -13,19 +13,19 @@
 			"extensions": [
 				"ms-python.python",
 				"github.vscode-pull-request-github",
+				"github.vscode-github-actions",
 				"ryanluker.vscode-coverage-gutters",
 				"ms-python.vscode-pylance",
-				"donjayamanne.githistory"
+				"donjayamanne.githistory",
+				"ms-python.pylint",
+				"ms-python.black-formatter"
 			],
 			"settings": {
 				"files.eol": "\n",
 				"editor.tabSize": 4,
 				"python.pythonPath": "/usr/bin/python3",
 				"python.analysis.autoSearchPaths": false,
-				"python.linting.pylintEnabled": true,
-				"python.linting.enabled": true,
-				"python.formatting.provider": "black",
-				"python.formatting.blackPath": "/usr/local/py-utils/bin/black",
+				"editor.defaultFormatter": "ms-python.black-formatter",
 				"editor.formatOnPaste": false,
 				"editor.formatOnSave": true,
 				"editor.formatOnType": true,

@@ -24,9 +24,9 @@ from .const import (
 def bypass_setup_fixture():
     """Prevent setup."""
     with patch(
-        "custom_components.ev_smart_charging.async_setup",
-        return_value=True,
-    ), patch(
+        #     "custom_components.ev_smart_charging.async_setup",
+        #     return_value=True,
+        # ), patch(
         "custom_components.ev_smart_charging.async_setup_entry",
         return_value=True,
     ):
