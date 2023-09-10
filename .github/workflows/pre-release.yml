@@ -1,0 +1,28 @@
+name: Pre-release actions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Run pre-release tests
+    runs-on: "ubuntu-latest"
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+        include:
+          - python-version: "3.9"
+            pytest_all_ha_versions: "pytest_all_ha_versions_python39"
+          - python-version: "3.10"
+            pytest_all_ha_versions: "pytest_all_ha_versions_python310"
+          - python-version: "3.11"
+            pytest_all_ha_versions: "pytest_all_ha_versions_python311"
+    steps:
+      - name: Check out code from GitHub
+        uses: "actions/checkout@v4"
+      - name: Setup Python
+        uses: "actions/setup-python@v4"
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run test script
+        run: bash ${{ github.workspace }}/scripts/${{ matrix.pytest_all_ha_versions }}
