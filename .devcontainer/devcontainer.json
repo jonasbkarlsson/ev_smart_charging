@@ -13,6 +13,7 @@
 			"extensions": [
 				"ms-python.python",
 				"github.vscode-pull-request-github",
+				"github.vscode-github-actions",
 				"ryanluker.vscode-coverage-gutters",
 				"ms-python.vscode-pylance",
 				"donjayamanne.githistory",
