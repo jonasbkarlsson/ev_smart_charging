@@ -1,4 +1,4 @@
-name: Pre-release test actions
+name: Pre-release tests
 
 on:
   workflow_dispatch:
