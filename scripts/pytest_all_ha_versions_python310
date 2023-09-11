@@ -11,7 +11,7 @@
 # This test fails!
 
 echo 1
-pip3 install -qq homeassistant==2022.7.0 pytest-homeassistant-custom-component==0.10.2
+pip3 install -qq homeassistant==2022.7.0 pytest-homeassistant-custom-component==0.10.2 pytest-asyncio==0.20.2
 pip3 list 2>/dev/null | grep homeassistant | grep -v "\-home"
 pip3 list 2>/dev/null | grep pytest-homeassistant-custom-component
 pip3 list
