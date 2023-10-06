@@ -47,6 +47,7 @@ async def test_coordinator_keep_on_issue(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_KEEP_ON_ISSUE, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]

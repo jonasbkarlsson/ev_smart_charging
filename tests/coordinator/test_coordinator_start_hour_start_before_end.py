@@ -56,6 +56,7 @@ async def test_coordinator_start_hour_start_before_end_1a(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_START_HOUR_1A, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
     sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
@@ -166,6 +167,7 @@ async def test_coordinator_start_hour_start_before_end_1b(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_START_HOUR_1B, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
     sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
@@ -280,6 +282,7 @@ async def test_coordinator_start_hour_start_before_end_1c(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_START_HOUR_1C, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
     sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)

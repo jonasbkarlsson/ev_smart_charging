@@ -60,6 +60,7 @@ async def test_coordinator_status(
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
     MockPriceEntity.set_state(hass, PRICE_20220930, None)
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
     sensors = []

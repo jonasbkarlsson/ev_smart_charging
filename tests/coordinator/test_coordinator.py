@@ -43,6 +43,7 @@ async def test_coordinator(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_NO_TARGET_SOC, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
@@ -57,6 +58,7 @@ async def test_coordinator(
 
     # Test turn on and off charging
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
@@ -174,6 +176,7 @@ async def test_coordinator_min_soc1(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator
 
@@ -238,6 +241,7 @@ async def test_coordinator_min_soc2(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator
 
@@ -303,6 +307,7 @@ async def test_validate_input_sensors(hass: HomeAssistant):
     """Test validate_input_sensors()"""
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
 
@@ -322,6 +327,7 @@ async def test_get_entity_id_from_unique_id(hass: HomeAssistant):
     """Test get_entity_id_from_unique_id()"""
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
 
@@ -349,6 +355,7 @@ async def test_coordinator_fix_soc(
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 

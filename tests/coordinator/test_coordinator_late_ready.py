@@ -44,6 +44,7 @@ async def test_coordinator_late_ready(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_LATE, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
@@ -225,6 +226,7 @@ async def test_coordinator_late_ready2(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_LATE24, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
@@ -294,6 +296,7 @@ async def test_coordinator_late_ready3(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_LATE24, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
