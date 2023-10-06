@@ -329,6 +329,7 @@ async def test_device_name_creator(hass: HomeAssistant):
     names = []
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.add_to_hass(hass)
     assert (name := DeviceNameCreator.create(hass)) == NAME
     names.append(name)
     device_registry.async_get_or_create(
@@ -340,6 +341,7 @@ async def test_device_name_creator(hass: HomeAssistant):
     config_entry2 = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test2"
     )
+    config_entry2.add_to_hass(hass)
     assert (name2 := DeviceNameCreator.create(hass)) not in names
     names.append(name2)
     device_registry.async_get_or_create(
@@ -355,6 +357,7 @@ async def test_device_name_creator(hass: HomeAssistant):
     config_entry3 = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test3"
     )
+    config_entry3.add_to_hass(hass)
     device_registry.async_get_or_create(
         config_entry_id=config_entry3.entry_id,
         name=name3,

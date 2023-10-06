@@ -52,6 +52,7 @@ async def test_coordinator_opportunistic_switches(
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.add_to_hass(hass)
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
@@ -154,6 +155,7 @@ async def test_coordinator_opportunistic_switches2(
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.add_to_hass(hass)
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]

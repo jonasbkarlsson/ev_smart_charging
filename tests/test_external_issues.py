@@ -44,6 +44,7 @@ async def test_external_issue_nordpool_235(
     MockPriceEntity.set_state(hass, PRICE_20221001, PRICE_20221001)
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 

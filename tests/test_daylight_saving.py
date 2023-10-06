@@ -47,6 +47,7 @@ async def test_to_daylight_saving_time(
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator
 
@@ -172,6 +173,7 @@ async def test_from_daylight_saving_time(
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator
 

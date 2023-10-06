@@ -46,6 +46,7 @@ async def test_coordinator_keep_on_get_entities(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_KEEP_ON2, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
@@ -117,6 +118,7 @@ async def test_coordinator_keep_on_schedule(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_KEEP_ON1, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
@@ -218,6 +220,7 @@ async def test_coordinator_keep_on_connect(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_KEEP_ON1, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
@@ -375,6 +378,7 @@ async def test_coordinator_keep_on_connect2(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_KEEP_ON1, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
@@ -496,6 +500,7 @@ async def test_coordinator_keep_on_connect3(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_KEEP_ON1, entry_id="test"
     )
+    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 

@@ -38,6 +38,7 @@ async def test_switch(hass, bypass_validate_input_sensors):
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test", title="none"
     )
+    config_entry.add_to_hass(hass)
 
     # Set up the entry and assert that the values set during setup are where we expect
     # them to be.
@@ -139,6 +140,7 @@ async def test_switch_off_restore(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test", title="none"
     )
+    config_entry.add_to_hass(hass)
     await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
 
@@ -179,6 +181,7 @@ async def test_switch_on_restore(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test", title="none"
     )
+    config_entry.add_to_hass(hass)
     await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
 

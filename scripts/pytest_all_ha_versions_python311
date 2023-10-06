@@ -50,3 +50,6 @@ run_next_test "auto"
 # As of HA 2023.8, Python 3.10 is not supported.
 pip3 install -qq homeassistant==2023.8.4 pytest-homeassistant-custom-component==0.13.53
 run_next_test "auto"
+
+pip3 install -qq homeassistant==2023.9.3 pytest-homeassistant-custom-component==0.13.57
+run_next_test "auto"

@@ -65,6 +65,7 @@ async def test_get_parameter(hass):
     """Test get_parameter"""
 
     config_entry = MockConfigEntry(data=MOCK_CONFIG_DATA, options=MOCK_CONFIG_OPTIONS)
+    config_entry.add_to_hass(hass)
     assert get_parameter(config_entry, CONF_PCT_PER_HOUR) == 8.0
     assert get_parameter(config_entry, CONF_MIN_SOC) == 30.0
     assert get_parameter(config_entry, CONF_READY_HOUR) is None
