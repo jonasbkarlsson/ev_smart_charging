@@ -1,6 +1,5 @@
 """Adds config flow for EV Smart Charging."""
 import logging
-from typing import Any, Optional
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -9,7 +8,12 @@ from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
 
 from .const import (
+    CONF_COST_CALCULATION,
+    CONF_COST_CURRENCY,
+    CONF_COST_MULTIPLIER,
+    CONF_COST_OFFSET,
     CONF_DEVICE_NAME,
+    CONF_ENERGY_SENSOR,
     CONF_EV_CONTROLLED,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
@@ -26,8 +30,7 @@ _LOGGER = logging.getLogger(__name__)
 class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow."""
 
-    VERSION = 6
-    user_input: Optional[dict[str, Any]]
+    VERSION = 7
 
     def __init__(self):
         """Initialize."""
@@ -71,9 +74,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             if not self._errors:
                 self.user_input = user_input
-                return self.async_create_entry(
-                    title=user_input[CONF_DEVICE_NAME], data=self.user_input
-                )
+                return await self.async_step_cost()
 
         return await self._show_config_form_user(user_input)
 
@@ -105,6 +106,62 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema(user_schema),
             errors=self._errors,
+            last_step=False,
+        )
+
+    async def async_step_cost(self, user_input=None):
+        """UI configuration of charger"""
+
+        _LOGGER.debug("EVChargingControlConfigFlow.async_step_cost")
+        self._errors = {}
+
+        if user_input is not None:
+            # process user_input
+            error = FlowValidator.validate_step_cost(self.hass, user_input)
+            if error is not None:
+                self._errors[error[0]] = error[1]
+
+            if not self._errors:
+                self.user_input.update(user_input)
+                return self.async_create_entry(
+                    title=self.user_input[CONF_DEVICE_NAME], data=self.user_input
+                )
+
+        user_input = {}
+        # Provide defaults for form
+        user_input[CONF_COST_CALCULATION] = False
+        user_input[CONF_ENERGY_SENSOR] = ""
+        user_input[CONF_COST_CURRENCY] = "EUR"
+        user_input[CONF_COST_MULTIPLIER] = 1.0
+        user_input[CONF_COST_OFFSET] = 0.0
+
+        return await self._show_config_form_cost(user_input)
+
+    async def _show_config_form_cost(self, user_input):
+        """Show the configuration form."""
+
+        cost_schema = {
+            vol.Required(
+                CONF_COST_CALCULATION, default=user_input[CONF_COST_CALCULATION]
+            ): cv.boolean,
+            vol.Optional(
+                CONF_ENERGY_SENSOR, default=user_input[CONF_ENERGY_SENSOR]
+            ): cv.string,
+            vol.Optional(
+                CONF_COST_CURRENCY, default=user_input[CONF_COST_CURRENCY]
+            ): cv.string,
+            vol.Optional(
+                CONF_COST_MULTIPLIER, default=user_input[CONF_COST_MULTIPLIER]
+            ): cv.positive_float,
+            vol.Optional(
+                CONF_COST_OFFSET, default=user_input[CONF_COST_OFFSET]
+            ): vol.Coerce(float),
+        }
+
+        return self.async_show_form(
+            step_id="cost",
+            data_schema=vol.Schema(cost_schema),
+            errors=self._errors,
             last_step=True,
         )
 
@@ -116,8 +173,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Initialize options flow."""
         self.config_entry = config_entry
         self._errors = {}
+        self.user_input = {}
 
-    async def async_step_init(self, user_input) -> FlowResult:
+    async def async_step_init(self, user_input=None) -> FlowResult:
         """Manage the options."""
 
         self._errors = {}
@@ -129,9 +187,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 self._errors[error[0]] = error[1]
 
             if not self._errors:
-                return self.async_create_entry(
-                    title=self.config_entry.title, data=user_input
-                )
+                self.user_input = user_input
+                return await self.async_step_cost()
 
         user_schema = {
             vol.Required(
@@ -159,6 +216,53 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(user_schema),
+            errors=self._errors,
+            last_step=False,
+        )
+
+    async def async_step_cost(self, user_input=None) -> FlowResult:
+        """UI configuration of charger"""
+
+        self._errors = {}
+
+        if user_input is not None:
+            # process user_input
+            error = FlowValidator.validate_step_cost(self.hass, user_input)
+            if error is not None:
+                self._errors[error[0]] = error[1]
+
+            if not self._errors:
+                self.user_input.update(user_input)
+                return self.async_create_entry(
+                    title=self.config_entry.title, data=self.user_input
+                )
+
+        cost_schema = {
+            vol.Required(
+                CONF_COST_CALCULATION,
+                default=get_parameter(self.config_entry, CONF_COST_CALCULATION),
+            ): cv.boolean,
+            vol.Optional(
+                CONF_ENERGY_SENSOR,
+                default=get_parameter(self.config_entry, CONF_ENERGY_SENSOR),
+            ): cv.string,
+            vol.Optional(
+                CONF_COST_CURRENCY,
+                default=get_parameter(self.config_entry, CONF_COST_CURRENCY),
+            ): cv.string,
+            vol.Optional(
+                CONF_COST_MULTIPLIER,
+                default=get_parameter(self.config_entry, CONF_COST_MULTIPLIER),
+            ): cv.positive_float,
+            vol.Optional(
+                CONF_COST_OFFSET,
+                default=get_parameter(self.config_entry, CONF_COST_OFFSET),
+            ): vol.Coerce(float),
+        }
+
+        return self.async_show_form(
+            step_id="cost",
+            data_schema=vol.Schema(cost_schema),
             errors=self._errors,
             last_step=True,
         )

@@ -17,6 +17,10 @@ from custom_components.ev_smart_charging.helpers.price_adaptor import PriceAdapt
 # pylint: disable=relative-beyond-top-level
 from ..const import (
     CONF_CHARGER_ENTITY,
+    CONF_COST_CALCULATION,
+    CONF_COST_CURRENCY,
+    CONF_COST_MULTIPLIER,
+    CONF_ENERGY_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     DOMAIN,
@@ -96,6 +100,35 @@ class FlowValidator:
             if entry.domain != SWITCH:
                 user_input[CONF_CHARGER_ENTITY] = ""
                 return ("base", "charger_control_switch_not_switch")
+
+        return None
+
+    @staticmethod
+    def validate_step_cost(
+        hass: HomeAssistant, user_input: dict[str, Any]
+    ) -> list[str]:
+        """Validate step_cost"""
+
+        entity_registry: EntityRegistry = async_entity_registry_get(hass)
+
+        # Only check if cost calculation will be done
+        if user_input[CONF_COST_CALCULATION]:
+            # Do not allow multiplier equal to 0
+            if user_input[CONF_COST_MULTIPLIER] == 0.0:
+                return ("base", "cost_multiplier_zero")
+            # Do not allow empty currency strings
+            user_input[CONF_COST_CURRENCY] = user_input[CONF_COST_CURRENCY].strip()
+            if len(user_input[CONF_COST_CURRENCY]) == 0:
+                return ("base", "cost_currency_missing")
+
+            # Validate Energy entity
+            user_input[CONF_ENERGY_SENSOR] = user_input[CONF_ENERGY_SENSOR].strip()
+            entity = hass.states.get(user_input[CONF_ENERGY_SENSOR])
+            if entity is None:
+                return ("base", "energy_sensor_not_found")
+            if not Validator.is_float(entity.state):
+                _LOGGER.debug("Energy sensor state is not float")
+                return ("base", "energy_sensor_invalid")
 
         return None
 

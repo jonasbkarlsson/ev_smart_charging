@@ -71,6 +71,11 @@ CONF_OPPORTUNISTIC_LEVEL = "opportunistic_level"
 CONF_LOW_PRICE_CHARGING_LEVEL = "low_price_charging_level"
 CONF_LOW_SOC_CHARGING_LEVEL = "low_soc_charging_level"
 CONF_MIN_SOC = "min_soc"
+CONF_COST_CALCULATION = "cost_calculation"
+CONF_ENERGY_SENSOR = "energy_sensor"
+CONF_COST_CURRENCY = "cost_currency"
+CONF_COST_MULTIPLIER = "cost_multiplier"
+CONF_COST_OFFSET = "cost_offset"
 
 HOURS = [
     "None",

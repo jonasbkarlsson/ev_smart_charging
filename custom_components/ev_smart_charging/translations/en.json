@@ -11,7 +11,18 @@
                     "charger_entity": "Charger control switch (single space to remove)",
                     "ev_controlled": "An EV integration will control start/stop of charging"
                 }
+            },
+            "cost": {
+                "description": "Configuration for cost calculation.",
+                "data": {
+                    "cost_calculation": "Select to use cost calculation",
+                    "energy_sensor": "Energy sensor",
+                    "cost_currency": "Currency",
+                    "cost_multiplier": "Multiplier for cost calculation",
+                    "cost_offset": "Offset for cost calculation"
+                }
             }
+
         },
         "error": {
             "price_not_found": "Electricity price sensor not found.",
@@ -22,7 +33,11 @@
             "ev_target_soc_not_found": "EV Target SOC entity not found.",
             "ev_target_soc_invalid_data": "The Target SOC entity gives invalid data.",
             "charger_control_switch_not_found": "Charger control switch entity not found.",
-            "charger_control_switch_not_switch": "Charger control switch entity is not a switch."
+            "charger_control_switch_not_switch": "Charger control switch entity is not a switch.",
+            "cost_multiplier_zero": "Multiplier can not be zero.",
+            "cost_currency_missing": "Please provide a currency.",
+            "energy_sensor_not_found": "Energy sensor not found.",
+            "energy_sensor_invalid": "Energy sensor gives invalid data."
         }
     },
     "options": {
@@ -36,6 +51,16 @@
                     "charger_entity": "Charger control switch (single space to remove)",
                     "ev_controlled": "An EV integration will control start/stop of charging"
                 }
+            },
+            "cost": {
+                "description": "Configuration for cost calculation.",
+                "data": {
+                    "cost_calculation": "Select to use cost calculation",
+                    "energy_sensor": "Energy sensor",
+                    "cost_currency": "Currency",
+                    "cost_multiplier": "Multiplier for cost calculation",
+                    "cost_offset": "Offset for cost calculation"
+                }
             }
         },
         "error": {
@@ -47,7 +72,11 @@
             "ev_target_soc_not_found": "EV Target SOC entity not found.",
             "ev_target_soc_invalid_data": "The Target SOC entity gives invalid data.",
             "charger_control_switch_not_found": "Charger control switch entity not found.",
-            "charger_control_switch_not_switch": "Charger control switch entity is not a switch."
-        }
+            "charger_control_switch_not_switch": "Charger control switch entity is not a switch.",
+            "cost_multiplier_zero": "Multiplier can not be zero.",
+            "cost_currency_missing": "Please provide a currency.",
+            "energy_sensor_not_found": "Energy sensor not found.",
+            "energy_sensor_invalid": "Energy sensor gives invalid data."
+       }
     }
 }
