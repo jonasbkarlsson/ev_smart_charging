@@ -35,6 +35,8 @@ PLATFORM_OCPP = "ocpp"
 # Entity names
 ENTITY_NAME_CHARGING_SENSOR = "Charging"
 ENTITY_NAME_STATUS_SENSOR = "Status"
+ENTITY_NAME_TOTAL_COST_SENSOR = "Total cost"
+ENTITY_NAME_SESSION_COST_SENSOR = "Session cost"
 ENTITY_NAME_ACTIVE_SWITCH = "Smart charging activated"
 ENTITY_NAME_APPLY_LIMIT_SWITCH = "Apply price limit"
 ENTITY_NAME_CONTINUOUS_SWITCH = "Continuous charging preferred"

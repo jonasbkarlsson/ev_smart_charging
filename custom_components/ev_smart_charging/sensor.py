@@ -1,7 +1,13 @@
 """Sensor platform for EV Smart Charging."""
 import logging
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import (
+    RestoreSensor,
+    SensorExtraStoredData,
+    SensorEntity,
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.const import STATE_OFF
 
@@ -10,7 +16,10 @@ from .const import (
     CHARGING_STATUS_NOT_ACTIVE,
     DOMAIN,
     ENTITY_NAME_CHARGING_SENSOR,
+    ENTITY_NAME_SESSION_COST_SENSOR,
+    ENTITY_NAME_TOTAL_COST_SENSOR,
     ENTITY_NAME_STATUS_SENSOR,
+    ICON_CASH,
     SENSOR,
 )
 from .entity import EVSmartChargingEntity
@@ -25,6 +34,8 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_devices):
     sensors = []
     sensors.append(EVSmartChargingSensorCharging(entry))
     sensors.append(EVSmartChargingSensorStatus(entry))
+    sensors.append(EVSmartChargingSensorTotalCost(entry))
+    sensors.append(EVSmartChargingSensorSessionCost(entry))
     async_add_devices(sensors)
     await coordinator.add_sensor(sensors)
 
@@ -184,3 +195,49 @@ class EVSmartChargingSensorStatus(EVSmartChargingSensor):
         super().__init__(entry)
 
         self._attr_native_value = CHARGING_STATUS_NOT_ACTIVE
+
+
+class EVSmartChargingSensorCost(EVSmartChargingSensor, RestoreSensor):
+    """EV Smart Charging sensor class."""
+
+    _attr_device_class = SensorDeviceClass.MONETARY
+    _attr_state_class = SensorStateClass.TOTAL
+    _attr_icon = ICON_CASH
+    _attr_native_unit_of_measurement = "EUR"
+
+    def __init__(self, entry):
+        _LOGGER.debug("EVSmartChargingSensorCost.__init__()")
+        super().__init__(entry)
+        self._attr_native_value = 0.0
+
+    async def async_added_to_hass(self) -> None:
+        """Run when entity about to be added to hass."""
+        _LOGGER.debug("EVSmartChargingSensorCost.async_added_to_hass()")
+        restored: SensorExtraStoredData = await self.async_get_last_sensor_data()
+        if restored is not None:
+            self._attr_native_unit_of_measurement = restored.native_unit_of_measurement
+            self.native_value = restored.native_value
+            _LOGGER.debug(
+                "EVSmartChargingSensorCost.async_added_to_hass() %s",
+                self._attr_native_value,
+            )
+
+
+class EVSmartChargingSensorTotalCost(EVSmartChargingSensorCost):
+    """EV Smart Charging sensor class."""
+
+    _attr_name = ENTITY_NAME_TOTAL_COST_SENSOR
+
+    def __init__(self, entry):
+        _LOGGER.debug("EVSmartChargingSensorTotalCost.__init__()")
+        super().__init__(entry)
+
+
+class EVSmartChargingSensorSessionCost(EVSmartChargingSensorCost):
+    """EV Smart Charging sensor class."""
+
+    _attr_name = ENTITY_NAME_SESSION_COST_SENSOR
+
+    def __init__(self, entry):
+        _LOGGER.debug("EVSmartChargingSensorSessionCost.__init__()")
+        super().__init__(entry)
