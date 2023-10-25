@@ -309,6 +309,17 @@ action:
 
 Please replace the contents of `action:` with suitable contents for your charger.
 
+## Example of action to start charging on a Go-E Gemini by publishing mqtt
+```
+  - service: mqtt.publish
+    data:
+      topic: go-eCharger/your_go-e_serial/frc/set
+      payload: "2"
+      qos: "0"
+      retain: true
+    enabled: true
+```
+
 ### Example of automation to stop charging
 ```
 alias: EV Smart Charging - Stop
@@ -330,6 +341,25 @@ action:
 
 Please replace the contents of `action:` with suitable contents for your charger.
 
+## Example of action to stop charging on a Go-E Gemini by publishing mqtt
+```
+  - service: mqtt.publish
+    data:
+      topic: go-eCharger/your_go-e_serial/frc/set
+      payload: "1"
+      qos: "0"
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: mqtt.publish
+    data:
+      topic: go-eCharger/your_go-e_serial/frc/set
+      payload: "0"
+      qos: "0"
+      retain: true
+```
 ### Example of automation to inform the integration that the EV is connected to the charger
 ```
 alias: EV Smart Charging - EV connected
@@ -361,6 +391,38 @@ action:
               entity_id: switch.ev_smart_charging_ev_connected
 mode: single
 ```
+
+### Example of automation to inform the integration that the EV is connected to the charger by listening to mqtt (Go-E Gemini)
+```
+alias: Set connected state
+trigger:
+  - platform: mqtt
+    topic: go-eCharger/your_go-e_serial/car
+action:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.payload in ['2', '3', '4'] }}"
+          - condition: template
+            value_template: "{{ is_state('switch.ev_smart_charging_ev_connected', 'off') }}"
+        sequence:
+          - service: switch.turn_on
+            target:
+              entity_id: switch.ev_smart_charging_ev_connected
+            data: {}
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.payload in ['0', '1', '5'] }}"
+          - condition: template
+            value_template: "{{ is_state('switch.ev_smart_charging_ev_connected', 'on') }}"
+        sequence:
+          - service: switch.turn_off
+            target:
+              entity_id: switch.ev_smart_charging_ev_connected
+            data: {}
+```
+
 
 ## Verifying the configuration
 
