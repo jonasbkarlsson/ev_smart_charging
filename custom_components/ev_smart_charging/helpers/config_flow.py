@@ -109,8 +109,6 @@ class FlowValidator:
     ) -> list[str]:
         """Validate step_cost"""
 
-        entity_registry: EntityRegistry = async_entity_registry_get(hass)
-
         # Only check if cost calculation will be done
         if user_input[CONF_COST_CALCULATION]:
             # Do not allow multiplier equal to 0

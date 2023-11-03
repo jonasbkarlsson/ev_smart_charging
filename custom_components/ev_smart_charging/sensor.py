@@ -11,9 +11,12 @@ from homeassistant.components.sensor import (
 from homeassistant.core import HomeAssistant
 from homeassistant.const import STATE_OFF
 
+from custom_components.ev_smart_charging.helpers.general import get_parameter
+
 
 from .const import (
     CHARGING_STATUS_NOT_ACTIVE,
+    CONF_COST_CURRENCY,
     DOMAIN,
     ENTITY_NAME_CHARGING_SENSOR,
     ENTITY_NAME_SESSION_COST_SENSOR,
@@ -203,12 +206,12 @@ class EVSmartChargingSensorCost(EVSmartChargingSensor, RestoreSensor):
     _attr_device_class = SensorDeviceClass.MONETARY
     _attr_state_class = SensorStateClass.TOTAL
     _attr_icon = ICON_CASH
-    _attr_native_unit_of_measurement = "EUR"
 
     def __init__(self, entry):
         _LOGGER.debug("EVSmartChargingSensorCost.__init__()")
         super().__init__(entry)
         self._attr_native_value = 0.0
+        self._attr_native_unit_of_measurement = get_parameter(entry, CONF_COST_CURRENCY)
 
     async def async_added_to_hass(self) -> None:
         """Run when entity about to be added to hass."""

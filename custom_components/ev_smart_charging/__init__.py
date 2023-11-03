@@ -16,6 +16,11 @@ from homeassistant.helpers.entity_registry import (
 
 from .coordinator import EVSmartChargingCoordinator
 from .const import (
+    CONF_COST_CALCULATION,
+    CONF_COST_CURRENCY,
+    CONF_COST_MULTIPLIER,
+    CONF_COST_OFFSET,
+    CONF_ENERGY_SENSOR,
     CONF_EV_CONTROLLED,
     CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_LOW_SOC_CHARGING_LEVEL,
@@ -139,7 +144,16 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         new[CONF_LOW_SOC_CHARGING_LEVEL] = 20.0
         migration = True
 
-    if config_entry.version > 6:
+    if config_entry.version == 6:
+        config_entry.version = 7
+        new[CONF_COST_CALCULATION] = False
+        new[CONF_ENERGY_SENSOR] = ""
+        new[CONF_COST_CURRENCY] = "EUR"
+        new[CONF_COST_MULTIPLIER] = 1.0
+        new[CONF_COST_OFFSET] = 0.0
+        migration = True
+
+    if config_entry.version > 7:
         _LOGGER.error(
             "Migration from version %s to a lower version is not possible",
             config_entry.version,
