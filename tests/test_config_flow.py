@@ -91,12 +91,20 @@ async def test_successful_config_flow_option(
 ):
     """Test a option flow."""
 
+    # Initialize a config flow
+    result: Dict[str, Any] = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input=MOCK_CONFIG_USER
+    )
+
+    # Initialize an option flow
     config_entry: config_entries.ConfigEntry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test"
     )
     config_entry.add_to_hass(hass)
 
-    # Initialize a option flow
     result = await hass.config_entries.options.async_init(
         handler="test", context={"source": "init"}
     )
@@ -122,12 +130,20 @@ async def test_successful_config_flow_option(
 async def test_unsuccessful_config_flow_option(hass: HomeAssistant):
     """Test a option flow."""
 
+    # Initialize a config flow
+    result: Dict[str, Any] = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], user_input=MOCK_CONFIG_USER
+    )
+
+    # Initialize a option flow
     config_entry: config_entries.ConfigEntry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test"
     )
     config_entry.add_to_hass(hass)
 
-    # Initialize a option flow
     result = await hass.config_entries.options.async_init(
         handler="test", context={"source": "init"}
     )
