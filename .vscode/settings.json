@@ -1,6 +1,4 @@
 {
-    "python.linting.pylintEnabled": true,
-    "python.linting.enabled": true,
     "python.defaultInterpreterPath": "/usr/bin/python",
     "files.associations": {
         "*.yaml": "home-assistant"
