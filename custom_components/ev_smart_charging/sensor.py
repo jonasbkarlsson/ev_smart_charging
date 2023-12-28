@@ -38,12 +38,6 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
         id_name = self._attr_name.replace(" ", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, SENSOR, id_name])
 
-    @SensorEntity.native_value.setter
-    def native_value(self, new_value):
-        """Set the value reported by the sensor."""
-        self._attr_native_value = new_value
-        self.update_ha_state()
-
 
 class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""
@@ -68,6 +62,11 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
         self._charging_start_time = None
         self._charging_stop_time = None
         self._charging_number_of_hours = None
+
+    def set_state(self, new_state):
+        """Set new status."""
+        self._attr_native_value = new_state
+        self.update_ha_state()
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -184,3 +183,8 @@ class EVSmartChargingSensorStatus(EVSmartChargingSensor):
         super().__init__(entry)
 
         self._attr_native_value = CHARGING_STATUS_NOT_ACTIVE
+
+    def set_status(self, new_status):
+        """Set new status."""
+        self._attr_native_value = new_status
+        self.update_ha_state()

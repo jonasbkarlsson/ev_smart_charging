@@ -325,19 +325,15 @@ class EVSmartChargingCoordinator:
                 )
                 if self.sensor_status:
                     if self.low_soc_charging_state == STATE_ON:
-                        self.sensor_status.native_value = (
-                            CHARGING_STATUS_LOW_SOC_CHARGING
-                        )
+                        self.sensor_status.set_status(CHARGING_STATUS_LOW_SOC_CHARGING)
                     elif self.low_price_charging_state == STATE_ON:
-                        self.sensor_status.native_value = (
+                        self.sensor_status.set_status(
                             CHARGING_STATUS_LOW_PRICE_CHARGING
                         )
                     elif self.auto_charging_state == STATE_ON:
-                        self.sensor_status.native_value = CHARGING_STATUS_CHARGING
+                        self.sensor_status.set_status(CHARGING_STATUS_CHARGING)
                     else:
-                        self.sensor_status.native_value = (
-                            CHARGING_STATUS_WAITING_CHARGING
-                        )
+                        self.sensor_status.set_status(CHARGING_STATUS_WAITING_CHARGING)
             else:
                 _LOGGER.debug("Charging summary removed")
                 self.sensor.charging_is_planned = False
@@ -346,28 +342,24 @@ class EVSmartChargingCoordinator:
                 self.sensor.charging_number_of_hours = 0
                 if self.sensor_status:
                     if not self.switch_active:
-                        self.sensor_status.native_value = CHARGING_STATUS_NOT_ACTIVE
+                        self.sensor_status.set_status(CHARGING_STATUS_NOT_ACTIVE)
                     elif not self.switch_ev_connected:
-                        self.sensor_status.native_value = CHARGING_STATUS_DISCONNECTED
+                        self.sensor_status.set_status(CHARGING_STATUS_DISCONNECTED)
                     elif self.low_soc_charging_state == STATE_ON:
-                        self.sensor_status.native_value = (
-                            CHARGING_STATUS_LOW_SOC_CHARGING
-                        )
+                        self.sensor_status.set_status(CHARGING_STATUS_LOW_SOC_CHARGING)
                     elif self.low_price_charging_state == STATE_ON:
-                        self.sensor_status.native_value = (
+                        self.sensor_status.set_status(
                             CHARGING_STATUS_LOW_PRICE_CHARGING
                         )
                     elif self.switch_keep_on and self.auto_charging_state == STATE_ON:
-                        self.sensor_status.native_value = CHARGING_STATUS_KEEP_ON
+                        self.sensor_status.set_status(CHARGING_STATUS_KEEP_ON)
                     elif (
                         time_now.hour >= self.ready_hour_local
                         and not self.tomorrow_valid
                     ):
-                        self.sensor_status.native_value = (
-                            CHARGING_STATUS_WAITING_NEW_PRICE
-                        )
+                        self.sensor_status.set_status(CHARGING_STATUS_WAITING_NEW_PRICE)
                     else:
-                        self.sensor_status.native_value = CHARGING_STATUS_NO_PLAN
+                        self.sensor_status.set_status(CHARGING_STATUS_NO_PLAN)
                 self._charging_schedule = Scheduler.get_empty_schedule()
                 self.sensor.charging_schedule = self._charging_schedule
 
@@ -376,7 +368,7 @@ class EVSmartChargingCoordinator:
 
         if state is True:
             _LOGGER.debug("Turn on charging")
-            self.sensor.native_value = STATE_ON
+            self.sensor.set_state(STATE_ON)
             if self.charger_switch is not None:
                 _LOGGER.debug(
                     "Before service call switch.turn_on: %s", self.charger_switch
@@ -388,7 +380,7 @@ class EVSmartChargingCoordinator:
                 )
         else:
             _LOGGER.debug("Turn off charging")
-            self.sensor.native_value = STATE_OFF
+            self.sensor.set_state(STATE_OFF)
             if self.charger_switch is not None:
                 _LOGGER.debug(
                     "Before service call switch.turn_off: %s", self.charger_switch
