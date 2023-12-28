@@ -58,9 +58,9 @@ async def test_sensor(hass, bypass_validate_input_sensors):
     sensor_status = coordinator.sensor_status
 
     # Test the sensor
-    sensor.native_value = STATE_OFF
+    sensor.set_state(STATE_OFF)
     assert sensor.native_value == STATE_OFF
-    sensor.native_value = STATE_ON
+    sensor.set_state(STATE_ON)
     assert sensor.native_value == STATE_ON
 
     sensor.current_price = 12.1
@@ -114,9 +114,9 @@ async def test_sensor(hass, bypass_validate_input_sensors):
     assert extra["Charging number of hours"] == 4
 
     # Test sensor_status
-    sensor_status.native_value = CHARGING_STATUS_WAITING_CHARGING
+    sensor_status.set_status(CHARGING_STATUS_WAITING_CHARGING)
     assert sensor_status.native_value == CHARGING_STATUS_WAITING_CHARGING
-    sensor_status.native_value = CHARGING_STATUS_CHARGING
+    sensor_status.set_status(CHARGING_STATUS_CHARGING)
     assert sensor_status.native_value == CHARGING_STATUS_CHARGING
 
     # Unload the entry and verify that the data has been removed
