@@ -48,7 +48,7 @@ jobs:
           zip ev_smart_charging.zip -r ./
 
       - name: 📤 Upload zip to release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: ${{ github.event_name == 'release' }}
         with:
           files: ${{ github.workspace }}/custom_components/ev_smart_charging/ev_smart_charging.zip
