@@ -150,10 +150,12 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
     if migration:
         if MAJOR_VERSION >= 2024 and MINOR_VERSION >= 4:
+            # New argument to set version from HA 2024.4.
             hass.config_entries.async_update_entry(
                 config_entry, data=new, version=version
             )
-        else:
+        else:  # pragma: no cover
+            # Old way to set new version. Used up to HA 2024.3.
             config_entry.version = version
             hass.config_entries.async_update_entry(config_entry, data=new)
 
