@@ -9,7 +9,7 @@ jobs:
     runs-on: "ubuntu-latest"
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
         include:
           - python-version: "3.9"
             pytest_all_ha_versions: "pytest_all_ha_versions_python39"
@@ -17,6 +17,8 @@ jobs:
             pytest_all_ha_versions: "pytest_all_ha_versions_python310"
           - python-version: "3.11"
             pytest_all_ha_versions: "pytest_all_ha_versions_python311"
+          - python-version: "3.12"
+            pytest_all_ha_versions: "pytest_all_ha_versions_python312"
     steps:
       - name: Check out code from GitHub
         uses: "actions/checkout@v4"

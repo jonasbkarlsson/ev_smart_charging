@@ -4,6 +4,7 @@ import asyncio
 import logging
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import MAJOR_VERSION, MINOR_VERSION
 from homeassistant.core import Config, HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.device_registry import async_get as async_device_registry_get
@@ -111,44 +112,53 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
     new = {**config_entry.data}
     migration = False
+    version = config_entry.version
 
-    if config_entry.version == 1:
+    if version == 1:
         # Set default values for new configuration parameters
         new[CONF_START_HOUR] = "None"
-        config_entry.version = 2
+        version = 2
         migration = True
 
-    if config_entry.version == 2:
+    if version == 2:
         # Set default values for new configuration parameters
         new[CONF_OPPORTUNISTIC_LEVEL] = 50.0
-        config_entry.version = 3
+        version = 3
         migration = True
 
-    if config_entry.version == 3:
-        config_entry.version = 4
+    if version == 3:
+        version = 4
         migration = True
 
-    if config_entry.version == 4:
-        config_entry.version = 5
+    if version == 4:
+        version = 5
         new[CONF_EV_CONTROLLED] = False
         migration = True
 
-    if config_entry.version == 5:
-        config_entry.version = 6
+    if version == 5:
+        version = 6
         new[CONF_LOW_PRICE_CHARGING_LEVEL] = 0.0
         new[CONF_LOW_SOC_CHARGING_LEVEL] = 20.0
         migration = True
 
-    if config_entry.version > 6:
+    if version > 6:
         _LOGGER.error(
             "Migration from version %s to a lower version is not possible",
-            config_entry.version,
+            version,
         )
         return False
 
     if migration:
-        hass.config_entries.async_update_entry(config_entry, data=new)
+        if MAJOR_VERSION >= 2024 and MINOR_VERSION >= 4:
+            # New argument to set version from HA 2024.4.
+            hass.config_entries.async_update_entry(
+                config_entry, data=new, version=version
+            )
+        else:  # pragma: no cover
+            # Old way to set new version. Used up to HA 2024.3.
+            config_entry.version = version
+            hass.config_entries.async_update_entry(config_entry, data=new)
 
-    _LOGGER.info("Migration to version %s successful", config_entry.version)
+    _LOGGER.info("Migration to version %s successful", version)
 
     return True
