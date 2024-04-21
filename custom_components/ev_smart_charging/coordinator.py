@@ -671,9 +671,13 @@ class EVSmartChargingCoordinator:
                 _LOGGER.error("Target SOC sensor not valid: %s", ev_target_soc_state)
 
         # Check if Opportunistic charging should be used
-        if self.switch_opportunistic is True and (
-            self.raw_two_days.last_value()
-            < (self.max_price * self.number_opportunistic_level / 100.0)
+        if (
+            self.switch_opportunistic is True
+            and self.raw_two_days
+            and (
+                self.raw_two_days.last_value()
+                < (self.max_price * self.number_opportunistic_level / 100.0)
+            )
         ):
             max_price = self.max_price * self.number_opportunistic_level / 100.0
         else:
