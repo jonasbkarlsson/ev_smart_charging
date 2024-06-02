@@ -649,7 +649,8 @@ class EVSmartChargingCoordinator:
         event: Event[EventStateChangedData],
         configuration_updated: bool = False,
     ):  # pylint: disable=unused-argument
-        """Price or EV sensors have been updated. EventStateChangedData is supported from Home Assistant 2024.5.5"""
+        """Price or EV sensors have been updated.
+        EventStateChangedData is supported from Home Assistant 2024.5.5"""
 
         entity_id = event.data["entity_id"]
         old_state = event.data["old_state"]
