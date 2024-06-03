@@ -1,6 +1,7 @@
 """PriceAdaptor class"""
 
 # pylint: disable=relative-beyond-top-level
+import json
 import logging
 
 from typing import Any
@@ -70,6 +71,14 @@ class PriceAdaptor:
         if self._price_platform == PLATFORM_ENTSOE:
             return Raw(state.attributes["prices_today"], self._price_platform)
 
+        if self._price_platform is None:
+            try:
+                return Raw(
+                    json.loads(state.attributes["prices_today"]), self._price_platform
+                )
+            except json.JSONDecodeError:
+                pass
+
         return Raw([])
 
     def get_raw_tomorrow_local(self, state) -> Raw:
@@ -81,6 +90,15 @@ class PriceAdaptor:
         if self._price_platform == PLATFORM_ENTSOE:
             return Raw(state.attributes["prices_tomorrow"], self._price_platform)
 
+        if self._price_platform is None:
+            try:
+                return Raw(
+                    json.loads(state.attributes["prices_tomorrow"]),
+                    self._price_platform,
+                )
+            except json.JSONDecodeError:
+                pass
+
         return Raw([])
 
     def get_current_price(self, state) -> float:
@@ -89,7 +107,7 @@ class PriceAdaptor:
         if self._price_platform in (PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE):
             return state.attributes["current_price"]
 
-        if self._price_platform == PLATFORM_ENTSOE:
+        if self._price_platform in (PLATFORM_ENTSOE, None):
             time_now = dt.now()
             return self.get_raw_today_local(state).get_value(time_now)
 
@@ -107,12 +125,14 @@ class PriceAdaptor:
         # Validate Price entity
         price_state = hass.states.get(user_input[CONF_PRICE_SENSOR])
         entry: RegistryEntry = entities.get(user_input[CONF_PRICE_SENSOR])
-        if price_state is None or entry is None:
-            return ("base", "price_not_found")
-        if entry.domain != SENSOR:
-            return ("base", "price_not_sensor")
 
         price_platform = get_platform(hass, user_input[CONF_PRICE_SENSOR])
+
+        if price_platform:
+            if price_state is None or entry is None:
+                return ("base", "price_not_found")
+            if entry.domain != SENSOR:
+                return ("base", "price_not_sensor")
 
         if price_platform in (PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE):
             if not "current_price" in price_state.attributes.keys():
@@ -125,7 +145,7 @@ class PriceAdaptor:
                 _LOGGER.debug("No attribute raw_tomorrow in price sensor")
                 return ("base", "sensor_is_not_price")
 
-        if price_platform == PLATFORM_ENTSOE:
+        if price_platform == PLATFORM_ENTSOE or price_platform is None:
             if not "prices_today" in price_state.attributes.keys():
                 _LOGGER.debug("No attribute prices today in price sensor")
                 return ("base", "sensor_is_not_price")

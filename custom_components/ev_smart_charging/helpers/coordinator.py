@@ -58,7 +58,7 @@ def convert_raw_item(
     #   "price": float,
     # }
     # {'time': '2023-03-06 00:00:00+01:00', 'price': 0.1306} time is not datetime
-    if platform == PLATFORM_ENTSOE:
+    if platform == PLATFORM_ENTSOE or platform is None:
         if item["price"] is not None and isinstance(item["time"], str):
             item_new = {}
             item_new["value"] = item["price"]
