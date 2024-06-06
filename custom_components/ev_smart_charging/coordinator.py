@@ -646,12 +646,13 @@ class EVSmartChargingCoordinator:
     @callback
     async def update_sensors_new(
         self,
-        event: Event[EventStateChangedData],
+        event: Event,  # Event[EventStateChangedData]
         configuration_updated: bool = False,
     ):  # pylint: disable=unused-argument
         """Price or EV sensors have been updated.
         EventStateChangedData is supported from Home Assistant 2024.5.5"""
 
+        # Allowed from HA 2024.4
         entity_id = event.data["entity_id"]
         old_state = event.data["old_state"]
         new_state = event.data["new_state"]
