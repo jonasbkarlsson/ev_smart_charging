@@ -5,14 +5,37 @@ import logging
 from homeassistant.config_entries import (
     ConfigEntry,
 )
-from homeassistant.const import SERVICE_TURN_ON, SERVICE_TURN_OFF
-from homeassistant.core import HomeAssistant, State, callback, Event
+from homeassistant.const import (
+    SERVICE_TURN_ON,
+    SERVICE_TURN_OFF,
+    MAJOR_VERSION,
+    MINOR_VERSION,
+)
+
+from homeassistant.core import (
+    HomeAssistant,
+    State,
+    callback,
+    Event,
+)
+
+try:
+    from homeassistant.core import (  # pylint: disable=no-name-in-module
+        EventStateChangedData,
+    )
+except ImportError:
+
+    class EventStateChangedData:
+        """Dummy class for HA 2024.5.4 and older."""
+
+
 from homeassistant.helpers.device_registry import EVENT_DEVICE_REGISTRY_UPDATED
 from homeassistant.helpers.device_registry import async_get as async_device_registry_get
 from homeassistant.helpers.device_registry import DeviceRegistry
 from homeassistant.helpers.event import (
     async_track_state_change,
     async_track_time_change,
+    async_track_state_change_event,
 )
 from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
 from homeassistant.helpers.entity_registry import (
@@ -412,26 +435,54 @@ class EVSmartChargingCoordinator:
             self.config_entry, CONF_EV_TARGET_SOC_SENSOR
         )
 
-        self.listeners.append(
-            async_track_state_change(
-                self.hass,
-                [
-                    self.price_entity_id,
-                    self.ev_soc_entity_id,
-                ],
-                self.update_sensors,
-            )
-        )
-        if len(self.ev_target_soc_entity_id) > 0:
+        if MAJOR_VERSION <= 2023 or (MAJOR_VERSION == 2024 and MINOR_VERSION <= 5):
+            # Use for Home Assistant 2024.5 or older
             self.listeners.append(
                 async_track_state_change(
                     self.hass,
                     [
-                        self.ev_target_soc_entity_id,
+                        self.price_entity_id,
+                        self.ev_soc_entity_id,
                     ],
                     self.update_sensors,
                 )
             )
+        else:
+            # Use for Home Assistant 2024.6 or newer
+            self.listeners.append(
+                async_track_state_change_event(
+                    self.hass,
+                    [
+                        self.price_entity_id,
+                        self.ev_soc_entity_id,
+                    ],
+                    self.update_sensors_new,
+                )
+            )
+        if len(self.ev_target_soc_entity_id) > 0:
+            if MAJOR_VERSION <= 2023 or (MAJOR_VERSION == 2024 and MINOR_VERSION <= 5):
+                # Use for Home Assistant 2024.5 or older
+                self.listeners.append(
+                    async_track_state_change(
+                        self.hass,
+                        [
+                            self.ev_target_soc_entity_id,
+                        ],
+                        self.update_sensors,
+                    )
+                )
+            else:
+                # Use for Home Assistant 2024.6 or newer
+                self.listeners.append(
+                    async_track_state_change_event(
+                        self.hass,
+                        [
+                            self.price_entity_id,
+                            self.ev_soc_entity_id,
+                        ],
+                        self.update_sensors_new,
+                    )
+                )
         else:
             # Set default Target SOC when there is no sensor
             self.sensor.ev_target_soc = DEFAULT_TARGET_SOC
@@ -593,6 +644,26 @@ class EVSmartChargingCoordinator:
         await self.update_sensors(configuration_updated=True)
 
     @callback
+    async def update_sensors_new(
+        self,
+        event: Event,  # Event[EventStateChangedData]
+        configuration_updated: bool = False,
+    ):  # pylint: disable=unused-argument
+        """Price or EV sensors have been updated.
+        EventStateChangedData is supported from Home Assistant 2024.5.5"""
+
+        # Allowed from HA 2024.4
+        entity_id = event.data["entity_id"]
+        old_state = event.data["old_state"]
+        new_state = event.data["new_state"]
+
+        await self.update_sensors(
+            entity_id=entity_id,
+            old_state=old_state,
+            new_state=new_state,
+            configuration_updated=configuration_updated,
+        )
+
     async def update_sensors(
         self,
         entity_id: str = None,
