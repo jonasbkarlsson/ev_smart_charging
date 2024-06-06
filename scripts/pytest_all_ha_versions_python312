@@ -39,5 +39,14 @@ pip3 install -qq homeassistant==2024.3.3 pytest-homeassistant-custom-component==
 run_next_test "auto"
 
 # As of HA 2024.4, Python 3.11 is not supported.
-pip3 install -qq homeassistant==2024.4.3 pytest-homeassistant-custom-component==0.13.114
+
+#pip3 install -qq homeassistant==2024.4.4 pytest-homeassistant-custom-component==0.13.115
+#run_next_test "auto"
+# Depends on non-existng version of mypy-dev
+
+#pip3 install -qq homeassistant==2024.5.5 pytest-homeassistant-custom-component==0.13.125
+#run_next_test "auto"
+# Depends on non-existng version of mypy-dev
+
+pip3 install -qq homeassistant==2024.6.0 pytest-homeassistant-custom-component==0.13.132
 run_next_test "auto"

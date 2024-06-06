@@ -2,6 +2,8 @@
 
 set -e
 
+sudo chown -R vscode:vscode /workspaces
+
 cd "$(dirname "$0")/.."
 
 python3 -m pip install --requirement requirements_dev.txt
