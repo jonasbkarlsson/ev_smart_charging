@@ -3,7 +3,7 @@
 // Depending on setup, "remoteUser": "vscode", might be preferred to add.
 {
 	"name": "EV Smart Charging",
-	"image": "mcr.microsoft.com/devcontainers/python:3.12",
+	"image": "mcr.microsoft.com/devcontainers/python:3.11",
 	"postCreateCommand": "scripts/setup",
 	"forwardPorts": [
 		8123
@@ -32,5 +32,6 @@
 				"files.trimTrailingWhitespace": true
 			}
 		}
-	}
+	},
+	"remoteUser": "vscode"
 }
