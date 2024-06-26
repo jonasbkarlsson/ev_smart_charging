@@ -93,7 +93,7 @@ class Raw:
     }"""
 
     def __init__(
-        self, raw: list[dict[str, Any]] | str, platform: str = PLATFORM_NORDPOOL
+        self, raw: list[dict[str, Any]], platform: str = PLATFORM_NORDPOOL
     ) -> None:
         self.data = []
         if raw:
