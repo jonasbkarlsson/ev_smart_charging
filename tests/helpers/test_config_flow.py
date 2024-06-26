@@ -63,7 +63,7 @@ async def test_validate_step_user_price(hass: HomeAssistant):
     hass.states.async_set("button.nordpool_kwh_se3_sek_2_10_0", "123")
     assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER_WRONG_PRICE) == (
         "base",
-        "price_not_sensor",
+        "sensor_is_not_price",
     )
 
     # Check with price entity without attributes

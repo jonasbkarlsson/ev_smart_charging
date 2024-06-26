@@ -5,16 +5,14 @@ import logging
 
 from typing import Any
 from homeassistant.core import HomeAssistant, State
-from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
-from homeassistant.helpers.entity_registry import EntityRegistry, RegistryEntry
 from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.const import (
     CONF_PRICE_SENSOR,
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
+    PLATFORM_GENERIC,
     PLATFORM_NORDPOOL,
-    SENSOR,
 )
 from custom_components.ev_smart_charging.helpers.general import Validator, get_platform
 from custom_components.ev_smart_charging.helpers.coordinator import Raw
@@ -67,7 +65,7 @@ class PriceAdaptor:
         if self._price_platform in (PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE):
             return Raw(state.attributes["raw_today"], self._price_platform)
 
-        if self._price_platform == PLATFORM_ENTSOE:
+        if self._price_platform in (PLATFORM_ENTSOE, PLATFORM_GENERIC):
             return Raw(state.attributes["prices_today"], self._price_platform)
 
         return Raw([])
@@ -78,7 +76,7 @@ class PriceAdaptor:
         if self._price_platform in (PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE):
             return Raw(state.attributes["raw_tomorrow"], self._price_platform)
 
-        if self._price_platform == PLATFORM_ENTSOE:
+        if self._price_platform in (PLATFORM_ENTSOE, PLATFORM_GENERIC):
             return Raw(state.attributes["prices_tomorrow"], self._price_platform)
 
         return Raw([])
@@ -89,7 +87,7 @@ class PriceAdaptor:
         if self._price_platform in (PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE):
             return state.attributes["current_price"]
 
-        if self._price_platform == PLATFORM_ENTSOE:
+        if self._price_platform in (PLATFORM_ENTSOE, PLATFORM_GENERIC):
             time_now = dt.now()
             return self.get_raw_today_local(state).get_value(time_now)
 
@@ -101,16 +99,10 @@ class PriceAdaptor:
     ) -> list[str]:
         """Validate Price entity"""
 
-        entity_registry: EntityRegistry = async_entity_registry_get(hass)
-        entities = entity_registry.entities
-
         # Validate Price entity
         price_state = hass.states.get(user_input[CONF_PRICE_SENSOR])
-        entry: RegistryEntry = entities.get(user_input[CONF_PRICE_SENSOR])
-        if price_state is None or entry is None:
+        if price_state is None:
             return ("base", "price_not_found")
-        if entry.domain != SENSOR:
-            return ("base", "price_not_sensor")
 
         price_platform = get_platform(hass, user_input[CONF_PRICE_SENSOR])
 
@@ -125,12 +117,17 @@ class PriceAdaptor:
                 _LOGGER.debug("No attribute raw_tomorrow in price sensor")
                 return ("base", "sensor_is_not_price")
 
-        if price_platform == PLATFORM_ENTSOE:
+        if price_platform in (PLATFORM_ENTSOE, PLATFORM_GENERIC):
             if not "prices_today" in price_state.attributes.keys():
                 _LOGGER.debug("No attribute prices today in price sensor")
                 return ("base", "sensor_is_not_price")
             if not "prices_tomorrow" in price_state.attributes.keys():
                 _LOGGER.debug("No attribute prices tomorrow in price sensor")
                 return ("base", "sensor_is_not_price")
+
+        if not Validator.is_float(price_state.state):
+            _LOGGER.debug("Price state is not float")
+            return ("base", "sensor_is_not_price")
+
 
         return None

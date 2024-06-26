@@ -10,6 +10,7 @@ from homeassistant.util import dt
 from custom_components.ev_smart_charging.const import (
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
+    PLATFORM_GENERIC,
     PLATFORM_NORDPOOL,
     READY_HOUR_NONE,
     START_HOUR_NONE,
@@ -54,11 +55,24 @@ def convert_raw_item(
             return item_new
 
     # Array of item = {
-    #   "time": datetime,
+    #   "time": string,
     #   "price": float,
     # }
     # {'time': '2023-03-06 00:00:00+01:00', 'price': 0.1306} time is not datetime
     if platform == PLATFORM_ENTSOE:
+        if item["price"] is not None and isinstance(item["time"], str):
+            item_new = {}
+            item_new["value"] = item["price"]
+            item_new["start"] = datetime.fromisoformat(item["time"])
+            item_new["end"] = item_new["start"] + timedelta(hours=1)
+            return item_new
+
+    # Array of item = {
+    #   "time": string,
+    #   "price": float,
+    # }
+    # {'time': '2023-03-06 00:00:00+01:00', 'price': 0.1306} time is not datetime
+    if platform == PLATFORM_GENERIC:
         if item["price"] is not None and isinstance(item["time"], str):
             item_new = {}
             item_new["value"] = item["price"]
