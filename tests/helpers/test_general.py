@@ -11,6 +11,7 @@ from custom_components.ev_smart_charging.const import (
     CONF_PCT_PER_HOUR,
     CONF_READY_HOUR,
     PLATFORM_ENERGIDATASERVICE,
+    PLATFORM_GENERIC,
     PLATFORM_NORDPOOL,
 )
 from custom_components.ev_smart_charging.helpers.config_flow import FindEntity
@@ -89,4 +90,4 @@ async def test_get_platform(hass: HomeAssistant):
         get_platform(hass, FindEntity.find_energidataservice_sensor(hass))
         == PLATFORM_ENERGIDATASERVICE
     )
-    assert get_platform(hass, "Non existant entity") is None
+    assert get_platform(hass, "Non existant entity") is PLATFORM_GENERIC

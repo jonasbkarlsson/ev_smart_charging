@@ -10,6 +10,7 @@ from homeassistant.helpers.entity_registry import (
     EntityRegistry,
     RegistryEntry,
 )
+from custom_components.ev_smart_charging.const import PLATFORM_GENERIC
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -59,6 +60,6 @@ def get_platform(hass: HomeAssistant, entity_id: str):
     entities = entity_registry.entities
     entry: RegistryEntry = entities.get(entity_id)
     if entry is None:
-        return None
+        return PLATFORM_GENERIC
     platform = entry.platform
     return platform

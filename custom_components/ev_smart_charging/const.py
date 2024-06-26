@@ -31,6 +31,7 @@ PLATFORM_ENERGIDATASERVICE = "energidataservice"
 PLATFORM_ENTSOE = "entsoe"
 PLATFORM_VW = "volkswagen_we_connect_id"
 PLATFORM_OCPP = "ocpp"
+PLATFORM_GENERIC = "generic"
 
 # Entity names
 ENTITY_NAME_CHARGING_SENSOR = "Charging"
