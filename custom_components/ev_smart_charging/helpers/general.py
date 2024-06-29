@@ -59,7 +59,7 @@ def get_platform(hass: HomeAssistant, entity_id: str):
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     entities = entity_registry.entities
     entry: RegistryEntry = entities.get(entity_id)
-    if entry is None:
+    if entry is None or entry.platform == 'template':
         return PLATFORM_GENERIC
     platform = entry.platform
     return platform
