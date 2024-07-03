@@ -222,6 +222,20 @@ def get_lowest_hours_non_continuous(
         if item["start"] < time_end:
             time_end_index = index
 
+    if time_start_index is None or time_end_index is None:
+        _LOGGER.error("Is not able to calculate charging schedule!")
+        _LOGGER.error("start_hour = %s", start_hour)
+        _LOGGER.error("ready_hour = %s", ready_hour)
+        _LOGGER.error("hours = %s", hours)
+        if raw_two_days:
+            if raw_two_days.data:
+                _LOGGER.error("raw_two_days.data = %s", raw_two_days.data)
+            else:
+                _LOGGER.error("raw_two_days.data = None")
+        else:
+            _LOGGER.error("raw_two_days = None")
+        return []
+
     if (time_end_index - time_start_index) < hours:
         return list(range(time_start_index, time_end_index + 1))
 
@@ -264,6 +278,20 @@ def get_lowest_hours_continuous(
             time_start_index = index
         if item["start"] < time_end:
             time_end_index = index
+
+    if time_start_index is None or time_end_index is None:
+        _LOGGER.error("Is not able to calculate charging schedule!")
+        _LOGGER.error("start_hour = %s", start_hour)
+        _LOGGER.error("ready_hour = %s", ready_hour)
+        _LOGGER.error("hours = %s", hours)
+        if raw_two_days:
+            if raw_two_days.data:
+                _LOGGER.error("raw_two_days.data = %s", raw_two_days.data)
+            else:
+                _LOGGER.error("raw_two_days.data = None")
+        else:
+            _LOGGER.error("raw_two_days = None")
+        return []
 
     if (time_end_index - time_start_index) < hours:
         return list(range(time_start_index, time_end_index + 1))
