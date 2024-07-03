@@ -8,7 +8,7 @@ run_first_test() {
   echo
   pip3 list 2>/dev/null | grep homeassistant | grep -v "\-home"
   pip3 list 2>/dev/null | grep pytest-homeassistant-custom-component
-  output=$(pytest -q --no-summary --asyncio-mode=$asynciomode tests 2>&1 | grep passed)
+  output=$(python -m pytest -q --no-summary --asyncio-mode=$asynciomode tests 2>&1 | grep passed)
   echo "$output"
   number1=$(echo "$output" | awk '{print $1}')
   if [ -z "$number1" ]; then
@@ -22,7 +22,7 @@ run_next_test() {
   echo
   pip3 list 2>/dev/null | grep homeassistant | grep -v "\-home"
   pip3 list 2>/dev/null | grep pytest-homeassistant-custom-component
-  output=$(pytest -q --no-summary --asyncio-mode=$asynciomode tests 2>&1 | grep passed)
+  output=$(python -m pytest -q --no-summary --asyncio-mode=$asynciomode tests 2>&1 | grep passed)
   echo "$output"
   number2=$(echo "$output" | awk '{print $1}')
   if [ "$number1" != "$number2" ]; then
@@ -48,5 +48,5 @@ run_next_test "auto"
 #run_next_test "auto"
 # Depends on non-existng version of mypy-dev
 
-pip3 install -qq homeassistant==2024.6.0 pytest-homeassistant-custom-component==0.13.132
+pip3 install -qq homeassistant==2024.6.4 pytest-homeassistant-custom-component==0.13.136
 run_next_test "auto"
