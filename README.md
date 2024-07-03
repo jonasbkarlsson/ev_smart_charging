@@ -16,7 +16,7 @@ The integration calculates the set of hours that will give the lowest price, by 
 
 ## Requirements
 - The [Nordpool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice) or the [Entso-e](https://github.com/JaccoR/hass-entso-e) integration.
-- Home Assistant version 2022.7 or newer.
+- Home Assistant version 2022.8 or newer.
 
 ## Features
 - Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool), [Energi Data Service](https://github.com/MTrab/energidataservice) or [Entso-e](https://github.com/JaccoR/hass-entso-e) integration.
