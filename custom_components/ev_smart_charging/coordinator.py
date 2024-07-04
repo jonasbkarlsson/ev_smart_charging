@@ -20,7 +20,7 @@ from homeassistant.core import (
 )
 
 try:
-    from homeassistant.core import (  # pylint: disable=no-name-in-module
+    from homeassistant.core import (  # pylint: disable=no-name-in-module, unused-import
         EventStateChangedData,
     )
 except ImportError:

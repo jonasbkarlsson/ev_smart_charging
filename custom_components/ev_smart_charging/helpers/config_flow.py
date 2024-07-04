@@ -23,6 +23,7 @@ from ..const import (
     NAME,
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
+    PLATFORM_GENERIC,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
     PLATFORM_VW,
@@ -150,6 +151,20 @@ class FindEntity:
             if entry[1].platform == PLATFORM_ENTSOE:
                 entity_id = entry[1].entity_id
                 if "average_electricity_price_today" in entity_id:
+                    return entity_id
+        return ""
+
+    @staticmethod
+    def find_generic_sensor(hass: HomeAssistant) -> str:
+        """Search for generic sensor"""
+        entity_registry: EntityRegistry = async_entity_registry_get(hass)
+        registry_entries: UserDict[
+            str, RegistryEntry
+        ] = entity_registry.entities.items()
+        for entry in registry_entries:
+            if entry[1].platform == PLATFORM_GENERIC:
+                entity_id = entry[1].entity_id
+                if "price_template_sensor" in entity_id:
                     return entity_id
         return ""
 

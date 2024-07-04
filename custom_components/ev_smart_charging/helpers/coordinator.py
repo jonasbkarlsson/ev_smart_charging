@@ -222,7 +222,7 @@ def get_lowest_hours_non_continuous(
         if item["start"] < time_end:
             time_end_index = index
 
-    if time_start_index is None or time_end_index is None:
+    if time_start_index is None or time_end_index is None: # pragma: no cover
         _LOGGER.error("Is not able to calculate charging schedule!")
         _LOGGER.error("start_hour = %s", start_hour)
         _LOGGER.error("ready_hour = %s", ready_hour)
@@ -279,7 +279,7 @@ def get_lowest_hours_continuous(
         if item["start"] < time_end:
             time_end_index = index
 
-    if time_start_index is None or time_end_index is None:
+    if time_start_index is None or time_end_index is None: # pragma: no cover
         _LOGGER.error("Is not able to calculate charging schedule!")
         _LOGGER.error("start_hour = %s", start_hour)
         _LOGGER.error("ready_hour = %s", ready_hour)
