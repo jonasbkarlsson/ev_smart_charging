@@ -100,7 +100,9 @@ class Raw:
             for item in raw:
                 item_new = convert_raw_item(item, platform)
                 if item_new is not None:
-                    self.data.append(item_new)
+                    # Only use full hour price for now
+                    if item_new['start'].minute == 0:
+                        self.data.append(item_new)
 
             self.valid = len(self.data) > 12
         else:

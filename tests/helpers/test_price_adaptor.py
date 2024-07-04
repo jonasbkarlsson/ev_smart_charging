@@ -35,6 +35,7 @@ from tests.price import (
     PRICE_20221001_ENERGIDATASERVICE,
     PRICE_20221001_ENTSOE,
 )
+from tests.price_15min import PRICE_20220930_GENERIC_15MIN
 
 
 # pylint: disable=unused-argument
@@ -263,6 +264,13 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     assert not raw_today_local.data
 
     MockPriceEntityGeneric.set_state(hass, PRICE_20220930_ENTSOE, None)
+    await hass.async_block_till_done()
+    price_state = hass.states.get(price_sensor)
+    raw_today_local = price_adaptor.get_raw_today_local(price_state)
+    assert raw_today_local.data == PRICE_20220930
+
+    # Test template sensor with price per 15 minutes
+    MockPriceEntityGeneric.set_state(hass, PRICE_20220930_GENERIC_15MIN, None)
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
