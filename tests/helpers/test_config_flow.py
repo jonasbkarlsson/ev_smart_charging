@@ -37,6 +37,7 @@ from tests.helpers.helpers import (
     MockPriceEntity,
     MockPriceEntityEnergiDataService,
     MockPriceEntityEntsoe,
+    MockPriceEntityGeneric,
     MockSOCEntity,
     MockTargetSOCEntity,
 )
@@ -305,6 +306,10 @@ async def test_find_entity(hass: HomeAssistant):
     assert FindEntity.find_nordpool_sensor(hass) == ""
     MockPriceEntity.create(hass, entity_registry)
     assert FindEntity.find_price_sensor(hass).startswith("sensor.nordpool")
+
+    assert FindEntity.find_generic_sensor(hass) == ""
+    MockPriceEntityGeneric.create(hass, entity_registry)
+    assert FindEntity.find_generic_sensor(hass).startswith("sensor.generic")
 
     assert FindEntity.find_vw_soc_sensor(hass) == ""
     MockSOCEntity.create(hass, entity_registry)

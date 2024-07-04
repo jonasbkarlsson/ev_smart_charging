@@ -8,6 +8,7 @@ from homeassistant.util import dt as dt_util
 from custom_components.ev_smart_charging.const import (
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
+    PLATFORM_GENERIC,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
     PLATFORM_VW,
@@ -144,6 +145,48 @@ class MockPriceEntityEntsoe:
         # Set state
         hass.states.async_set(
             "sensor.entsoe_average_electricity_price_today",
+            f"{new_price}",
+            {
+                "prices_today": new_raw_today,
+                "prices_tomorrow": new_raw_tomorrow,
+            },
+        )
+
+class MockPriceEntityGeneric:
+    """Mockup for a generic price entity"""
+
+    @staticmethod
+    def create(
+        hass: HomeAssistant, entity_registry: EntityRegistry, price: float = 123
+    ):
+        """Create a correct price entity"""
+        entity_registry.async_get_or_create(
+            domain=SENSOR,
+            platform=PLATFORM_GENERIC,
+            unique_id="price_template_sensor",
+        )
+        MockPriceEntityGeneric.set_state(hass, None, None, price)
+
+    @staticmethod
+    def set_state(
+        hass: HomeAssistant,
+        new_raw_today: list,
+        new_raw_tomorrow: list,
+        new_price: float = None,
+    ):
+        """Set state of MockPriceEntityGeneric"""
+
+        # Find current price
+        if new_price is None:
+            new_price = "unavailable"
+            if price := Raw(new_raw_today, PLATFORM_GENERIC).get_value(dt_util.now()):
+                new_price = price
+            if price := Raw(new_raw_tomorrow, PLATFORM_GENERIC).get_value(dt_util.now()):
+                new_price = price
+
+        # Set state
+        hass.states.async_set(
+            "sensor.generic_price_template_sensor",
             f"{new_price}",
             {
                 "prices_today": new_raw_today,

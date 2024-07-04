@@ -13,6 +13,7 @@ from custom_components.ev_smart_charging.const import (
     CONF_PRICE_SENSOR,
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
+    PLATFORM_GENERIC,
     PLATFORM_NORDPOOL,
     SENSOR,
 )
@@ -24,6 +25,7 @@ from tests.helpers.helpers import (
     MockPriceEntity,
     MockPriceEntityEnergiDataService,
     MockPriceEntityEntsoe,
+    MockPriceEntityGeneric,
 )
 from tests.price import (
     PRICE_20220930,
@@ -247,6 +249,24 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
     assert raw_today_local.data == PRICE_20220930
 
+    # Test PLATFORM_GENERIC
+    price_adaptor.set_price_platform(PLATFORM_GENERIC)
+
+    MockPriceEntityGeneric.create(hass, entity_registry)
+    await hass.async_block_till_done()
+    price_sensor = FindEntity.find_generic_sensor(hass)
+    assert price_sensor.startswith("sensor.generic")
+    price_state = hass.states.get(price_sensor)
+    assert price_state is not None
+    raw_today_local = price_adaptor.get_raw_today_local(price_state)
+    assert raw_today_local is not None
+    assert not raw_today_local.data
+
+    MockPriceEntityGeneric.set_state(hass, PRICE_20220930_ENTSOE, None)
+    await hass.async_block_till_done()
+    price_state = hass.states.get(price_sensor)
+    raw_today_local = price_adaptor.get_raw_today_local(price_state)
+    assert raw_today_local.data == PRICE_20220930
 
 async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     """Test get_raw_tomorrow_local"""
@@ -321,6 +341,25 @@ async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
     assert raw_tomorrow_local.data == PRICE_20221001
 
+    # Test PLATFORM_GENERIC
+    price_adaptor.set_price_platform(PLATFORM_GENERIC)
+
+    MockPriceEntityGeneric.create(hass, entity_registry)
+    await hass.async_block_till_done()
+    price_sensor = FindEntity.find_generic_sensor(hass)
+    assert price_sensor.startswith("sensor.generic")
+    price_state = hass.states.get(price_sensor)
+    assert price_state is not None
+    raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
+    assert raw_tomorrow_local is not None
+    assert not raw_tomorrow_local.data
+
+    MockPriceEntityGeneric.set_state(hass, PRICE_20220930_ENTSOE, PRICE_20221001_ENTSOE)
+    await hass.async_block_till_done()
+    price_state = hass.states.get(price_sensor)
+    raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
+    assert raw_tomorrow_local.data == PRICE_20221001
+
 
 async def test_get_current_price(hass, set_cet_timezone, freezer):
     """Test get_current_price"""
@@ -365,6 +404,17 @@ async def test_get_current_price(hass, set_cet_timezone, freezer):
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_entsoe_sensor(hass)
     MockPriceEntityEntsoe.set_state(hass, PRICE_20220930_ENTSOE, None)
+    await hass.async_block_till_done()
+    price_state = hass.states.get(price_sensor)
+    current_price = price_adaptor.get_current_price(price_state)
+    assert current_price == 219.48
+
+    # Test PLATFORM_GENERIC
+    price_adaptor.set_price_platform(PLATFORM_GENERIC)
+    MockPriceEntityGeneric.create(hass, entity_registry)
+    await hass.async_block_till_done()
+    price_sensor = FindEntity.find_generic_sensor(hass)
+    MockPriceEntityGeneric.set_state(hass, PRICE_20220930_ENTSOE, None)
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
     current_price = price_adaptor.get_current_price(price_state)
@@ -439,6 +489,17 @@ async def test_validate_price_entity(hass: HomeAssistant):
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
+    # Check with price entity with invalid state
+    hass.states.async_set(
+        "sensor.nordpool_kwh_se3_sek_2_10_0",
+        "123a",
+        {"current_price": 123, "raw_today": None, "raw_tomorrow": None},
+    )
+    assert PriceAdaptor.validate_price_entity(hass, user_input) == (
+        "base",
+        "sensor_is_not_price",
+    )
+
 
 async def test_validate_price_entity_entsoe(hass: HomeAssistant):
     """Test the price entity in validate_price_entity."""
@@ -480,3 +541,14 @@ async def test_validate_price_entity_entsoe(hass: HomeAssistant):
         {"prices_today": None, "prices_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
+
+    # Check with price entity with invalid state
+    hass.states.async_set(
+        "sensor.entsoe_average_electricity_price_today",
+        "123a",
+        {"prices_today": None, "prices_tomorrow": None},
+    )
+    assert PriceAdaptor.validate_price_entity(hass, user_input) == (
+        "base",
+        "sensor_is_not_price",
+    )
