@@ -49,7 +49,7 @@ class PriceAdaptor:
 
                 # Check raw_today
                 try:
-                    if not self.get_raw_today_local(price_state).is_valid():
+                    if not self.get_raw_today_local(price_state).is_valid(check_today_local = True):
                         return False
                 except KeyError:
                     return False

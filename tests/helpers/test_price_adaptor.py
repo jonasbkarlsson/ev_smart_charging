@@ -1,12 +1,13 @@
 """Test ev_smart_charging/helpers/price_adaptor.py"""
 
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from homeassistant.core import HomeAssistant
 from homeassistant.core import State
 from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
 from homeassistant.helpers.entity_registry import EntityRegistry
-
+from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.const import (
     BUTTON,
@@ -39,8 +40,12 @@ from tests.price_15min import PRICE_20220930_GENERIC_15MIN
 
 
 # pylint: disable=unused-argument
-async def test_is_price_state(hass):
+async def test_is_price_state(hass, freezer):
     """Test is_price_state"""
+
+    dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
+
+    freezer.move_to("2022-10-01T14:00:00+02:00")
 
     price_adaptor = PriceAdaptor()
 
@@ -75,76 +80,76 @@ async def test_is_price_state(hass):
     one_list = [
         {
             "value": 0.0,
-            "start": datetime(2022, 10, 1, 14),
-            "stop": datetime(2022, 10, 1, 15),
+            "start": datetime(2022, 10, 1, 14, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 15, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         }
     ]
 
     thirteen_list = [
         {
             "value": 1.0,
-            "start": datetime(2022, 10, 1, 1),
-            "stop": datetime(2022, 10, 1, 2),
+            "start": datetime(2022, 10, 1, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 2, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
         {
             "value": 2.0,
-            "start": datetime(2022, 10, 1, 2),
-            "stop": datetime(2022, 10, 1, 3),
+            "start": datetime(2022, 10, 1, 2, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 3, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
         {
             "value": 3.0,
-            "start": datetime(2022, 10, 1, 3),
-            "stop": datetime(2022, 10, 1, 4),
+            "start": datetime(2022, 10, 1, 3, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 4, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
         {
             "value": 4.0,
-            "start": datetime(2022, 10, 1, 4),
-            "stop": datetime(2022, 10, 1, 5),
+            "start": datetime(2022, 10, 1, 4, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
         {
             "value": 5.0,
-            "start": datetime(2022, 10, 1, 5),
-            "stop": datetime(2022, 10, 1, 6),
+            "start": datetime(2022, 10, 1, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 6, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
         {
             "value": 6.0,
-            "start": datetime(2022, 10, 1, 6),
-            "stop": datetime(2022, 10, 1, 7),
+            "start": datetime(2022, 10, 1, 6, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 7, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
         {
             "value": 7.0,
-            "start": datetime(2022, 10, 1, 7),
-            "stop": datetime(2022, 10, 1, 8),
+            "start": datetime(2022, 10, 1, 7, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 8, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
         {
             "value": 8.0,
-            "start": datetime(2022, 10, 1, 8),
-            "stop": datetime(2022, 10, 1, 9),
+            "start": datetime(2022, 10, 1, 8, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 9, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
         {
             "value": 9.0,
-            "start": datetime(2022, 10, 1, 9),
-            "stop": datetime(2022, 10, 1, 10),
+            "start": datetime(2022, 10, 1, 9, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 10, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
         {
             "value": 10.0,
-            "start": datetime(2022, 10, 1, 10),
-            "stop": datetime(2022, 10, 1, 11),
+            "start": datetime(2022, 10, 1, 10, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 11, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
         {
             "value": 11.0,
-            "start": datetime(2022, 10, 1, 11),
-            "stop": datetime(2022, 10, 1, 12),
+            "start": datetime(2022, 10, 1, 11, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 12, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
         {
             "value": 12.0,
-            "start": datetime(2022, 10, 1, 12),
-            "stop": datetime(2022, 10, 1, 13),
+            "start": datetime(2022, 10, 1, 12, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 13, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
         {
             "value": 13.0,
-            "start": datetime(2022, 10, 1, 13),
-            "stop": datetime(2022, 10, 1, 14),
+            "start": datetime(2022, 10, 1, 13, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+            "stop": datetime(2022, 10, 1, 14, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
         },
     ]
 
@@ -176,6 +181,14 @@ async def test_is_price_state(hass):
     )
     assert price_adaptor.is_price_state(price_state) is False
 
+    freezer.move_to("2022-10-02T00:00:00+02:00")
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={"current_price": 12.1, "raw_today": thirteen_list},
+    )
+    assert price_adaptor.is_price_state(price_state) is False
 
 async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     """Test get_raw_today_local"""
