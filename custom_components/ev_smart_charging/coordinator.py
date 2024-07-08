@@ -721,7 +721,16 @@ class EVSmartChargingCoordinator:
                     self.ev_soc_before_last_charging = -1
             self.tomorrow_valid_previous = self.tomorrow_valid
         else:
-            _LOGGER.error("Price sensor not valid")
+            # If the problem occured directly after midnight, ignore it.
+            # Most likely due to the price entity updating its state in multiple steps,
+            # resulting in invalid information before all the updates have been done.
+            if dt.now().hour == 0 and dt.now().minute < 10:
+                _LOGGER.debug("Price sensor not valid directly after midnight. " \
+                              "Can usually be ignored.")
+                _LOGGER.debug("Price state: %s", price_state)
+            else:
+                _LOGGER.error("Price sensor not valid")
+                _LOGGER.error("Price state: %s", price_state)
 
         ev_soc_state = self.hass.states.get(self.ev_soc_entity_id)
         if Validator.is_soc_state(ev_soc_state):

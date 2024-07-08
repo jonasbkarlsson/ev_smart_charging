@@ -39,8 +39,10 @@ from tests.price_15min import PRICE_20220930_GENERIC_15MIN
 
 
 # pylint: disable=unused-argument
-async def test_is_price_state(hass):
+async def test_is_price_state(hass, freezer):
     """Test is_price_state"""
+
+    freezer.move_to("2022-10-01T14:00:00+02:00")
 
     price_adaptor = PriceAdaptor()
 
@@ -176,6 +178,14 @@ async def test_is_price_state(hass):
     )
     assert price_adaptor.is_price_state(price_state) is False
 
+    freezer.move_to("2022-10-02T00:00:00+02:00")
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={"current_price": 12.1, "raw_today": thirteen_list},
+    )
+    assert price_adaptor.is_price_state(price_state) is False
 
 async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     """Test get_raw_today_local"""

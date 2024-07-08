@@ -30,7 +30,7 @@ async def test_startup_181(
     """Test Coordinator."""
 
     # Tests that update_sensor() is handling the case when the sensors have not been setup.
-    freezer.move_to("2022-10-01T03:00:00+02:00")
+    freezer.move_to("2022-09-30T03:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     MockSOCEntity.create(hass, entity_registry, "55")

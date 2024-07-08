@@ -112,9 +112,24 @@ class Raw:
         """Get raw data"""
         return self.data
 
-    def is_valid(self) -> bool:
+    def is_valid(self, check_today_local = False) -> bool:
         """Get valid"""
-        return self.valid
+        if not self.valid:
+            return False
+        if not check_today_local:
+            return True
+        else:
+            # Check that self.data contains at least 12 valid prices for today
+            nrof_valid_prices = 0
+            for item in self.data:
+                if item["start"].day == dt.now().day:
+                    nrof_valid_prices = nrof_valid_prices + 1
+
+            if nrof_valid_prices > 12:
+                return True
+            else:
+                _LOGGER.debug("Less than 12 valid prices for today found in %s", self.data)
+                return False
 
     def copy(self):
         """Get a copy of Raw"""
