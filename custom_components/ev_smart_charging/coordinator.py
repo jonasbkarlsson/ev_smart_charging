@@ -477,8 +477,7 @@ class EVSmartChargingCoordinator:
                     async_track_state_change_event(
                         self.hass,
                         [
-                            self.price_entity_id,
-                            self.ev_soc_entity_id,
+                            self.ev_target_soc_entity_id,
                         ],
                         self.update_sensors_new,
                     )
@@ -677,6 +676,10 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("entity_id = %s", entity_id)
         # _LOGGER.debug("old_state = %s", old_state)
         _LOGGER.debug("new_state = %s", new_state)
+
+        # Update schedule if EV SOC Target is updated
+        if self.ev_target_soc_entity_id and (entity_id == self.ev_target_soc_entity_id):
+            configuration_updated = True
 
         # To handle non-live SOC
         if configuration_updated:
