@@ -2,6 +2,7 @@
 from zoneinfo import ZoneInfo
 from datetime import datetime
 
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import STATE_OFF, STATE_ON
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -37,6 +38,7 @@ async def test_sensor(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
 
     # Set up the entry and assert that the values set during setup are where we expect

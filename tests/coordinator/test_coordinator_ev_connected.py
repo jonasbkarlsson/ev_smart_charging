@@ -2,6 +2,7 @@
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.const import STATE_OFF
 from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
@@ -39,6 +40,7 @@ async def test_coordinator_ev_connected(hass: HomeAssistant, set_cet_timezone, f
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()

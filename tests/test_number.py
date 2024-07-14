@@ -3,6 +3,7 @@ from unittest.mock import patch
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.components.number import NumberExtraStoredData
 
@@ -44,6 +45,7 @@ async def test_number(hass, bypass_validate_input_sensors):
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test", title="none"
     )
+    config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
 
     # Set up the entry and assert that the values set during setup are where we expect
@@ -135,6 +137,7 @@ async def test_number_restore(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test", title="none"
     )
+    config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
     await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
