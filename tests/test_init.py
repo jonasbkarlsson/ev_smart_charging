@@ -38,7 +38,8 @@ async def test_setup_unload_and_reload_entry(hass, bypass_validate_input_sensors
     """Test entry setup and unload."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
-    config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
 
     # Set up the entry and assert that the values set during setup are where we expect
@@ -82,7 +83,8 @@ async def test_setup_with_migration_v1(hass, bypass_validate_input_sensors):
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_ALL_V1, entry_id="test", version=1
     )
-    config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
 
     # Migrate from version 1
@@ -120,7 +122,8 @@ async def test_setup_with_migration_v2(hass, bypass_validate_input_sensors):
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_ALL_V2, entry_id="test", version=2
     )
-    config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
 
     # Migrate from version 2
@@ -157,7 +160,8 @@ async def test_setup_with_migration_v3(hass, bypass_validate_input_sensors):
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_ALL_V3, entry_id="test", version=3
     )
-    config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
 
     # Migrate from version 3
