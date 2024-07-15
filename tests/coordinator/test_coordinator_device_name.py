@@ -67,7 +67,7 @@ async def test_coordinator_device_name(hass, bypass_validate_input_sensors):
 
     # assert config_entry.title == "New title"
 
-    # # Unload the entry and verify that the data has been removed
-    # assert await async_unload_entry(hass, config_entry)
-    # await hass.async_block_till_done()
-    # assert config_entry.entry_id not in hass.data[DOMAIN]
+    # Unload the entry and verify that the data has been removed
+    assert await async_unload_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert config_entry.entry_id not in hass.data[DOMAIN]
