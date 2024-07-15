@@ -1,5 +1,6 @@
 """Test ev_smart_charging setup process."""
 
+from homeassistant.const import MAJOR_VERSION, MINOR_VERSION
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.exceptions import ConfigEntryNotReady
 import pytest
@@ -203,7 +204,8 @@ async def test_setup_new_integration_name(hass, bypass_validate_input_sensors):
     """Test entry setup with new integration name."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
-    config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
 
     # Set up the entry and assert that the values set during setup are where we expect
