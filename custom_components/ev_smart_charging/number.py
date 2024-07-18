@@ -87,7 +87,7 @@ class EVSmartChargingNumberChargingSpeed(EVSmartChargingNumber):
     _attr_native_min_value = 0.1
     _attr_native_max_value = 100.0
     _attr_native_step = 0.1
-    _attr_native_unit_of_measurement = "%"
+    _attr_native_unit_of_measurement = "%/h"
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingNumberChargingSpeed.__init__()")
