@@ -21,7 +21,7 @@ The integration calculates the set of hours that will give the lowest price, by 
 ## Features
 - Automatic EV charging control based on electrity prices.
 - Native support of the [Nordpool](https://github.com/custom-components/nordpool), [Energi Data Service](https://github.com/MTrab/energidataservice) and [Entso-e](https://github.com/JaccoR/hass-entso-e) integrations.
-- Support of a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). A templete sensor can be used to get price information from many price intergrations.
+- Support of a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). A templete sensor can be used to get price information from many price integrations.
 - Configuraton of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
 - Optional setting of minimum SOC level that should be reached indepently of the electrity price.
@@ -289,6 +289,8 @@ If there is no integration that provides the EV Target SOC, one can create a Num
 If your charger's integration does not provide a swicth entity that this integration can use for control, then the connection between this integration and your charger's integration can in many cases be made with automations.
 
 Also, if information about the EV being connected to the charger is available, an automation can provide that information to the integration in order to improve the handling of the case when the car is not connected to the charger at the time charging is planned to start.
+
+Some examples are given below. Additional examples are given in the [Wiki page](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Chargers).
 
 ### Example of automation to start charging
 ```
