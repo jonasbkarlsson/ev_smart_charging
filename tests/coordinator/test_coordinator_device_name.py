@@ -30,7 +30,7 @@ async def test_coordinator_device_name(hass, bypass_validate_input_sensors):
     """Test entry setup with new integration name."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
-    if MAJOR_VERSION >= 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
 
