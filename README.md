@@ -10,16 +10,18 @@
 
 ![Icon](assets/icon.png)
 
-The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration requires the [Nordpool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice) or the [Entso-e](https://github.com/JaccoR/hass-entso-e) integration.
+The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration natively supports the [Nordpool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice) and the [Entso-e](https://github.com/JaccoR/hass-entso-e) integrations. The integration also supports a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). Together with using a template sensor, many different price integrations should be possible to use.
 
 The integration calculates the set of hours that will give the lowest price, by default restricted to a continuous set. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight) or when the time of the day is before the configured charge completion time. When the automatic charging has started, changes of settings will not have any effect.
 
 ## Requirements
-- The [Nordpool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice) or the [Entso-e](https://github.com/JaccoR/hass-entso-e) integration.
+- The [Nordpool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice), the [Entso-e](https://github.com/JaccoR/hass-entso-e) integration or a template sensor that generates price data using the supported [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor).
 - Home Assistant version 2022.7 or newer.
 
 ## Features
-- Automatic EV charging control based on electrity prices from the [Nordpool](https://github.com/custom-components/nordpool), [Energi Data Service](https://github.com/MTrab/energidataservice) or [Entso-e](https://github.com/JaccoR/hass-entso-e) integration.
+- Automatic EV charging control based on electrity prices.
+- Native support of the [Nordpool](https://github.com/custom-components/nordpool), [Energi Data Service](https://github.com/MTrab/energidataservice) and [Entso-e](https://github.com/JaccoR/hass-entso-e) integrations.
+- Support of a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). A templete sensor can be used to get price information from many price integrations.
 - Configuraton of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
 - Optional setting of minimum SOC level that should be reached indepently of the electrity price.
@@ -61,7 +63,7 @@ The configuration form contains the entities that the integration is interacting
 Parameter | Required | Description
 -- | -- | --
 Name | Yes | The name of the instance.
-Electricity price entity | Yes | The Nordpool, the Energi Data Service or the Entso-e integration sensor entity. For the Entso-e integration, the entity called `sensor.average_electricity_price_today` should be used.
+Electricity price entity | Yes | The Nordpool, the Energi Data Service, the Entso-e integration sensor entity or a template sensor providing the price in the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). For the Entso-e integration, the entity called `sensor.average_electricity_price_today` should be used.
 EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100. Note that this entity is crucial for the integration. If live information about he SOC is not available, please carefully read the section below with more information about the EV SOC entity.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control switch entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'.
@@ -287,6 +289,8 @@ If there is no integration that provides the EV Target SOC, one can create a Num
 If your charger's integration does not provide a swicth entity that this integration can use for control, then the connection between this integration and your charger's integration can in many cases be made with automations.
 
 Also, if information about the EV being connected to the charger is available, an automation can provide that information to the integration in order to improve the handling of the case when the car is not connected to the charger at the time charging is planned to start.
+
+Some examples are given below. Additional examples are given in the [Wiki page](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Chargers).
 
 ### Example of automation to start charging
 ```
