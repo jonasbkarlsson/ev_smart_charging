@@ -187,9 +187,11 @@ class EVSmartChargingCoordinator:
             async_track_time_change(hass, self.update_hourly, minute=0, second=0)
         )
         # Listen for changes to the device.
-        self.listeners.append(
-            hass.bus.async_listen(EVENT_DEVICE_REGISTRY_UPDATED, self.device_updated)
-        )
+        if MAJOR_VERSION < 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION <= 6):
+            # Does not work with HA 2024.7
+            self.listeners.append(
+                hass.bus.async_listen(EVENT_DEVICE_REGISTRY_UPDATED, self.device_updated)
+            )
 
     def unsubscribe_listeners(self):
         """Unsubscribed to listeners"""
