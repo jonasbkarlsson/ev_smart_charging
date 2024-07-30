@@ -3,30 +3,15 @@
   "version": "0.2.0",
   "configurations": [
     {
-      // Example of attaching to local debug server
-      "name": "Python: Attach Local",
+      "name": "Python: Debug Home Assistant",
       "type": "debugpy",
-      "request": "attach",
-      "connect": { "host": "localhost", "port": 5678 },
+      "request": "launch",
+      "module": "homeassistant",
       "justMyCode": false,
-      "pathMappings": [
-        {
-          "localRoot": "${workspaceFolder}",
-          "remoteRoot": "/workspaces/ev_smart_charging/.devcontainer/hass"
-        }
-      ]
-    },
-    {
-      // Example of attaching to my production server
-      "name": "Python: Attach Remote",
-      "type": "debugpy",
-      "request": "attach",
-      "connect": { "host": "homeassistant.local", "port": 5678 },
-      "pathMappings": [
-        {
-          "localRoot": "${workspaceFolder}",
-          "remoteRoot": "/usr/src/homeassistant"
-        }
+      "args": [
+        "--debug",
+        "-c",
+        "config"
       ]
     },
     {
