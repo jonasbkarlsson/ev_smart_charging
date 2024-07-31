@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
 
 set -e
-cd "$(dirname "$0")/../.devcontainer"
 
-# Copy config and custom_components
-cp configuration.yaml hass
-cp -r ../custom_components/ hass
+cd "$(dirname "$0")/.."
+
+# Create config dir if not present
+if [[ ! -d "${PWD}/config" ]]; then
+    mkdir -p "${PWD}/config"
+    # hass --config "${PWD}/config" --script ensure_config
+    python3 -Xfrozen_modules=off -m homeassistant --config "${PWD}/config" --script ensure_config
+fi
+
+# Set the path to custom_components
+export PYTHONPATH="${PYTHONPATH}:${PWD}/custom_components"
 
 # Start Home Assistant
-hass -c hass --debug
+#hass --config "${PWD}/config" --debug
+python3 -Xfrozen_modules=off -m homeassistant --config "${PWD}/config" --debug

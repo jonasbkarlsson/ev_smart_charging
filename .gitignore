@@ -1,7 +1,10 @@
+# Artifacts
 __pycache__
-pythonenv*
-venv
-.venv
 .coverage
-.idea
+
+# Misc
 issues
+
+# Home Assistant configuration
+config/*
+!config/configuration.yaml
