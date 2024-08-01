@@ -188,7 +188,7 @@ class EVSmartChargingCoordinator:
         )
         # Listen for changes to the device.
         if MAJOR_VERSION < 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION <= 6):
-            # Does not work with HA 2024.7
+            # Is not needed for HA 2024.7
             self.listeners.append(
                 hass.bus.async_listen(EVENT_DEVICE_REGISTRY_UPDATED, self.device_updated)
             )

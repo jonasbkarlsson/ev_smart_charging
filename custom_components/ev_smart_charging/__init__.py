@@ -32,6 +32,7 @@ _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up this integration using UI."""
+    _LOGGER.debug("async_setup_entry")
 
     if hass.data.get(DOMAIN) is None:
         hass.data.setdefault(DOMAIN, {})
@@ -47,22 +48,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
+    for platform in PLATFORMS:
+        coordinator.platforms.append(platform)
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     else:
         for platform in PLATFORMS:
-            if entry.options.get(platform, True):
-                coordinator.platforms.append(platform)
-                hass.async_create_task(
-                    hass.config_entries.async_forward_entry_setup(entry, platform)
-                )
+            hass.async_create_task(
+                hass.config_entries.async_forward_entry_setup(entry, platform)
+            )
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
     # If the name of the integration (config_entry.title) has changed,
     # update the device name.
     if MAJOR_VERSION < 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION <= 6):
-        # Does not work with HA 2024.7
+        # Not needed for HA 2024.7
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
         all_entities = async_entries_for_config_entry(entity_registry, entry.entry_id)
         if all_entities:
@@ -104,11 +105,14 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     return unloaded
 
+my_lock = asyncio.Lock()
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Reload config entry."""
-    await async_unload_entry(hass, entry)
-    await async_setup_entry(hass, entry)
+    _LOGGER.debug("async_reload_entry")
+    async with my_lock:
+        await async_unload_entry(hass, entry)
+        await async_setup_entry(hass, entry)
 
 
 async def async_migrate_entry(hass, config_entry: ConfigEntry):

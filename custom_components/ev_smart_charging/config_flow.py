@@ -126,9 +126,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             # process user_input
             error = FlowValidator.validate_step_user(self.hass, user_input)
-            if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
-                # Does not work with HA 2024.7
-                error = ("base", "reconfiguration_not_supported")
 
             if error is not None:
                 self._errors[error[0]] = error[1]
