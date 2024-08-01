@@ -8,3 +8,5 @@ issues
 # Home Assistant configuration
 config/*
 !config/configuration.yaml
+custom_components/*
+!custom_components/ev_smart_charging
