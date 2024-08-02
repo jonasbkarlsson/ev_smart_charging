@@ -232,28 +232,28 @@ async def test_setup_new_integration_name(hass, bypass_validate_input_sensors):
         hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
     )
 
-    # Only test for HA 2024.6 and older
+    test = hass.data["device_registry"].devices
+    device = hass.data["device_registry"].devices[next(iter(test))]
+    # The behvior of HA 2024.6 and older (name_by_user is updated)
+    # and HA 2024.7 and newer (name is updated) is different.
+    assert device.name_by_user == "New title" or device.name == "New title"
 
-    if MAJOR_VERSION < 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION <= 6):
+    # Change a changed title
+    config_entry.title = "New title2"
 
-        test = hass.data["device_registry"].devices
-        device = hass.data["device_registry"].devices[next(iter(test))]
-        assert device.name_by_user == "New title"
+    # Reload the entry and assert that the data from above is still there
+    assert await async_reload_entry(hass, config_entry) is None
+    await hass.async_block_till_done()
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
 
-        # Change a changed title
-        config_entry.title = "New title2"
-
-        # Reload the entry and assert that the data from above is still there
-        assert await async_reload_entry(hass, config_entry) is None
-        await hass.async_block_till_done()
-        assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
-        assert isinstance(
-            hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
-        )
-
-        test = hass.data["device_registry"].devices
-        device = hass.data["device_registry"].devices[next(iter(test))]
-        assert device.name_by_user == "New title2"
+    test = hass.data["device_registry"].devices
+    device = hass.data["device_registry"].devices[next(iter(test))]
+    # The behvior of HA 2024.6 and older (name_by_user is updated)
+    # and HA 2024.7 and newer (name is updated) is different.
+    assert device.name_by_user == "New title2" or device.name == "New title2"
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)
