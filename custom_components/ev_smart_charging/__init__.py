@@ -62,25 +62,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     # If the name of the integration (config_entry.title) has changed,
     # update the device name.
-    if MAJOR_VERSION < 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION <= 6):
-        # Not needed for HA 2024.7
-        entity_registry: EntityRegistry = async_entity_registry_get(hass)
-        all_entities = async_entries_for_config_entry(entity_registry, entry.entry_id)
-        if all_entities:
-            device_id = all_entities[0].device_id
-            device_registry: DeviceRegistry = async_device_registry_get(hass)
-            device: DeviceEntry = device_registry.async_get(device_id)
-            if device:
-                if device.name_by_user is not None:
-                    if entry.title != device.name_by_user:
-                        device_registry.async_update_device(
-                            device.id, name_by_user=entry.title
-                        )
-                else:
-                    if entry.title != device.name:
-                        device_registry.async_update_device(
-                            device.id, name_by_user=entry.title
-                        )
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+    all_entities = async_entries_for_config_entry(entity_registry, entry.entry_id)
+    if all_entities:
+        device_id = all_entities[0].device_id
+        device_registry: DeviceRegistry = async_device_registry_get(hass)
+        device: DeviceEntry = device_registry.async_get(device_id)
+        if device:
+            if device.name_by_user is not None:
+                if entry.title != device.name_by_user:
+                    device_registry.async_update_device(
+                        device.id, name_by_user=entry.title
+                    )
+            else:
+                if entry.title != device.name:
+                    device_registry.async_update_device(
+                        device.id, name_by_user=entry.title
+                    )
 
     return True
 
