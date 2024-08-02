@@ -43,6 +43,7 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""
 
     _attr_name = ENTITY_NAME_CHARGING_SENSOR
+    _attr_translation_key = "charging"
 
     def __init__(self, entry):
         _LOGGER.debug("EVSmartChargingSensor.__init__()")
@@ -177,6 +178,7 @@ class EVSmartChargingSensorStatus(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""
 
     _attr_name = ENTITY_NAME_STATUS_SENSOR
+    _attr_translation_key = "status"
 
     def __init__(self, entry):
         _LOGGER.debug("EVSmartChargingSensorStatus.__init__()")

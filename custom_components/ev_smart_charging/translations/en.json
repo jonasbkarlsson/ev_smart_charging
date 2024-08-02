@@ -49,5 +49,15 @@
             "charger_control_switch_not_found": "Charger control switch entity not found.",
             "charger_control_switch_not_switch": "Charger control switch entity is not a switch."
         }
+    },
+    "entity": {
+        "sensor": {
+            "charging": {
+                "name": "ChargingTEST"
+            },
+            "status": {
+                "name": "StatusTEST"
+            }
+        }
     }
 }
