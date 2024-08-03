@@ -70,10 +70,6 @@
         "sensor": {
             "charging": {
                 "name": "Charging",
-                "state": {
-                    "on": "On",
-                    "off": "Off"
-                },
                 "state_attributes": {
                     "current_price": { "name": "Current price"},
                     "ev_soc": {"name": "EV SOC"},

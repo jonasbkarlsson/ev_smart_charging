@@ -70,20 +70,16 @@
         "sensor": {
             "charging": {
                 "name": "Laddning",
-                "state": {
-                    "on": "På",
-                    "off": "Av"
-                },
                 "state_attributes": {
-                    "current_price": { "name": "Current price"},
-                    "ev_soc": {"name": "EV SOC"},
-                    "ev_target_soc": {"name": "EV target SOC"},
-                    "charging_is_planned": {"name": "Charging is planned"},
-                    "charging_start_time": {"name": "Charging start time"},
-                    "charging_stop_time": {"name": "Charging stop time"},
-                    "charging_number_of_hours": {"name": "Charging number of hours"},
-                    "raw_two_days": {"name": "Raw two days"},
-                    "charging_schedule": {"name": "Charging schedule"}
+                    "current_price": { "name": "Nuvarande pris"},
+                    "ev_soc": {"name": "Laddnivå"},
+                    "ev_target_soc": {"name": "Önskad laddnivå"},
+                    "charging_is_planned": {"name": "Laddning är planerad"},
+                    "charging_start_time": {"name": "Laddning starttid"},
+                    "charging_stop_time": {"name": "Laddning sluttid"},
+                    "charging_number_of_hours": {"name": "Antal timmar laddning"},
+                    "raw_two_days": {"name": "Priser två dagar"},
+                    "charging_schedule": {"name": "Laddningschema"}
                 }
             },
             "status": {
