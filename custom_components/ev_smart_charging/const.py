@@ -101,15 +101,15 @@ HOURS = [
 START_HOUR_NONE = -48
 READY_HOUR_NONE = 72
 
-CHARGING_STATUS_WAITING_NEW_PRICE = "Waiting for new prices"
-CHARGING_STATUS_NO_PLAN = "No charging planned"
-CHARGING_STATUS_WAITING_CHARGING = "Waiting for charging to begin"
-CHARGING_STATUS_CHARGING = "Charging"
-CHARGING_STATUS_KEEP_ON = "Keeping charger on"
-CHARGING_STATUS_DISCONNECTED = "Disconnected"
-CHARGING_STATUS_NOT_ACTIVE = "Smart charging not active"
-CHARGING_STATUS_LOW_PRICE_CHARGING = "Low price charging"
-CHARGING_STATUS_LOW_SOC_CHARGING = "Low SOC charging"
+CHARGING_STATUS_WAITING_NEW_PRICE = "waiting_for_new_prices"
+CHARGING_STATUS_NO_PLAN = "no_charging_planned"
+CHARGING_STATUS_WAITING_CHARGING = "waiting_for_charging_to_begin"
+CHARGING_STATUS_CHARGING = "charging"
+CHARGING_STATUS_KEEP_ON = "keeping_charger_on"
+CHARGING_STATUS_DISCONNECTED = "disconnected"
+CHARGING_STATUS_NOT_ACTIVE = "smart_charging_not_active"
+CHARGING_STATUS_LOW_PRICE_CHARGING = "low_price_charging"
+CHARGING_STATUS_LOW_SOC_CHARGING = "low_soc_charging"
 
 # Defaults
 DEFAULT_NAME = DOMAIN
