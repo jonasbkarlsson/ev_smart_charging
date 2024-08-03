@@ -7,7 +7,6 @@ from homeassistant.const import STATE_OFF
 
 
 from .const import (
-    CHARGING_STATUS_NOT_ACTIVE,
     DOMAIN,
     ENTITY_NAME_CHARGING_SENSOR,
     ENTITY_NAME_STATUS_SENSOR,
@@ -35,15 +34,13 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
     def __init__(self, entry):
         _LOGGER.debug("EVSmartChargingSensor.__init__()")
         super().__init__(entry)
-        id_name = self._attr_name.replace(" ", "").lower()
+        id_name = self._entity_name.replace(" ", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, SENSOR, id_name])
-
 
 class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""
 
-    _attr_name = ENTITY_NAME_CHARGING_SENSOR
-    _attr_translation_key = "charging"
+    _entity_name = ENTITY_NAME_CHARGING_SENSOR
 
     def __init__(self, entry):
         _LOGGER.debug("EVSmartChargingSensor.__init__()")
@@ -73,12 +70,12 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     def extra_state_attributes(self) -> dict:
         return {
             "current_price": self._current_price,
-            "EV SOC": self._ev_soc,
-            "EV target SOC": self._ev_target_soc,
-            "Charging is planned": self._charging_is_planned,
-            "Charging start time": self._charging_start_time,
-            "Charging stop time": self._charging_stop_time,
-            "Charging number of hours": self._charging_number_of_hours,
+            "ev_soc": self._ev_soc,
+            "ev_target_soc": self._ev_target_soc,
+            "charging_is_planned": self._charging_is_planned,
+            "charging_start_time": self._charging_start_time,
+            "charging_stop_time": self._charging_stop_time,
+            "charging_number_of_hours": self._charging_number_of_hours,
             "raw_two_days": self._raw_two_days,
             "charging_schedule": self._charging_schedule,
         }
@@ -177,14 +174,11 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
 class EVSmartChargingSensorStatus(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""
 
-    _attr_name = ENTITY_NAME_STATUS_SENSOR
-    _attr_translation_key = "status"
+    _entity_name = ENTITY_NAME_STATUS_SENSOR
 
     def __init__(self, entry):
         _LOGGER.debug("EVSmartChargingSensorStatus.__init__()")
         super().__init__(entry)
-
-        self._attr_native_value = CHARGING_STATUS_NOT_ACTIVE
 
     def set_status(self, new_status):
         """Set new status."""

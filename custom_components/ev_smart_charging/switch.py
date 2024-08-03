@@ -51,7 +51,7 @@ class EVSmartChargingSwitch(EVSmartChargingEntity, SwitchEntity, RestoreEntity):
         _LOGGER.debug("EVSmartChargingSwitch.__init__()")
         super().__init__(entry)
         self.coordinator = coordinator
-        id_name = self._attr_name.replace(" ", "").lower()
+        id_name = self._entity_name.replace(" ", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, SWITCH, id_name])
 
     async def async_turn_on(self, **kwargs: Any) -> None:
@@ -75,7 +75,7 @@ class EVSmartChargingSwitch(EVSmartChargingEntity, SwitchEntity, RestoreEntity):
 class EVSmartChargingSwitchActive(EVSmartChargingSwitch):
     """EV Smart Charging active switch class."""
 
-    _attr_name = ENTITY_NAME_ACTIVE_SWITCH
+    _entity_name = ENTITY_NAME_ACTIVE_SWITCH
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingSwitchActive.__init__()")
@@ -99,7 +99,7 @@ class EVSmartChargingSwitchActive(EVSmartChargingSwitch):
 class EVSmartChargingSwitchApplyLimit(EVSmartChargingSwitch):
     """EV Smart Charging apply limit switch class."""
 
-    _attr_name = ENTITY_NAME_APPLY_LIMIT_SWITCH
+    _entity_name = ENTITY_NAME_APPLY_LIMIT_SWITCH
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingSwitchApplyLimit.__init__()")
@@ -124,7 +124,7 @@ class EVSmartChargingSwitchApplyLimit(EVSmartChargingSwitch):
 class EVSmartChargingSwitchContinuous(EVSmartChargingSwitch):
     """EV Smart Charging continuous switch class."""
 
-    _attr_name = ENTITY_NAME_CONTINUOUS_SWITCH
+    _entity_name = ENTITY_NAME_CONTINUOUS_SWITCH
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingSwitchContinuous.__init__()")
@@ -148,7 +148,7 @@ class EVSmartChargingSwitchContinuous(EVSmartChargingSwitch):
 class EVSmartChargingSwitchEVConnected(EVSmartChargingSwitch):
     """EV Smart Charging continuous switch class."""
 
-    _attr_name = ENTITY_NAME_EV_CONNECTED_SWITCH
+    _entity_name = ENTITY_NAME_EV_CONNECTED_SWITCH
     _attr_icon = ICON_CONNECTION
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
@@ -173,7 +173,7 @@ class EVSmartChargingSwitchEVConnected(EVSmartChargingSwitch):
 class EVSmartChargingSwitchKeepOn(EVSmartChargingSwitch):
     """EV Smart Charging keep charger on switch class."""
 
-    _attr_name = ENTITY_NAME_KEEP_ON_SWITCH
+    _entity_name = ENTITY_NAME_KEEP_ON_SWITCH
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingSwitchKeepOn.__init__()")
@@ -198,7 +198,7 @@ class EVSmartChargingSwitchKeepOn(EVSmartChargingSwitch):
 class EVSmartChargingSwitchOpportunistic(EVSmartChargingSwitch):
     """EV Smart Charging opportunistic switch class."""
 
-    _attr_name = ENTITY_NAME_OPPORTUNISTIC_SWITCH
+    _entity_name = ENTITY_NAME_OPPORTUNISTIC_SWITCH
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingSwitchOpportunistic.__init__()")
@@ -223,7 +223,7 @@ class EVSmartChargingSwitchOpportunistic(EVSmartChargingSwitch):
 class EVSmartChargingSwitchLowPriceCharging(EVSmartChargingSwitch):
     """EV Smart Charging low price charging switch class."""
 
-    _attr_name = ENTITY_NAME_LOW_PRICE_CHARGING_SWITCH
+    _entity_name = ENTITY_NAME_LOW_PRICE_CHARGING_SWITCH
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingSwitchLowPriceCharging.__init__()")
@@ -247,7 +247,7 @@ class EVSmartChargingSwitchLowPriceCharging(EVSmartChargingSwitch):
 class EVSmartChargingSwitchLowSocCharging(EVSmartChargingSwitch):
     """EV Smart Charging low SOC charging switch class."""
 
-    _attr_name = ENTITY_NAME_LOW_SOC_CHARGING_SWITCH
+    _entity_name = ENTITY_NAME_LOW_SOC_CHARGING_SWITCH
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingSwitchLowSocCharging.__init__()")

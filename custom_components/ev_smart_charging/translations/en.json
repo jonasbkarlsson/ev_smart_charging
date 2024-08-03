@@ -51,13 +51,48 @@
         }
     },
     "entity": {
+        "button": {
+            "manually_start_charging": { "name": "Manually start charging TEST" },
+            "manually_stop_charging": { "name": "Manually stop charging TEST" }
+        },
+        "number": {
+            "charging_speed": { "name": "Charging speed TEST" },
+            "electricity_price_limit": { "name": "Electricity price limit TEST" },
+            "opportunistic_level": { "name": "Opportunistic level TEST" },
+            "low_price_charging_level": { "name": "Low price charging level TEST" },
+            "low_soc_charging_level": { "name": "Low SOC charging level TEST" },
+            "minimum_ev_soc": { "name": "Minimum EV SOC TEST" }
+        },
+        "select": {
+            "charge_start_time": { "name": "Charge start time TEST" },
+            "charge_completion_time": { "name": "Charge completion time TEST" }
+        },
         "sensor": {
             "charging": {
-                "name": "ChargingTEST"
+                "name": "Charging TEST",
+                "state_attributes": {
+                    "current_price": { "name": "Current price TEST"},
+                    "ev_soc": {"name": "EV SOC TEST"},
+                    "ev_target_soc": {"name": "EV target SOC TEST"},
+                    "charging_is_planned": {"name": "Charging is planned TEST"},
+                    "charging_start_time": {"name": "Charging start time TEST"},
+                    "charging_stop_time": {"name": "Charging stop time TEST"},
+                    "charging_number_of_hours": {"name": "Charging number of hours TEST"},
+                    "raw_two_days": {"name": "Raw two days TEST"},
+                    "charging_schedule": {"name": "Charging schedule TEST"}
+                }
             },
-            "status": {
-                "name": "StatusTEST"
-            }
+            "status": { "name": "Status TEST" }
+        },
+        "switch": {
+            "smart_charging_activated": { "name": "Smart charging activated TEST" },
+            "apply_price_limit": { "name": "Apply price limit TEST" },
+            "continuous_charging_preferred": { "name": "Continuous charging preferred TEST" },
+            "ev_connected": { "name": "EV connected TEST" },
+            "keep_charger_on": { "name": "Keep charger on TEST" },
+            "opportunistic_charging": { "name": "Opportunistic charging TEST" },
+            "low_price_charging": { "name": "Low price charging TEST" },
+            "low_soc_charging": { "name": "Low SOC charging TEST" }
         }
     }
 }

@@ -46,7 +46,7 @@ class EVSmartChargingSelect(EVSmartChargingEntity, SelectEntity, RestoreEntity):
         _LOGGER.debug("EVSmartChargingSelect.__init__()")
         super().__init__(entry)
         self.coordinator = coordinator
-        id_name = self._attr_name.replace(" ", "").lower()
+        id_name = self._entity_name.replace(" ", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, SELECT, id_name])
 
     async def async_select_option(self, option: str) -> None:
@@ -63,7 +63,7 @@ class EVSmartChargingSelect(EVSmartChargingEntity, SelectEntity, RestoreEntity):
 class EVSmartChargingSelectStartHour(EVSmartChargingSelect):
     """EV Smart Charging start_hour select class."""
 
-    _attr_name = ENTITY_NAME_CONF_START_HOUR
+    _entity_name = ENTITY_NAME_CONF_START_HOUR
     _attr_icon = ICON_TIME
     _attr_entity_category = EntityCategory.CONFIG
     _attr_options = HOURS
@@ -90,7 +90,7 @@ class EVSmartChargingSelectStartHour(EVSmartChargingSelect):
 class EVSmartChargingSelectReadyHour(EVSmartChargingSelect):
     """EV Smart Charging ready_hour select class."""
 
-    _attr_name = ENTITY_NAME_CONF_READY_HOUR
+    _entity_name = ENTITY_NAME_CONF_READY_HOUR
     _attr_icon = ICON_TIME
     _attr_entity_category = EntityCategory.CONFIG
     _attr_options = HOURS
