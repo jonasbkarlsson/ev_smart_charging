@@ -13,7 +13,7 @@ class EVSmartChargingEntity(Entity):
     _attr_icon = ICON
     _attr_has_entity_name = True
 
-    _entity_key: str | None
+    _entity_key: str
 
     def __init__(self, config_entry):
         self.config_entry = config_entry
