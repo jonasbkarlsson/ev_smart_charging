@@ -32,8 +32,9 @@ run_next_test() {
 }
 
 # As of HA 2023.3, Python 3.11 is supported.
-pip3 install -qq homeassistant==2023.3.6 pytest-homeassistant-custom-component==0.13.10
-run_first_test "auto"
+# HA 2023.3 does not support entity translation.
+#pip3 install -qq homeassistant==2023.3.6 pytest-homeassistant-custom-component==0.13.10
+#run_first_test "auto"
 
 pip3 install -qq homeassistant==2023.4.6 pytest-homeassistant-custom-component==0.13.23
 run_next_test "auto"
