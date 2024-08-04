@@ -17,12 +17,12 @@ from .const import (
     CONF_OPPORTUNISTIC_LEVEL,
     CONF_PCT_PER_HOUR,
     DOMAIN,
-    ENTITY_NAME_CONF_LOW_PRICE_CHARGING_NUMBER,
-    ENTITY_NAME_CONF_LOW_SOC_CHARGING_NUMBER,
-    ENTITY_NAME_CONF_OPPORTUNISTIC_LEVEL_NUMBER,
-    ENTITY_NAME_CONF_PCT_PER_HOUR_NUMBER,
-    ENTITY_NAME_CONF_MAX_PRICE_NUMBER,
-    ENTITY_NAME_CONF_MIN_SOC_NUMBER,
+    ENTITY_KEY_CONF_LOW_PRICE_CHARGING_NUMBER,
+    ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER,
+    ENTITY_KEY_CONF_OPPORTUNISTIC_LEVEL_NUMBER,
+    ENTITY_KEY_CONF_PCT_PER_HOUR_NUMBER,
+    ENTITY_KEY_CONF_MAX_PRICE_NUMBER,
+    ENTITY_KEY_CONF_MIN_SOC_NUMBER,
     ICON_BATTERY_50,
     ICON_CASH,
     NUMBER,
@@ -60,7 +60,7 @@ class EVSmartChargingNumber(EVSmartChargingEntity, RestoreNumber):
         _LOGGER.debug("EVSmartChargingNumber.__init__()")
         super().__init__(entry)
         self.coordinator = coordinator
-        id_name = self._entity_name.replace(" ", "").lower()
+        id_name = self._entity_key.replace("_", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, NUMBER, id_name])
 
     async def async_set_native_value(self, value: float) -> None:
@@ -82,7 +82,7 @@ class EVSmartChargingNumber(EVSmartChargingEntity, RestoreNumber):
 class EVSmartChargingNumberChargingSpeed(EVSmartChargingNumber):
     """EV Smart Charging active number class."""
 
-    _entity_name = ENTITY_NAME_CONF_PCT_PER_HOUR_NUMBER
+    _entity_key = ENTITY_KEY_CONF_PCT_PER_HOUR_NUMBER
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value = 0.1
     _attr_native_max_value = 100.0
@@ -106,7 +106,7 @@ class EVSmartChargingNumberChargingSpeed(EVSmartChargingNumber):
 class EVSmartChargingNumberPriceLimit(EVSmartChargingNumber):
     """EV Smart Charging apply limit number class."""
 
-    _entity_name = ENTITY_NAME_CONF_MAX_PRICE_NUMBER
+    _entity_key = ENTITY_KEY_CONF_MAX_PRICE_NUMBER
     _attr_icon = ICON_CASH
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value = -10000.0
@@ -130,7 +130,7 @@ class EVSmartChargingNumberPriceLimit(EVSmartChargingNumber):
 class EVSmartChargingNumberMinSOC(EVSmartChargingNumber):
     """EV Smart Charging continuous number class."""
 
-    _entity_name = ENTITY_NAME_CONF_MIN_SOC_NUMBER
+    _entity_key = ENTITY_KEY_CONF_MIN_SOC_NUMBER
     _attr_icon = ICON_BATTERY_50
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value = 0.0
@@ -155,7 +155,7 @@ class EVSmartChargingNumberMinSOC(EVSmartChargingNumber):
 class EVSmartChargingNumberOpportunistic(EVSmartChargingNumber):
     """EV Smart Charging opportunistic number class."""
 
-    _entity_name = ENTITY_NAME_CONF_OPPORTUNISTIC_LEVEL_NUMBER
+    _entity_key = ENTITY_KEY_CONF_OPPORTUNISTIC_LEVEL_NUMBER
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value = 0.0
     _attr_native_max_value = 100.0
@@ -185,7 +185,7 @@ class EVSmartChargingNumberOpportunistic(EVSmartChargingNumber):
 class EVSmartChargingNumberLowPriceCharging(EVSmartChargingNumber):
     """EV Smart Charging low price charging number class."""
 
-    _entity_name = ENTITY_NAME_CONF_LOW_PRICE_CHARGING_NUMBER
+    _entity_key = ENTITY_KEY_CONF_LOW_PRICE_CHARGING_NUMBER
     _attr_icon = ICON_CASH
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value = -10000.0
@@ -211,7 +211,7 @@ class EVSmartChargingNumberLowPriceCharging(EVSmartChargingNumber):
 class EVSmartChargingNumberLowSocCharging(EVSmartChargingNumber):
     """EV Smart Charging low SOC charging number class."""
 
-    _entity_name = ENTITY_NAME_CONF_LOW_SOC_CHARGING_NUMBER
+    _entity_key = ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER
     _attr_icon = ICON_BATTERY_50
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value = 0.0

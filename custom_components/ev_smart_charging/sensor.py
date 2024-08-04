@@ -8,8 +8,8 @@ from homeassistant.const import STATE_OFF
 
 from .const import (
     DOMAIN,
-    ENTITY_NAME_CHARGING_SENSOR,
-    ENTITY_NAME_STATUS_SENSOR,
+    ENTITY_KEY_CHARGING_SENSOR,
+    ENTITY_KEY_STATUS_SENSOR,
     SENSOR,
 )
 from .entity import EVSmartChargingEntity
@@ -34,13 +34,13 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
     def __init__(self, entry):
         _LOGGER.debug("EVSmartChargingSensor.__init__()")
         super().__init__(entry)
-        id_name = self._entity_name.replace(" ", "").lower()
+        id_name = self._entity_key.replace("_", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, SENSOR, id_name])
 
 class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""
 
-    _entity_name = ENTITY_NAME_CHARGING_SENSOR
+    _entity_key = ENTITY_KEY_CHARGING_SENSOR
 
     def __init__(self, entry):
         _LOGGER.debug("EVSmartChargingSensor.__init__()")
@@ -174,7 +174,7 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
 class EVSmartChargingSensorStatus(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""
 
-    _entity_name = ENTITY_NAME_STATUS_SENSOR
+    _entity_key = ENTITY_KEY_STATUS_SENSOR
 
     def __init__(self, entry):
         _LOGGER.debug("EVSmartChargingSensorStatus.__init__()")
