@@ -28,7 +28,7 @@
     "options": {
         "step": {
             "init": {
-                "description": "Configuration of name and external entities.",
+                "description": "Configuration of external entities.",
                 "data": {
                     "price_sensor": "Electricity price sensor",
                     "ev_soc_sensor": "EV SOC entity",
