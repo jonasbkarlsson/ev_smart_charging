@@ -13,8 +13,12 @@ class EVSmartChargingEntity(Entity):
     _attr_icon = ICON
     _attr_has_entity_name = True
 
+    _entity_key: str
+
     def __init__(self, config_entry):
         self.config_entry = config_entry
+        self._attr_translation_key = self._entity_key
+
 
     def update_ha_state(self):
         """Update the HA state"""

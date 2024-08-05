@@ -7,8 +7,8 @@ from homeassistant.core import HomeAssistant
 from .const import (
     BUTTON,
     DOMAIN,
-    ENTITY_NAME_START_BUTTON,
-    ENTITY_NAME_STOP_BUTTON,
+    ENTITY_KEY_START_BUTTON,
+    ENTITY_KEY_STOP_BUTTON,
     ICON_START,
     ICON_STOP,
 )
@@ -35,7 +35,7 @@ class EVSmartChargingButton(EVSmartChargingEntity, ButtonEntity):
         _LOGGER.debug("EVSmartChargingButton.__init__()")
         super().__init__(entry)
         self.coordinator = coordinator
-        id_name = self._attr_name.replace(" ", "").lower()
+        id_name = self._entity_key.replace("_", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, BUTTON, id_name])
         _LOGGER.debug("self._attr_unique_id = %s", self._attr_unique_id)
 
@@ -43,7 +43,7 @@ class EVSmartChargingButton(EVSmartChargingEntity, ButtonEntity):
 class EVSmartChargingButtonStart(EVSmartChargingButton):
     """EV Smart Charging start button class."""
 
-    _attr_name = ENTITY_NAME_START_BUTTON
+    _entity_key = ENTITY_KEY_START_BUTTON
     _attr_icon = ICON_START
 
     async def async_press(self) -> None:
@@ -54,7 +54,7 @@ class EVSmartChargingButtonStart(EVSmartChargingButton):
 class EVSmartChargingButtonStop(EVSmartChargingButton):
     """EV Smart Charging start button class."""
 
-    _attr_name = ENTITY_NAME_STOP_BUTTON
+    _entity_key = ENTITY_KEY_STOP_BUTTON
     _attr_icon = ICON_STOP
 
     async def async_press(self) -> None:

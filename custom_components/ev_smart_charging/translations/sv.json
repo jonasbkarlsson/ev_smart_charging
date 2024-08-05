@@ -1,0 +1,111 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Konfigurering av namn och externa entiteter.",
+                "data": {
+                    "device_name": "Namn",
+                    "price_sensor": "Elpris sensor",
+                    "ev_soc_sensor": "Entitet för laddnivå (SOC)",
+                    "ev_target_soc_sensor": "Entitet för önskad laddnivå (ett mellanslags för att ta bort)",
+                    "charger_entity": "Brytare för laddningsstyrning (ett mellanslags för att ta bort)",
+                    "ev_controlled": "Elbilsintegration kommer att styra start och stopp av laddning."
+                }
+            }
+        },
+        "error": {
+            "price_not_found": "Elprissensorn hittas inte.",
+            "price_not_sensor": "Entiteten för elpris är inte en sensor.",
+            "sensor_is_not_price": "Entiteten för elpris har inte rätt attribut.",
+            "ev_soc_not_found": "Entiteten för laddnivå (SOC) hittas inte.",
+            "ev_soc_invalid_data": "Entiteten för laddnivå ger inkorrekt data.",
+            "ev_target_soc_not_found": "Entiteten för önskad laddnivå (SOC) hittas inte.",
+            "ev_target_soc_invalid_data": "Entiteten för önskad laddnivå ger inkorrekt data.",
+            "charger_control_switch_not_found": "Brytare för laddningsstyrning hittas inte.",
+            "charger_control_switch_not_switch": "Entiteten för laddningsstyrning är inte en brytare."
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "description": "Konfigurering av externa entiteter.",
+                "data": {
+                    "price_sensor": "Elpris sensor",
+                    "ev_soc_sensor": "Entitet för laddnivå (SOC)",
+                    "ev_target_soc_sensor": "Entitet för önskad laddnivå (ett mellanslags för att ta bort)",
+                    "charger_entity": "Brytare för laddningsstyrning (ett mellanslags för att ta bort)",
+                    "ev_controlled": "Elbilsintegration kommer att styra start och stopp av laddning."
+                }
+            }
+        },
+        "error": {
+            "price_not_found": "Elprissensorn hittas inte.",
+            "price_not_sensor": "Entiteten för elpris är inte en sensor.",
+            "sensor_is_not_price": "Entiteten för elpris har inte rätt attribut.",
+            "ev_soc_not_found": "Entiteten för laddnivå (SOC) hittas inte.",
+            "ev_soc_invalid_data": "Entiteten för laddnivå ger inkorrekt data.",
+            "ev_target_soc_not_found": "Entiteten för önskad laddnivå hittas inte.",
+            "ev_target_soc_invalid_data": "Entiteten för önskad laddnivå ger inkorrekt data.",
+            "charger_control_switch_not_found": "Brytare för laddningsstyrning hittas inte.",
+            "charger_control_switch_not_switch": "Entiteten för laddningsstyrning är inte en brytare."
+        }
+    },
+    "entity": {
+        "button": {
+            "manually_start_charging": { "name": "Starta laddning manuellt" },
+            "manually_stop_charging": { "name": "Stoppa laddning manuellt" }
+        },
+        "number": {
+            "charging_speed": { "name": "Laddningshastighet" },
+            "electricity_price_limit": { "name": "Elprisgräns" },
+            "opportunistic_level": { "name": "Opportunistisk nivå" },
+            "low_price_charging_level": { "name": "Prisnivå för lågprisladdning" },
+            "low_soc_charging_level": { "name": "Laddnivå för lågladdnivåladdning" },
+            "minimum_ev_soc": { "name": "Lägsta laddnivå (SOC)" }
+        },
+        "select": {
+            "charge_start_time": { "name": "Starttid för laddning" },
+            "charge_completion_time": { "name": "Sluttid för laddning" }
+        },
+        "sensor": {
+            "charging": {
+                "name": "Laddning",
+                "state_attributes": {
+                    "current_price": { "name": "Nuvarande pris"},
+                    "ev_soc": {"name": "Laddnivå (SOC)"},
+                    "ev_target_soc": {"name": "Önskad laddnivå (SOC)"},
+                    "charging_is_planned": {"name": "Laddning är planerad"},
+                    "charging_start_time": {"name": "Laddning starttid"},
+                    "charging_stop_time": {"name": "Laddning sluttid"},
+                    "charging_number_of_hours": {"name": "Antal timmar laddning"},
+                    "raw_two_days": {"name": "Priser två dagar"},
+                    "charging_schedule": {"name": "Laddningsschema"}
+                }
+            },
+            "status": {
+                "name": "Status",
+                "state": {
+                    "waiting_for_new_prices": "Väntar på ny prisinformation",
+                    "no_charging_planned": "Ingen laddning planerad",
+                    "waiting_for_charging_to_begin": "Väntar på att laddning ska börja",
+                    "charging": "Laddar",
+                    "keeping_charger_on": "Laddaren hålls aktiv",
+                    "disconnected": "Frånkopplad",
+                    "smart_charging_not_active": "Smart laddning inte aktiverad",
+                    "low_price_charging": "Laddar, lågt pris",
+                    "low_soc_charging": "Laddar, låg laddnivå (SOC)"
+                }
+            }
+        },
+        "switch": {
+            "smart_charging_activated": { "name": "Smart laddning aktiverad" },
+            "apply_price_limit": { "name": "Tillämpa elprisgräns" },
+            "continuous_charging_preferred": { "name": "Föredra kontinuerlig laddning" },
+            "ev_connected": { "name": "Elbil ansluten" },
+            "keep_charger_on": { "name": "Håll laddaren aktiv" },
+            "opportunistic_charging": { "name": "Opportunistisk laddning" },
+            "low_price_charging": { "name": "Laddning vid lågt pris" },
+            "low_soc_charging": { "name": "Laddning vid låg laddnivå (SOC)" }
+        }
+    }
+}
