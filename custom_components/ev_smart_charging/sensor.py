@@ -22,8 +22,15 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_devices):
     _LOGGER.debug("EVSmartCharging.sensor.py")
     coordinator = hass.data[DOMAIN][entry.entry_id]
     sensors = []
-    sensors.append(EVSmartChargingSensorCharging(entry))
-    sensors.append(EVSmartChargingSensorStatus(entry))
+
+    sensor_entity = EVSmartChargingSensorCharging(entry)
+#    sensor_entity.hass = hass
+    sensors.append(sensor_entity)
+
+    sensor_entity = EVSmartChargingSensorStatus(entry)
+ #   sensor_entity.hass = hass
+    sensors.append(sensor_entity)
+
     async_add_devices(sensors)
     await coordinator.add_sensor(sensors)
 
@@ -36,6 +43,7 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
         super().__init__(entry)
         id_name = self._entity_key.replace("_", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, SENSOR, id_name])
+        self.set_entity_id(SENSOR, self._entity_key)
 
 class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""

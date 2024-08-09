@@ -19,6 +19,12 @@ class EVSmartChargingEntity(Entity):
         self.config_entry = config_entry
         self._attr_translation_key = self._entity_key
 
+    def set_entity_id(self, platform_str, key):
+        """Set the entity id"""
+        entity_id = str(platform_str) + "." + DOMAIN + "_" + key
+        _LOGGER.debug("entity_id = %s", entity_id)
+        self.entity_id = entity_id
+
 
     def update_ha_state(self):
         """Update the HA state"""
