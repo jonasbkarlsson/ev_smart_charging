@@ -70,12 +70,12 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     def extra_state_attributes(self) -> dict:
         return {
             "current_price": self._current_price,
-            "ev_soc": self._ev_soc,
-            "ev_target_soc": self._ev_target_soc,
-            "charging_is_planned": self._charging_is_planned,
-            "charging_start_time": self._charging_start_time,
-            "charging_stop_time": self._charging_stop_time,
-            "charging_number_of_hours": self._charging_number_of_hours,
+            "EV SOC": self._ev_soc,
+            "EV target SOC": self._ev_target_soc,
+            "Charging is planned": self._charging_is_planned,
+            "Charging start time": self._charging_start_time,
+            "Charging stop time": self._charging_stop_time,
+            "Charging number of hours": self._charging_number_of_hours,
             "raw_two_days": self._raw_two_days,
             "charging_schedule": self._charging_schedule,
         }
