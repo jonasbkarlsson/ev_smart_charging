@@ -72,12 +72,12 @@
                 "name": "Laddning",
                 "state_attributes": {
                     "current_price": { "name": "Nuvarande pris"},
-                    "ev_soc": {"name": "Laddnivå (SOC)"},
-                    "ev_target_soc": {"name": "Önskad laddnivå (SOC)"},
-                    "charging_is_planned": {"name": "Laddning är planerad"},
-                    "charging_start_time": {"name": "Laddning starttid"},
-                    "charging_stop_time": {"name": "Laddning sluttid"},
-                    "charging_number_of_hours": {"name": "Antal timmar laddning"},
+                    "EV SOC": {"name": "Laddnivå (SOC)"},
+                    "EV target SOC": {"name": "Önskad laddnivå (SOC)"},
+                    "Charging is planned": {"name": "Laddning är planerad"},
+                    "Charging start time": {"name": "Laddning starttid"},
+                    "Charging stop time": {"name": "Laddning sluttid"},
+                    "Charging number of hours": {"name": "Antal timmar laddning"},
                     "raw_two_days": {"name": "Priser två dagar"},
                     "charging_schedule": {"name": "Laddningsschema"}
                 }
