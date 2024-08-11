@@ -39,7 +39,6 @@ class EVSmartChargingButton(EVSmartChargingEntity, ButtonEntity):
         self._attr_unique_id = ".".join([entry.entry_id, BUTTON, id_name])
         _LOGGER.debug("self._attr_unique_id = %s", self._attr_unique_id)
         self.set_entity_id(BUTTON, self._entity_key)
- #       self.hass = coordinator.hass
 
 class EVSmartChargingButtonStart(EVSmartChargingButton):
     """EV Smart Charging start button class."""

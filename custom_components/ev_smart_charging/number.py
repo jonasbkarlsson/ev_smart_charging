@@ -63,7 +63,6 @@ class EVSmartChargingNumber(EVSmartChargingEntity, RestoreNumber):
         id_name = self._entity_key.replace("_", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, NUMBER, id_name])
         self.set_entity_id(NUMBER, self._entity_key)
-        #self.hass = coordinator.hass
 
     async def async_set_native_value(self, value: float) -> None:
         """Set new value."""
