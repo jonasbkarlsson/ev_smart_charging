@@ -28,7 +28,7 @@ class EVSmartChargingEntity(Entity):
 
     def update_ha_state(self):
         """Update the HA state"""
-        if self.entity_id is not None:
+        if self.entity_id is not None and self.hass is not None:
             self.async_schedule_update_ha_state()
 
     @property
