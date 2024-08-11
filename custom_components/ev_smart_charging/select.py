@@ -48,6 +48,7 @@ class EVSmartChargingSelect(EVSmartChargingEntity, SelectEntity, RestoreEntity):
         self.coordinator = coordinator
         id_name = self._entity_key.replace("_", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, SELECT, id_name])
+        self.set_entity_id(SELECT, self._entity_key)
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""

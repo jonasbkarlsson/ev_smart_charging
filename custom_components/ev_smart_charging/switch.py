@@ -53,6 +53,7 @@ class EVSmartChargingSwitch(EVSmartChargingEntity, SwitchEntity, RestoreEntity):
         self.coordinator = coordinator
         id_name = self._entity_key.replace("_", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, SWITCH, id_name])
+        self.set_entity_id(SWITCH, self._entity_key)
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""

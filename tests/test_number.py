@@ -45,7 +45,7 @@ async def test_number(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test", title="none"
+        domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test", title="ev_smart_charging"
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
@@ -65,16 +65,16 @@ async def test_number(hass, bypass_validate_input_sensors):
     # Get the numbers
     number_charging_speed: EVSmartChargingNumberChargingSpeed = hass.data[
         "entity_components"
-    ][NUMBER].get_entity("number.none_charging_speed")
+    ][NUMBER].get_entity("number.ev_smart_charging_charging_speed")
     number_price_limit: EVSmartChargingNumberPriceLimit = hass.data[
         "entity_components"
-    ][NUMBER].get_entity("number.none_electricity_price_limit")
+    ][NUMBER].get_entity("number.ev_smart_charging_electricity_price_limit")
     number_min_soc: EVSmartChargingNumberMinSOC = hass.data["entity_components"][
         NUMBER
-    ].get_entity("number.none_minimum_ev_soc")
+    ].get_entity("number.ev_smart_charging_minimum_ev_soc")
     number_opportunistic: EVSmartChargingNumberOpportunistic = hass.data[
         "entity_components"
-    ][NUMBER].get_entity("number.none_opportunistic_level")
+    ][NUMBER].get_entity("number.ev_smart_charging_opportunistic_level")
     assert number_charging_speed
     assert number_price_limit
     assert number_min_soc
@@ -138,7 +138,7 @@ async def test_number_restore(
 
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test", title="none"
+        domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test", title="ev_smart_charging"
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
@@ -148,7 +148,7 @@ async def test_number_restore(
 
     number_charging_speed: EVSmartChargingNumberChargingSpeed = hass.data[
         "entity_components"
-    ][NUMBER].get_entity("number.none_charging_speed")
+    ][NUMBER].get_entity("number.ev_smart_charging_charging_speed")
 
     await number_charging_speed.async_set_native_value(45)
     assert number_charging_speed.native_value == 45

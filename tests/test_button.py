@@ -33,7 +33,7 @@ async def test_button(hass, bypass_validate_input_sensors):
     """Test buttons."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test", title="none"
+        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test", title="ev_smart_charging"
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
@@ -53,10 +53,10 @@ async def test_button(hass, bypass_validate_input_sensors):
     # Get the buttons
     button_start: EVSmartChargingButtonStart = hass.data["entity_components"][
         BUTTON
-    ].get_entity("button.none_manually_start_charging")
+    ].get_entity("button.ev_smart_charging_manually_start_charging")
     button_stop: EVSmartChargingButtonStop = hass.data["entity_components"][
         BUTTON
-    ].get_entity("button.none_manually_stop_charging")
+    ].get_entity("button.ev_smart_charging_manually_stop_charging")
     assert button_start
     assert button_stop
     assert isinstance(button_start, EVSmartChargingButtonStart)

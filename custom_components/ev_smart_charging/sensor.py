@@ -36,6 +36,7 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
         super().__init__(entry)
         id_name = self._entity_key.replace("_", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, SENSOR, id_name])
+        self.set_entity_id(SENSOR, self._entity_key)
 
 class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""

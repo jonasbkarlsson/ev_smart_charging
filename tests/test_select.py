@@ -42,7 +42,7 @@ async def test_select(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test", title="none"
+        domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test", title="ev_smart_charging"
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
@@ -62,10 +62,10 @@ async def test_select(hass, bypass_validate_input_sensors):
     # Get the selects
     select_start_hour: EVSmartChargingSelectStartHour = hass.data["entity_components"][
         SELECT
-    ].get_entity("select.none_charge_start_time")
+    ].get_entity("select.ev_smart_charging_charge_start_time")
     select_ready_hour: EVSmartChargingSelectReadyHour = hass.data["entity_components"][
         SELECT
-    ].get_entity("select.none_charge_completion_time")
+    ].get_entity("select.ev_smart_charging_charge_completion_time")
     assert select_start_hour
     assert select_ready_hour
     assert isinstance(select_start_hour, EVSmartChargingSelectStartHour)
@@ -100,7 +100,7 @@ def mock_last_state_select_fixture():
     """Mock last state."""
 
     restored: State = State(
-        entity_id="select.none_charge_completion_time", state="11:00"
+        entity_id="select.ev_smart_charging_charge_completion_time", state="11:00"
     )
     with patch(
         "homeassistant.helpers.restore_state.RestoreEntity.async_get_last_state",
@@ -116,7 +116,7 @@ async def test_select_restore(
 
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test", title="none"
+        domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test", title="ev_smart_charging"
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
@@ -126,7 +126,7 @@ async def test_select_restore(
 
     select_ready_hour: EVSmartChargingSelectReadyHour = hass.data["entity_components"][
         SELECT
-    ].get_entity("select.none_charge_completion_time")
+    ].get_entity("select.ev_smart_charging_charge_completion_time")
 
     await select_ready_hour.async_select_option("10:00")
     assert select_ready_hour.state == "10:00"
