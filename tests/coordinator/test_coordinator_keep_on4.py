@@ -243,3 +243,68 @@ async def test_coordinator_keep_on_issue104(
 
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()
+
+
+async def test_coordinator_keep_on_issue237(
+    hass: HomeAssistant, set_cet_timezone, freezer
+):
+    """Test Coordinator."""
+
+    # Test a specific case with keep_on, where keep_on is activated and target SOC is changed to
+    # a higher value than the currect SOC. This should turn off the charger and
+    # calculate a new charging schedule
+
+    freezer.move_to("2022-09-30T14:00:00+02:00")
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+    MockSOCEntity.create(hass, entity_registry, "40")
+    MockTargetSOCEntity.create(hass, entity_registry, "80")
+    MockPriceEntity.create(hass, entity_registry, 123)
+    MockChargerEntity.create(hass, entity_registry, STATE_OFF)
+
+    config_entry = MockConfigEntry(
+        domain=DOMAIN, data=MOCK_CONFIG_KEEP_ON2, entry_id="test"
+    )
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
+    config_entry.add_to_hass(hass)
+    assert await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    assert coordinator is not None
+
+    # Provide price
+    MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
+    MockSOCEntity.set_state(hass, "80")
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
+    assert coordinator.tomorrow_valid
+
+    # Turn on switches
+    await coordinator.switch_active_update(True)
+    await coordinator.switch_apply_limit_update(False)
+    await coordinator.switch_continuous_update(True)
+    await coordinator.switch_ev_connected_update(True)
+    await coordinator.switch_keep_on_update(True)
+    await hass.async_block_till_done()
+
+    assert coordinator.auto_charging_state == STATE_ON
+    assert coordinator.sensor.state == STATE_ON
+    assert coordinator.sensor.charging_is_planned is False
+
+    # Increase target SOC to above current SOC.
+    # Test with 6.0 PCT/h. Ready hour = 10:00.
+    # SOC = 80%, Target SOC = 85%
+    # This should give 1h charging, 05-06
+    MockTargetSOCEntity.set_state(hass, "85")
+    await hass.async_block_till_done()
+    assert coordinator.auto_charging_state == STATE_OFF
+    assert coordinator.sensor.state == STATE_OFF
+    assert coordinator.sensor.charging_is_planned is True
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
