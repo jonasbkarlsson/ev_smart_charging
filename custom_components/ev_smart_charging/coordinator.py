@@ -679,9 +679,10 @@ class EVSmartChargingCoordinator:
         # _LOGGER.debug("old_state = %s", old_state)
         _LOGGER.debug("new_state = %s", new_state)
 
-        # Update schedule if EV SOC Target is updated
+        # Update schedule and reset keep_on if EV SOC Target is updated
         if self.ev_target_soc_entity_id and (entity_id == self.ev_target_soc_entity_id):
             configuration_updated = True
+            self.switch_keep_on_completion_time = None
 
         # To handle non-live SOC
         if configuration_updated:
