@@ -14,6 +14,7 @@ from homeassistant.helpers.entity_registry import (
     EntityRegistry,
     async_entries_for_config_entry,
 )
+from homeassistant.util import dt
 
 from .coordinator import EVSmartChargingCoordinator
 from .const import (
@@ -47,6 +48,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         raise ConfigEntryNotReady(validation_error)
 
     hass.data[DOMAIN][entry.entry_id] = coordinator
+    coordinator.setup_timestamp = dt.now().timestamp()
 
     for platform in PLATFORMS:
         coordinator.platforms.append(platform)
