@@ -334,6 +334,7 @@ class EVSmartChargingCoordinator:
             # Initialization is assumed to be finished in 5 seconds.
             if self.is_during_intialization():
                 turn_on_charging = False
+                _LOGGER.debug("is_during_intialization() = True")
 
             # Handle connected EV for EV controlled charging
             if self.after_ev_connected:
