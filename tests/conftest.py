@@ -98,3 +98,22 @@ def skip_update_hourly_fixture():
         "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.update_hourly"
     ):
         yield
+
+# This fixture is used to prevent calls to update_initial().
+@pytest.fixture(name="skip_update_initial", autouse=True)
+def skip_update_initial_fixture():
+    """Skip update_initial."""
+    with patch(
+        "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.update_initial"
+    ):
+        yield
+
+# This fixture will result in calls to is_during_intialization to return False.
+@pytest.fixture(name="bypass_is_during_intialization", autouse=True)
+def bypass_is_during_intialization_fixture():
+    """Skip calls to check if initialization is on-going."""
+    with patch(
+        "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.is_during_intialization",
+        return_value=False,
+    ):
+        yield

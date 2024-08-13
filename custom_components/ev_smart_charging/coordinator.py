@@ -33,6 +33,7 @@ from homeassistant.helpers.device_registry import EVENT_DEVICE_REGISTRY_UPDATED
 from homeassistant.helpers.device_registry import async_get as async_device_registry_get
 from homeassistant.helpers.device_registry import DeviceRegistry
 from homeassistant.helpers.event import (
+    async_call_later,
     async_track_state_change,
     async_track_time_change,
     async_track_state_change_event,
@@ -101,6 +102,7 @@ class EVSmartChargingCoordinator:
         self.config_entry = config_entry
         self.platforms = []
         self.listeners = []
+        self.setup_timestamp = None
 
         self.sensor = None
         self.sensor_status = None
@@ -190,6 +192,10 @@ class EVSmartChargingCoordinator:
         self.listeners.append(
             hass.bus.async_listen(EVENT_DEVICE_REGISTRY_UPDATED, self.device_updated)
         )
+        # Update state once after intitialization
+        self.listeners.append(
+            async_call_later(hass, 10.0, self.update_initial)
+        )
 
     def unsubscribe_listeners(self):
         """Unsubscribed to listeners"""
@@ -227,6 +233,21 @@ class EVSmartChargingCoordinator:
         """Called every hour"""
         _LOGGER.debug("EVSmartChargingCoordinator.update_hourly()")
         await self.update_sensors()
+
+    @callback
+    async def update_initial(
+        self, date_time: datetime = None
+    ):  # pylint: disable=unused-argument
+        """Called once"""
+        _LOGGER.debug("EVSmartChargingCoordinator.update_initial()")
+        await self.update_configuration()
+
+    def is_during_intialization(self) -> bool:
+        """Checks if the integration is being intialized"""
+        # Assumes initialization takes less than 5 seconds.
+        now_timestamp = dt.now().timestamp()
+        time_since_start = now_timestamp - self.setup_timestamp
+        return time_since_start < 5
 
     @callback
     async def update_state(
@@ -309,7 +330,12 @@ class EVSmartChargingCoordinator:
                         # Keep charger on.
                         turn_on_charging = True
 
-            # Handle conencted EV for EV controlled charging
+            # Don't turn on charging if initialization is not complete.
+            # Initialization is assumed to be finished in 5 seconds.
+            if self.is_during_intialization():
+                turn_on_charging = False
+
+            # Handle connected EV for EV controlled charging
             if self.after_ev_connected:
                 self.after_ev_connected = False
                 # Make sure charging command is sent
