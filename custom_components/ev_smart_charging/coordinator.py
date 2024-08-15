@@ -337,7 +337,7 @@ class EVSmartChargingCoordinator:
                 _LOGGER.debug("is_during_intialization() = True")
 
             # Handle connected EV for EV controlled charging
-            if self.after_ev_connected:
+            if self.after_ev_connected and not self.is_during_intialization():
                 self.after_ev_connected = False
                 # Make sure charging command is sent
                 current_value = not turn_on_charging
