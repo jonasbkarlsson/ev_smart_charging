@@ -4,7 +4,6 @@ from typing import Any, Optional
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import MAJOR_VERSION, MINOR_VERSION
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
@@ -14,8 +13,15 @@ from .const import (
     CONF_EV_CONTROLLED,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
+    CONF_GRID_USAGE_SENSOR,
+    CONF_GRID_VOLTAGE,
+    CONF_MAX_CHARGING_AMPS,
+    CONF_MIN_CHARGING_AMPS,
     CONF_PRICE_SENSOR,
     CONF_CHARGER_ENTITY,
+    CONF_SOLAR_CHARGING_ENABLED,
+    CONF_SOLAR_CHARGING_OFF_DELAY,
+    CONF_THREE_PHASE_CHARGING,
     DOMAIN,
 )
 from .helpers.config_flow import DeviceNameCreator, FindEntity, FlowValidator
@@ -27,7 +33,7 @@ _LOGGER = logging.getLogger(__name__)
 class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow."""
 
-    VERSION = 6
+    VERSION = 7
     user_input: Optional[dict[str, Any]]
 
     def __init__(self):
@@ -63,6 +69,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ] = FindEntity.find_vw_target_soc_sensor(self.hass)
             user_input[CONF_CHARGER_ENTITY] = FindEntity.find_ocpp_device(self.hass)
             user_input[CONF_EV_CONTROLLED] = False
+            user_input[CONF_SOLAR_CHARGING_ENABLED] = False
 
         else:
             # process user_input
@@ -72,9 +79,12 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             if not self._errors:
                 self.user_input = user_input
-                return self.async_create_entry(
-                    title=user_input[CONF_DEVICE_NAME], data=self.user_input
-                )
+                if user_input[CONF_SOLAR_CHARGING_ENABLED]:
+                    return await self.async_step_solar()
+                else:
+                    return self.async_create_entry(
+                        title=user_input[CONF_DEVICE_NAME], data=self.user_input
+                    )
 
         return await self._show_config_form_user(user_input)
 
@@ -100,6 +110,9 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Optional(
                 CONF_EV_CONTROLLED, default=user_input[CONF_EV_CONTROLLED]
             ): cv.boolean,
+            vol.Optional(
+                CONF_SOLAR_CHARGING_ENABLED, default=user_input[CONF_SOLAR_CHARGING_ENABLED]
+            ): cv.boolean,
         }
 
         return self.async_show_form(
@@ -109,6 +122,68 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             last_step=True,
         )
 
+    async def async_step_solar(self, user_input=None):
+        """Configuraton of Solar charging"""
+        _LOGGER.debug("EVChargingControlConfigFlow.async_step_solar")
+        self._errors = {}
+
+        if user_input is None:
+            user_input = {}
+            # Provide defaults for form
+            user_input[CONF_GRID_USAGE_SENSOR] = ""
+            user_input[CONF_GRID_VOLTAGE] = 235 # [V]
+            user_input[CONF_MAX_CHARGING_AMPS] = 16 # [A]
+            user_input[CONF_MIN_CHARGING_AMPS] = 6 # [A]
+            user_input[CONF_THREE_PHASE_CHARGING] = False
+            user_input[CONF_SOLAR_CHARGING_OFF_DELAY] = 5 # [minutes]
+
+        else:
+            # process user_input
+            #TODO: error = FlowValidator.validate_step_solar(self.hass, user_input)
+            error = None
+            if error is not None:
+                self._errors[error[0]] = error[1]
+
+            if not self._errors:
+                self.user_input = self.user_input | user_input
+                return self.async_create_entry(
+                    title=self.user_input[CONF_DEVICE_NAME], data=self.user_input
+                )
+
+        return await self._show_config_form_solar(user_input)
+
+    async def _show_config_form_solar(self, user_input):
+        """Show the configuration form."""
+
+        positive_int = vol.All(vol.Coerce(int), vol.Range(min=1))
+
+        user_schema = {
+            vol.Required(
+                CONF_GRID_USAGE_SENSOR, default=user_input[CONF_GRID_USAGE_SENSOR]
+            ): cv.string,
+            vol.Required(
+                CONF_GRID_VOLTAGE, default=user_input[CONF_GRID_VOLTAGE]
+            ): positive_int,
+            vol.Required(
+                CONF_MAX_CHARGING_AMPS, default=user_input[CONF_MAX_CHARGING_AMPS]
+            ): positive_int,
+            vol.Required(
+                CONF_MIN_CHARGING_AMPS, default=user_input[CONF_MIN_CHARGING_AMPS]
+            ): positive_int,
+            vol.Required(
+                CONF_THREE_PHASE_CHARGING, default=user_input[CONF_THREE_PHASE_CHARGING]
+            ): cv.boolean,
+            vol.Required(
+                CONF_SOLAR_CHARGING_OFF_DELAY, default=user_input[CONF_SOLAR_CHARGING_OFF_DELAY]
+            ): positive_int,
+        }
+
+        return self.async_show_form(
+            step_id="solar",
+            data_schema=vol.Schema(user_schema),
+            errors=self._errors,
+            last_step=True,
+        )
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
     """Options flow handler"""

@@ -70,6 +70,13 @@ CONF_OPPORTUNISTIC_LEVEL = "opportunistic_level"
 CONF_LOW_PRICE_CHARGING_LEVEL = "low_price_charging_level"
 CONF_LOW_SOC_CHARGING_LEVEL = "low_soc_charging_level"
 CONF_MIN_SOC = "min_soc"
+CONF_SOLAR_CHARGING_ENABLED = "solar_charging_enabled"
+CONF_GRID_USAGE_SENSOR = "grid_usage_sensor"
+CONF_GRID_VOLTAGE = "grid_voltage"
+CONF_MAX_CHARGING_AMPS = "max_charging_amps"
+CONF_MIN_CHARGING_AMPS = "min_charging_amps"
+CONF_THREE_PHASE_CHARGING = "three_phase_charging"
+CONF_SOLAR_CHARGING_OFF_DELAY = "solar_charging_off_delay"
 
 HOURS = [
     "None",

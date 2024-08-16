@@ -9,7 +9,19 @@
                     "ev_soc_sensor": "EV SOC entity",
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
                     "charger_entity": "Charger control switch (single space to remove)",
-                    "ev_controlled": "An EV integration will control start/stop of charging"
+                    "ev_controlled": "An EV integration will control start/stop of charging",
+                    "solar_charging_enabled": "Enable charging using solar power"
+                }
+            },
+            "solar": {
+                "description": "Configuration of charging using solar power.",
+                "data": {
+                    "grid_usage_sensor": "Grid usage sensor [W]",
+                    "grid_voltage": "Grid voltage [V]",
+                    "max_charging_amps": "Maximum charging current [A]",
+                    "min_charging_amps": "Minimum charging current [A]",
+                    "three_phase_charging": "Three-phase charging",
+                    "solar_charging_off_delay": "Time delay for ending solar power based charging"
                 }
             }
         },

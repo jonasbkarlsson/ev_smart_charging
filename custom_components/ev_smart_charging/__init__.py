@@ -19,10 +19,17 @@ from homeassistant.util import dt
 from .coordinator import EVSmartChargingCoordinator
 from .const import (
     CONF_EV_CONTROLLED,
+    CONF_GRID_USAGE_SENSOR,
+    CONF_GRID_VOLTAGE,
     CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_LOW_SOC_CHARGING_LEVEL,
+    CONF_MAX_CHARGING_AMPS,
+    CONF_MIN_CHARGING_AMPS,
     CONF_OPPORTUNISTIC_LEVEL,
+    CONF_SOLAR_CHARGING_ENABLED,
+    CONF_SOLAR_CHARGING_OFF_DELAY,
     CONF_START_HOUR,
+    CONF_THREE_PHASE_CHARGING,
     DOMAIN,
     STARTUP_MESSAGE,
     PLATFORMS,
@@ -152,7 +159,18 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         new[CONF_LOW_SOC_CHARGING_LEVEL] = 20.0
         migration = True
 
-    if version > 6:
+    if version == 6:
+        version = 7
+        new[CONF_SOLAR_CHARGING_ENABLED] = False
+        new[CONF_GRID_USAGE_SENSOR] = ""
+        new[CONF_GRID_VOLTAGE] = 235 # [V]
+        new[CONF_MAX_CHARGING_AMPS] = 16 # [A]
+        new[CONF_MIN_CHARGING_AMPS] = 6 # [A]
+        new[CONF_THREE_PHASE_CHARGING] = False
+        new[CONF_SOLAR_CHARGING_OFF_DELAY] = 5 # [minutes]
+        migration = True
+
+    if version > 7:
         _LOGGER.error(
             "Migration from version %s to a lower version is not possible",
             version,
