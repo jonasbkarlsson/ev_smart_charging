@@ -139,8 +139,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         else:
             # process user_input
-            #TODO: error = FlowValidator.validate_step_solar(self.hass, user_input)
-            error = None
+            error = FlowValidator.validate_step_solar(self.hass, user_input)
             if error is not None:
                 self._errors[error[0]] = error[1]
 

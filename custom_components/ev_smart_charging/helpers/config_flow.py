@@ -19,6 +19,9 @@ from ..const import (
     CONF_CHARGER_ENTITY,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
+    CONF_GRID_USAGE_SENSOR,
+    CONF_MAX_CHARGING_AMPS,
+    CONF_MIN_CHARGING_AMPS,
     DOMAIN,
     NAME,
     PLATFORM_ENERGIDATASERVICE,
@@ -100,6 +103,25 @@ class FlowValidator:
 
         return None
 
+    @staticmethod
+    def validate_step_solar(
+        hass: HomeAssistant, user_input: dict[str, Any]
+    ) -> list[str]:
+        """Validate step_solar"""
+
+        # Validate grid_usage entity
+        entity = hass.states.get(user_input[CONF_GRID_USAGE_SENSOR])
+        if entity is None:
+            return ("base", "grid_usage_not_found")
+        if not Validator.is_float(entity.state):
+            _LOGGER.debug("Grid usage state is not float")
+            return ("base", "grid_usage_invalid_data")
+
+        if user_input[CONF_MAX_CHARGING_AMPS] < user_input[CONF_MIN_CHARGING_AMPS]:
+            _LOGGER.debug("Maximum charging current is smaller than minimum")
+            return ("base", "max_charging_amps_smaller_than_min")
+
+        return None
 
 class FindEntity:
     """Find entities"""
