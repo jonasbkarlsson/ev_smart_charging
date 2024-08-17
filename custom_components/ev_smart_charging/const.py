@@ -35,6 +35,7 @@ PLATFORM_GENERIC = "generic"
 
 # Entity keys
 ENTITY_KEY_CHARGING_SENSOR = "charging"
+ENTITY_KEY_CHARGING_CURRENT_SENSOR = "charging_current"
 ENTITY_KEY_STATUS_SENSOR = "status"
 ENTITY_KEY_ACTIVE_SWITCH = "smart_charging_activated"
 ENTITY_KEY_APPLY_LIMIT_SWITCH = "apply_price_limit"

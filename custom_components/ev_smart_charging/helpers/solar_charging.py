@@ -14,6 +14,9 @@ from custom_components.ev_smart_charging.const import (
     CONF_THREE_PHASE_CHARGING,
 )
 from custom_components.ev_smart_charging.helpers.general import get_parameter
+from custom_components.ev_smart_charging.sensor import (
+    EVSmartChargingSensorChargingCurrent,
+)
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -22,27 +25,42 @@ _LOGGER = logging.getLogger(__name__)
 class SolarCharging:
     """SolarCharging class"""
 
-    def __init__(self, config_entry: ConfigEntry) -> None:
+    def __init__(
+        self,
+        config_entry: ConfigEntry,
+    ) -> None:
         self.grid_usage = 0
         self.grid_usage_timestamp = dt.now().timestamp()
-        self.grid_voltage = get_parameter(config_entry, CONF_GRID_VOLTAGE)
+        self.grid_voltage = float(get_parameter(config_entry, CONF_GRID_VOLTAGE))
         if get_parameter(config_entry, CONF_THREE_PHASE_CHARGING):
             self.number_of_phases = 3
         else:
             self.number_of_phases = 1
         self.current_charging_amps = 0
-        self.min_charging_amps = get_parameter(config_entry, CONF_MIN_CHARGING_AMPS)
-        self.max_charging_amps = get_parameter(config_entry, CONF_MAX_CHARGING_AMPS)
+        self.min_charging_amps = float(
+            get_parameter(config_entry, CONF_MIN_CHARGING_AMPS)
+        )
+        self.max_charging_amps = float(
+            get_parameter(config_entry, CONF_MAX_CHARGING_AMPS)
+        )
         self.low_power_timestamp = None
-        self.solar_charging_off_delay = get_parameter(
-            config_entry, CONF_SOLAR_CHARGING_OFF_DELAY
+        self.solar_charging_off_delay = float(
+            get_parameter(config_entry, CONF_SOLAR_CHARGING_OFF_DELAY)
         )  # [minutes]
+        self.sensor_charging_current = None
+
+    def set_charging_current_sensor(
+        self, sensor_charging_current: EVSmartChargingSensorChargingCurrent
+    ) -> None:
+        """Store sensors."""
+        self.sensor_charging_current = sensor_charging_current
 
     def update_grid_usage(self, grid_usage: float) -> None:
         """New value of grid usage received"""
         timestamp = dt.now().timestamp()
         # Don't update charging current more than once per 10 seconds
-        if (timestamp - self.grid_usage_timestamp) > 10:
+        if (timestamp - self.grid_usage_timestamp) >= 10:
+            self.grid_usage_timestamp = timestamp
             self.grid_usage = grid_usage
 
             available_amps = (
@@ -61,6 +79,8 @@ class SolarCharging:
 
             if proposed_charging_amps < self.min_charging_amps:
                 timestamp = dt.now().timestamp()
+                if not self.low_power_timestamp:
+                    self.low_power_timestamp = timestamp
                 if (timestamp - self.low_power_timestamp) > (
                     60 * self.solar_charging_off_delay
                 ):
@@ -68,5 +88,6 @@ class SolarCharging:
                     new_charging_amps = 0
 
             if new_charging_amps != self.current_charging_amps:
-                # TODO: update charging current sensor
+                if self.sensor_charging_current:
+                    self.sensor_charging_current.set_charging_current(new_charging_amps)
                 self.current_charging_amps = new_charging_amps

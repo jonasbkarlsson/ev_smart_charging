@@ -1,4 +1,5 @@
 """Sensor platform for EV Smart Charging."""
+
 import logging
 
 from homeassistant.components.sensor import SensorEntity
@@ -8,6 +9,7 @@ from homeassistant.const import STATE_OFF
 
 from .const import (
     DOMAIN,
+    ENTITY_KEY_CHARGING_CURRENT_SENSOR,
     ENTITY_KEY_CHARGING_SENSOR,
     ENTITY_KEY_STATUS_SENSOR,
     SENSOR,
@@ -24,6 +26,7 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_devices):
     sensors = []
     sensors.append(EVSmartChargingSensorCharging(entry))
     sensors.append(EVSmartChargingSensorStatus(entry))
+    sensors.append(EVSmartChargingSensorChargingCurrent(entry))
     async_add_devices(sensors)
     await coordinator.add_sensor(sensors)
 
@@ -37,6 +40,7 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
         id_name = self._entity_key.replace("_", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, SENSOR, id_name])
         self.set_entity_id(SENSOR, self._entity_key)
+
 
 class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""
@@ -183,5 +187,20 @@ class EVSmartChargingSensorStatus(EVSmartChargingSensor):
 
     def set_status(self, new_status):
         """Set new status."""
+        self._attr_native_value = new_status
+        self.update_ha_state()
+
+
+class EVSmartChargingSensorChargingCurrent(EVSmartChargingSensor):
+    """EV Smart Charging sensor class."""
+
+    _entity_key = ENTITY_KEY_CHARGING_CURRENT_SENSOR
+
+    def __init__(self, entry):
+        _LOGGER.debug("EVSmartChargingSensorChargingCurrent.__init__()")
+        super().__init__(entry)
+
+    def set_charging_current(self, new_status):
+        """Set new current."""
         self._attr_native_value = new_status
         self.update_ha_state()

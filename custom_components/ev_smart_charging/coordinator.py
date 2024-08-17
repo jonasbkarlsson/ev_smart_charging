@@ -91,6 +91,7 @@ from .helpers.general import Validator, get_parameter, get_platform
 from .sensor import (
     EVSmartChargingSensor,
     EVSmartChargingSensorCharging,
+    EVSmartChargingSensorChargingCurrent,
     EVSmartChargingSensorStatus,
 )
 
@@ -110,6 +111,7 @@ class EVSmartChargingCoordinator:
 
         self.sensor = None
         self.sensor_status = None
+        self.sensor_charging_current = None
         self.switch_active = None
         self.switch_apply_limit = None
         self.switch_apply_limit_entity_id = None
@@ -200,9 +202,10 @@ class EVSmartChargingCoordinator:
         self.listeners.append(async_call_later(hass, 10.0, self.update_initial))
 
         # Solar charging
-        self.solar_charging = SolarCharging(config_entry)
+        self.solar_charging = None
         self.solar_grid_usage_entity_id = None
         if get_parameter(self.config_entry, CONF_SOLAR_CHARGING_ENABLED, False):
+            self.solar_charging = SolarCharging(config_entry)
             self.solar_grid_usage_entity_id = get_parameter(
                 self.config_entry, CONF_GRID_USAGE_SENSOR
             )
@@ -486,6 +489,10 @@ class EVSmartChargingCoordinator:
                 self.sensor = sensor
             if isinstance(sensor, EVSmartChargingSensorStatus):
                 self.sensor_status = sensor
+            if isinstance(sensor, EVSmartChargingSensorChargingCurrent):
+                self.sensor_charging_current = sensor
+                if self.solar_charging:
+                    self.solar_charging.set_charging_current_sensor(sensor)
 
         self.price_entity_id = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
         self.price_adaptor.set_price_platform(
@@ -739,10 +746,8 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("new_state = %s", new_state)
 
         # Handle Solar Charging
-        if self.solar_grid_usage_entity_id and (
-            entity_id == self.solar_grid_usage_entity_id
-        ):
-            self.solar_charging.update_grid_usage(new_state.state)
+        if self.solar_charging and (entity_id == self.solar_grid_usage_entity_id):
+            self.solar_charging.update_grid_usage(float(new_state.state))
             await self.update_state()
             return
 
