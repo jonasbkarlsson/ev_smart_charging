@@ -1,0 +1,72 @@
+"""SolarCharging class"""
+
+import logging
+import math
+
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.util import dt
+
+from custom_components.ev_smart_charging.const import (
+    CONF_GRID_VOLTAGE,
+    CONF_MAX_CHARGING_AMPS,
+    CONF_MIN_CHARGING_AMPS,
+    CONF_SOLAR_CHARGING_OFF_DELAY,
+    CONF_THREE_PHASE_CHARGING,
+)
+from custom_components.ev_smart_charging.helpers.general import get_parameter
+
+
+_LOGGER = logging.getLogger(__name__)
+
+
+class SolarCharging:
+    """SolarCharging class"""
+
+    def __init__(self, config_entry: ConfigEntry) -> None:
+        self.grid_usage = 0
+        self.grid_usage_timestamp = dt.now().timestamp()
+        self.grid_voltage = get_parameter(config_entry, CONF_GRID_VOLTAGE)
+        if get_parameter(config_entry, CONF_THREE_PHASE_CHARGING):
+            self.number_of_phases = 3
+        else:
+            self.number_of_phases = 1
+        self.current_charging_amps = 0
+        self.min_charging_amps = get_parameter(config_entry, CONF_MIN_CHARGING_AMPS)
+        self.max_charging_amps = get_parameter(config_entry, CONF_MAX_CHARGING_AMPS)
+        self.low_power_timestamp = None
+        self.solar_charging_off_delay = get_parameter(
+            config_entry, CONF_SOLAR_CHARGING_OFF_DELAY
+        )  # [minutes]
+
+    def update_grid_usage(self, grid_usage: float) -> None:
+        """New value of grid usage received"""
+        timestamp = dt.now().timestamp()
+        # Don't update charging current more than once per 10 seconds
+        if (timestamp - self.grid_usage_timestamp) > 10:
+            self.grid_usage = grid_usage
+
+            available_amps = (
+                -self.grid_usage / self.grid_voltage
+            ) / self.number_of_phases
+            proposed_charging_amps = available_amps + self.current_charging_amps
+            new_charging_amps = math.floor(
+                min(
+                    max(proposed_charging_amps, self.min_charging_amps),
+                    self.max_charging_amps,
+                )
+            )
+
+            if proposed_charging_amps >= self.min_charging_amps:
+                self.low_power_timestamp = None
+
+            if proposed_charging_amps < self.min_charging_amps:
+                timestamp = dt.now().timestamp()
+                if (timestamp - self.low_power_timestamp) > (
+                    60 * self.solar_charging_off_delay
+                ):
+                    # Too low solar power for too long time
+                    new_charging_amps = 0
+
+            if new_charging_amps != self.current_charging_amps:
+                # TODO: update charging current sensor
+                self.current_charging_amps = new_charging_amps

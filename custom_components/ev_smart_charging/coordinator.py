@@ -19,6 +19,8 @@ from homeassistant.core import (
     Event,
 )
 
+from custom_components.ev_smart_charging.helpers.solar_charging import SolarCharging
+
 try:
     from homeassistant.core import (  # pylint: disable=no-name-in-module, unused-import
         EventStateChangedData,
@@ -60,6 +62,7 @@ from .const import (
     CHARGING_STATUS_LOW_SOC_CHARGING,
     CONF_CHARGER_ENTITY,
     CONF_EV_CONTROLLED,
+    CONF_GRID_USAGE_SENSOR,
     CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_LOW_SOC_CHARGING_LEVEL,
     CONF_MAX_PRICE,
@@ -70,6 +73,7 @@ from .const import (
     CONF_PRICE_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
+    CONF_SOLAR_CHARGING_ENABLED,
     CONF_START_HOUR,
     DEFAULT_TARGET_SOC,
     READY_HOUR_NONE,
@@ -193,9 +197,37 @@ class EVSmartChargingCoordinator:
             hass.bus.async_listen(EVENT_DEVICE_REGISTRY_UPDATED, self.device_updated)
         )
         # Update state once after intitialization
-        self.listeners.append(
-            async_call_later(hass, 10.0, self.update_initial)
-        )
+        self.listeners.append(async_call_later(hass, 10.0, self.update_initial))
+
+        # Solar charging
+        self.solar_charging = SolarCharging(config_entry)
+        self.solar_grid_usage_entity_id = None
+        if get_parameter(self.config_entry, CONF_SOLAR_CHARGING_ENABLED, False):
+            self.solar_grid_usage_entity_id = get_parameter(
+                self.config_entry, CONF_GRID_USAGE_SENSOR
+            )
+            if MAJOR_VERSION <= 2023 or (MAJOR_VERSION == 2024 and MINOR_VERSION <= 5):
+                # Use for Home Assistant 2024.5 or older
+                self.listeners.append(
+                    async_track_state_change(
+                        self.hass,
+                        [
+                            self.solar_grid_usage_entity_id,
+                        ],
+                        self.update_sensors,
+                    )
+                )
+            else:
+                # Use for Home Assistant 2024.6 or newer
+                self.listeners.append(
+                    async_track_state_change_event(
+                        self.hass,
+                        [
+                            self.solar_grid_usage_entity_id,
+                        ],
+                        self.update_sensors_new,
+                    )
+                )
 
     def unsubscribe_listeners(self):
         """Unsubscribed to listeners"""
@@ -706,6 +738,14 @@ class EVSmartChargingCoordinator:
         # _LOGGER.debug("old_state = %s", old_state)
         _LOGGER.debug("new_state = %s", new_state)
 
+        # Handle Solar Charging
+        if self.solar_grid_usage_entity_id and (
+            entity_id == self.solar_grid_usage_entity_id
+        ):
+            self.solar_charging.update_grid_usage(new_state.state)
+            await self.update_state()
+            return
+
         # Update schedule and reset keep_on if EV SOC Target is updated
         if self.ev_target_soc_entity_id and (entity_id == self.ev_target_soc_entity_id):
             configuration_updated = True
@@ -758,8 +798,10 @@ class EVSmartChargingCoordinator:
             # Most likely due to the price entity updating its state in multiple steps,
             # resulting in invalid information before all the updates have been done.
             if dt.now().hour == 0 and dt.now().minute < 10:
-                _LOGGER.debug("Price sensor not valid directly after midnight. " \
-                              "Can usually be ignored.")
+                _LOGGER.debug(
+                    "Price sensor not valid directly after midnight. "
+                    "Can usually be ignored."
+                )
                 _LOGGER.debug("Price state: %s", price_state)
             else:
                 _LOGGER.error("Price sensor not valid")
