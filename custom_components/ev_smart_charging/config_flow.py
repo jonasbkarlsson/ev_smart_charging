@@ -191,6 +191,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Initialize options flow."""
         self.config_entry = config_entry
         self._errors = {}
+        self.user_input = {}
 
     async def async_step_init(self, user_input) -> FlowResult:
         """Manage the options."""
@@ -205,9 +206,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 self._errors[error[0]] = error[1]
 
             if not self._errors:
-                return self.async_create_entry(
-                    title=self.config_entry.title, data=user_input
-                )
+                self.user_input = user_input
+                if user_input[CONF_SOLAR_CHARGING_ENABLED]:
+                    return await self.async_step_solar()
+                else:
+                    return self.async_create_entry(
+                        title=self.config_entry.title, data=self.user_input
+                    )
 
         user_schema = {
             vol.Required(
@@ -230,10 +235,68 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_EV_CONTROLLED,
                 default=get_parameter(self.config_entry, CONF_EV_CONTROLLED),
             ): cv.boolean,
+            vol.Optional(
+                CONF_SOLAR_CHARGING_ENABLED,
+                default=get_parameter(self.config_entry, CONF_SOLAR_CHARGING_ENABLED),
+            ): cv.boolean,
         }
 
         return self.async_show_form(
             step_id="init",
+            data_schema=vol.Schema(user_schema),
+            errors=self._errors,
+            last_step=False,
+        )
+
+    async def async_step_solar(self, user_input=None) -> FlowResult:
+        """Manage the options."""
+
+        positive_int = vol.All(vol.Coerce(int), vol.Range(min=1))
+
+        self._errors = {}
+
+        if user_input is not None:
+            # process user_input
+            error = FlowValidator.validate_step_solar(self.hass, user_input)
+
+            if error is not None:
+                self._errors[error[0]] = error[1]
+
+            if not self._errors:
+                self.user_input = self.user_input | user_input
+                return self.async_create_entry(
+                    title=self.config_entry.title, data=self.user_input
+                )
+
+        user_schema = {
+            vol.Required(
+                CONF_GRID_USAGE_SENSOR,
+                default=get_parameter(self.config_entry, CONF_GRID_USAGE_SENSOR),
+            ): cv.string,
+            vol.Required(
+                CONF_GRID_VOLTAGE,
+                default=get_parameter(self.config_entry, CONF_GRID_VOLTAGE),
+            ): positive_int,
+            vol.Required(
+                CONF_MAX_CHARGING_AMPS,
+                default=get_parameter(self.config_entry, CONF_MAX_CHARGING_AMPS),
+            ): positive_int,
+            vol.Required(
+                CONF_MIN_CHARGING_AMPS,
+                default=get_parameter(self.config_entry, CONF_MIN_CHARGING_AMPS),
+            ): positive_int,
+            vol.Required(
+                CONF_THREE_PHASE_CHARGING,
+                default=get_parameter(self.config_entry, CONF_THREE_PHASE_CHARGING),
+            ): cv.boolean,
+            vol.Required(
+                CONF_SOLAR_CHARGING_OFF_DELAY,
+                default=get_parameter(self.config_entry, CONF_SOLAR_CHARGING_OFF_DELAY),
+            ): positive_int,
+        }
+
+        return self.async_show_form(
+            step_id="solar",
             data_schema=vol.Schema(user_schema),
             errors=self._errors,
             last_step=True,
