@@ -10,7 +10,7 @@
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
                     "charger_entity": "Charger control switch (single space to remove)",
                     "ev_controlled": "An EV integration will control start/stop of charging",
-                    "solar_charging_enabled": "Enable charging using solar power"
+                    "solar_charging_configured": "Configure charging using solar power"
                 }
             },
             "solar": {
@@ -50,7 +50,7 @@
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
                     "charger_entity": "Charger control switch (single space to remove)",
                     "ev_controlled": "An EV integration will control start/stop of charging",
-                    "solar_charging_enabled": "Enable charging using solar power"
+                    "solar_charging_configured": "Configure charging using solar power"
                 }
             },
             "solar": {

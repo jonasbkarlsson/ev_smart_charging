@@ -73,7 +73,7 @@ from .const import (
     CONF_PRICE_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
-    CONF_SOLAR_CHARGING_ENABLED,
+    CONF_SOLAR_CHARGING_CONFIGURED,
     CONF_START_HOUR,
     DEFAULT_TARGET_SOC,
     READY_HOUR_NONE,
@@ -204,7 +204,7 @@ class EVSmartChargingCoordinator:
         # Solar charging
         self.solar_charging = None
         self.solar_grid_usage_entity_id = None
-        if get_parameter(self.config_entry, CONF_SOLAR_CHARGING_ENABLED, False):
+        if get_parameter(self.config_entry, CONF_SOLAR_CHARGING_CONFIGURED, False):
             self.solar_charging = SolarCharging(config_entry)
             self.solar_grid_usage_entity_id = get_parameter(
                 self.config_entry, CONF_GRID_USAGE_SENSOR
@@ -214,9 +214,7 @@ class EVSmartChargingCoordinator:
                 self.listeners.append(
                     async_track_state_change(
                         self.hass,
-                        [
-                            self.solar_grid_usage_entity_id,
-                        ],
+                        [self.solar_grid_usage_entity_id],
                         self.update_sensors,
                     )
                 )
@@ -225,9 +223,7 @@ class EVSmartChargingCoordinator:
                 self.listeners.append(
                     async_track_state_change_event(
                         self.hass,
-                        [
-                            self.solar_grid_usage_entity_id,
-                        ],
+                        [self.solar_grid_usage_entity_id],
                         self.update_sensors_new,
                     )
                 )

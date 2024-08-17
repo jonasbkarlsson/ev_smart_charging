@@ -26,7 +26,7 @@ from .const import (
     CONF_MAX_CHARGING_AMPS,
     CONF_MIN_CHARGING_AMPS,
     CONF_OPPORTUNISTIC_LEVEL,
-    CONF_SOLAR_CHARGING_ENABLED,
+    CONF_SOLAR_CHARGING_CONFIGURED,
     CONF_SOLAR_CHARGING_OFF_DELAY,
     CONF_START_HOUR,
     CONF_THREE_PHASE_CHARGING,
@@ -112,8 +112,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     return unloaded
 
+
 # Global lock
 ev_smart_charging_lock = asyncio.Lock()
+
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Reload config entry."""
@@ -161,13 +163,13 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
     if version == 6:
         version = 7
-        new[CONF_SOLAR_CHARGING_ENABLED] = False
+        new[CONF_SOLAR_CHARGING_CONFIGURED] = False
         new[CONF_GRID_USAGE_SENSOR] = ""
-        new[CONF_GRID_VOLTAGE] = 235 # [V]
-        new[CONF_MAX_CHARGING_AMPS] = 16 # [A]
-        new[CONF_MIN_CHARGING_AMPS] = 6 # [A]
+        new[CONF_GRID_VOLTAGE] = 235  # [V]
+        new[CONF_MAX_CHARGING_AMPS] = 16  # [A]
+        new[CONF_MIN_CHARGING_AMPS] = 6  # [A]
         new[CONF_THREE_PHASE_CHARGING] = False
-        new[CONF_SOLAR_CHARGING_OFF_DELAY] = 5 # [minutes]
+        new[CONF_SOLAR_CHARGING_OFF_DELAY] = 5  # [minutes]
         migration = True
 
     if version > 7:
