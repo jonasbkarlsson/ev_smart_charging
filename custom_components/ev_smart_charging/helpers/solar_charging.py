@@ -43,7 +43,7 @@ class SolarCharging:
         self.max_charging_amps = float(
             get_parameter(config_entry, CONF_MAX_CHARGING_AMPS)
         )
-        self.low_power_timestamp = None
+        self.low_power_timestamp = dt.now().timestamp() - 100000  # Long time ago
         self.solar_charging_off_delay = float(
             get_parameter(config_entry, CONF_SOLAR_CHARGING_OFF_DELAY)
         )  # [minutes]
@@ -85,9 +85,14 @@ class SolarCharging:
                     60 * self.solar_charging_off_delay
                 ):
                     # Too low solar power for too long time
+                    _LOGGER.debug("Too low solar power for too long time.")
                     new_charging_amps = 0
 
             if new_charging_amps != self.current_charging_amps:
                 if self.sensor_charging_current:
+                    _LOGGER.debug(
+                        "set_charging_current(new_charging_amps) = %s",
+                        new_charging_amps,
+                    )
                     self.sensor_charging_current.set_charging_current(new_charging_amps)
                 self.current_charging_amps = new_charging_amps

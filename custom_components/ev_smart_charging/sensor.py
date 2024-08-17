@@ -2,7 +2,7 @@
 
 import logging
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.core import HomeAssistant
 from homeassistant.const import STATE_OFF
 
@@ -195,9 +195,12 @@ class EVSmartChargingSensorChargingCurrent(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""
 
     _entity_key = ENTITY_KEY_CHARGING_CURRENT_SENSOR
+    _attr_device_class = SensorDeviceClass.CURRENT
+    _attr_native_unit_of_measurement = "A"
 
     def __init__(self, entry):
         _LOGGER.debug("EVSmartChargingSensorChargingCurrent.__init__()")
+        self._attr_native_value = 0
         super().__init__(entry)
 
     def set_charging_current(self, new_status):
