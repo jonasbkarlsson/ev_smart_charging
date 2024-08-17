@@ -744,7 +744,7 @@ class EVSmartChargingCoordinator:
         # Handle Solar Charging
         if self.solar_charging and (entity_id == self.solar_grid_usage_entity_id):
             self.solar_charging.update_grid_usage(float(new_state.state))
-            await self.update_state()
+            # await self.update_state()
             return
 
         # Update schedule and reset keep_on if EV SOC Target is updated
