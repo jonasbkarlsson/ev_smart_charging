@@ -37,6 +37,7 @@ PLATFORM_GENERIC = "generic"
 ENTITY_KEY_CHARGING_SENSOR = "charging"
 ENTITY_KEY_CHARGING_CURRENT_SENSOR = "charging_current"
 ENTITY_KEY_STATUS_SENSOR = "status"
+ENTITY_KEY_SOLAR_STATUS_SENSOR = "solar_status"
 ENTITY_KEY_ACTIVE_SWITCH = "smart_charging_activated"
 ENTITY_KEY_APPLY_LIMIT_SWITCH = "apply_price_limit"
 ENTITY_KEY_CONTINUOUS_SWITCH = "continuous_charging_preferred"
@@ -118,6 +119,10 @@ CHARGING_STATUS_DISCONNECTED = "disconnected"
 CHARGING_STATUS_NOT_ACTIVE = "smart_charging_not_active"
 CHARGING_STATUS_LOW_PRICE_CHARGING = "low_price_charging"
 CHARGING_STATUS_LOW_SOC_CHARGING = "low_soc_charging"
+
+SOLAR_CHARGING_STATUS_NOT_ACTIVATED = "not_activated"
+SOLAR_CHARGING_STATUS_WAITING = "waiting"
+SOLAR_CHARGING_STATUS_CHARGING = "charging"
 
 # Defaults
 DEFAULT_NAME = DOMAIN

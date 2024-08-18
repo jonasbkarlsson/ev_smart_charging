@@ -112,6 +112,9 @@
                     "charging_schedule": {"name": "Charging schedule"}
                 }
             },
+            "charging_current": {
+                "name": "Charging current"
+            },
             "status": {
                 "name": "Status",
                 "state": {
@@ -125,7 +128,16 @@
                     "low_price_charging": "Low price charging",
                     "low_soc_charging": "Low SOC charging"
                 }
+            },
+            "solar_status": {
+                "name": "Solar based charging status",
+                "state": {
+                    "not_activated": "Not activated",
+                    "waiting": "Waiting for solar power",
+                    "charging": "Charging with solar power"
+                }
             }
+
         },
         "switch": {
             "smart_charging_activated": { "name": "Smart charging activated" },

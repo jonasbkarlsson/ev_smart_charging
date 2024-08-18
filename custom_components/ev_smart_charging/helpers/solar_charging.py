@@ -12,10 +12,13 @@ from custom_components.ev_smart_charging.const import (
     CONF_MIN_CHARGING_AMPS,
     CONF_SOLAR_CHARGING_OFF_DELAY,
     CONF_THREE_PHASE_CHARGING,
+    SOLAR_CHARGING_STATUS_CHARGING,
+    SOLAR_CHARGING_STATUS_WAITING,
 )
 from custom_components.ev_smart_charging.helpers.general import get_parameter
 from custom_components.ev_smart_charging.sensor import (
     EVSmartChargingSensorChargingCurrent,
+    EVSmartChargingSensorSolarStatus,
 )
 
 
@@ -48,12 +51,19 @@ class SolarCharging:
             get_parameter(config_entry, CONF_SOLAR_CHARGING_OFF_DELAY)
         )  # [minutes]
         self.sensor_charging_current = None
+        self.sensor_solar_status = None
 
     def set_charging_current_sensor(
         self, sensor_charging_current: EVSmartChargingSensorChargingCurrent
     ) -> None:
-        """Store sensors."""
+        """Store sensor."""
         self.sensor_charging_current = sensor_charging_current
+
+    def set_solar_status_sensor(
+        self, sensor_solar_status: EVSmartChargingSensorSolarStatus
+    ) -> None:
+        """Store sensor."""
+        self.sensor_solar_status = sensor_solar_status
 
     def update_grid_usage(self, grid_usage: float) -> None:
         """New value of grid usage received"""
@@ -95,4 +105,13 @@ class SolarCharging:
                         new_charging_amps,
                     )
                     self.sensor_charging_current.set_charging_current(new_charging_amps)
+                    if self.sensor_solar_status:
+                        if new_charging_amps == 0:
+                            self.sensor_solar_status.set_status(
+                                SOLAR_CHARGING_STATUS_WAITING
+                            )
+                        else:
+                            self.sensor_solar_status.set_status(
+                                SOLAR_CHARGING_STATUS_CHARGING
+                            )
                 self.current_charging_amps = new_charging_amps

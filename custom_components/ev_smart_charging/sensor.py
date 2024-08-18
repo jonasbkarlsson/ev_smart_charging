@@ -11,6 +11,7 @@ from .const import (
     DOMAIN,
     ENTITY_KEY_CHARGING_CURRENT_SENSOR,
     ENTITY_KEY_CHARGING_SENSOR,
+    ENTITY_KEY_SOLAR_STATUS_SENSOR,
     ENTITY_KEY_STATUS_SENSOR,
     SENSOR,
 )
@@ -27,6 +28,7 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_devices):
     sensors.append(EVSmartChargingSensorCharging(entry))
     sensors.append(EVSmartChargingSensorStatus(entry))
     sensors.append(EVSmartChargingSensorChargingCurrent(entry))
+    sensors.append(EVSmartChargingSensorSolarStatus(entry))
     async_add_devices(sensors)
     await coordinator.add_sensor(sensors)
 
@@ -205,5 +207,20 @@ class EVSmartChargingSensorChargingCurrent(EVSmartChargingSensor):
 
     def set_charging_current(self, new_status):
         """Set new current."""
+        self._attr_native_value = new_status
+        self.update_ha_state()
+
+
+class EVSmartChargingSensorSolarStatus(EVSmartChargingSensor):
+    """EV Smart Charging sensor class."""
+
+    _entity_key = ENTITY_KEY_SOLAR_STATUS_SENSOR
+
+    def __init__(self, entry):
+        _LOGGER.debug("EVSmartChargingSensorSolarStatus.__init__()")
+        super().__init__(entry)
+
+    def set_status(self, new_status):
+        """Set new status."""
         self._attr_native_value = new_status
         self.update_ha_state()

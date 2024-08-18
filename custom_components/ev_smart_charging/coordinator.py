@@ -92,6 +92,7 @@ from .sensor import (
     EVSmartChargingSensor,
     EVSmartChargingSensorCharging,
     EVSmartChargingSensorChargingCurrent,
+    EVSmartChargingSensorSolarStatus,
     EVSmartChargingSensorStatus,
 )
 
@@ -112,6 +113,7 @@ class EVSmartChargingCoordinator:
         self.sensor = None
         self.sensor_status = None
         self.sensor_charging_current = None
+        self.sensor_solar_status = None
         self.switch_active = None
         self.switch_apply_limit = None
         self.switch_apply_limit_entity_id = None
@@ -489,6 +491,10 @@ class EVSmartChargingCoordinator:
                 self.sensor_charging_current = sensor
                 if self.solar_charging:
                     self.solar_charging.set_charging_current_sensor(sensor)
+            if isinstance(sensor, EVSmartChargingSensorSolarStatus):
+                self.sensor_solar_status = sensor
+                if self.solar_charging:
+                    self.solar_charging.set_solar_status_sensor(sensor)
 
         self.price_entity_id = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
         self.price_adaptor.set_price_platform(
