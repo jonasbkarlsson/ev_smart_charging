@@ -1,0 +1,111 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Konfiguration af navn og eksterne enheder.",
+                "data": {
+                    "device_name": "Navn",
+                    "price_sensor": "Sensor for strømpris",
+                    "ev_soc_sensor": "Elbil SOC-enhed (ladeniveau)",
+                    "ev_target_soc_sensor": "Enhed for ønsket SOC/ladeniveau (mellemrum til at fjerne)",
+                    "charger_entity": "Ladeafbryder (mellemrum til at fjerne)",
+                    "ev_controlled": "Elbilintegration, bruges til at styre start og stop af opladning."
+                }
+            }
+        },
+        "error": {
+            "price_not_found": "Sensor for strømpris ikke fundet.",
+            "price_not_sensor": "Strømpris-Enheden er ikke en sensor.",
+            "sensor_is_not_price": "Sensoren for strømpris har ikke de nødvendige attributter.",
+            "ev_soc_not_found": "Elbil SOC-Enhed ikke fundet.",
+            "ev_soc_invalid_data": "SOC-Enheden giver ugyldige data.",
+            "ev_target_soc_not_found": "Elbil mål-SOC-Enhed ikke fundet.",
+            "ev_target_soc_invalid_data": "Mål-SOC-Enheden giver ugyldige data.",
+            "charger_control_switch_not_found": "Ladeafbryder ikke fundet.",
+            "charger_control_switch_not_switch": "Ladeafbryderen er ikke en afbryder."
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "description": "Konfiguration af eksterne Enheder.",
+                "data": {
+                    "price_sensor": "Sensor for strømpris",
+                    "ev_soc_sensor": "Elbil SOC-Enhed",
+                    "ev_target_soc_sensor": "Elbil mål-SOC-Enhed (mellemrum til at fjerne)",
+                    "charger_entity": "Ladeafbryder (mellemrum til at fjerne)",
+                    "ev_controlled": "Elbil-integration for at kontrollere start/stop af oplading"
+                }
+            }
+        },
+        "error": {
+            "price_not_found": "Sensor for strømpris ikke fundet.",
+            "price_not_sensor": "Strømpris-enheden er ikke en sensor.",
+            "sensor_is_not_price": "Sensoren for strømpris har ikke de nødvendige attributter.",
+            "ev_soc_not_found": "Elbil SOC-Enhed ikke fundet.",
+            "ev_soc_invalid_data": "SOC-Enheden giver ugyldige data.",
+            "ev_target_soc_not_found": "Elbil mål-SOC-Enhed ikke fundet.",
+            "ev_target_soc_invalid_data": "Mål-SOC-Enheden giver ugyldige data.",
+            "charger_control_switch_not_found": "Ladeafbryder ikke fundet.",
+            "charger_control_switch_not_switch": "Ladeafbryderen er ikke en afbryder."
+        }
+    },
+    "entity": {
+        "button": {
+            "manually_start_charging": { "name": "Start oplading manuelt" },
+            "manually_stop_charging": { "name": "Stop oplading manuelt" }
+        },
+        "number": {
+            "charging_speed": { "name": "Ladehastighed" },
+            "electricity_price_limit": { "name": "Maksimum strømpris" },
+            "opportunistic_level": { "name": "Opportunistisk niveau" },
+            "low_price_charging_level": { "name": "Lad ved lav prisniveau" },
+            "low_soc_charging_level": { "name": "Lad ved lav ladeniveau (SOC)" },
+            "minimum_ev_soc": { "name": "Minimum ladeniveau (SOC)" }
+        },
+        "select": {
+            "charge_start_time": { "name": "Starttidspunkt for oplading" },
+            "charge_completion_time": { "name": "Sluttidspunkt for oplading" }
+        },
+        "sensor": {
+            "charging": {
+                "name": "Lading",
+                "state_attributes": {
+                    "current_price": { "name": "Gældende pris"},
+                    "ev_soc": {"name": "Ladeniveau (SOC)"},
+                    "ev_target_soc": {"name": "Ønsket ladeniveau (SOC)"},
+                    "charging_is_planned": {"name": "Lading er planlagt"},
+                    "charging_start_time": {"name": "Starttidspunkt for oplading"},
+                    "charging_stop_time": {"name": "Stoptidspunkt for oplading"},
+                    "charging_number_of_hours": {"name": "Antal ladetimer"},
+                    "raw_two_days": {"name": "Strømpriser to dage"},
+                    "charging_schedule": {"name": "Ladeskema"}
+                }
+            },
+            "status": {
+                "name": "Status",
+                "state": {
+                    "waiting_for_new_prices": "Venter på nye priser",
+                    "no_charging_planned": "Ingen oplading planlagt",
+                    "waiting_for_charging_to_begin": "Venter på at oplading skal begynde",
+                    "charging": "Oplader",
+                    "keeping_charger_on": "Holder opladeren tændt",
+                    "disconnected": "Frakoblet",
+                    "smart_charging_not_active": "Smart oplading ikke aktiv",
+                    "low_price_charging": "Oplad ved lav pris",
+                    "low_soc_charging": "Oplad ved lav ladeniveau (SOC)"
+                }
+            }
+        },
+        "switch": {
+            "smart_charging_activated": { "name": "Smart oplading aktiveret" },
+            "apply_price_limit": { "name": "Brug prisgrænse" },
+            "continuous_charging_preferred": { "name": "Kontinuerlig oplading foretrukket" },
+            "ev_connected": { "name": "Elbil tilkoblet" },
+            "keep_charger_on": { "name": "Hold opladeren tændt" },
+            "opportunistic_charging": { "name": "Opportunistisk oplading" },
+            "low_price_charging": { "name": "Oplad ved lav pris" },
+            "low_soc_charging": { "name": "Oplad ved lav ladeniveau (SOC)" }
+        }
+    }
+}
