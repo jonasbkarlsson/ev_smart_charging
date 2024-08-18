@@ -165,7 +165,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         version = 7
         new[CONF_SOLAR_CHARGING_CONFIGURED] = False
         new[CONF_GRID_USAGE_SENSOR] = ""
-        new[CONF_GRID_VOLTAGE] = 235  # [V]
+        new[CONF_GRID_VOLTAGE] = 230  # [V]
         new[CONF_MAX_CHARGING_AMPS] = 16  # [A]
         new[CONF_MIN_CHARGING_AMPS] = 6  # [A]
         new[CONF_THREE_PHASE_CHARGING] = False

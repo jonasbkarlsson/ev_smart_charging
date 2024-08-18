@@ -133,7 +133,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_input = {}
             # Provide defaults for form
             user_input[CONF_GRID_USAGE_SENSOR] = ""
-            user_input[CONF_GRID_VOLTAGE] = 235  # [V]
+            user_input[CONF_GRID_VOLTAGE] = 230  # [V]
             user_input[CONF_MAX_CHARGING_AMPS] = 16  # [A]
             user_input[CONF_MIN_CHARGING_AMPS] = 6  # [A]
             user_input[CONF_THREE_PHASE_CHARGING] = False
