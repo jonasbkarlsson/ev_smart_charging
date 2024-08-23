@@ -18,8 +18,9 @@
                 "data": {
                     "grid_usage_sensor": "Grid usage sensor [W]",
                     "grid_voltage": "Grid voltage [V]",
-                    "max_charging_amps": "Maximum charging current [A]",
-                    "min_charging_amps": "Minimum charging current [A]",
+                    "max_charging_current": "Maximum charging current [A]",
+                    "min_charging_current": "Minimum charging current [A]",
+                    "normal_charging_current": "Normal (non-solar) charging current [A]",
                     "three_phase_charging": "Three-phase charging",
                     "solar_charging_off_delay": "Time delay for ending solar power based charging"
                 }
@@ -36,8 +37,7 @@
             "charger_control_switch_not_found": "Charger control switch entity not found.",
             "charger_control_switch_not_switch": "Charger control switch entity is not a switch.",
             "grid_usage_not_found": "Grid usage sensor not found.",
-            "grid_usage_invalid_data": "Grid usage entity gives invalid data.",
-            "max_charging_amps_smaller_than_min": "Maximum charging current is smaller than minimum charging current."
+            "grid_usage_invalid_data": "Grid usage entity gives invalid data."
         }
     },
     "options": {
@@ -58,8 +58,9 @@
                 "data": {
                     "grid_usage_sensor": "Grid usage sensor [W]",
                     "grid_voltage": "Grid voltage [V]",
-                    "max_charging_amps": "Maximum charging current [A]",
-                    "min_charging_amps": "Minimum charging current [A]",
+                    "max_charging_current": "Maximum charging current [A]",
+                    "min_charging_current": "Minimum charging current [A]",
+                    "normal_charging_current": "Normal (non-solar) charging current [A]",
                     "three_phase_charging": "Three-phase charging",
                     "solar_charging_off_delay": "Time delay for ending solar power based charging"
                 }
@@ -76,8 +77,7 @@
             "charger_control_switch_not_found": "Charger control switch entity not found.",
             "charger_control_switch_not_switch": "Charger control switch entity is not a switch.",
             "grid_usage_not_found": "Grid usage sensor not found.",
-            "grid_usage_invalid_data": "Grid usage entity gives invalid data.",
-            "max_charging_amps_smaller_than_min": "Maximum charging current is smaller than minimum charging current."
+            "grid_usage_invalid_data": "Grid usage entity gives invalid data."
         }
     },
     "entity": {
@@ -91,7 +91,11 @@
             "opportunistic_level": { "name": "Opportunistic level" },
             "low_price_charging_level": { "name": "Low price charging level" },
             "low_soc_charging_level": { "name": "Low SOC charging level" },
-            "minimum_ev_soc": { "name": "Minimum EV SOC" }
+            "minimum_ev_soc": { "name": "Minimum EV SOC" },
+            "max_charging_current": { "name": "Maximum charging current" },
+            "min_charging_current": { "name": "Minimum charging current" },
+            "normal_charging_current": { "name": "Normal charging current" },
+            "solar_charging_off_delay": { "name": "Solar charging off delay" }
         },
         "select": {
             "charge_start_time": { "name": "Charge start time" },
@@ -147,7 +151,8 @@
             "keep_charger_on": { "name": "Keep charger on" },
             "opportunistic_charging": { "name": "Opportunistic charging" },
             "low_price_charging": { "name": "Low price charging" },
-            "low_soc_charging": { "name": "Low SOC charging" }
+            "low_soc_charging": { "name": "Low SOC charging" },
+            "three_phase_charging": { "name": "Three phase charging"}
         }
     }
 }

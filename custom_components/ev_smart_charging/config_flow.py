@@ -16,13 +16,9 @@ from .const import (
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_GRID_USAGE_SENSOR,
     CONF_GRID_VOLTAGE,
-    CONF_MAX_CHARGING_AMPS,
-    CONF_MIN_CHARGING_AMPS,
     CONF_PRICE_SENSOR,
     CONF_CHARGER_ENTITY,
     CONF_SOLAR_CHARGING_CONFIGURED,
-    CONF_SOLAR_CHARGING_OFF_DELAY,
-    CONF_THREE_PHASE_CHARGING,
     DOMAIN,
 )
 from .helpers.config_flow import DeviceNameCreator, FindEntity, FlowValidator
@@ -134,10 +130,6 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Provide defaults for form
             user_input[CONF_GRID_USAGE_SENSOR] = ""
             user_input[CONF_GRID_VOLTAGE] = 230  # [V]
-            user_input[CONF_MAX_CHARGING_AMPS] = 16  # [A]
-            user_input[CONF_MIN_CHARGING_AMPS] = 6  # [A]
-            user_input[CONF_THREE_PHASE_CHARGING] = False
-            user_input[CONF_SOLAR_CHARGING_OFF_DELAY] = 5  # [minutes]
 
         else:
             # process user_input
@@ -164,19 +156,6 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ): cv.string,
             vol.Required(
                 CONF_GRID_VOLTAGE, default=user_input[CONF_GRID_VOLTAGE]
-            ): positive_int,
-            vol.Required(
-                CONF_MAX_CHARGING_AMPS, default=user_input[CONF_MAX_CHARGING_AMPS]
-            ): positive_int,
-            vol.Required(
-                CONF_MIN_CHARGING_AMPS, default=user_input[CONF_MIN_CHARGING_AMPS]
-            ): positive_int,
-            vol.Required(
-                CONF_THREE_PHASE_CHARGING, default=user_input[CONF_THREE_PHASE_CHARGING]
-            ): cv.boolean,
-            vol.Required(
-                CONF_SOLAR_CHARGING_OFF_DELAY,
-                default=user_input[CONF_SOLAR_CHARGING_OFF_DELAY],
             ): positive_int,
         }
 
@@ -282,22 +261,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Required(
                 CONF_GRID_VOLTAGE,
                 default=get_parameter(self.config_entry, CONF_GRID_VOLTAGE),
-            ): positive_int,
-            vol.Required(
-                CONF_MAX_CHARGING_AMPS,
-                default=get_parameter(self.config_entry, CONF_MAX_CHARGING_AMPS),
-            ): positive_int,
-            vol.Required(
-                CONF_MIN_CHARGING_AMPS,
-                default=get_parameter(self.config_entry, CONF_MIN_CHARGING_AMPS),
-            ): positive_int,
-            vol.Required(
-                CONF_THREE_PHASE_CHARGING,
-                default=get_parameter(self.config_entry, CONF_THREE_PHASE_CHARGING),
-            ): cv.boolean,
-            vol.Required(
-                CONF_SOLAR_CHARGING_OFF_DELAY,
-                default=get_parameter(self.config_entry, CONF_SOLAR_CHARGING_OFF_DELAY),
             ): positive_int,
         }
 

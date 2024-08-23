@@ -23,8 +23,9 @@ from .const import (
     CONF_GRID_VOLTAGE,
     CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_LOW_SOC_CHARGING_LEVEL,
-    CONF_MAX_CHARGING_AMPS,
-    CONF_MIN_CHARGING_AMPS,
+    CONF_MAX_CHARGING_CURRENT,
+    CONF_MIN_CHARGING_CURRENT,
+    CONF_NORMAL_CHARGING_CURRENT,
     CONF_OPPORTUNISTIC_LEVEL,
     CONF_SOLAR_CHARGING_CONFIGURED,
     CONF_SOLAR_CHARGING_OFF_DELAY,
@@ -166,8 +167,9 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         new[CONF_SOLAR_CHARGING_CONFIGURED] = False
         new[CONF_GRID_USAGE_SENSOR] = ""
         new[CONF_GRID_VOLTAGE] = 230  # [V]
-        new[CONF_MAX_CHARGING_AMPS] = 16  # [A]
-        new[CONF_MIN_CHARGING_AMPS] = 6  # [A]
+        new[CONF_MAX_CHARGING_CURRENT] = 16  # [A]
+        new[CONF_MIN_CHARGING_CURRENT] = 6  # [A]
+        new[CONF_NORMAL_CHARGING_CURRENT] = 16  # [A]
         new[CONF_THREE_PHASE_CHARGING] = False
         new[CONF_SOLAR_CHARGING_OFF_DELAY] = 5  # [minutes]
         migration = True

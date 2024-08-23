@@ -18,6 +18,7 @@ ICON_MIN_SOC = "mdi:battery-charging-30"
 ICON_START = "mdi:play-circle-outline"
 ICON_STOP = "mdi:stop-circle-outline"
 ICON_TIME = "mdi:clock-time-four-outline"
+ICON_TIMER = "mdi:camera-timer"
 
 # Platforms
 SENSOR = Platform.SENSOR
@@ -54,8 +55,14 @@ ENTITY_KEY_CONF_OPPORTUNISTIC_LEVEL_NUMBER = "opportunistic_level"
 ENTITY_KEY_CONF_LOW_PRICE_CHARGING_NUMBER = "low_price_charging_level"
 ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER = "low_soc_charging_level"
 ENTITY_KEY_CONF_MIN_SOC_NUMBER = "minimum_ev_soc"
+ENTITY_KEY_CONF_MAX_CHARGING_CURRENT_NUMBER = "max_charging_current"
+ENTITY_KEY_CONF_MIN_CHARGING_CURRENT_NUMBER = "min_charging_current"
+ENTITY_KEY_CONF_NORMAL_CHARGING_CURRENT_NUMBER = "normal_charging_current"
+ENTITY_KEY_CONF_SOLAR_CHARGING_OFF_DELAY_NUMBER = "solar_charging_off_delay"
 ENTITY_KEY_CONF_START_HOUR = "charge_start_time"
 ENTITY_KEY_CONF_READY_HOUR = "charge_completion_time"
+ENTITY_KEY_CONF_THREE_PHASE_CHARGING = "three_phase_charging"
+
 
 # Configuration and options
 CONF_DEVICE_NAME = "device_name"
@@ -64,21 +71,22 @@ CONF_EV_SOC_SENSOR = "ev_soc_sensor"
 CONF_EV_TARGET_SOC_SENSOR = "ev_target_soc_sensor"
 CONF_CHARGER_ENTITY = "charger_entity"
 CONF_EV_CONTROLLED = "ev_controlled"
-CONF_PCT_PER_HOUR = "pct_per_hour"
-CONF_START_HOUR = "start_hour"
-CONF_READY_HOUR = "ready_hour"
-CONF_MAX_PRICE = "maximum_price"
-CONF_OPPORTUNISTIC_LEVEL = "opportunistic_level"
-CONF_LOW_PRICE_CHARGING_LEVEL = "low_price_charging_level"
-CONF_LOW_SOC_CHARGING_LEVEL = "low_soc_charging_level"
-CONF_MIN_SOC = "min_soc"
+CONF_PCT_PER_HOUR = "pct_per_hour"  # Config entity
+CONF_START_HOUR = "start_hour"  # Config entity
+CONF_READY_HOUR = "ready_hour"  # Config entity
+CONF_MAX_PRICE = "maximum_price"  # Config entity
+CONF_OPPORTUNISTIC_LEVEL = "opportunistic_level"  # Config entity
+CONF_LOW_PRICE_CHARGING_LEVEL = "low_price_charging_level"  # Config entity
+CONF_LOW_SOC_CHARGING_LEVEL = "low_soc_charging_level"  # Config entity
+CONF_MIN_SOC = "min_soc"  # Config entity
 CONF_SOLAR_CHARGING_CONFIGURED = "solar_charging_configured"
 CONF_GRID_USAGE_SENSOR = "grid_usage_sensor"
 CONF_GRID_VOLTAGE = "grid_voltage"
-CONF_MAX_CHARGING_AMPS = "max_charging_amps"
-CONF_MIN_CHARGING_AMPS = "min_charging_amps"
-CONF_THREE_PHASE_CHARGING = "three_phase_charging"
-CONF_SOLAR_CHARGING_OFF_DELAY = "solar_charging_off_delay"
+CONF_MAX_CHARGING_CURRENT = "max_charging_current"  # Config entity
+CONF_MIN_CHARGING_CURRENT = "min_charging_current"  # Config entity
+CONF_NORMAL_CHARGING_CURRENT = "normal_charging_current"  # Config entity
+CONF_THREE_PHASE_CHARGING = "three_phase_charging"  # Config entity
+CONF_SOLAR_CHARGING_OFF_DELAY = "solar_charging_off_delay"  # Config entity
 
 HOURS = [
     "None",

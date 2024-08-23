@@ -1,16 +1,19 @@
 """Switch platform for EV Smart Charging."""
+
 import logging
 from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.const import STATE_ON
 from homeassistant.core import HomeAssistant, State
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import (
     DOMAIN,
     ENTITY_KEY_ACTIVE_SWITCH,
     ENTITY_KEY_APPLY_LIMIT_SWITCH,
+    ENTITY_KEY_CONF_THREE_PHASE_CHARGING,
     ENTITY_KEY_CONTINUOUS_SWITCH,
     ENTITY_KEY_EV_CONNECTED_SWITCH,
     ENTITY_KEY_LOW_PRICE_CHARGING_SWITCH,
@@ -41,9 +44,11 @@ async def async_setup_entry(
     switches.append(EVSmartChargingSwitchOpportunistic(entry, coordinator))
     switches.append(EVSmartChargingSwitchLowPriceCharging(entry, coordinator))
     switches.append(EVSmartChargingSwitchLowSocCharging(entry, coordinator))
+    switches.append(EVSmartChargingSwitchThreePhaseCharging(entry, coordinator))
     async_add_devices(switches)
 
 
+# pylint: disable=abstract-method
 class EVSmartChargingSwitch(EVSmartChargingEntity, SwitchEntity, RestoreEntity):
     """EV Smart Charging switch class."""
 
@@ -267,3 +272,28 @@ class EVSmartChargingSwitchLowSocCharging(EVSmartChargingSwitch):
         """Turn the entity off."""
         await super().async_turn_off(**kwargs)
         await self.coordinator.switch_low_soc_charging_update(False)
+
+
+class EVSmartChargingSwitchThreePhaseCharging(EVSmartChargingSwitch):
+    """EV Smart Charging three phase charging switch class."""
+
+    _entity_key = ENTITY_KEY_CONF_THREE_PHASE_CHARGING
+    _attr_entity_category = EntityCategory.CONFIG
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSwitchThreePhaseCharging.__init__()")
+        super().__init__(entry, coordinator)
+        if self.is_on is None:
+            self._attr_is_on = False
+            self.update_ha_state()
+        self.coordinator.switch_three_phase_charging = self.is_on
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+        await super().async_turn_on(**kwargs)
+        await self.coordinator.switch_three_phase_charging_update(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""
+        await super().async_turn_off(**kwargs)
+        await self.coordinator.switch_three_phase_charging_update(False)

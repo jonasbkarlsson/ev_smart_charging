@@ -19,8 +19,6 @@ from homeassistant.core import (
     Event,
 )
 
-from custom_components.ev_smart_charging.helpers.solar_charging import SolarCharging
-
 try:
     from homeassistant.core import (  # pylint: disable=no-name-in-module, unused-import
         EventStateChangedData,
@@ -49,6 +47,7 @@ from homeassistant.const import STATE_ON, STATE_OFF
 from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.helpers.price_adaptor import PriceAdaptor
+from custom_components.ev_smart_charging.helpers.solar_charging import SolarCharging
 
 from .const import (
     CHARGING_STATUS_CHARGING,
@@ -65,8 +64,11 @@ from .const import (
     CONF_GRID_USAGE_SENSOR,
     CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_LOW_SOC_CHARGING_LEVEL,
+    CONF_MAX_CHARGING_CURRENT,
     CONF_MAX_PRICE,
+    CONF_MIN_CHARGING_CURRENT,
     CONF_MIN_SOC,
+    CONF_NORMAL_CHARGING_CURRENT,
     CONF_OPPORTUNISTIC_LEVEL,
     CONF_PCT_PER_HOUR,
     CONF_READY_HOUR,
@@ -74,6 +76,7 @@ from .const import (
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_SOLAR_CHARGING_CONFIGURED,
+    CONF_SOLAR_CHARGING_OFF_DELAY,
     CONF_START_HOUR,
     DEFAULT_TARGET_SOC,
     READY_HOUR_NONE,
@@ -130,6 +133,7 @@ class EVSmartChargingCoordinator:
         self.switch_opportunistic_unique_id = None
         self.switch_low_price_charging = None
         self.switch_low_soc_charging = None
+        self.switch_three_phase_charging = None
         self.price_entity_id = None
         self.price_adaptor = PriceAdaptor()
         self.ev_soc_entity_id = None
@@ -187,6 +191,18 @@ class EVSmartChargingCoordinator:
         self.low_soc_charging = float(
             get_parameter(self.config_entry, CONF_LOW_SOC_CHARGING_LEVEL, 20.0)
         )
+        self.max_charging_current = float(
+            get_parameter(self.config_entry, CONF_MAX_CHARGING_CURRENT, 16.0)
+        )
+        self.min_charging_current = float(
+            get_parameter(self.config_entry, CONF_MIN_CHARGING_CURRENT, 16.0)
+        )
+        self.normal_charging_current = float(
+            get_parameter(self.config_entry, CONF_NORMAL_CHARGING_CURRENT, 16.0)
+        )
+        self.solar_charging_off_delay = float(
+            get_parameter(self.config_entry, CONF_SOLAR_CHARGING_OFF_DELAY, 16.0)
+        )
 
         self.auto_charging_state = STATE_OFF
         self.low_price_charging_state = STATE_OFF
@@ -207,7 +223,17 @@ class EVSmartChargingCoordinator:
         self.solar_charging = None
         self.solar_grid_usage_entity_id = None
         if get_parameter(self.config_entry, CONF_SOLAR_CHARGING_CONFIGURED, False):
-            self.solar_charging = SolarCharging(config_entry)
+            if self.switch_three_phase_charging:
+                number_of_phases = 3
+            else:
+                number_of_phases = 1
+            self.solar_charging = SolarCharging(
+                config_entry,
+                number_of_phases,
+                self.min_charging_current,
+                self.max_charging_current,
+                self.solar_charging_off_delay,
+            )
             self.solar_grid_usage_entity_id = get_parameter(
                 self.config_entry, CONF_GRID_USAGE_SENSOR
             )
@@ -708,6 +734,12 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("switch_low_soc_charging_update = %s", state)
         await self.update_configuration()
 
+    async def switch_three_phase_charging_update(self, state: bool):
+        """Handle the three phase charging switch"""
+        self.switch_three_phase_charging = state
+        _LOGGER.debug("switch_three_phase_charging_update = %s", state)
+        await self.update_configuration()
+
     async def update_configuration(self):
         """Called when the configuration has been updated"""
         await self.update_sensors(configuration_updated=True)
@@ -748,10 +780,22 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("new_state = %s", new_state)
 
         # Handle Solar Charging
-        if self.solar_charging and (entity_id == self.solar_grid_usage_entity_id):
-            self.solar_charging.update_grid_usage(float(new_state.state))
-            # await self.update_state()
-            return
+        if self.solar_charging:
+            if configuration_updated:
+                if self.switch_three_phase_charging:
+                    number_of_phases = 3
+                else:
+                    number_of_phases = 1
+                self.solar_charging.update_configuration(
+                    number_of_phases,
+                    self.min_charging_current,
+                    self.max_charging_current,
+                    self.solar_charging_off_delay,
+                )
+            if self.solar_charging and (entity_id == self.solar_grid_usage_entity_id):
+                self.solar_charging.update_grid_usage(float(new_state.state))
+                # await self.update_state()
+                return
 
         # Update schedule and reset keep_on if EV SOC Target is updated
         if self.ev_target_soc_entity_id and (entity_id == self.ev_target_soc_entity_id):
