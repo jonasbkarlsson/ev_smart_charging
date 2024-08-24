@@ -5,7 +5,7 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import MAJOR_VERSION, MINOR_VERSION
-from homeassistant.core import Config, HomeAssistant
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.device_registry import async_get as async_device_registry_get
 from homeassistant.helpers.device_registry import DeviceRegistry, DeviceEntry
@@ -23,14 +23,9 @@ from .const import (
     CONF_GRID_VOLTAGE,
     CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_LOW_SOC_CHARGING_LEVEL,
-    CONF_MAX_CHARGING_CURRENT,
-    CONF_MIN_CHARGING_CURRENT,
-    CONF_NORMAL_CHARGING_CURRENT,
     CONF_OPPORTUNISTIC_LEVEL,
     CONF_SOLAR_CHARGING_CONFIGURED,
-    CONF_SOLAR_CHARGING_OFF_DELAY,
     CONF_START_HOUR,
-    CONF_THREE_PHASE_CHARGING,
     DOMAIN,
     STARTUP_MESSAGE,
     PLATFORMS,
@@ -167,11 +162,6 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         new[CONF_SOLAR_CHARGING_CONFIGURED] = False
         new[CONF_GRID_USAGE_SENSOR] = ""
         new[CONF_GRID_VOLTAGE] = 230  # [V]
-        new[CONF_MAX_CHARGING_CURRENT] = 16  # [A]
-        new[CONF_MIN_CHARGING_CURRENT] = 6  # [A]
-        new[CONF_NORMAL_CHARGING_CURRENT] = 16  # [A]
-        new[CONF_THREE_PHASE_CHARGING] = False
-        new[CONF_SOLAR_CHARGING_OFF_DELAY] = 5  # [minutes]
         migration = True
 
     if version > 7:

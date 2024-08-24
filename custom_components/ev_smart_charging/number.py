@@ -13,14 +13,10 @@ from homeassistant.helpers.entity import EntityCategory
 from .const import (
     CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_LOW_SOC_CHARGING_LEVEL,
-    CONF_MAX_CHARGING_CURRENT,
     CONF_MAX_PRICE,
-    CONF_MIN_CHARGING_CURRENT,
     CONF_MIN_SOC,
-    CONF_NORMAL_CHARGING_CURRENT,
     CONF_OPPORTUNISTIC_LEVEL,
     CONF_PCT_PER_HOUR,
-    CONF_SOLAR_CHARGING_OFF_DELAY,
     DOMAIN,
     ENTITY_KEY_CONF_LOW_PRICE_CHARGING_NUMBER,
     ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER,
@@ -266,9 +262,7 @@ class EVSmartChargingNumberMaxChargingCurrent(EVSmartChargingNumber):
         _LOGGER.debug("EVSmartChargingNumberMaxChargingCurrent.__init__()")
         super().__init__(entry, coordinator)
         if self.value is None:
-            self._attr_native_value = get_parameter(
-                entry, CONF_MAX_CHARGING_CURRENT, 16.0
-            )
+            self._attr_native_value = 16.0
             self.update_ha_state()
 
     async def async_set_native_value(self, value: float) -> None:
@@ -293,9 +287,7 @@ class EVSmartChargingNumberMinChargingCurrent(EVSmartChargingNumber):
         _LOGGER.debug("EVSmartChargingNumberMinChargingCurrent.__init__()")
         super().__init__(entry, coordinator)
         if self.value is None:
-            self._attr_native_value = get_parameter(
-                entry, CONF_MIN_CHARGING_CURRENT, 6.0
-            )
+            self._attr_native_value = 6.0
             self.update_ha_state()
 
     async def async_set_native_value(self, value: float) -> None:
@@ -320,9 +312,7 @@ class EVSmartChargingNumberNormalChargingCurrent(EVSmartChargingNumber):
         _LOGGER.debug("EVSmartChargingNumberNormalChargingCurrent.__init__()")
         super().__init__(entry, coordinator)
         if self.value is None:
-            self._attr_native_value = get_parameter(
-                entry, CONF_NORMAL_CHARGING_CURRENT, 16.0
-            )
+            self._attr_native_value = 16.0
             self.update_ha_state()
 
     async def async_set_native_value(self, value: float) -> None:
@@ -347,9 +337,7 @@ class EVSmartChargingNumberSolarChargingOffDelay(EVSmartChargingNumber):
         _LOGGER.debug("EVSmartChargingNumberSolarChargingOffDelay.__init__()")
         super().__init__(entry, coordinator)
         if self.value is None:
-            self._attr_native_value = get_parameter(
-                entry, CONF_SOLAR_CHARGING_OFF_DELAY, 5.0
-            )
+            self._attr_native_value = 5.0
             self.update_ha_state()
 
     async def async_set_native_value(self, value: float) -> None:

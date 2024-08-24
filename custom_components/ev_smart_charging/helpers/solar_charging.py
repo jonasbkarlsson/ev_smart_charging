@@ -27,18 +27,14 @@ class SolarCharging:
     def __init__(
         self,
         config_entry: ConfigEntry,
-        number_of_phases: int,
-        min_charging_current: float,
-        max_charging_current: float,
-        solar_charging_off_delay: float,
     ) -> None:
         self.grid_usage = 0
         self.grid_usage_timestamp = dt.now().timestamp()
         self.grid_voltage = float(get_parameter(config_entry, CONF_GRID_VOLTAGE))
-        self.number_of_phases = number_of_phases
-        self.min_charging_current = min_charging_current
-        self.max_charging_current = max_charging_current
-        self.solar_charging_off_delay = solar_charging_off_delay
+        self.number_of_phases = 1
+        self.min_charging_current = 6
+        self.max_charging_current = 16
+        self.solar_charging_off_delay = 5
         self.current_charging_amps = 0
         self.low_power_timestamp = dt.now().timestamp() - 100000  # Long time ago
         self.sensor_charging_current = None
@@ -65,7 +61,11 @@ class SolarCharging:
     ) -> None:
         """Update configuration"""
         _LOGGER.debug(
-            "update_configuration().number_of_phases = %s", str(number_of_phases)
+            "update_configuration().= %s %s %s %s",
+            str(number_of_phases),
+            str(min_charging_current),
+            str(max_charging_current),
+            str(solar_charging_off_delay),
         )
         self.number_of_phases = number_of_phases
         self.min_charging_current = min_charging_current

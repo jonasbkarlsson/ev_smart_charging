@@ -82,11 +82,6 @@ CONF_MIN_SOC = "min_soc"  # Config entity
 CONF_SOLAR_CHARGING_CONFIGURED = "solar_charging_configured"
 CONF_GRID_USAGE_SENSOR = "grid_usage_sensor"
 CONF_GRID_VOLTAGE = "grid_voltage"
-CONF_MAX_CHARGING_CURRENT = "max_charging_current"  # Config entity
-CONF_MIN_CHARGING_CURRENT = "min_charging_current"  # Config entity
-CONF_NORMAL_CHARGING_CURRENT = "normal_charging_current"  # Config entity
-CONF_THREE_PHASE_CHARGING = "three_phase_charging"  # Config entity
-CONF_SOLAR_CHARGING_OFF_DELAY = "solar_charging_off_delay"  # Config entity
 
 HOURS = [
     "None",
