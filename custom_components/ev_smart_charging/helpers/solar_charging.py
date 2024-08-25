@@ -41,6 +41,7 @@ class SolarCharging:
         self.low_power_timestamp = dt.now().timestamp() - 100000  # Long time ago
         self.sensor_charging_current = None
         self.sensor_solar_status = None
+        self.pacing_time = 10
 
     def set_charging_current_sensor(
         self, sensor_charging_current: EVSmartChargingSensorChargingCurrent
@@ -97,7 +98,8 @@ class SolarCharging:
         """New value of grid usage received"""
         timestamp = dt.now().timestamp()
         # Don't update charging current more than once per 10 seconds
-        if (timestamp - self.grid_usage_timestamp) >= 10:
+        if (timestamp - self.grid_usage_timestamp) >= self.pacing_time:
+            self.pacing_time = 10
             self.grid_usage_timestamp = timestamp
             self.grid_usage = grid_usage
 
@@ -149,4 +151,7 @@ class SolarCharging:
                             self.sensor_solar_status.set_status(
                                 SOLAR_CHARGING_STATUS_CHARGING
                             )
+                            if self.current_charging_amps == 0:
+                                # Wait longer to update after turning on charger.
+                                self.pacing_time = 30
                 self.current_charging_amps = new_charging_amps
