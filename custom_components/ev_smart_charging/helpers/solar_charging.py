@@ -77,6 +77,21 @@ class SolarCharging:
         self.min_charging_current = min_charging_current
         self.max_charging_current = max_charging_current
         self.solar_charging_off_delay = solar_charging_off_delay
+        if self.sensor_solar_status and self.sensor_charging_current:
+            if (
+                self.ev_connected
+                and self.sensor_solar_status.state == CHARGING_STATUS_DISCONNECTED
+            ):
+                self.sensor_solar_status.set_status(SOLAR_CHARGING_STATUS_WAITING)
+
+            if (
+                not self.ev_connected
+                and self.sensor_solar_status.state != CHARGING_STATUS_DISCONNECTED
+            ):
+                self.sensor_solar_status.set_status(CHARGING_STATUS_DISCONNECTED)
+                new_charging_amps = 0.0
+                self.sensor_charging_current.set_charging_current(new_charging_amps)
+                self.current_charging_amps = new_charging_amps
 
     def update_grid_usage(self, grid_usage: float) -> None:
         """New value of grid usage received"""

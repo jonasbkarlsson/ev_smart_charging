@@ -137,6 +137,7 @@
                 "name": "Solar based charging status",
                 "state": {
                     "not_activated": "Not activated",
+                    "disconnected": "Disconnected",
                     "waiting": "Waiting for solar power",
                     "charging": "Charging with solar power"
                 }
