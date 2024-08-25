@@ -7,6 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.const import (
+    CHARGING_STATUS_DISCONNECTED,
     CONF_GRID_VOLTAGE,
     SOLAR_CHARGING_STATUS_CHARGING,
     SOLAR_CHARGING_STATUS_WAITING,
@@ -31,6 +32,7 @@ class SolarCharging:
         self.grid_usage = 0
         self.grid_usage_timestamp = dt.now().timestamp()
         self.grid_voltage = float(get_parameter(config_entry, CONF_GRID_VOLTAGE))
+        self.ev_connected = False
         self.number_of_phases = 1
         self.min_charging_current = 6
         self.max_charging_current = 16
@@ -51,9 +53,11 @@ class SolarCharging:
     ) -> None:
         """Store sensor."""
         self.sensor_solar_status = sensor_solar_status
+        self.sensor_solar_status.set_status(SOLAR_CHARGING_STATUS_WAITING)
 
     def update_configuration(
         self,
+        ev_connected: bool,
         number_of_phases: int,
         min_charging_current: float,
         max_charging_current: float,
@@ -61,12 +65,14 @@ class SolarCharging:
     ) -> None:
         """Update configuration"""
         _LOGGER.debug(
-            "update_configuration().= %s %s %s %s",
+            "update_configuration().= %s %s %s %s %s",
+            str(ev_connected),
             str(number_of_phases),
             str(min_charging_current),
             str(max_charging_current),
             str(solar_charging_off_delay),
         )
+        self.ev_connected = ev_connected
         self.number_of_phases = number_of_phases
         self.min_charging_current = min_charging_current
         self.max_charging_current = max_charging_current
@@ -104,6 +110,8 @@ class SolarCharging:
                     # Too low solar power for too long time
                     _LOGGER.debug("Too low solar power for too long time.")
                     new_charging_amps = 0
+            if not self.ev_connected:
+                new_charging_amps = 0
 
             if new_charging_amps != self.current_charging_amps:
                 if self.sensor_charging_current:
@@ -114,9 +122,14 @@ class SolarCharging:
                     self.sensor_charging_current.set_charging_current(new_charging_amps)
                     if self.sensor_solar_status:
                         if new_charging_amps == 0:
-                            self.sensor_solar_status.set_status(
-                                SOLAR_CHARGING_STATUS_WAITING
-                            )
+                            if self.ev_connected:
+                                self.sensor_solar_status.set_status(
+                                    SOLAR_CHARGING_STATUS_WAITING
+                                )
+                            else:
+                                self.sensor_solar_status.set_status(
+                                    CHARGING_STATUS_DISCONNECTED
+                                )
                         else:
                             self.sensor_solar_status.set_status(
                                 SOLAR_CHARGING_STATUS_CHARGING
