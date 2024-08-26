@@ -130,6 +130,8 @@ class EVSmartChargingCoordinator:
         self.switch_low_price_charging = None
         self.switch_low_soc_charging = None
         self.switch_three_phase_charging = None
+        self.switch_active_price_charging = None
+        self.switch_active_solar_charging = None
         self.price_entity_id = None
         self.price_adaptor = PriceAdaptor()
         self.ev_soc_entity_id = None
@@ -710,6 +712,18 @@ class EVSmartChargingCoordinator:
         """Handle the low SOC charging switch"""
         self.switch_low_soc_charging = state
         _LOGGER.debug("switch_low_soc_charging_update = %s", state)
+        await self.update_configuration()
+
+    async def switch_active_price_charging_update(self, state: bool):
+        """Handle the active price charging switch"""
+        self.switch_active_price_charging = state
+        _LOGGER.debug("switch_active_price_charging_update = %s", state)
+        await self.update_configuration()
+
+    async def switch_active_solar_charging_update(self, state: bool):
+        """Handle the active solar charging switch"""
+        self.switch_active_solar_charging = state
+        _LOGGER.debug("switch_active_solar_charging_update = %s", state)
         await self.update_configuration()
 
     async def switch_three_phase_charging_update(self, state: bool):

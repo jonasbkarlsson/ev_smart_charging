@@ -11,6 +11,8 @@ from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import (
     DOMAIN,
+    ENTITY_KEY_ACTIVE_PRICE_SWITCH,
+    ENTITY_KEY_ACTIVE_SOLAR_SWITCH,
     ENTITY_KEY_ACTIVE_SWITCH,
     ENTITY_KEY_APPLY_LIMIT_SWITCH,
     ENTITY_KEY_CONF_THREE_PHASE_CHARGING,
@@ -45,6 +47,8 @@ async def async_setup_entry(
     switches.append(EVSmartChargingSwitchLowPriceCharging(entry, coordinator))
     switches.append(EVSmartChargingSwitchLowSocCharging(entry, coordinator))
     switches.append(EVSmartChargingSwitchThreePhaseCharging(entry, coordinator))
+    switches.append(EVSmartChargingSwitchActivePriceCharging(entry, coordinator))
+    switches.append(EVSmartChargingSwitchActiveSolarCharging(entry, coordinator))
     async_add_devices(switches)
 
 
@@ -297,3 +301,51 @@ class EVSmartChargingSwitchThreePhaseCharging(EVSmartChargingSwitch):
         """Turn the entity off."""
         await super().async_turn_off(**kwargs)
         await self.coordinator.switch_three_phase_charging_update(False)
+
+
+class EVSmartChargingSwitchActivePriceCharging(EVSmartChargingSwitch):
+    """EV Smart Charging active price charging switch class."""
+
+    _entity_key = ENTITY_KEY_ACTIVE_PRICE_SWITCH
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSwitchActivePriceCharging.__init__()")
+        super().__init__(entry, coordinator)
+        if self.is_on is None:
+            self._attr_is_on = True
+            self.update_ha_state()
+        self.coordinator.switch_active_price_charging = self.is_on
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+        await super().async_turn_on(**kwargs)
+        await self.coordinator.switch_active_price_charging_update(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""
+        await super().async_turn_off(**kwargs)
+        await self.coordinator.switch_active_price_charging_update(False)
+
+
+class EVSmartChargingSwitchActiveSolarCharging(EVSmartChargingSwitch):
+    """EV Smart Charging active solar charging switch class."""
+
+    _entity_key = ENTITY_KEY_ACTIVE_SOLAR_SWITCH
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSwitchActiveSolarCharging.__init__()")
+        super().__init__(entry, coordinator)
+        if self.is_on is None:
+            self._attr_is_on = False
+            self.update_ha_state()
+        self.coordinator.switch_active_solar_charging = self.is_on
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+        await super().async_turn_on(**kwargs)
+        await self.coordinator.switch_active_solar_charging_update(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""
+        await super().async_turn_off(**kwargs)
+        await self.coordinator.switch_active_solar_charging_update(False)

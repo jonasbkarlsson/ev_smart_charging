@@ -134,7 +134,7 @@
                 }
             },
             "solar_status": {
-                "name": "Solar based charging status",
+                "name": "Solar charging status",
                 "state": {
                     "not_activated": "Not activated",
                     "disconnected": "Disconnected",
@@ -154,7 +154,9 @@
             "opportunistic_charging": { "name": "Opportunistic charging" },
             "low_price_charging": { "name": "Low price charging" },
             "low_soc_charging": { "name": "Low SOC charging" },
-            "three_phase_charging": { "name": "Three phase charging"}
+            "three_phase_charging": { "name": "Three phase charging"},
+            "price_charging_activated": { "name": "Price charging activated"},
+            "solar_charging_activated": { "name": "Solar charging activated"}
         }
     }
 }
