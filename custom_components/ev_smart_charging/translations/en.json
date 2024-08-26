@@ -139,7 +139,8 @@
                     "not_activated": "Not activated",
                     "disconnected": "Disconnected",
                     "waiting": "Waiting for solar power",
-                    "charging": "Charging with solar power"
+                    "charging": "Charging with solar power",
+                    "charging_completed": "Charging completed"
                 }
             }
 

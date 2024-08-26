@@ -10,6 +10,7 @@ from custom_components.ev_smart_charging.const import (
     CHARGING_STATUS_DISCONNECTED,
     CONF_GRID_VOLTAGE,
     SOLAR_CHARGING_STATUS_CHARGING,
+    SOLAR_CHARGING_STATUS_CHARGING_COMPLETED,
     SOLAR_CHARGING_STATUS_WAITING,
 )
 from custom_components.ev_smart_charging.helpers.general import get_parameter
@@ -42,6 +43,9 @@ class SolarCharging:
         self.sensor_charging_current = None
         self.sensor_solar_status = None
         self.pacing_time = 10
+        self.ev_soc = 0
+        self.target_ev_soc = 100
+        self.solar_charging = False
 
     def set_charging_current_sensor(
         self, sensor_charging_current: EVSmartChargingSensorChargingCurrent
@@ -83,7 +87,12 @@ class SolarCharging:
                 self.ev_connected
                 and self.sensor_solar_status.state == CHARGING_STATUS_DISCONNECTED
             ):
-                self.sensor_solar_status.set_status(SOLAR_CHARGING_STATUS_WAITING)
+                if self.ev_soc >= self.target_ev_soc:
+                    self.sensor_solar_status.set_status(
+                        SOLAR_CHARGING_STATUS_CHARGING_COMPLETED
+                    )
+                else:
+                    self.sensor_solar_status.set_status(SOLAR_CHARGING_STATUS_WAITING)
 
             if (
                 not self.ev_connected
@@ -93,12 +102,36 @@ class SolarCharging:
                 new_charging_amps = 0.0
                 self.sensor_charging_current.set_charging_current(new_charging_amps)
                 self.current_charging_amps = new_charging_amps
+                self.solar_charging = False
+
+    def check_if_charging_completed(self) -> None:
+        """Check if target EV SOC has been reached"""
+        if self.ev_soc >= self.target_ev_soc and self.solar_charging:
+            new_charging_amps = 0.0
+            self.sensor_charging_current.set_charging_current(new_charging_amps)
+            self.current_charging_amps = new_charging_amps
+            self.solar_charging = False
+            self.sensor_solar_status.set_status(
+                SOLAR_CHARGING_STATUS_CHARGING_COMPLETED
+            )
+
+    def update_ev_soc(self, ev_soc: float) -> None:
+        """Update EV SOC"""
+        self.ev_soc = ev_soc
+        self.check_if_charging_completed()
+
+    def update_target_ev_soc(self, target_ev_soc: float) -> None:
+        """Update target EV SOC"""
+        self.target_ev_soc = target_ev_soc
+        self.check_if_charging_completed()
 
     def update_grid_usage(self, grid_usage: float) -> None:
         """New value of grid usage received"""
         timestamp = dt.now().timestamp()
         # Don't update charging current more than once per 10 seconds
-        if (timestamp - self.grid_usage_timestamp) >= self.pacing_time:
+        if (
+            timestamp - self.grid_usage_timestamp
+        ) >= self.pacing_time and self.ev_soc < self.target_ev_soc:
             self.pacing_time = 10
             self.grid_usage_timestamp = timestamp
             self.grid_usage = grid_usage
@@ -139,6 +172,7 @@ class SolarCharging:
                     self.sensor_charging_current.set_charging_current(new_charging_amps)
                     if self.sensor_solar_status:
                         if new_charging_amps == 0:
+                            self.solar_charging = False
                             if self.ev_connected:
                                 self.sensor_solar_status.set_status(
                                     SOLAR_CHARGING_STATUS_WAITING
@@ -148,6 +182,7 @@ class SolarCharging:
                                     CHARGING_STATUS_DISCONNECTED
                                 )
                         else:
+                            self.solar_charging = True
                             self.sensor_solar_status.set_status(
                                 SOLAR_CHARGING_STATUS_CHARGING
                             )

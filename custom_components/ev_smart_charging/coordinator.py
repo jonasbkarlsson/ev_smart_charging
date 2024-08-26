@@ -771,6 +771,11 @@ class EVSmartChargingCoordinator:
                     self.max_charging_current,
                     self.solar_charging_off_delay,
                 )
+            if self.solar_charging and (entity_id == self.ev_soc_entity_id):
+                self.solar_charging.update_ev_soc(float(new_state.state))
+            if self.solar_charging and (entity_id == self.ev_target_soc_entity_id):
+                self.solar_charging.update_target_ev_soc(float(new_state.state))
+
             if self.solar_charging and (entity_id == self.solar_grid_usage_entity_id):
                 self.solar_charging.update_grid_usage(float(new_state.state))
                 # await self.update_state()
