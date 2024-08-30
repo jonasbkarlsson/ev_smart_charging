@@ -106,14 +106,22 @@ class SolarCharging:
 
     def check_if_charging_completed(self) -> None:
         """Check if target EV SOC has been reached"""
-        if self.ev_soc >= self.target_ev_soc and self.solar_charging:
-            new_charging_amps = 0.0
-            self.sensor_charging_current.set_charging_current(new_charging_amps)
-            self.current_charging_amps = new_charging_amps
-            self.solar_charging = False
-            self.sensor_solar_status.set_status(
-                SOLAR_CHARGING_STATUS_CHARGING_COMPLETED
-            )
+        current_solar_status = self.sensor_solar_status.state
+        new_solar_status = current_solar_status
+        if self.ev_soc >= self.target_ev_soc:
+            if self.solar_charging:
+                new_charging_amps = 0.0
+                self.sensor_charging_current.set_charging_current(new_charging_amps)
+                self.current_charging_amps = new_charging_amps
+                self.solar_charging = False
+            if self.ev_connected:
+                new_solar_status = SOLAR_CHARGING_STATUS_CHARGING_COMPLETED
+        else:
+            if not self.solar_charging and self.ev_connected:
+                new_solar_status = SOLAR_CHARGING_STATUS_WAITING
+
+        if new_solar_status != current_solar_status:
+            self.sensor_solar_status.set_status(new_solar_status)
 
     def update_ev_soc(self, ev_soc: float) -> None:
         """Update EV SOC"""
