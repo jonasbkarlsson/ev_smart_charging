@@ -319,7 +319,9 @@ class EVSmartChargingNumberDefaultChargingCurrent(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.default_charging_current = value
-        await self.coordinator.update_configuration()
+        await self.coordinator.update_configuration(
+            default_charging_current_updated=True
+        )
 
 
 class EVSmartChargingNumberSolarChargingOffDelay(EVSmartChargingNumber):

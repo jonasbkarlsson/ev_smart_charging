@@ -744,9 +744,14 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("switch_three_phase_charging_update = %s", state)
         await self.update_configuration()
 
-    async def update_configuration(self):
+    async def update_configuration(
+        self, default_charging_current_updated: bool = False
+    ):
         """Called when the configuration has been updated"""
-        await self.update_sensors(configuration_updated=True)
+        await self.update_sensors(
+            configuration_updated=True,
+            default_charging_current_updated=default_charging_current_updated,
+        )
 
     @callback
     async def update_sensors_new(
@@ -767,6 +772,7 @@ class EVSmartChargingCoordinator:
             old_state=old_state,
             new_state=new_state,
             configuration_updated=configuration_updated,
+            default_charging_current_updated=False,
         )
 
     async def update_sensors(
@@ -775,6 +781,7 @@ class EVSmartChargingCoordinator:
         old_state: State = None,
         new_state: State = None,
         configuration_updated: bool = False,
+        default_charging_current_updated: bool = False,
     ):  # pylint: disable=unused-argument
         """Price or EV sensors have been updated."""
 
@@ -782,6 +789,11 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("entity_id = %s", entity_id)
         # _LOGGER.debug("old_state = %s", old_state)
         _LOGGER.debug("new_state = %s", new_state)
+
+        if default_charging_current_updated:
+            self.sensor_charging_current.set_charging_current(
+                self.default_charging_current
+            )
 
         # Handle Solar Charging
         if self.solar_charging:
@@ -806,7 +818,6 @@ class EVSmartChargingCoordinator:
 
             if self.solar_charging and (entity_id == self.solar_grid_usage_entity_id):
                 self.solar_charging.update_grid_usage(float(new_state.state))
-                # await self.update_state()
                 return
 
         # Update schedule and reset keep_on if EV SOC Target is updated
