@@ -779,6 +779,8 @@ class EVSmartChargingCoordinator:
                 else:
                     number_of_phases = 1
                 self.solar_charging.update_configuration(
+                    self.switch_active,
+                    self.switch_active_solar_charging,
                     self.switch_ev_connected,
                     number_of_phases,
                     self.min_charging_current,

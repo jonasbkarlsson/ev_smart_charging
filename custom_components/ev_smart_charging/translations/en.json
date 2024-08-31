@@ -136,6 +136,7 @@
             "solar_status": {
                 "name": "Solar charging status",
                 "state": {
+                    "smart_charging_not_active": "Smart charging not active",
                     "not_activated": "Not activated",
                     "disconnected": "Disconnected",
                     "waiting": "Waiting for solar power",
