@@ -460,6 +460,10 @@ class EVSmartChargingCoordinator:
         if state is True:
             _LOGGER.debug("Turn on charging")
             self.sensor.set_state(STATE_ON)
+            if self.sensor_charging_current:
+                self.sensor_charging_current.set_charging_current(
+                    self.normal_charging_current
+                )
             if self.charger_switch is not None:
                 _LOGGER.debug(
                     "Before service call switch.turn_on: %s", self.charger_switch
@@ -472,6 +476,8 @@ class EVSmartChargingCoordinator:
         else:
             _LOGGER.debug("Turn off charging")
             self.sensor.set_state(STATE_OFF)
+            if self.sensor_charging_current:
+                self.sensor_charging_current.set_charging_current(0)
             if self.charger_switch is not None:
                 _LOGGER.debug(
                     "Before service call switch.turn_off: %s", self.charger_switch
