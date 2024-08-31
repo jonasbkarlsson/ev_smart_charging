@@ -1,4 +1,5 @@
 """Number platform for EV Smart Charging."""
+
 import logging
 from typing import Union
 
@@ -19,12 +20,17 @@ from .const import (
     DOMAIN,
     ENTITY_KEY_CONF_LOW_PRICE_CHARGING_NUMBER,
     ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER,
+    ENTITY_KEY_CONF_MAX_CHARGING_CURRENT_NUMBER,
+    ENTITY_KEY_CONF_MIN_CHARGING_CURRENT_NUMBER,
+    ENTITY_KEY_CONF_DEFAULT_CHARGING_CURRENT_NUMBER,
     ENTITY_KEY_CONF_OPPORTUNISTIC_LEVEL_NUMBER,
     ENTITY_KEY_CONF_PCT_PER_HOUR_NUMBER,
     ENTITY_KEY_CONF_MAX_PRICE_NUMBER,
     ENTITY_KEY_CONF_MIN_SOC_NUMBER,
+    ENTITY_KEY_CONF_SOLAR_CHARGING_OFF_DELAY_NUMBER,
     ICON_BATTERY_50,
     ICON_CASH,
+    ICON_TIMER,
     NUMBER,
 )
 from .coordinator import EVSmartChargingCoordinator
@@ -47,9 +53,14 @@ async def async_setup_entry(
     numbers.append(EVSmartChargingNumberOpportunistic(entry, coordinator))
     numbers.append(EVSmartChargingNumberLowPriceCharging(entry, coordinator))
     numbers.append(EVSmartChargingNumberLowSocCharging(entry, coordinator))
+    numbers.append(EVSmartChargingNumberMaxChargingCurrent(entry, coordinator))
+    numbers.append(EVSmartChargingNumberMinChargingCurrent(entry, coordinator))
+    numbers.append(EVSmartChargingNumberDefaultChargingCurrent(entry, coordinator))
+    numbers.append(EVSmartChargingNumberSolarChargingOffDelay(entry, coordinator))
     async_add_devices(numbers)
 
 
+# pylint: disable=abstract-method
 class EVSmartChargingNumber(EVSmartChargingEntity, RestoreNumber):
     """EV Smart Charging number class."""
 
@@ -233,4 +244,106 @@ class EVSmartChargingNumberLowSocCharging(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.low_soc_charging = value
+        await self.coordinator.update_configuration()
+
+
+class EVSmartChargingNumberMaxChargingCurrent(EVSmartChargingNumber):
+    """EV Smart Charging maximum charging current number class."""
+
+    _entity_key = ENTITY_KEY_CONF_MAX_CHARGING_CURRENT_NUMBER
+    #    _attr_icon = ICON_BATTERY_50
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value = 1.0
+    _attr_native_max_value = 32.0
+    _attr_native_step = 1.0
+    _attr_native_unit_of_measurement = "A"
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingNumberMaxChargingCurrent.__init__()")
+        super().__init__(entry, coordinator)
+        if self.value is None:
+            self._attr_native_value = 16.0
+            self.update_ha_state()
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set new value."""
+        await super().async_set_native_value(value)
+        self.coordinator.max_charging_current = value
+        await self.coordinator.update_configuration()
+
+
+class EVSmartChargingNumberMinChargingCurrent(EVSmartChargingNumber):
+    """EV Smart Charging minimum charging current number class."""
+
+    _entity_key = ENTITY_KEY_CONF_MIN_CHARGING_CURRENT_NUMBER
+    #    _attr_icon = ICON_BATTERY_50
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value = 1.0
+    _attr_native_max_value = 32.0
+    _attr_native_step = 1.0
+    _attr_native_unit_of_measurement = "A"
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingNumberMinChargingCurrent.__init__()")
+        super().__init__(entry, coordinator)
+        if self.value is None:
+            self._attr_native_value = 6.0
+            self.update_ha_state()
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set new value."""
+        await super().async_set_native_value(value)
+        self.coordinator.min_charging_current = value
+        await self.coordinator.update_configuration()
+
+
+class EVSmartChargingNumberDefaultChargingCurrent(EVSmartChargingNumber):
+    """EV Smart Charging default charging current number class."""
+
+    _entity_key = ENTITY_KEY_CONF_DEFAULT_CHARGING_CURRENT_NUMBER
+    #    _attr_icon = ICON_BATTERY_50
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value = 1.0
+    _attr_native_max_value = 32.0
+    _attr_native_step = 1.0
+    _attr_native_unit_of_measurement = "A"
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingNumberDefaultChargingCurrent.__init__()")
+        super().__init__(entry, coordinator)
+        if self.value is None:
+            self._attr_native_value = 16.0
+            self.update_ha_state()
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set new value."""
+        await super().async_set_native_value(value)
+        self.coordinator.default_charging_current = value
+        await self.coordinator.update_configuration(
+            default_charging_current_updated=True
+        )
+
+
+class EVSmartChargingNumberSolarChargingOffDelay(EVSmartChargingNumber):
+    """EV Smart Charging Solar Charging Off Delay number class."""
+
+    _entity_key = ENTITY_KEY_CONF_SOLAR_CHARGING_OFF_DELAY_NUMBER
+    _attr_icon = ICON_TIMER
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value = 1.0
+    _attr_native_max_value = 60.0
+    _attr_native_step = 1.0
+    _attr_native_unit_of_measurement = "minutes"
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingNumberSolarChargingOffDelay.__init__()")
+        super().__init__(entry, coordinator)
+        if self.value is None:
+            self._attr_native_value = 5.0
+            self.update_ha_state()
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set new value."""
+        await super().async_set_native_value(value)
+        self.coordinator.solar_charging_off_delay = value
         await self.coordinator.update_configuration()
