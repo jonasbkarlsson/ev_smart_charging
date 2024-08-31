@@ -71,6 +71,7 @@ async def test_coordinator_status(
     await coordinator.add_sensor(sensors)
     await hass.async_block_till_done()
     await coordinator.switch_active_update(False)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(False)

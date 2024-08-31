@@ -47,6 +47,7 @@ from homeassistant.const import STATE_ON, STATE_OFF
 from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.helpers.price_adaptor import PriceAdaptor
+from custom_components.ev_smart_charging.helpers.solar_charging import SolarCharging
 
 from .const import (
     CHARGING_STATUS_CHARGING,
@@ -54,12 +55,14 @@ from .const import (
     CHARGING_STATUS_KEEP_ON,
     CHARGING_STATUS_NO_PLAN,
     CHARGING_STATUS_NOT_ACTIVE,
+    CHARGING_STATUS_PRICE_NOT_ACTIVE,
     CHARGING_STATUS_WAITING_CHARGING,
     CHARGING_STATUS_WAITING_NEW_PRICE,
     CHARGING_STATUS_LOW_PRICE_CHARGING,
     CHARGING_STATUS_LOW_SOC_CHARGING,
     CONF_CHARGER_ENTITY,
     CONF_EV_CONTROLLED,
+    CONF_GRID_USAGE_SENSOR,
     CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_LOW_SOC_CHARGING_LEVEL,
     CONF_MAX_PRICE,
@@ -71,6 +74,7 @@ from .const import (
     CONF_PRICE_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
+    CONF_SOLAR_CHARGING_CONFIGURED,
     CONF_START_QUARTER,
     DEFAULT_TARGET_SOC,
     READY_QUARTER_NONE,
@@ -88,6 +92,8 @@ from .helpers.general import Utils, Validator, get_parameter, get_quarter_index
 from .sensor import (
     EVSmartChargingSensor,
     EVSmartChargingSensorCharging,
+    EVSmartChargingSensorChargingCurrent,
+    EVSmartChargingSensorSolarStatus,
     EVSmartChargingSensorStatus,
 )
 
@@ -122,6 +128,8 @@ class EVSmartChargingCoordinator:
 
         self.sensor = None
         self.sensor_status = None
+        self.sensor_charging_current = None
+        self.sensor_solar_status = None
         self.switch_active = None
         self.switch_apply_limit = None
         self.switch_apply_limit_entity_id = None
@@ -141,6 +149,9 @@ class EVSmartChargingCoordinator:
         self.switch_opportunistic_type2 = None
         self.switch_opportunistic_type2_entity_id = None
         self.switch_opportunistic_type2_unique_id = None
+        self.switch_three_phase_charging = None
+        self.switch_active_price_charging = None
+        self.switch_active_solar_charging = None
         self.price_entity_id = None
         self.price_adaptor = PriceAdaptor()
         self.ev_soc_entity_id = None
@@ -203,6 +214,10 @@ class EVSmartChargingCoordinator:
         self.low_soc_charging = float(
             get_parameter(self.config_entry, CONF_LOW_SOC_CHARGING_LEVEL, 20.0)
         )
+        self.max_charging_current = 16.0
+        self.min_charging_current = 6.0
+        self.default_charging_current = 16.0
+        self.solar_charging_off_delay = 5.0
 
         self.auto_charging_state = STATE_OFF
         self.low_price_charging_state = STATE_OFF
@@ -220,6 +235,33 @@ class EVSmartChargingCoordinator:
         )
         # Update state once after intitialization
         self.listeners.append(async_call_later(hass, 10.0, self.update_initial))
+
+        # Solar charging
+        self.solar_charging = None
+        self.solar_grid_usage_entity_id = None
+        if get_parameter(self.config_entry, CONF_SOLAR_CHARGING_CONFIGURED, False):
+            self.solar_charging = SolarCharging(config_entry)
+            self.solar_grid_usage_entity_id = get_parameter(
+                self.config_entry, CONF_GRID_USAGE_SENSOR
+            )
+            if MAJOR_VERSION <= 2023 or (MAJOR_VERSION == 2024 and MINOR_VERSION <= 5):
+                # Use for Home Assistant 2024.5 or older
+                self.listeners.append(
+                    async_track_state_change(
+                        self.hass,
+                        [self.solar_grid_usage_entity_id],
+                        self.update_sensors,
+                    )
+                )
+            else:
+                # Use for Home Assistant 2024.6 or newer
+                self.listeners.append(
+                    async_track_state_change_event(
+                        self.hass,
+                        [self.solar_grid_usage_entity_id],
+                        self.update_sensors_new,
+                    )
+                )
 
     def unsubscribe_listeners(self):
         """Unsubscribed to listeners"""
@@ -294,11 +336,13 @@ class EVSmartChargingCoordinator:
                     or self.ev_soc < self.number_min_soc
                 )
                 and self.switch_ev_connected is True
+                and self.switch_active_price_charging is True
                 and self.switch_active is True
             )
 
             if (
                 self.switch_active is True
+                and self.switch_active_price_charging is True
                 and self.switch_ev_connected is True
                 and self.switch_low_price_charging is True
                 and self.sensor.current_price is not None
@@ -309,6 +353,7 @@ class EVSmartChargingCoordinator:
             else:
                 self.low_price_charging_state = STATE_OFF
 
+            # Perform low SOC charging even if self.switch_active_price_charging is False
             if (
                 self.switch_active is True
                 and self.switch_ev_connected is True
@@ -419,10 +464,12 @@ class EVSmartChargingCoordinator:
                 if self.sensor_status:
                     if not self.switch_active:
                         self.sensor_status.set_status(CHARGING_STATUS_NOT_ACTIVE)
-                    elif not self.switch_ev_connected:
-                        self.sensor_status.set_status(CHARGING_STATUS_DISCONNECTED)
                     elif self.low_soc_charging_state == STATE_ON:
                         self.sensor_status.set_status(CHARGING_STATUS_LOW_SOC_CHARGING)
+                    elif not self.switch_active_price_charging:
+                        self.sensor_status.set_status(CHARGING_STATUS_PRICE_NOT_ACTIVE)
+                    elif not self.switch_ev_connected:
+                        self.sensor_status.set_status(CHARGING_STATUS_DISCONNECTED)
                     elif self.low_price_charging_state == STATE_ON:
                         self.sensor_status.set_status(
                             CHARGING_STATUS_LOW_PRICE_CHARGING
@@ -445,6 +492,10 @@ class EVSmartChargingCoordinator:
         if state is True:
             _LOGGER.debug("Turn on charging")
             self.sensor.set_state(STATE_ON)
+            if self.sensor_charging_current:
+                self.sensor_charging_current.set_charging_current(
+                    self.default_charging_current
+                )
             if (
                 self.charger_switch.entity_id is not None
                 and self.charger_switch.domain is not None
@@ -461,6 +512,8 @@ class EVSmartChargingCoordinator:
         else:
             _LOGGER.debug("Turn off charging")
             self.sensor.set_state(STATE_OFF)
+            if self.sensor_charging_current:
+                self.sensor_charging_current.set_charging_current(0)
             if (
                 self.charger_switch.entity_id is not None
                 and self.charger_switch.domain is not None
@@ -486,6 +539,14 @@ class EVSmartChargingCoordinator:
                 self.sensor = sensor
             if isinstance(sensor, EVSmartChargingSensorStatus):
                 self.sensor_status = sensor
+            if isinstance(sensor, EVSmartChargingSensorChargingCurrent):
+                self.sensor_charging_current = sensor
+                if self.solar_charging:
+                    self.solar_charging.set_charging_current_sensor(sensor)
+            if isinstance(sensor, EVSmartChargingSensorSolarStatus):
+                self.sensor_solar_status = sensor
+                if self.solar_charging:
+                    self.solar_charging.set_solar_status_sensor(sensor)
 
         self.price_entity_id = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
         price_state = self.hass.states.get(self.price_entity_id)
@@ -621,12 +682,12 @@ class EVSmartChargingCoordinator:
             self.switch_keep_on_completion_time = None
             # Make sure the charger is turned off, when connected to charger
             # and the car is used to start/stop charging.
-            if self.switch_active is True:
+            if self.switch_active is True and self.switch_active_price_charging is True:
                 if get_parameter(self.config_entry, CONF_EV_CONTROLLED):
                     self.after_ev_connected = True
         else:
             # Make sure the charger is turned off, but only if smart charging is active.
-            if self.switch_active is True:
+            if self.switch_active is True and self.switch_active is True:
                 await self.turn_off_charging()
         await self.update_configuration()
 
@@ -753,9 +814,32 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("switch_low_soc_charging_update = %s", state)
         await self.update_configuration()
 
-    async def update_configuration(self):
+    async def switch_active_price_charging_update(self, state: bool):
+        """Handle the active price charging switch"""
+        self.switch_active_price_charging = state
+        _LOGGER.debug("switch_active_price_charging_update = %s", state)
+        await self.update_configuration()
+
+    async def switch_active_solar_charging_update(self, state: bool):
+        """Handle the active solar charging switch"""
+        self.switch_active_solar_charging = state
+        _LOGGER.debug("switch_active_solar_charging_update = %s", state)
+        await self.update_configuration()
+
+    async def switch_three_phase_charging_update(self, state: bool):
+        """Handle the three phase charging switch"""
+        self.switch_three_phase_charging = state
+        _LOGGER.debug("switch_three_phase_charging_update = %s", state)
+        await self.update_configuration()
+
+    async def update_configuration(
+        self, default_charging_current_updated: bool = False
+    ):
         """Called when the configuration has been updated"""
-        await self.update_sensors(configuration_updated=True)
+        await self.update_sensors(
+            configuration_updated=True,
+            default_charging_current_updated=default_charging_current_updated,
+        )
 
     @callback
     async def update_sensors_new(
@@ -776,6 +860,7 @@ class EVSmartChargingCoordinator:
             old_state=old_state,
             new_state=new_state,
             configuration_updated=configuration_updated,
+            default_charging_current_updated=False,
         )
 
     async def update_sensors(
@@ -784,6 +869,7 @@ class EVSmartChargingCoordinator:
         old_state: State = None,
         new_state: State = None,
         configuration_updated: bool = False,
+        default_charging_current_updated: bool = False,
     ):  # pylint: disable=unused-argument
         """Price or EV sensors have been updated."""
 
@@ -791,6 +877,36 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("entity_id = %s", entity_id)
         # _LOGGER.debug("old_state = %s", old_state)
         _LOGGER.debug("new_state = %s", new_state)
+
+        if default_charging_current_updated:
+            self.sensor_charging_current.set_charging_current(
+                self.default_charging_current
+            )
+
+        # Handle Solar Charging
+        if self.solar_charging:
+            if configuration_updated:
+                if self.switch_three_phase_charging:
+                    number_of_phases = 3
+                else:
+                    number_of_phases = 1
+                self.solar_charging.update_configuration(
+                    self.switch_active,
+                    self.switch_active_solar_charging,
+                    self.switch_ev_connected,
+                    number_of_phases,
+                    self.min_charging_current,
+                    self.max_charging_current,
+                    self.solar_charging_off_delay,
+                )
+            if self.solar_charging and (entity_id == self.ev_soc_entity_id):
+                self.solar_charging.update_ev_soc(float(new_state.state))
+            if self.solar_charging and (entity_id == self.ev_target_soc_entity_id):
+                self.solar_charging.update_target_ev_soc(float(new_state.state))
+
+            if self.solar_charging and (entity_id == self.solar_grid_usage_entity_id):
+                self.solar_charging.update_grid_usage(float(new_state.state))
+                return
 
         # Update schedule and reset keep_on if EV SOC Target is updated
         if self.ev_target_soc_entity_id and (entity_id == self.ev_target_soc_entity_id):
@@ -929,7 +1045,7 @@ class EVSmartChargingCoordinator:
                 self.start_quarter_local, self.ready_quarter_local
             ),
             "ready_quarter": get_ready_quarter_utc(self.ready_quarter_local),
-            "switch_active": self.switch_active,
+            "switch_active": self.switch_active and self.switch_active_price_charging,
             "switch_apply_limit": self.switch_apply_limit
             or self.opportunistic_feature_triggered,
             "switch_continuous": self.switch_continuous,
