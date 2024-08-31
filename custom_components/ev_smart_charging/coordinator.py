@@ -55,6 +55,7 @@ from .const import (
     CHARGING_STATUS_KEEP_ON,
     CHARGING_STATUS_NO_PLAN,
     CHARGING_STATUS_NOT_ACTIVE,
+    CHARGING_STATUS_PRICE_NOT_ACTIVE,
     CHARGING_STATUS_WAITING_CHARGING,
     CHARGING_STATUS_WAITING_NEW_PRICE,
     CHARGING_STATUS_LOW_PRICE_CHARGING,
@@ -309,11 +310,13 @@ class EVSmartChargingCoordinator:
                     or self.ev_soc < self.number_min_soc
                 )
                 and self.switch_ev_connected is True
+                and self.switch_active_price_charging is True
                 and self.switch_active is True
             )
 
             if (
                 self.switch_active is True
+                and self.switch_active_price_charging is True
                 and self.switch_ev_connected is True
                 and self.switch_low_price_charging is True
                 and self.sensor.current_price is not None
@@ -324,6 +327,7 @@ class EVSmartChargingCoordinator:
             else:
                 self.low_price_charging_state = STATE_OFF
 
+            # Perform low SOC charging even if self.switch_active_price_charging is False
             if (
                 self.switch_active is True
                 and self.switch_ev_connected is True
@@ -434,6 +438,8 @@ class EVSmartChargingCoordinator:
                 if self.sensor_status:
                     if not self.switch_active:
                         self.sensor_status.set_status(CHARGING_STATUS_NOT_ACTIVE)
+                    elif not self.switch_active_price_charging:
+                        self.sensor_status.set_status(CHARGING_STATUS_PRICE_NOT_ACTIVE)
                     elif not self.switch_ev_connected:
                         self.sensor_status.set_status(CHARGING_STATUS_DISCONNECTED)
                     elif self.low_soc_charging_state == STATE_ON:
@@ -637,12 +643,12 @@ class EVSmartChargingCoordinator:
             self.switch_keep_on_completion_time = None
             # Make sure the charger is turned off, when connected to charger
             # and the car is used to start/stop charging.
-            if self.switch_active is True:
+            if self.switch_active is True and self.switch_active_price_charging is True:
                 if get_parameter(self.config_entry, CONF_EV_CONTROLLED):
                     self.after_ev_connected = True
         else:
             # Make sure the charger is turned off, but only if smart charging is active.
-            if self.switch_active is True:
+            if self.switch_active is True and self.switch_active is True:
                 await self.turn_off_charging()
         await self.update_configuration()
 
@@ -905,7 +911,7 @@ class EVSmartChargingCoordinator:
                 self.start_hour_local, self.ready_hour_local
             ),
             "ready_hour": get_ready_hour_utc(self.ready_hour_local),
-            "switch_active": self.switch_active,
+            "switch_active": self.switch_active and self.switch_active_price_charging,
             "switch_apply_limit": self.switch_apply_limit,
             "switch_continuous": self.switch_continuous,
             "max_price": max_price,

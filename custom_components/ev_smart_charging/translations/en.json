@@ -128,6 +128,7 @@
                     "charging": "Charging",
                     "keeping_charger_on": "Keeping charger on",
                     "disconnected": "Disconnected",
+                    "price_not_active": "Price based charging not active",
                     "smart_charging_not_active": "Smart charging not active",
                     "low_price_charging": "Low price charging",
                     "low_soc_charging": "Low SOC charging"
