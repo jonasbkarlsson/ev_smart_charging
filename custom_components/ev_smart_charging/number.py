@@ -22,7 +22,7 @@ from .const import (
     ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER,
     ENTITY_KEY_CONF_MAX_CHARGING_CURRENT_NUMBER,
     ENTITY_KEY_CONF_MIN_CHARGING_CURRENT_NUMBER,
-    ENTITY_KEY_CONF_NORMAL_CHARGING_CURRENT_NUMBER,
+    ENTITY_KEY_CONF_DEFAULT_CHARGING_CURRENT_NUMBER,
     ENTITY_KEY_CONF_OPPORTUNISTIC_LEVEL_NUMBER,
     ENTITY_KEY_CONF_PCT_PER_HOUR_NUMBER,
     ENTITY_KEY_CONF_MAX_PRICE_NUMBER,
@@ -55,7 +55,7 @@ async def async_setup_entry(
     numbers.append(EVSmartChargingNumberLowSocCharging(entry, coordinator))
     numbers.append(EVSmartChargingNumberMaxChargingCurrent(entry, coordinator))
     numbers.append(EVSmartChargingNumberMinChargingCurrent(entry, coordinator))
-    numbers.append(EVSmartChargingNumberNormalChargingCurrent(entry, coordinator))
+    numbers.append(EVSmartChargingNumberDefaultChargingCurrent(entry, coordinator))
     numbers.append(EVSmartChargingNumberSolarChargingOffDelay(entry, coordinator))
     async_add_devices(numbers)
 
@@ -297,10 +297,10 @@ class EVSmartChargingNumberMinChargingCurrent(EVSmartChargingNumber):
         await self.coordinator.update_configuration()
 
 
-class EVSmartChargingNumberNormalChargingCurrent(EVSmartChargingNumber):
-    """EV Smart Charging normal charging current number class."""
+class EVSmartChargingNumberDefaultChargingCurrent(EVSmartChargingNumber):
+    """EV Smart Charging default charging current number class."""
 
-    _entity_key = ENTITY_KEY_CONF_NORMAL_CHARGING_CURRENT_NUMBER
+    _entity_key = ENTITY_KEY_CONF_DEFAULT_CHARGING_CURRENT_NUMBER
     #    _attr_icon = ICON_BATTERY_50
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value = 1.0
@@ -309,7 +309,7 @@ class EVSmartChargingNumberNormalChargingCurrent(EVSmartChargingNumber):
     _attr_native_unit_of_measurement = "A"
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
-        _LOGGER.debug("EVSmartChargingNumberNormalChargingCurrent.__init__()")
+        _LOGGER.debug("EVSmartChargingNumberDefaultChargingCurrent.__init__()")
         super().__init__(entry, coordinator)
         if self.value is None:
             self._attr_native_value = 16.0
@@ -318,7 +318,7 @@ class EVSmartChargingNumberNormalChargingCurrent(EVSmartChargingNumber):
     async def async_set_native_value(self, value: float) -> None:
         """Set new value."""
         await super().async_set_native_value(value)
-        self.coordinator.normal_charging_current = value
+        self.coordinator.default_charging_current = value
         await self.coordinator.update_configuration()
 
 

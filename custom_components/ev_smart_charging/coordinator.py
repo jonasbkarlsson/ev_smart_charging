@@ -192,7 +192,7 @@ class EVSmartChargingCoordinator:
         )
         self.max_charging_current = 16.0
         self.min_charging_current = 6.0
-        self.normal_charging_current = 16.0
+        self.default_charging_current = 16.0
         self.solar_charging_off_delay = 5.0
 
         self.auto_charging_state = STATE_OFF
@@ -468,7 +468,7 @@ class EVSmartChargingCoordinator:
             self.sensor.set_state(STATE_ON)
             if self.sensor_charging_current:
                 self.sensor_charging_current.set_charging_current(
-                    self.normal_charging_current
+                    self.default_charging_current
                 )
             if self.charger_switch is not None:
                 _LOGGER.debug(

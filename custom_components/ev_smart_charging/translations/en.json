@@ -20,7 +20,7 @@
                     "grid_voltage": "Grid voltage [V]",
                     "max_charging_current": "Maximum charging current [A]",
                     "min_charging_current": "Minimum charging current [A]",
-                    "normal_charging_current": "Normal (non-solar) charging current [A]",
+                    "default_charging_current": "Default (non-solar) charging current [A]",
                     "three_phase_charging": "Three-phase charging",
                     "solar_charging_off_delay": "Time delay for ending solar power based charging"
                 }
@@ -60,7 +60,7 @@
                     "grid_voltage": "Grid voltage [V]",
                     "max_charging_current": "Maximum charging current [A]",
                     "min_charging_current": "Minimum charging current [A]",
-                    "normal_charging_current": "Normal (non-solar) charging current [A]",
+                    "default_charging_current": "Default (non-solar) charging current [A]",
                     "three_phase_charging": "Three-phase charging",
                     "solar_charging_off_delay": "Time delay for ending solar power based charging"
                 }
@@ -94,7 +94,7 @@
             "minimum_ev_soc": { "name": "Minimum EV SOC" },
             "max_charging_current": { "name": "Maximum charging current" },
             "min_charging_current": { "name": "Minimum charging current" },
-            "normal_charging_current": { "name": "Normal charging current" },
+            "default_charging_current": { "name": "Default charging current" },
             "solar_charging_off_delay": { "name": "Solar charging off delay" }
         },
         "select": {
