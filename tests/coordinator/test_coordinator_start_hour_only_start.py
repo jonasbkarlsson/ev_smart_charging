@@ -68,6 +68,7 @@ async def test_coordinator_start_hour_only_start_4a(
     assert coordinator is not None
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
@@ -167,6 +168,7 @@ async def test_coordinator_start_hour_only_start_4b(
     assert coordinator is not None
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)

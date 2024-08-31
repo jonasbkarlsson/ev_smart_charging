@@ -55,6 +55,7 @@ async def test_to_daylight_saving_time(
     sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
     assert sensor is not None
     await coordinator.add_sensor([sensor])
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_active_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
@@ -182,6 +183,7 @@ async def test_from_daylight_saving_time(
     assert sensor is not None
     await coordinator.add_sensor([sensor])
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
 

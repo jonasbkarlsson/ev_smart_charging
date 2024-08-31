@@ -20,6 +20,7 @@ from ..const import (
     CONF_CHARGER_ENTITY,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
+    CONF_GRID_USAGE_SENSOR,
     DOMAIN,
     NAME,
     PLATFORM_ENERGIDATASERVICE,
@@ -95,6 +96,22 @@ class FlowValidator:
             if entity.domain not in [SWITCH, INPUT_BOOLEAN_DOMAIN]:
                 user_input[CONF_CHARGER_ENTITY] = ""
                 return ("base", "charger_control_switch_not_switch")
+
+        return None
+
+    @staticmethod
+    def validate_step_solar(
+        hass: HomeAssistant, user_input: dict[str, Any]
+    ) -> list[str]:
+        """Validate step_solar"""
+
+        # Validate grid_usage entity
+        entity = hass.states.get(user_input[CONF_GRID_USAGE_SENSOR])
+        if entity is None:
+            return ("base", "grid_usage_not_found")
+        if not Validator.is_float(entity.state):
+            _LOGGER.debug("Grid usage state is not float")
+            return ("base", "grid_usage_invalid_data")
 
         return None
 

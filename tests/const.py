@@ -14,6 +14,7 @@ from custom_components.ev_smart_charging.const import (
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_PCT_PER_HOUR,
     CONF_READY_QUARTER,
+    CONF_SOLAR_CHARGING_CONFIGURED,
     CONF_START_QUARTER,
     NAME,
 )
@@ -25,6 +26,7 @@ MOCK_CONFIG_USER = {
     CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
     CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
     CONF_EV_CONTROLLED: False,
+    CONF_SOLAR_CHARGING_CONFIGURED: False,
 }
 
 MOCK_CONFIG_USER_WRONG_PRICE = {
@@ -71,6 +73,7 @@ MOCK_CONFIG_CHARGER_EXTRA = {
     CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
     CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
     CONF_EV_CONTROLLED: False,
+    CONF_SOLAR_CHARGING_CONFIGURED: False,
 }
 
 MOCK_CONFIG_CHARGER_NEW = {

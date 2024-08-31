@@ -105,6 +105,7 @@ async def test_coordinator2(
 
     # Turn on switches
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
@@ -222,6 +223,7 @@ async def test_coordinator_min_soc1(
 
     # Turn on switches
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(True)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
@@ -291,6 +293,7 @@ async def test_coordinator_min_soc2(
 
     # Turn on switches
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(True)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
@@ -410,6 +413,7 @@ async def test_coordinator_fix_soc(
 
     # Turn on switches. Should give 2h schedule 05:00-07:00
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)

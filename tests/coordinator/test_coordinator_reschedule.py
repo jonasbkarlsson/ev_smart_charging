@@ -62,6 +62,7 @@ async def test_coordinator_reschedule(
     coordinator.ready_quarter_local = 8 * 4
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)

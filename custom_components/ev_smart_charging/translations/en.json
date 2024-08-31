@@ -9,7 +9,20 @@
                     "ev_soc_sensor": "EV SOC entity",
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
                     "charger_entity": "Charger control entity (single space to remove)",
-                    "ev_controlled": "An EV integration will control start/stop of charging"
+                    "ev_controlled": "An EV integration will control start/stop of charging",
+                    "solar_charging_configured": "Configure charging using solar power"
+                }
+            },
+            "solar": {
+                "description": "Configuration of charging using solar power.",
+                "data": {
+                    "grid_usage_sensor": "Grid usage sensor [W]",
+                    "grid_voltage": "Grid voltage [V]",
+                    "max_charging_current": "Maximum charging current [A]",
+                    "min_charging_current": "Minimum charging current [A]",
+                    "default_charging_current": "Default (non-solar) charging current [A]",
+                    "three_phase_charging": "Three-phase charging",
+                    "solar_charging_off_delay": "Time delay for ending solar power based charging"
                 }
             }
         },
@@ -22,7 +35,9 @@
             "ev_target_soc_not_found": "EV Target SOC entity not found.",
             "ev_target_soc_invalid_data": "The Target SOC entity gives invalid data.",
             "charger_control_switch_not_found": "Charger control entity not found.",
-            "charger_control_switch_not_switch": "Charger control entity is not a switch or an input boolean."
+            "charger_control_switch_not_switch": "Charger control entity is not a switch or an input boolean.",
+            "grid_usage_not_found": "Grid usage sensor not found.",
+            "grid_usage_invalid_data": "Grid usage entity gives invalid data."
         }
     },
     "options": {
@@ -34,7 +49,20 @@
                     "ev_soc_sensor": "EV SOC entity",
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
                     "charger_entity": "Charger control entity (single space to remove)",
-                    "ev_controlled": "An EV integration will control start/stop of charging"
+                    "ev_controlled": "An EV integration will control start/stop of charging",
+                    "solar_charging_configured": "Configure charging using solar power"
+                }
+            },
+            "solar": {
+                "description": "Configuration of charging using solar power.",
+                "data": {
+                    "grid_usage_sensor": "Grid usage sensor [W]",
+                    "grid_voltage": "Grid voltage [V]",
+                    "max_charging_current": "Maximum charging current [A]",
+                    "min_charging_current": "Minimum charging current [A]",
+                    "default_charging_current": "Default (non-solar) charging current [A]",
+                    "three_phase_charging": "Three-phase charging",
+                    "solar_charging_off_delay": "Time delay for ending solar power based charging"
                 }
             }
         },
@@ -47,7 +75,9 @@
             "ev_target_soc_not_found": "EV Target SOC entity not found.",
             "ev_target_soc_invalid_data": "The Target SOC entity gives invalid data.",
             "charger_control_switch_not_found": "Charger control entity not found.",
-            "charger_control_switch_not_switch": "Charger control entity is not a switch or an input boolean."
+            "charger_control_switch_not_switch": "Charger control entity is not a switch or an input boolean.",
+            "grid_usage_not_found": "Grid usage sensor not found.",
+            "grid_usage_invalid_data": "Grid usage entity gives invalid data."
         }
     },
     "entity": {
@@ -62,7 +92,11 @@
             "opportunistic_type2_level": { "name": "Opportunistic type2 level" },
             "low_price_charging_level": { "name": "Low price charging level" },
             "low_soc_charging_level": { "name": "Low SOC charging level" },
-            "minimum_ev_soc": { "name": "Minimum EV SOC" }
+            "minimum_ev_soc": { "name": "Minimum EV SOC" },
+            "max_charging_current": { "name": "Maximum charging current" },
+            "min_charging_current": { "name": "Minimum charging current" },
+            "default_charging_current": { "name": "Default charging current" },
+            "solar_charging_off_delay": { "name": "Solar charging off delay" }
         },
         "select": {
             "charge_start_time": { "name": "Charge start time" },
@@ -84,6 +118,9 @@
                     "charging_schedule": {"name": "Charging schedule"}
                 }
             },
+            "charging_current": {
+                "name": "Charging current"
+            },
             "status": {
                 "name": "Status",
                 "state": {
@@ -93,11 +130,24 @@
                     "charging": "Charging",
                     "keeping_charger_on": "Keeping charger on",
                     "disconnected": "Disconnected",
+                    "price_not_active": "Price based charging not active",
                     "smart_charging_not_active": "Smart charging not active",
                     "low_price_charging": "Low price charging",
                     "low_soc_charging": "Low SOC charging"
                 }
+            },
+            "solar_status": {
+                "name": "Solar charging status",
+                "state": {
+                    "smart_charging_not_active": "Smart charging not active",
+                    "not_activated": "Not activated",
+                    "disconnected": "Disconnected",
+                    "waiting": "Waiting for solar power",
+                    "charging": "Charging with solar power",
+                    "charging_completed": "Charging completed"
+                }
             }
+
         },
         "switch": {
             "smart_charging_activated": { "name": "Smart charging activated" },
@@ -108,7 +158,10 @@
             "opportunistic_charging": { "name": "Opportunistic charging" },
             "opportunistic_type2_charging": { "name": "Opportunistic type2 charging" },
             "low_price_charging": { "name": "Low price charging" },
-            "low_soc_charging": { "name": "Low SOC charging" }
+            "low_soc_charging": { "name": "Low SOC charging" },
+            "three_phase_charging": { "name": "Three phase charging"},
+            "price_charging_activated": { "name": "Price charging activated"},
+            "solar_charging_activated": { "name": "Solar charging activated"}
         }
     }
 }

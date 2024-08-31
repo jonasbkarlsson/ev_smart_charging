@@ -71,6 +71,7 @@ async def test_coordinator_start_hour_end_before_start_2a(
     assert coordinator is not None
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
@@ -187,6 +188,7 @@ async def test_coordinator_start_hour_end_before_start_2b(
     assert coordinator is not None
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
@@ -303,6 +305,7 @@ async def test_coordinator_start_hour_end_before_start_2c(
     assert coordinator is not None
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
