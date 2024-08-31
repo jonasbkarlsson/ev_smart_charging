@@ -69,6 +69,7 @@ async def test_coordinator_keep_on_get_entities(
 
     # Turn on switches
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(False)
     await coordinator.switch_ev_connected_update(True)
@@ -138,6 +139,7 @@ async def test_coordinator_keep_on_schedule(
 
     # Turn on switches
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(False)
     await coordinator.switch_ev_connected_update(True)
@@ -240,6 +242,7 @@ async def test_coordinator_keep_on_connect(
 
     # Turn on switches
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(False)
     await coordinator.switch_ev_connected_update(True)
@@ -398,6 +401,7 @@ async def test_coordinator_keep_on_connect2(
 
     # Turn on switches
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(False)
     await coordinator.switch_ev_connected_update(True)  # Set to True and don't change
@@ -517,6 +521,7 @@ async def test_coordinator_keep_on_connect3(
 
     # Turn on switches
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(False)
     await coordinator.switch_ev_connected_update(True)

@@ -19,6 +19,7 @@ from ..const import (
     CONF_CHARGER_ENTITY,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
+    CONF_GRID_USAGE_SENSOR,
     DOMAIN,
     NAME,
     PLATFORM_ENERGIDATASERVICE,
@@ -100,6 +101,22 @@ class FlowValidator:
 
         return None
 
+    @staticmethod
+    def validate_step_solar(
+        hass: HomeAssistant, user_input: dict[str, Any]
+    ) -> list[str]:
+        """Validate step_solar"""
+
+        # Validate grid_usage entity
+        entity = hass.states.get(user_input[CONF_GRID_USAGE_SENSOR])
+        if entity is None:
+            return ("base", "grid_usage_not_found")
+        if not Validator.is_float(entity.state):
+            _LOGGER.debug("Grid usage state is not float")
+            return ("base", "grid_usage_invalid_data")
+
+        return None
+
 
 class FindEntity:
     """Find entities"""
@@ -120,9 +137,9 @@ class FindEntity:
     def find_nordpool_sensor(hass: HomeAssistant) -> str:
         """Find Nordpool sensor"""
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
-        registry_entries: UserDict[
-            str, RegistryEntry
-        ] = entity_registry.entities.items()
+        registry_entries: UserDict[str, RegistryEntry] = (
+            entity_registry.entities.items()
+        )
         for entry in registry_entries:
             if entry[1].platform == PLATFORM_NORDPOOL:
                 return entry[1].entity_id
@@ -132,9 +149,9 @@ class FindEntity:
     def find_energidataservice_sensor(hass: HomeAssistant) -> str:
         """Find Energi Data Service sensor"""
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
-        registry_entries: UserDict[
-            str, RegistryEntry
-        ] = entity_registry.entities.items()
+        registry_entries: UserDict[str, RegistryEntry] = (
+            entity_registry.entities.items()
+        )
         for entry in registry_entries:
             if entry[1].platform == PLATFORM_ENERGIDATASERVICE:
                 return entry[1].entity_id
@@ -144,9 +161,9 @@ class FindEntity:
     def find_entsoe_sensor(hass: HomeAssistant) -> str:
         """Search for Entso-e sensor"""
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
-        registry_entries: UserDict[
-            str, RegistryEntry
-        ] = entity_registry.entities.items()
+        registry_entries: UserDict[str, RegistryEntry] = (
+            entity_registry.entities.items()
+        )
         for entry in registry_entries:
             if entry[1].platform == PLATFORM_ENTSOE:
                 entity_id = entry[1].entity_id
@@ -158,9 +175,9 @@ class FindEntity:
     def find_generic_sensor(hass: HomeAssistant) -> str:
         """Search for generic sensor"""
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
-        registry_entries: UserDict[
-            str, RegistryEntry
-        ] = entity_registry.entities.items()
+        registry_entries: UserDict[str, RegistryEntry] = (
+            entity_registry.entities.items()
+        )
         for entry in registry_entries:
             if entry[1].platform == PLATFORM_GENERIC:
                 entity_id = entry[1].entity_id
@@ -172,9 +189,9 @@ class FindEntity:
     def find_vw_soc_sensor(hass: HomeAssistant) -> str:
         """Search for Volkswagen SOC sensor"""
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
-        registry_entries: UserDict[
-            str, RegistryEntry
-        ] = entity_registry.entities.items()
+        registry_entries: UserDict[str, RegistryEntry] = (
+            entity_registry.entities.items()
+        )
         for entry in registry_entries:
             if entry[1].platform == PLATFORM_VW:
                 entity_id = entry[1].entity_id
@@ -187,9 +204,9 @@ class FindEntity:
     def find_vw_target_soc_sensor(hass: HomeAssistant) -> str:
         """Search for Volkswagen Target SOC sensor"""
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
-        registry_entries: UserDict[
-            str, RegistryEntry
-        ] = entity_registry.entities.items()
+        registry_entries: UserDict[str, RegistryEntry] = (
+            entity_registry.entities.items()
+        )
         for entry in registry_entries:
             if entry[1].platform == PLATFORM_VW:
                 entity_id = entry[1].entity_id
@@ -201,9 +218,9 @@ class FindEntity:
     def find_ocpp_device(hass: HomeAssistant) -> str:
         """Find OCPP entity"""
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
-        registry_entries: UserDict[
-            str, RegistryEntry
-        ] = entity_registry.entities.items()
+        registry_entries: UserDict[str, RegistryEntry] = (
+            entity_registry.entities.items()
+        )
         for entry in registry_entries:
             if entry[1].platform == PLATFORM_OCPP:
                 entity_id = entry[1].entity_id

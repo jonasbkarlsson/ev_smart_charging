@@ -1,4 +1,5 @@
 """Test ev_smart_charging coordinator."""
+
 from datetime import datetime
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -61,6 +62,7 @@ async def test_coordinator_start_hour_both_same_3a(
     await coordinator.add_sensor([sensor])
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
@@ -151,6 +153,7 @@ async def test_coordinator_start_hour_both_same_3b(
     await coordinator.add_sensor([sensor])
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
+    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
