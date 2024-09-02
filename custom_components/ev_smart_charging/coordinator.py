@@ -127,6 +127,7 @@ class EVSmartChargingCoordinator:
         self.listeners = []
         self.setup_timestamp = None
 
+        self.select_phase_switch_mode = None
         self.sensor = None
         self.sensor_status = None
         self.sensor_charging_current = None

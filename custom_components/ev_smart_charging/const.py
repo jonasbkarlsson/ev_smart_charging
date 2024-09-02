@@ -54,6 +54,7 @@ ENTITY_KEY_ACTIVE_PRICE_SWITCH = "price_charging_activated"
 ENTITY_KEY_ACTIVE_SOLAR_SWITCH = "solar_charging_activated"
 ENTITY_KEY_START_BUTTON = "manually_start_charging"
 ENTITY_KEY_STOP_BUTTON = "manually_stop_charging"
+ENTITY_KEY_PHASE_SWITCH_MODE_SELECT = "phase_switch_mode"
 ENTITY_KEY_CONF_PCT_PER_HOUR_NUMBER = "charging_speed"
 ENTITY_KEY_CONF_MAX_PRICE_NUMBER = "electricity_price_limit"
 ENTITY_KEY_CONF_OPPORTUNISTIC_LEVEL_NUMBER = "opportunistic_level"
@@ -191,6 +192,16 @@ QUARTERS = [
 ]
 START_QUARTER_NONE = -48 * 4  # TODO: Does this need to be changed?
 READY_QUARTER_NONE = 72 * 4  # TODO: Does this need to be changed?
+
+PHASE_SWITCH_MODE_ONE = "one_phase"
+PHASE_SWITCH_MODE_THREE = "three_phases"
+PHASE_SWITCH_MODE_DYNAMIC = "dynamic"
+
+PHASE_SWITCH_MODES = [
+    PHASE_SWITCH_MODE_ONE,
+    PHASE_SWITCH_MODE_THREE,
+    PHASE_SWITCH_MODE_DYNAMIC,
+]
 
 CHARGING_STATUS_WAITING_NEW_PRICE = "waiting_for_new_prices"
 CHARGING_STATUS_NO_PLAN = "no_charging_planned"

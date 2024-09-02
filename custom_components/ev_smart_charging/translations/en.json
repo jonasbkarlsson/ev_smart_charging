@@ -100,7 +100,15 @@
         },
         "select": {
             "charge_start_time": { "name": "Charge start time" },
-            "charge_completion_time": { "name": "Charge completion time" }
+            "charge_completion_time": { "name": "Charge completion time" },
+            "phase_switch_mode": {
+                "name": "Phase switch mode",
+                "state": {
+                    "one_phase": "One phase only",
+                    "three_phases": "Three phases only",
+                    "dynamic": "Dynamically one or three phases"
+                }
+            }
         },
         "sensor": {
             "charging": {

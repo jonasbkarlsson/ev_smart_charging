@@ -14,8 +14,11 @@ from .const import (
     DOMAIN,
     ENTITY_KEY_CONF_READY_QUARTER,
     ENTITY_KEY_CONF_START_QUARTER,
+    ENTITY_KEY_PHASE_SWITCH_MODE_SELECT,
     QUARTERS,
     ICON_TIME,
+    PHASE_SWITCH_MODE_THREE,
+    PHASE_SWITCH_MODES,
     READY_QUARTER_NONE,
     SELECT,
     START_QUARTER_NONE,
@@ -36,9 +39,11 @@ async def async_setup_entry(
     selects = []
     selects.append(EVSmartChargingSelectStartQuarter(entry, coordinator))
     selects.append(EVSmartChargingSelectReadyQuarter(entry, coordinator))
+    selects.append(EVSmartChargingSelectPhaseSwitchMode(entry, coordinator))
     async_add_devices(selects)
 
 
+# pylint: disable=abstract-method
 class EVSmartChargingSelect(EVSmartChargingEntity, SelectEntity, RestoreEntity):
     """EV Smart Charging switch class."""
 
@@ -115,4 +120,26 @@ class EVSmartChargingSelectReadyQuarter(EVSmartChargingSelect):
             if self.coordinator.ready_quarter_local == 0:
                 # Treat 00:00 as 24:00
                 self.coordinator.ready_quarter_local = 24 * 4
+            await self.coordinator.update_configuration()
+
+
+class EVSmartChargingSelectPhaseSwitchMode(EVSmartChargingSelect):
+    """EV Smart Charging phase switch mode select class."""
+
+    _entity_key = ENTITY_KEY_PHASE_SWITCH_MODE_SELECT
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_options = PHASE_SWITCH_MODES
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSelectPhaseSwitchMode.__init__()")
+        super().__init__(entry, coordinator)
+        if self.state is None:
+            self._attr_current_option = PHASE_SWITCH_MODE_THREE
+            self.update_ha_state()
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+        await super().async_select_option(option)
+        if self.state:
+            self.coordinator.select_phase_switch_mode = self.state
             await self.coordinator.update_configuration()
