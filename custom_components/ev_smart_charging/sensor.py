@@ -10,6 +10,7 @@ from homeassistant.const import STATE_OFF
 from .const import (
     DOMAIN,
     ENTITY_KEY_CHARGING_CURRENT_SENSOR,
+    ENTITY_KEY_CHARGING_PHASES_SENSOR,
     ENTITY_KEY_CHARGING_SENSOR,
     ENTITY_KEY_SOLAR_STATUS_SENSOR,
     ENTITY_KEY_STATUS_SENSOR,
@@ -28,6 +29,7 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_devices):
     sensors.append(EVSmartChargingSensorCharging(entry))
     sensors.append(EVSmartChargingSensorStatus(entry))
     sensors.append(EVSmartChargingSensorChargingCurrent(entry))
+    sensors.append(EVSmartChargingSensorChargingPhases(entry))
     sensors.append(EVSmartChargingSensorSolarStatus(entry))
     async_add_devices(sensors)
     await coordinator.add_sensor(sensors)
@@ -224,6 +226,26 @@ class EVSmartChargingSensorChargingCurrent(EVSmartChargingSensor):
 
     def set_charging_current(self, new_status):
         """Set new current."""
+        self._attr_native_value = new_status
+        self.update_ha_state()
+
+
+class EVSmartChargingSensorChargingPhases(EVSmartChargingSensor):
+    """EV Smart Charging sensor class."""
+
+    _entity_key = ENTITY_KEY_CHARGING_PHASES_SENSOR
+    _attr_native_unit_of_measurement = ""
+
+    def __init__(self, entry):
+        _LOGGER.debug("EVSmartChargingSensorChargingPhases.__init__()")
+        self._attr_native_value = 3
+        super().__init__(entry)
+
+    def set_charging_current(self, new_status):
+        """Set new current."""
+        # Only 1 and 3 are valid values.
+        if new_status not in [1, 3]:
+            new_status = 3
         self._attr_native_value = new_status
         self.update_ha_state()
 

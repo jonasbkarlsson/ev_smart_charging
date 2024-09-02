@@ -38,6 +38,7 @@ PLATFORM_GENERIC = "generic"
 # Entity keys
 ENTITY_KEY_CHARGING_SENSOR = "charging"
 ENTITY_KEY_CHARGING_CURRENT_SENSOR = "charging_current"
+ENTITY_KEY_CHARGING_PHASES_SENSOR = "charging_phases"
 ENTITY_KEY_STATUS_SENSOR = "status"
 ENTITY_KEY_SOLAR_STATUS_SENSOR = "solar_status"
 ENTITY_KEY_ACTIVE_SWITCH = "smart_charging_activated"

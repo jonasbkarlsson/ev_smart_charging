@@ -121,6 +121,9 @@
             "charging_current": {
                 "name": "Charging current"
             },
+            "charging_phases": {
+                "name": "Number of phases"
+            },
             "status": {
                 "name": "Status",
                 "state": {

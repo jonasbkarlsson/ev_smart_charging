@@ -18,6 +18,7 @@ from custom_components.ev_smart_charging.const import (
 from custom_components.ev_smart_charging.helpers.general import get_parameter
 from custom_components.ev_smart_charging.sensor import (
     EVSmartChargingSensorChargingCurrent,
+    EVSmartChargingSensorChargingPhases,
     EVSmartChargingSensorSolarStatus,
 )
 
@@ -45,6 +46,7 @@ class SolarCharging:
         self.current_charging_amps = 0
         self.low_power_timestamp = dt.now().timestamp() - 100000  # Long time ago
         self.sensor_charging_current = None
+        self.sensor_charging_phases = None
         self.sensor_solar_status = None
         self.pacing_time = 10
         self.ev_soc = 0
@@ -56,6 +58,12 @@ class SolarCharging:
     ) -> None:
         """Store sensor."""
         self.sensor_charging_current = sensor_charging_current
+
+    def set_charging_phases_sensor(
+        self, sensor_charging_phases: EVSmartChargingSensorChargingPhases
+    ) -> None:
+        """Store sensor."""
+        self.sensor_charging_phases = sensor_charging_phases
 
     def set_solar_status_sensor(
         self, sensor_solar_status: EVSmartChargingSensorSolarStatus
