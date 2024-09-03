@@ -152,7 +152,6 @@ class EVSmartChargingCoordinator:
         self.switch_opportunistic_type2 = None
         self.switch_opportunistic_type2_entity_id = None
         self.switch_opportunistic_type2_unique_id = None
-        self.switch_three_phase_charging = None
         self.switch_active_price_charging = None
         self.switch_active_solar_charging = None
         self.price_entity_id = None
@@ -833,12 +832,6 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("switch_active_solar_charging_update = %s", state)
         await self.update_configuration()
 
-    async def switch_three_phase_charging_update(self, state: bool):
-        """Handle the three phase charging switch"""
-        self.switch_three_phase_charging = state
-        _LOGGER.debug("switch_three_phase_charging_update = %s", state)
-        await self.update_configuration()
-
     async def update_configuration(
         self, default_charging_current_updated: bool = False
     ):
@@ -893,15 +886,11 @@ class EVSmartChargingCoordinator:
         # Handle Solar Charging
         if self.solar_charging:
             if configuration_updated:
-                if self.switch_three_phase_charging:
-                    number_of_phases = 3
-                else:
-                    number_of_phases = 1
                 self.solar_charging.update_configuration(
                     self.switch_active,
                     self.switch_active_solar_charging,
                     self.switch_ev_connected,
-                    number_of_phases,
+                    self.select_phase_switch_mode,
                     self.min_charging_current,
                     self.max_charging_current,
                     self.solar_charging_off_delay,

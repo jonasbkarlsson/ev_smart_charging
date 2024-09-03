@@ -10,6 +10,9 @@ from custom_components.ev_smart_charging.const import (
     CHARGING_STATUS_DISCONNECTED,
     CHARGING_STATUS_NOT_ACTIVE,
     CONF_GRID_VOLTAGE,
+    PHASE_SWITCH_MODE_DYNAMIC,
+    PHASE_SWITCH_MODE_ONE,
+    PHASE_SWITCH_MODE_THREE,
     SOLAR_CHARGING_STATUS_CHARGING,
     SOLAR_CHARGING_STATUS_CHARGING_COMPLETED,
     SOLAR_CHARGING_STATUS_NOT_ACTIVATED,
@@ -39,7 +42,7 @@ class SolarCharging:
         self.charging_activated = False
         self.solar_charging_activated = False
         self.ev_connected = False
-        self.number_of_phases = 1
+        self.phase_switch_mode = PHASE_SWITCH_MODE_THREE
         self.min_charging_current = 6
         self.max_charging_current = 16
         self.solar_charging_off_delay = 5
@@ -79,20 +82,16 @@ class SolarCharging:
             new_solar_status = current_solar_status
             if not self.charging_activated:
                 new_solar_status = CHARGING_STATUS_NOT_ACTIVE
+            elif not self.solar_charging_activated:
+                new_solar_status = SOLAR_CHARGING_STATUS_NOT_ACTIVATED
+            elif not self.ev_connected:
+                new_solar_status = CHARGING_STATUS_DISCONNECTED
+            elif self.ev_soc >= self.target_ev_soc:
+                new_solar_status = SOLAR_CHARGING_STATUS_CHARGING_COMPLETED
+            elif self.solar_charging:
+                new_solar_status = SOLAR_CHARGING_STATUS_CHARGING
             else:
-                if not self.solar_charging_activated:
-                    new_solar_status = SOLAR_CHARGING_STATUS_NOT_ACTIVATED
-                else:
-                    if not self.ev_connected:
-                        new_solar_status = CHARGING_STATUS_DISCONNECTED
-                    else:
-                        if self.ev_soc >= self.target_ev_soc:
-                            new_solar_status = SOLAR_CHARGING_STATUS_CHARGING_COMPLETED
-                        else:
-                            if self.solar_charging:
-                                new_solar_status = SOLAR_CHARGING_STATUS_CHARGING
-                            else:
-                                new_solar_status = SOLAR_CHARGING_STATUS_WAITING
+                new_solar_status = SOLAR_CHARGING_STATUS_WAITING
 
             if new_solar_status != current_solar_status:
                 if new_solar_status in [
@@ -112,18 +111,18 @@ class SolarCharging:
         charging_activated: bool,
         solar_charging_activated: bool,
         ev_connected: bool,
-        number_of_phases: int,
+        phase_switch_mode: str,
         min_charging_current: float,
         max_charging_current: float,
         solar_charging_off_delay: float,
     ) -> None:
         """Update configuration"""
         _LOGGER.debug(
-            "update_configuration().= %s %s %s %s %s %s %s",
+            "update_configuration() = %s %s %s %s %s %s %s",
             str(charging_activated),
             str(solar_charging_activated),
             str(ev_connected),
-            str(number_of_phases),
+            phase_switch_mode,
             str(min_charging_current),
             str(max_charging_current),
             str(solar_charging_off_delay),
@@ -131,7 +130,7 @@ class SolarCharging:
         self.charging_activated = charging_activated
         self.solar_charging_activated = solar_charging_activated
         self.ev_connected = ev_connected
-        self.number_of_phases = number_of_phases
+        self.phase_switch_mode = phase_switch_mode
         self.min_charging_current = min_charging_current
         self.max_charging_current = max_charging_current
         self.solar_charging_off_delay = solar_charging_off_delay
@@ -165,9 +164,14 @@ class SolarCharging:
             self.grid_usage_timestamp = timestamp
             self.grid_usage = grid_usage
 
-            available_amps = (
-                -self.grid_usage / self.grid_voltage
-            ) / self.number_of_phases
+            if self.phase_switch_mode == PHASE_SWITCH_MODE_ONE:
+                number_of_phases = 1
+            elif self.phase_switch_mode == PHASE_SWITCH_MODE_DYNAMIC:
+                number_of_phases = 3  # TODO:
+            else:
+                number_of_phases = 3
+
+            available_amps = (-self.grid_usage / self.grid_voltage) / number_of_phases
             proposed_charging_amps = available_amps + self.current_charging_amps
             new_charging_amps = math.floor(
                 min(
