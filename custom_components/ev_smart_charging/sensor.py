@@ -241,8 +241,8 @@ class EVSmartChargingSensorChargingPhases(EVSmartChargingSensor):
         self._attr_native_value = 3
         super().__init__(entry)
 
-    def set_charging_current(self, new_status):
-        """Set new current."""
+    def set_charging_phases(self, new_status):
+        """Set new number of phases."""
         # Only 1 and 3 are valid values.
         if new_status not in [1, 3]:
             new_status = 3

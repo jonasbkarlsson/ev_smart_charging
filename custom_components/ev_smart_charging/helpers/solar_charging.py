@@ -11,7 +11,6 @@ from custom_components.ev_smart_charging.const import (
     CHARGING_STATUS_NOT_ACTIVE,
     CONF_GRID_VOLTAGE,
     PHASE_SWITCH_MODE_DYNAMIC,
-    PHASE_SWITCH_MODE_ONE,
     PHASE_SWITCH_MODE_THREE,
     SOLAR_CHARGING_STATUS_CHARGING,
     SOLAR_CHARGING_STATUS_CHARGING_COMPLETED,
@@ -42,7 +41,7 @@ class SolarCharging:
         self.charging_activated = False
         self.solar_charging_activated = False
         self.ev_connected = False
-        self.phase_switch_mode = PHASE_SWITCH_MODE_THREE
+        self.phase_switch_mode = None
         self.min_charging_current = 6
         self.max_charging_current = 16
         self.solar_charging_off_delay = 5
@@ -55,6 +54,7 @@ class SolarCharging:
         self.ev_soc = 0
         self.target_ev_soc = 100
         self.solar_charging = False
+        self.number_of_phases = 3
 
     def set_charging_current_sensor(
         self, sensor_charging_current: EVSmartChargingSensorChargingCurrent
@@ -130,7 +130,13 @@ class SolarCharging:
         self.charging_activated = charging_activated
         self.solar_charging_activated = solar_charging_activated
         self.ev_connected = ev_connected
-        self.phase_switch_mode = phase_switch_mode
+        if self.phase_switch_mode != phase_switch_mode:
+            self.phase_switch_mode = phase_switch_mode
+            if self.phase_switch_mode == PHASE_SWITCH_MODE_THREE:
+                self.number_of_phases = 3
+            else:
+                self.number_of_phases = 1
+            self.sensor_charging_phases.set_charging_phases(self.number_of_phases)
         self.min_charging_current = min_charging_current
         self.max_charging_current = max_charging_current
         self.solar_charging_off_delay = solar_charging_off_delay
@@ -164,14 +170,9 @@ class SolarCharging:
             self.grid_usage_timestamp = timestamp
             self.grid_usage = grid_usage
 
-            if self.phase_switch_mode == PHASE_SWITCH_MODE_ONE:
-                number_of_phases = 1
-            elif self.phase_switch_mode == PHASE_SWITCH_MODE_DYNAMIC:
-                number_of_phases = 3  # TODO:
-            else:
-                number_of_phases = 3
-
-            available_amps = (-self.grid_usage / self.grid_voltage) / number_of_phases
+            available_amps = (
+                -self.grid_usage / self.grid_voltage
+            ) / self.number_of_phases
             proposed_charging_amps = available_amps + self.current_charging_amps
             new_charging_amps = math.floor(
                 min(
@@ -179,6 +180,9 @@ class SolarCharging:
                     self.max_charging_current,
                 )
             )
+
+            if self.phase_switch_mode == PHASE_SWITCH_MODE_DYNAMIC:
+                pass  # TODO: Implement dynamic number of phases logic
 
             if proposed_charging_amps >= self.min_charging_current:
                 self.low_power_timestamp = None
