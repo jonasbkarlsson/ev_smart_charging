@@ -55,6 +55,8 @@ class SolarCharging:
         self.target_ev_soc = 100
         self.solar_charging = False
         self.number_of_phases = 3
+        self.phase_switch_timestamp = None
+        self.phase_switch_mode_state = 1
 
     def set_charging_current_sensor(
         self, sensor_charging_current: EVSmartChargingSensorChargingCurrent
@@ -104,6 +106,9 @@ class SolarCharging:
                     self.sensor_charging_current.set_charging_current(new_charging_amps)
                     self.current_charging_amps = new_charging_amps
                     self.solar_charging = False
+                    if self.phase_switch_mode == PHASE_SWITCH_MODE_DYNAMIC:
+                        self.number_of_phases = 1
+                        self.phase_switch_mode_state = 1
                 self.sensor_solar_status.set_status(new_solar_status)
 
     def update_configuration(
@@ -154,6 +159,15 @@ class SolarCharging:
 
     def update_grid_usage(self, grid_usage: float) -> None:
         """New value of grid usage received"""
+
+        def get_new_charging_amps(proposed_charging_amps: float) -> float:
+            return math.floor(
+                min(
+                    max(proposed_charging_amps, self.min_charging_current),
+                    self.max_charging_current,
+                )
+            )
+
         timestamp = dt.now().timestamp()
         # Don't update charging current more than once per 10 seconds
         if (
@@ -174,30 +188,146 @@ class SolarCharging:
                 -self.grid_usage / self.grid_voltage
             ) / self.number_of_phases
             proposed_charging_amps = available_amps + self.current_charging_amps
-            new_charging_amps = math.floor(
-                min(
-                    max(proposed_charging_amps, self.min_charging_current),
-                    self.max_charging_current,
-                )
-            )
 
             if self.phase_switch_mode == PHASE_SWITCH_MODE_DYNAMIC:
-                pass  # TODO: Implement dynamic number of phases logic
+                # States
+                # 1: #phases == 1 AND proposed_charging_amps < one_phase_min (Not enough power for even 1 phase)
+                # 2: #phases == 1 (Enough power for 1 phase)
+                # 3: #phases == 3 (Wait 90s until starting 3 phases)
+                # 4: #phases == 3 (Enough power for 3 phase)
+                # 5: #phases == 1 (Wait 90s until starting 1 phase)
 
-            if proposed_charging_amps >= self.min_charging_current:
-                self.low_power_timestamp = None
+                new_charging_amps = self.current_charging_amps
+                new_number_of_phases = self.number_of_phases
 
-            if proposed_charging_amps < self.min_charging_current:
-                timestamp = dt.now().timestamp()
-                if not self.low_power_timestamp:
-                    self.low_power_timestamp = timestamp
-                if (timestamp - self.low_power_timestamp) > (
-                    60 * self.solar_charging_off_delay
-                ):
-                    # Too low solar power for too long time
-                    _LOGGER.debug("Too low solar power for too long time.")
-                    new_charging_amps = 0
+                if self.phase_switch_mode_state == 1:
+                    _LOGGER.debug("State 1: Too low solar power.")
+                    if proposed_charging_amps >= self.min_charging_current:
+                        _LOGGER.debug("State 1: Enough solar power.")
+                        self.phase_switch_mode_state = 2
+                        new_charging_amps = get_new_charging_amps(
+                            proposed_charging_amps
+                        )
+                        self.low_power_timestamp = None
 
+                elif self.phase_switch_mode_state == 2:
+                    _LOGGER.debug("State 2: Enough solar power.")
+                    new_charging_amps = get_new_charging_amps(proposed_charging_amps)
+
+                    if proposed_charging_amps >= self.min_charging_current:
+                        self.low_power_timestamp = None
+
+                    if proposed_charging_amps >= 3 * self.min_charging_current:
+                        _LOGGER.debug(
+                            "State 2: Enough solar power to switch to 3 phases."
+                        )
+                        # Enough power to switch from 1 ohase to 3 phases
+                        timestamp = dt.now().timestamp()
+                        if not self.phase_switch_timestamp:
+                            self.phase_switch_timestamp = timestamp
+                        if timestamp - self.phase_switch_timestamp > 90:
+                            # Switch to 3 phases
+                            _LOGGER.debug("State2: Switch to 3 phases.")
+                            new_charging_amps = 0
+                            self.phase_switch_mode_state = 3
+                            new_number_of_phases = 3
+                            self.phase_switch_timestamp = None
+                    else:
+                        self.phase_switch_timestamp = None
+
+                    if proposed_charging_amps < self.min_charging_current:
+                        _LOGGER.debug("State 2: Too low solar power.")
+                        # Not enough power for even 1 phase
+                        timestamp = dt.now().timestamp()
+                        if not self.low_power_timestamp:
+                            self.low_power_timestamp = timestamp
+                        if (timestamp - self.low_power_timestamp) > (
+                            60 * self.solar_charging_off_delay
+                        ):
+                            # Too low solar power for too long time
+                            _LOGGER.debug(
+                                "State 2: Too low solar power for too long time."
+                            )
+                            new_charging_amps = 0
+                            self.phase_switch_mode_state = 1
+
+                elif self.phase_switch_mode_state == 3:
+                    _LOGGER.debug("State 3: Wait for switch to 3 phases.")
+                    timestamp = dt.now().timestamp()
+                    if not self.phase_switch_timestamp:
+                        self.phase_switch_timestamp = timestamp
+                    if timestamp - self.phase_switch_timestamp > 90:
+                        # Charge with 3 phases
+                        _LOGGER.debug("State 3: Charge with 3 phases.")
+                        new_charging_amps = get_new_charging_amps(
+                            proposed_charging_amps
+                        )
+                        self.phase_switch_mode_state = 4
+                        self.low_power_timestamp = None
+
+                elif self.phase_switch_mode_state == 4:
+                    new_charging_amps = get_new_charging_amps(proposed_charging_amps)
+
+                    if proposed_charging_amps >= self.min_charging_current:
+                        self.low_power_timestamp = None
+                    if proposed_charging_amps < self.min_charging_current:
+                        _LOGGER.debug("State 4: Too low solar power.")
+                        # Not enough power for 3 phase
+                        timestamp = dt.now().timestamp()
+                        if not self.low_power_timestamp:
+                            self.low_power_timestamp = timestamp
+                        if (timestamp - self.low_power_timestamp) > (
+                            60 * self.solar_charging_off_delay
+                        ):
+                            # Too low solar power for too long time
+                            _LOGGER.debug(
+                                "State 4: Too low solar power for too long time."
+                            )
+                            new_charging_amps = 0
+                            self.phase_switch_mode_state = 5
+                            new_number_of_phases = 1
+                            self.phase_switch_timestamp = None
+
+                elif self.phase_switch_mode_state == 5:
+                    _LOGGER.debug("State 5: Wait for switch to 1 phase.")
+                    timestamp = dt.now().timestamp()
+                    if not self.phase_switch_timestamp:
+                        self.phase_switch_timestamp = timestamp
+                    if timestamp - self.phase_switch_timestamp > 90:
+                        # Charge with 1 phases
+                        _LOGGER.debug("State 5: Charge with 1 phase.")
+                        new_charging_amps = get_new_charging_amps(
+                            proposed_charging_amps
+                        )
+                        self.phase_switch_mode_state = 2
+                        self.low_power_timestamp = None
+
+                # Update the number of phases
+                if self.number_of_phases != new_number_of_phases:
+                    self.sensor_charging_phases.set_charging_phases(
+                        new_number_of_phases
+                    )
+                    self.number_of_phases = new_number_of_phases
+
+            else:
+                # Fixed number of phases
+                if proposed_charging_amps >= self.min_charging_current:
+                    self.low_power_timestamp = None
+
+                if proposed_charging_amps < self.min_charging_current:
+                    timestamp = dt.now().timestamp()
+                    if not self.low_power_timestamp:
+                        self.low_power_timestamp = timestamp
+                    if (timestamp - self.low_power_timestamp) > (
+                        60 * self.solar_charging_off_delay
+                    ):
+                        # Too low solar power for too long time
+                        _LOGGER.debug("Too low solar power for too long time.")
+                        new_charging_amps = 0
+
+                new_charging_amps = get_new_charging_amps(proposed_charging_amps)
+
+            # Update the charging current
             if new_charging_amps != self.current_charging_amps:
                 _LOGGER.debug(
                     "set_charging_current(new_charging_amps) = %s",
