@@ -217,11 +217,14 @@ CHARGING_STATUS_LOW_SOC_CHARGING = "low_soc_charging"
 SOLAR_CHARGING_STATUS_NOT_ACTIVATED = "not_activated"
 SOLAR_CHARGING_STATUS_WAITING = "waiting"
 SOLAR_CHARGING_STATUS_CHARGING = "charging"
+SOLAR_CHARGING_STATUS_PHASE_SWITCHING = "phase_switching"
 SOLAR_CHARGING_STATUS_CHARGING_COMPLETED = "charging_completed"
 
 # Defaults
 DEFAULT_NAME = DOMAIN
 DEFAULT_TARGET_SOC = 100
+
+DEBUG = False
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------

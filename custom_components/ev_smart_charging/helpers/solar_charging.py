@@ -10,11 +10,13 @@ from custom_components.ev_smart_charging.const import (
     CHARGING_STATUS_DISCONNECTED,
     CHARGING_STATUS_NOT_ACTIVE,
     CONF_GRID_VOLTAGE,
+    DEBUG,
     PHASE_SWITCH_MODE_DYNAMIC,
     PHASE_SWITCH_MODE_THREE,
     SOLAR_CHARGING_STATUS_CHARGING,
     SOLAR_CHARGING_STATUS_CHARGING_COMPLETED,
     SOLAR_CHARGING_STATUS_NOT_ACTIVATED,
+    SOLAR_CHARGING_STATUS_PHASE_SWITCHING,
     SOLAR_CHARGING_STATUS_WAITING,
 )
 from custom_components.ev_smart_charging.helpers.general import get_parameter
@@ -57,6 +59,7 @@ class SolarCharging:
         self.number_of_phases = 3
         self.phase_switch_timestamp = None
         self.phase_switch_mode_state = 1
+        self.is_swicthing_number_of_phases = False
 
     def set_charging_current_sensor(
         self, sensor_charging_current: EVSmartChargingSensorChargingCurrent
@@ -92,6 +95,8 @@ class SolarCharging:
                 new_solar_status = SOLAR_CHARGING_STATUS_CHARGING_COMPLETED
             elif self.solar_charging:
                 new_solar_status = SOLAR_CHARGING_STATUS_CHARGING
+            elif self.is_swicthing_number_of_phases:
+                new_solar_status = SOLAR_CHARGING_STATUS_PHASE_SWITCHING
             else:
                 new_solar_status = SOLAR_CHARGING_STATUS_WAITING
 
@@ -232,6 +237,7 @@ class SolarCharging:
                             self.phase_switch_mode_state = 3
                             new_number_of_phases = 3
                             self.phase_switch_timestamp = None
+                            self.is_swicthing_number_of_phases = True
                     else:
                         self.phase_switch_timestamp = None
 
@@ -264,6 +270,7 @@ class SolarCharging:
                         )
                         self.phase_switch_mode_state = 4
                         self.low_power_timestamp = None
+                        self.is_swicthing_number_of_phases = False
 
                 elif self.phase_switch_mode_state == 4:
                     new_charging_amps = get_new_charging_amps(proposed_charging_amps)
@@ -287,6 +294,7 @@ class SolarCharging:
                             self.phase_switch_mode_state = 5
                             new_number_of_phases = 1
                             self.phase_switch_timestamp = None
+                            self.is_swicthing_number_of_phases = True
 
                 elif self.phase_switch_mode_state == 5:
                     _LOGGER.debug("State 5: Wait for switch to 1 phase.")
@@ -301,6 +309,7 @@ class SolarCharging:
                         )
                         self.phase_switch_mode_state = 2
                         self.low_power_timestamp = None
+                        self.is_swicthing_number_of_phases = False
 
                 # Update the number of phases
                 if self.number_of_phases != new_number_of_phases:
@@ -309,6 +318,11 @@ class SolarCharging:
                     )
                     self.number_of_phases = new_number_of_phases
 
+                # For debugging
+                if DEBUG:
+                    self.sensor_charging_phases.phase_switch_mode_state = (
+                        self.phase_switch_mode_state
+                    )
             else:
                 # Fixed number of phases
                 if proposed_charging_amps >= self.min_charging_current:

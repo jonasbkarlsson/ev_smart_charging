@@ -8,6 +8,7 @@ from homeassistant.const import STATE_OFF
 
 
 from .const import (
+    DEBUG,
     DOMAIN,
     ENTITY_KEY_CHARGING_CURRENT_SENSOR,
     ENTITY_KEY_CHARGING_PHASES_SENSOR,
@@ -240,6 +241,7 @@ class EVSmartChargingSensorChargingPhases(EVSmartChargingSensor):
         _LOGGER.debug("EVSmartChargingSensorChargingPhases.__init__()")
         self._attr_native_value = 3
         super().__init__(entry)
+        self._phase_switch_mode_state = 0
 
     def set_charging_phases(self, new_status):
         """Set new number of phases."""
@@ -247,6 +249,24 @@ class EVSmartChargingSensorChargingPhases(EVSmartChargingSensor):
         if new_status not in [1, 3]:
             new_status = 3
         self._attr_native_value = new_status
+        self.update_ha_state()
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        if DEBUG:
+            return {
+                "phase_switch_mode_state": self._phase_switch_mode_state,
+            }
+        return None
+
+    @property
+    def phase_switch_mode_state(self):
+        """Getter for phase_switch_mode_state."""
+        return self._phase_switch_mode_state
+
+    @phase_switch_mode_state.setter
+    def phase_switch_mode_state(self, new_value):
+        self._phase_switch_mode_state = new_value
         self.update_ha_state()
 
 

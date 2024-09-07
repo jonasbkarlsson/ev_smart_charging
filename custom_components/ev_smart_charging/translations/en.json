@@ -155,6 +155,7 @@
                     "disconnected": "Disconnected",
                     "waiting": "Waiting for solar power",
                     "charging": "Charging with solar power",
+                    "phase_switching": "Changing number of used phases",
                     "charging_completed": "Charging completed"
                 }
             }
