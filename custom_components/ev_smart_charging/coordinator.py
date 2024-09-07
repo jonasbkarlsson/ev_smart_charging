@@ -878,7 +878,7 @@ class EVSmartChargingCoordinator:
         # _LOGGER.debug("old_state = %s", old_state)
         _LOGGER.debug("new_state = %s", new_state)
 
-        if default_charging_current_updated:
+        if default_charging_current_updated and self.auto_charging_state == STATE_ON:
             self.sensor_charging_current.set_charging_current(
                 self.default_charging_current
             )
