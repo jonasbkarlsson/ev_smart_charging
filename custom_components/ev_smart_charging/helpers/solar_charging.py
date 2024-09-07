@@ -194,6 +194,9 @@ class SolarCharging:
             ) / self.number_of_phases
             proposed_charging_amps = available_amps + self.current_charging_amps
 
+            new_charging_amps = self.current_charging_amps
+            new_number_of_phases = self.number_of_phases
+
             if self.phase_switch_mode == PHASE_SWITCH_MODE_DYNAMIC:
                 # States
                 # 1: #phases == 1 AND proposed_charging_amps < one_phase_min (Not enough power for even 1 phase)
@@ -201,9 +204,6 @@ class SolarCharging:
                 # 3: #phases == 3 (Wait 90s until starting 3 phases)
                 # 4: #phases == 3 (Enough power for 3 phase)
                 # 5: #phases == 1 (Wait 90s until starting 1 phase)
-
-                new_charging_amps = self.current_charging_amps
-                new_number_of_phases = self.number_of_phases
 
                 if self.phase_switch_mode_state == 1:
                     _LOGGER.debug("State 1: Too low solar power.")
@@ -311,13 +311,6 @@ class SolarCharging:
                         self.low_power_timestamp = None
                         self.is_swicthing_number_of_phases = False
 
-                # Update the number of phases
-                if self.number_of_phases != new_number_of_phases:
-                    self.sensor_charging_phases.set_charging_phases(
-                        new_number_of_phases
-                    )
-                    self.number_of_phases = new_number_of_phases
-
                 # For debugging
                 if DEBUG:
                     self.sensor_charging_phases.phase_switch_mode_state = (
@@ -357,3 +350,8 @@ class SolarCharging:
                         self.pacing_time = 30
                 self.current_charging_amps = new_charging_amps
                 self.update_solar_status()
+
+            # Update the number of phases
+            if self.number_of_phases != new_number_of_phases:
+                self.sensor_charging_phases.set_charging_phases(new_number_of_phases)
+                self.number_of_phases = new_number_of_phases
