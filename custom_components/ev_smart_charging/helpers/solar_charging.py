@@ -325,6 +325,8 @@ class SolarCharging:
                     )
             else:
                 # Fixed number of phases
+                new_charging_amps = get_new_charging_amps(proposed_charging_amps)
+
                 if proposed_charging_amps >= self.min_charging_current:
                     self.low_power_timestamp = None
 
@@ -338,8 +340,6 @@ class SolarCharging:
                         # Too low solar power for too long time
                         _LOGGER.debug("Too low solar power for too long time.")
                         new_charging_amps = 0
-
-                new_charging_amps = get_new_charging_amps(proposed_charging_amps)
 
             # Update the charging current
             if new_charging_amps != self.current_charging_amps:
