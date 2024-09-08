@@ -16,6 +16,7 @@ from custom_components.ev_smart_charging.const import (
     PHASE_SWITCH_MODE_THREE,
     SOLAR_CHARGING_STATUS_CHARGING,
     SOLAR_CHARGING_STATUS_CHARGING_COMPLETED,
+    SOLAR_CHARGING_STATUS_CHARGING_OVERRIDDEN,
     SOLAR_CHARGING_STATUS_NOT_ACTIVATED,
     SOLAR_CHARGING_STATUS_PHASE_SWITCHING,
     SOLAR_CHARGING_STATUS_WAITING,
@@ -63,6 +64,7 @@ class SolarCharging:
         self.number_of_phases = 3
         self.phase_switch_timestamp = None
         self.phase_switch_mode_state = 1
+        self.solar_charging_enabled = True
 
     def set_charging_current_sensor(
         self, sensor_charging_current: EVSmartChargingSensorChargingCurrent
@@ -97,6 +99,8 @@ class SolarCharging:
                 new_solar_status = CHARGING_STATUS_DISCONNECTED
             elif self.ev_soc >= self.target_ev_soc:
                 new_solar_status = SOLAR_CHARGING_STATUS_CHARGING_COMPLETED
+            elif not self.solar_charging_enabled:
+                new_solar_status = SOLAR_CHARGING_STATUS_CHARGING_OVERRIDDEN
             elif (
                 timestamp - self.phase_switch_delay_timestamp
             ) < DEFAULT_PHASE_SWITCH_DELAY:
@@ -153,6 +157,7 @@ class SolarCharging:
             )
             timestamp = dt.now().timestamp()
             self.phase_switch_delay_timestamp = timestamp
+            self.low_power_timestamp = timestamp - 100000  # Long time ago
             self.phase_switch_mode = phase_switch_mode
             if self.phase_switch_mode == PHASE_SWITCH_MODE_THREE:
                 self.number_of_phases = 3
@@ -172,6 +177,11 @@ class SolarCharging:
     def update_target_ev_soc(self, target_ev_soc: float) -> None:
         """Update target EV SOC"""
         self.target_ev_soc = target_ev_soc
+        self.update_solar_status()
+
+    def update_enabled(self, enabled: bool) -> None:
+        """Update solar charging enabled"""
+        self.solar_charging_enabled = enabled
         self.update_solar_status()
 
     def update_grid_usage(self, grid_usage: float) -> None:
@@ -197,6 +207,7 @@ class SolarCharging:
             and (timestamp - self.phase_switch_delay_timestamp)
             >= DEFAULT_PHASE_SWITCH_DELAY
             and self.ev_soc < self.target_ev_soc
+            and self.solar_charging_enabled
         ):
 
             self.pacing_time = 10
