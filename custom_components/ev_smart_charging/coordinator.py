@@ -498,6 +498,8 @@ class EVSmartChargingCoordinator:
                 self.sensor_charging_current.set_charging_current(
                     self.default_charging_current
                 )
+            if self.solar_charging:
+                self.solar_charging.update_enabled(False)
             if (
                 self.charger_switch.entity_id is not None
                 and self.charger_switch.domain is not None
@@ -516,6 +518,8 @@ class EVSmartChargingCoordinator:
             self.sensor.set_state(STATE_OFF)
             if self.sensor_charging_current:
                 self.sensor_charging_current.set_charging_current(0)
+            if self.solar_charging:
+                self.solar_charging.update_enabled(True)
             if (
                 self.charger_switch.entity_id is not None
                 and self.charger_switch.domain is not None
