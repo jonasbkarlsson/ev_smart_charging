@@ -13,6 +13,7 @@ from custom_components.ev_smart_charging.const import (
     DEBUG,
     DEFAULT_PHASE_SWITCH_DELAY,
     PHASE_SWITCH_MODE_DYNAMIC,
+    PHASE_SWITCH_MODE_ONE,
     PHASE_SWITCH_MODE_THREE,
     SOLAR_CHARGING_STATUS_CHARGING,
     SOLAR_CHARGING_STATUS_CHARGING_COMPLETED,
@@ -48,6 +49,7 @@ class SolarCharging:
         self.phase_switch_mode = None
         self.min_charging_current = 6
         self.max_charging_current = 16
+        self.default_charging = 0
         self.solar_charging_off_delay = 5
         self.current_charging_amps = 0
         self.low_power_timestamp = dt.now().timestamp() - 100000  # Long time ago
@@ -93,18 +95,18 @@ class SolarCharging:
             timestamp = dt.now().timestamp()
             if not self.charging_activated:
                 new_solar_status = CHARGING_STATUS_NOT_ACTIVE
-            elif not self.solar_charging_activated:
-                new_solar_status = SOLAR_CHARGING_STATUS_NOT_ACTIVATED
             elif not self.ev_connected:
                 new_solar_status = CHARGING_STATUS_DISCONNECTED
             elif self.ev_soc >= self.target_ev_soc:
                 new_solar_status = SOLAR_CHARGING_STATUS_CHARGING_COMPLETED
-            elif not self.solar_charging_enabled:
-                new_solar_status = SOLAR_CHARGING_STATUS_CHARGING_OVERRIDDEN
             elif (
                 timestamp - self.phase_switch_delay_timestamp
             ) < DEFAULT_PHASE_SWITCH_DELAY:
                 new_solar_status = SOLAR_CHARGING_STATUS_PHASE_SWITCHING
+            elif not self.solar_charging_activated:
+                new_solar_status = SOLAR_CHARGING_STATUS_NOT_ACTIVATED
+            elif not self.solar_charging_enabled:
+                new_solar_status = SOLAR_CHARGING_STATUS_CHARGING_OVERRIDDEN
             elif self.solar_charging:
                 new_solar_status = SOLAR_CHARGING_STATUS_CHARGING
             else:
@@ -179,9 +181,46 @@ class SolarCharging:
         self.target_ev_soc = target_ev_soc
         self.update_solar_status()
 
-    def update_enabled(self, enabled: bool) -> None:
-        """Update solar charging enabled"""
-        self.solar_charging_enabled = enabled
+    def start_default_charging(self, default_charging: float) -> None:
+        """Turn on or off default charging"""
+        self.solar_charging_enabled = default_charging == 0.0
+        self.default_charging = default_charging
+
+        if default_charging != 0.0:
+            self.phase_switch_mode_state = 1
+            # For debugging
+            if DEBUG:
+                self.sensor_charging_phases.phase_switch_mode_state = (
+                    self.phase_switch_mode_state
+                )
+
+        if self.number_of_phases == 1 and (
+            self.phase_switch_mode != PHASE_SWITCH_MODE_ONE
+        ):
+            # Switch to 3 phases
+            self.sensor_charging_current.set_charging_current(0)
+            self.current_charging_amps = 0
+            timestamp = dt.now().timestamp()
+            self.phase_switch_delay_timestamp = timestamp
+            self.number_of_phases = 3
+            self.sensor_charging_phases.set_charging_phases(self.number_of_phases)
+
+        elif self.sensor_charging_current:
+            self.sensor_charging_current.set_charging_current(default_charging)
+            self.current_charging_amps = default_charging
+
+        if (
+            self.number_of_phases == 3
+            and default_charging == 0.0
+            and (self.phase_switch_mode != PHASE_SWITCH_MODE_THREE)
+            and self.solar_charging_activated
+        ):
+            # Switch to 1 phase
+            timestamp = dt.now().timestamp()
+            self.phase_switch_delay_timestamp = timestamp
+            self.number_of_phases = 1
+            self.sensor_charging_phases.set_charging_phases(self.number_of_phases)
+
         self.update_solar_status()
 
     def update_grid_usage(self, grid_usage: float) -> None:
@@ -360,3 +399,19 @@ class SolarCharging:
             if self.number_of_phases != new_number_of_phases:
                 self.sensor_charging_phases.set_charging_phases(new_number_of_phases)
                 self.number_of_phases = new_number_of_phases
+
+        if (
+            self.charging_activated
+            and self.ev_connected
+            and self.sensor_charging_current
+            and self.sensor_solar_status
+            and self.default_charging != 0
+            and self.current_charging_amps == 0
+            and (timestamp - self.phase_switch_delay_timestamp)
+            >= DEFAULT_PHASE_SWITCH_DELAY
+        ):
+            self.current_charging_amps = self.default_charging
+            self.sensor_charging_current.set_charging_current(
+                self.current_charging_amps
+            )
+            self.update_solar_status()
