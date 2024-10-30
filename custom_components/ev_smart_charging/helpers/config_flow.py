@@ -25,6 +25,7 @@ from ..const import (
     PLATFORM_ENTSOE,
     PLATFORM_GENERIC,
     PLATFORM_NORDPOOL,
+    PLATFORM_TGE,
     PLATFORM_OCPP,
     PLATFORM_VW,
     SWITCH,
@@ -114,6 +115,8 @@ class FindEntity:
             sensor = FindEntity.find_energidataservice_sensor(hass)
         if len(sensor) == 0:
             sensor = FindEntity.find_entsoe_sensor(hass)
+        if len(sensor) == 0:
+            sensor = FindEntity.find_tge_sensor(hass)
         return sensor
 
     @staticmethod
@@ -165,6 +168,21 @@ class FindEntity:
             if entry[1].platform == PLATFORM_GENERIC:
                 entity_id = entry[1].entity_id
                 if "price_template_sensor" in entity_id:
+                    return entity_id
+        return ""
+
+    @staticmethod
+    def find_tge_sensor(hass: HomeAssistant) -> str:
+        """Search for TGE sensor"""
+        entity_registry: EntityRegistry = async_entity_registry_get(hass)
+        registry_entries: UserDict[str, RegistryEntry] = (
+            entity_registry.entities.items()
+        )
+        for entry in registry_entries:
+            if entry[1].platform == PLATFORM_TGE:
+                entity_id = entry[1].entity_id
+                attributes = hass.states.get(entity_id).attributes
+                if all(attr in attributes for attr in ["prices", "prices_today", "prices_tomorrow"]):
                     return entity_id
         return ""
 
