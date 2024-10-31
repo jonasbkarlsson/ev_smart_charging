@@ -4,6 +4,7 @@ __pycache__
 
 # Misc
 issues
+.DS_Store
 
 # Home Assistant configuration
 config/*
