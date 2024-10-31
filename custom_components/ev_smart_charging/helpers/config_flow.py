@@ -114,9 +114,9 @@ class FindEntity:
         if len(sensor) == 0:
             sensor = FindEntity.find_energidataservice_sensor(hass)
         if len(sensor) == 0:
-            sensor = FindEntity.find_entsoe_sensor(hass)
-        if len(sensor) == 0:
             sensor = FindEntity.find_tge_sensor(hass)
+        if len(sensor) == 0:
+            sensor = FindEntity.find_entsoe_sensor(hass)
         return sensor
 
     @staticmethod
