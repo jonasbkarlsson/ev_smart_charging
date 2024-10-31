@@ -121,10 +121,8 @@ class Raw:
                         self.data.append(item_new)
 
             self.valid = len(self.data) > 12
-            _LOGGER.debug("Więcej ni 12 elementów, %s", self.valid)
         else:
             self.valid = False
-            _LOGGER.debug("Po prostu self.valid=False")
 
     def get_raw(self):
         """Get raw data"""
@@ -133,10 +131,8 @@ class Raw:
     def is_valid(self, check_today_local = False) -> bool:
         """Get valid"""
         if not self.valid:
-            _LOGGER.debug("Nie przeszło self.valid")
             return False
         if not check_today_local:
-            _LOGGER.debug("Nie przeszło check_today_local")
             return True
         else:
             # Check that self.data contains at least 12 valid prices for today
