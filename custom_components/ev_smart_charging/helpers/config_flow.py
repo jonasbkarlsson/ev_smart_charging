@@ -179,11 +179,8 @@ class FindEntity:
             entity_registry.entities.items()
         )
         for entry in registry_entries:
-            if entry[1].platform == PLATFORM_TGE:
-                entity_id = entry[1].entity_id
-                attributes = hass.states.get(entity_id).attributes
-                if all(attr in attributes for attr in ["prices", "prices_today", "prices_tomorrow"]):
-                    return entity_id
+            if entry[1].platform == PLATFORM_TGE and entry[1].unique_id == 'tge_sensor_fixing1_rate':
+                return entry[1].entity_id
         return ""
 
     @staticmethod
