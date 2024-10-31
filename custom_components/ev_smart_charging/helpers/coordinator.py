@@ -60,12 +60,27 @@ def convert_raw_item(
     #   "price": float,
     # }
     # {'time': '2023-03-06 00:00:00+01:00', 'price': 0.1306} time is not datetime
-    if platform in (PLATFORM_ENTSOE, PLATFORM_TGE):
+    if platform == PLATFORM_ENTSOE:
         if item["price"] is not None and isinstance(item["time"], str):
             item_new = {}
             item_new["value"] = item["price"]
             item_new["start"] = datetime.fromisoformat(item["time"])
             item_new["end"] = item_new["start"] + timedelta(hours=1)
+            return item_new
+
+    # Array of item = {
+    #   "time": datetime,
+    #   "price": float,
+    # }
+    # {'time': datetime.datetime(2023, 3, 6, 0, 0,
+    #          tzinfo=<DstTzInfo 'Europe/Stockholm' CET+1:00:00 STD>),
+    #  'price': 146.96}
+    if platform == PLATFORM_TGE:
+        if item["price"] is not None and isinstance(item["time"], datetime):
+            item_new = {}
+            item_new["value"] = item["price"]
+            item_new["start"] = item["time"]
+            item_new["end"] = item["time"] + timedelta(hours=1)
             return item_new
 
     # Array of item = {
@@ -106,8 +121,10 @@ class Raw:
                         self.data.append(item_new)
 
             self.valid = len(self.data) > 12
+            _LOGGER.debug("Więcej ni 12 elementów, %s", self.valid)
         else:
             self.valid = False
+            _LOGGER.debug("Po prostu self.valid=False")
 
     def get_raw(self):
         """Get raw data"""
@@ -116,8 +133,10 @@ class Raw:
     def is_valid(self, check_today_local = False) -> bool:
         """Get valid"""
         if not self.valid:
+            _LOGGER.debug("Nie przeszło self.valid")
             return False
         if not check_today_local:
+            _LOGGER.debug("Nie przeszło check_today_local")
             return True
         else:
             # Check that self.data contains at least 12 valid prices for today
