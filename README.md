@@ -19,20 +19,20 @@ The integration calculates the set of hours that will give the lowest price, by 
 - Home Assistant version 2023.4 or newer.
 
 ## Features
-- Automatic EV charging control based on electrity prices.
+- Automatic EV charging control based on electricity prices.
 - Native support of the [Nordpool](https://github.com/custom-components/nordpool), [Energi Data Service](https://github.com/MTrab/energidataservice) and [Entso-e](https://github.com/JaccoR/hass-entso-e) integrations.
-- Support of a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). A templete sensor can be used to get price information from many price integrations.
-- Configuraton of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
+- Support of a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). A template sensor can be used to get price information from many price integrations.
+- Configuration of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
-- Optional setting of minimum SOC level that should be reached indepently of the electrity price.
-- Optional setting to only charge when the electricty price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
+- Optional setting of minimum SOC level that should be reached independently of the electricity price.
+- Optional setting to only charge when the electricity price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
 - Optional setting to lower the level of maximum electricity price even further if the electricity price is very low at the end of the day tomorrow.
 - Optional setting to start charging immediately if the SOC is below a configured level.
 - Optional setting to start charging immediately if the electricity price is lower than a configured level.
 - Optional possibility to provide information to the integration about when the EV is connected to the charger.
 - Optional possibility to keep the charger on after completed charging, to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery.
-- Service calls to dynamically control all configuation parameters that affect charging.
-- Automatically detects and connects to the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Connnections to other EV and charger integrations can be configured manually.
+- Service calls to dynamically control all configuration parameters that affect charging.
+- Automatically detects and connects to the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Connections to other EV and charger integrations can be configured manually.
 
 ## Installation
 
@@ -78,7 +78,7 @@ Additional parameters that affects how the charging will be performed are availa
 Entity | Type | Descriptions, valid value ranges and service calls
 -- | -- | --
 `select.ev_smart_charging_charge_start_time` | Select | The earliest time of the day for the charging to start. If `None` is selected, there will be no explicit limitation of the starting time. Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
-`select.ev_smart_charging_charge_completion_time` | Select | The lastest time of the day for charging to reach the target State-of-Charge. If `None` is selected, charging will be optimized using all hours with available price information, including before tomorrow's prices are available. Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
+`select.ev_smart_charging_charge_completion_time` | Select | The latest time of the day for charging to reach the target State-of-Charge. If `None` is selected, charging will be optimized using all hours with available price information, including before tomorrow's prices are available. Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
 `number.ev_smart_charging_charging_speed` | Number | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 (11/77*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you! Valid values min=0.1, step=0.1, max=100. Can be set by service call `number.set_value`.
 `number.ev_smart_charging_electricity_price_limit` | Number | If the `switch.ev_smart_charging_apply_price_limit` switch is activated, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge. Valid values min=-10000, step=0.01, max=10000. Can be set by service call `number.set_value`.
 `number.ev_smart_charging_minimum_ev_soc` | Number | The minimum State-of-Charge that should be charged by scheduled charging, independently of the electricity price. Valid values min=0, step=1, max=100. Can be set by service call `number.set_value`.
@@ -116,7 +116,7 @@ Attribute | Description
 `charging_start_time` | If charging is planned, the date and time when the charging will start.
 `charging_stop_time` | If charging is planned, the date and time when the charging will stop.
 `charging_number_of_hours` | If charging is planned, the number of hours that charging will be done. This might be less than the number of hours between the start and stop times, if the `apply_price_limit` switch is activated.
-`raw_two_days` | The electricty price today and tomorrow from the electricity price entity.
+`raw_two_days` | The electricity price today and tomorrow from the electricity price entity.
 `charging_schedule` | The calculated charging schedule. Can be used by an ApexCharts card to visulize the planned charging, see below.
 
 ## Lovelace UI
@@ -180,7 +180,7 @@ cards:
             fontWeight: 10
     series:
       - entity: sensor.ev_smart_charging_charging
-        name: Electricty price
+        name: Electricity price
         unit: ' öre/kWh'
         data_generator: >
           return entity.attributes.raw_two_days.map((entry) => { return [new
@@ -245,7 +245,7 @@ cards:
     name: Status
   - type: entity
     entity: sensor.ev_smart_charging_charging
-    attribute: EV SOC
+    attribute: ev_soc
     name: EV SOC
     icon: mdi:battery-70
     unit: '%'
@@ -265,7 +265,7 @@ trigger:
   - platform: state
     entity_id:
       - sensor.my_ev
-    attribute: EV SOC
+    attribute: ev_soc
 condition: []
 action:
   - service: input_number.set_value
@@ -286,7 +286,7 @@ If the EV Target SOC is available as a state attribute, then a similar solution 
 If there is no integration that provides the EV Target SOC, one can create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "Target SOC" that typically will create an entity `input_number.target_soc`), and then use this entity when configuring the integration.
 
 ## Integrating with chargers
-If your charger's integration does not provide a swicth entity that this integration can use for control, then the connection between this integration and your charger's integration can in many cases be made with automations.
+If your charger's integration does not provide a switch entity that this integration can use for control, then the connection between this integration and your charger's integration can in many cases be made with automations.
 
 Also, if information about the EV being connected to the charger is available, an automation can provide that information to the integration in order to improve the handling of the case when the car is not connected to the charger at the time charging is planned to start.
 
