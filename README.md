@@ -63,7 +63,7 @@ The configuration form contains the entities that the integration is interacting
 Parameter | Required | Description
 -- | -- | --
 Name | Yes | The name of the instance.
-Electricity price entity | Yes | The Nordpool, the Energi Data Service, the Entso-e integration sensor entity or a template sensor providing the price in the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). For the Entso-e integration, the entity called `sensor.average_electricity_price_today` should be used.
+Electricity price entity | Yes | The Nordpool, the Energi Data Service, the Entso-e integration sensor entity or a template sensor providing the price in the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). For the Entso-e integration, the entity called `sensor.average_electricity_price` should be used.
 EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100. Note that this entity is crucial for the integration. If live information about he SOC is not available, please carefully read the section below with more information about the EV SOC entity.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control switch entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'.
