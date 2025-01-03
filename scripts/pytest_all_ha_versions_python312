@@ -53,3 +53,21 @@ run_next_test "auto"
 
 pip3 install -qq homeassistant==2024.7.4 pytest-homeassistant-custom-component==0.13.148
 run_next_test "auto"
+
+pip3 install -qq homeassistant==2024.8.3 pytest-homeassistant-custom-component==0.13.155
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2024.9.3 pytest-homeassistant-custom-component==0.13.164
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2024.10.4 pytest-homeassistant-custom-component==0.13.175
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2024.11.3 pytest-homeassistant-custom-component==0.13.184
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2024.12.5 pytest-homeassistant-custom-component==0.13.195
+run_next_test "auto"
+
+
+# As of HA 2025.2, Python 3.12 is not supported.
