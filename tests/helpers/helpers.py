@@ -121,7 +121,7 @@ class MockPriceEntityEntsoe:
         entity_registry.async_get_or_create(
             domain=SENSOR,
             platform=PLATFORM_ENTSOE,
-            unique_id="average_electricity_price_today",
+            unique_id="average_electricity_price",
         )
         MockPriceEntityEntsoe.set_state(hass, None, None, price)
 
@@ -144,7 +144,7 @@ class MockPriceEntityEntsoe:
 
         # Set state
         hass.states.async_set(
-            "sensor.entsoe_average_electricity_price_today",
+            "sensor.entsoe_average_electricity_price",
             f"{new_price}",
             {
                 "prices_today": new_raw_today,

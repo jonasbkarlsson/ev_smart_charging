@@ -150,7 +150,7 @@ class FindEntity:
         for entry in registry_entries:
             if entry[1].platform == PLATFORM_ENTSOE:
                 entity_id = entry[1].entity_id
-                if "average_electricity_price_today" in entity_id:
+                if "average_electricity_price" in entity_id:
                     return entity_id
         return ""
 
