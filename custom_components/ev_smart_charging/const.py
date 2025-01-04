@@ -18,7 +18,6 @@ ICON_MIN_SOC = "mdi:battery-charging-30"
 ICON_START = "mdi:play-circle-outline"
 ICON_STOP = "mdi:stop-circle-outline"
 ICON_TIME = "mdi:clock-time-four-outline"
-ICON_TIMER = "mdi:camera-timer"
 
 # Platforms
 SENSOR = Platform.SENSOR
@@ -36,9 +35,7 @@ PLATFORM_GENERIC = "generic"
 
 # Entity keys
 ENTITY_KEY_CHARGING_SENSOR = "charging"
-ENTITY_KEY_CHARGING_CURRENT_SENSOR = "charging_current"
 ENTITY_KEY_STATUS_SENSOR = "status"
-ENTITY_KEY_SOLAR_STATUS_SENSOR = "solar_status"
 ENTITY_KEY_ACTIVE_SWITCH = "smart_charging_activated"
 ENTITY_KEY_APPLY_LIMIT_SWITCH = "apply_price_limit"
 ENTITY_KEY_CONTINUOUS_SWITCH = "continuous_charging_preferred"
@@ -47,8 +44,6 @@ ENTITY_KEY_KEEP_ON_SWITCH = "keep_charger_on"
 ENTITY_KEY_OPPORTUNISTIC_SWITCH = "opportunistic_charging"
 ENTITY_KEY_LOW_PRICE_CHARGING_SWITCH = "low_price_charging"
 ENTITY_KEY_LOW_SOC_CHARGING_SWITCH = "low_soc_charging"
-ENTITY_KEY_ACTIVE_PRICE_SWITCH = "price_charging_activated"
-ENTITY_KEY_ACTIVE_SOLAR_SWITCH = "solar_charging_activated"
 ENTITY_KEY_START_BUTTON = "manually_start_charging"
 ENTITY_KEY_STOP_BUTTON = "manually_stop_charging"
 ENTITY_KEY_CONF_PCT_PER_HOUR_NUMBER = "charging_speed"
@@ -57,14 +52,8 @@ ENTITY_KEY_CONF_OPPORTUNISTIC_LEVEL_NUMBER = "opportunistic_level"
 ENTITY_KEY_CONF_LOW_PRICE_CHARGING_NUMBER = "low_price_charging_level"
 ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER = "low_soc_charging_level"
 ENTITY_KEY_CONF_MIN_SOC_NUMBER = "minimum_ev_soc"
-ENTITY_KEY_CONF_MAX_CHARGING_CURRENT_NUMBER = "max_charging_current"
-ENTITY_KEY_CONF_MIN_CHARGING_CURRENT_NUMBER = "min_charging_current"
-ENTITY_KEY_CONF_DEFAULT_CHARGING_CURRENT_NUMBER = "default_charging_current"
-ENTITY_KEY_CONF_SOLAR_CHARGING_OFF_DELAY_NUMBER = "solar_charging_off_delay"
 ENTITY_KEY_CONF_START_HOUR = "charge_start_time"
 ENTITY_KEY_CONF_READY_HOUR = "charge_completion_time"
-ENTITY_KEY_CONF_THREE_PHASE_CHARGING = "three_phase_charging"
-
 
 # Configuration and options
 CONF_DEVICE_NAME = "device_name"
@@ -73,17 +62,14 @@ CONF_EV_SOC_SENSOR = "ev_soc_sensor"
 CONF_EV_TARGET_SOC_SENSOR = "ev_target_soc_sensor"
 CONF_CHARGER_ENTITY = "charger_entity"
 CONF_EV_CONTROLLED = "ev_controlled"
-CONF_PCT_PER_HOUR = "pct_per_hour"  # Config entity
-CONF_START_HOUR = "start_hour"  # Config entity
-CONF_READY_HOUR = "ready_hour"  # Config entity
-CONF_MAX_PRICE = "maximum_price"  # Config entity
-CONF_OPPORTUNISTIC_LEVEL = "opportunistic_level"  # Config entity
-CONF_LOW_PRICE_CHARGING_LEVEL = "low_price_charging_level"  # Config entity
-CONF_LOW_SOC_CHARGING_LEVEL = "low_soc_charging_level"  # Config entity
-CONF_MIN_SOC = "min_soc"  # Config entity
-CONF_SOLAR_CHARGING_CONFIGURED = "solar_charging_configured"
-CONF_GRID_USAGE_SENSOR = "grid_usage_sensor"
-CONF_GRID_VOLTAGE = "grid_voltage"
+CONF_PCT_PER_HOUR = "pct_per_hour"
+CONF_START_HOUR = "start_hour"
+CONF_READY_HOUR = "ready_hour"
+CONF_MAX_PRICE = "maximum_price"
+CONF_OPPORTUNISTIC_LEVEL = "opportunistic_level"
+CONF_LOW_PRICE_CHARGING_LEVEL = "low_price_charging_level"
+CONF_LOW_SOC_CHARGING_LEVEL = "low_soc_charging_level"
+CONF_MIN_SOC = "min_soc"
 
 HOURS = [
     "None",
@@ -121,15 +107,9 @@ CHARGING_STATUS_WAITING_CHARGING = "waiting_for_charging_to_begin"
 CHARGING_STATUS_CHARGING = "charging"
 CHARGING_STATUS_KEEP_ON = "keeping_charger_on"
 CHARGING_STATUS_DISCONNECTED = "disconnected"
-CHARGING_STATUS_PRICE_NOT_ACTIVE = "price_not_active"
 CHARGING_STATUS_NOT_ACTIVE = "smart_charging_not_active"
 CHARGING_STATUS_LOW_PRICE_CHARGING = "low_price_charging"
 CHARGING_STATUS_LOW_SOC_CHARGING = "low_soc_charging"
-
-SOLAR_CHARGING_STATUS_NOT_ACTIVATED = "not_activated"
-SOLAR_CHARGING_STATUS_WAITING = "waiting"
-SOLAR_CHARGING_STATUS_CHARGING = "charging"
-SOLAR_CHARGING_STATUS_CHARGING_COMPLETED = "charging_completed"
 
 # Defaults
 DEFAULT_NAME = DOMAIN

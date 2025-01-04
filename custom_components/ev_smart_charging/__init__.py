@@ -5,7 +5,7 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import MAJOR_VERSION, MINOR_VERSION
-from homeassistant.core import HomeAssistant
+from homeassistant.core import Config, HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.device_registry import async_get as async_device_registry_get
 from homeassistant.helpers.device_registry import DeviceRegistry, DeviceEntry
@@ -19,12 +19,9 @@ from homeassistant.util import dt
 from .coordinator import EVSmartChargingCoordinator
 from .const import (
     CONF_EV_CONTROLLED,
-    CONF_GRID_USAGE_SENSOR,
-    CONF_GRID_VOLTAGE,
     CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_LOW_SOC_CHARGING_LEVEL,
     CONF_OPPORTUNISTIC_LEVEL,
-    CONF_SOLAR_CHARGING_CONFIGURED,
     CONF_START_HOUR,
     DOMAIN,
     STARTUP_MESSAGE,
@@ -108,10 +105,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     return unloaded
 
-
 # Global lock
 ev_smart_charging_lock = asyncio.Lock()
-
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Reload config entry."""
@@ -157,14 +152,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         new[CONF_LOW_SOC_CHARGING_LEVEL] = 20.0
         migration = True
 
-    if version == 6:
-        version = 7
-        new[CONF_SOLAR_CHARGING_CONFIGURED] = False
-        new[CONF_GRID_USAGE_SENSOR] = ""
-        new[CONF_GRID_VOLTAGE] = 230  # [V]
-        migration = True
-
-    if version > 7:
+    if version > 6:
         _LOGGER.error(
             "Migration from version %s to a lower version is not possible",
             version,

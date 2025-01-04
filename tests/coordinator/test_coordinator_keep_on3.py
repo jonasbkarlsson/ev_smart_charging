@@ -70,7 +70,6 @@ async def test_coordinator_keep_on_issue(
 
     # Turn on switches
     await coordinator.switch_active_update(True)
-    await coordinator.switch_active_price_charging_update(True)
     await coordinator.switch_apply_limit_update(False)
     await coordinator.switch_continuous_update(True)
     await coordinator.switch_ev_connected_update(True)
