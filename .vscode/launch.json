@@ -26,6 +26,7 @@
         "debug-test"
       ],
       "console": "integratedTerminal",
+      "justMyCode": false,
       "env": {
         "PYTEST_ADDOPTS": "--no-cov"
       }
