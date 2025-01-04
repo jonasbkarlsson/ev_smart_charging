@@ -4,17 +4,18 @@ from datetime import datetime
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
-from homeassistant.const import STATE_OFF
+from homeassistant.const import STATE_OFF, MAJOR_VERSION, MINOR_VERSION
 from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
 from homeassistant.helpers.entity_registry import EntityRegistry
 from homeassistant.util import dt as dt_util
 
+from custom_components.ev_smart_charging import async_setup_entry
 from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
 from custom_components.ev_smart_charging.const import DOMAIN
-from custom_components.ev_smart_charging.sensor import EVSmartChargingSensorCharging
 
 from tests.helpers.helpers import (
     MockChargerEntity,
@@ -45,13 +46,17 @@ async def test_coordinator_no_ready(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_NO_READY, entry_id="test"
     )
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
-    coordinator = EVSmartChargingCoordinator(hass, config_entry)
+    assert await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
     assert coordinator is not None
-
-    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
-    assert sensor is not None
-    await coordinator.add_sensor([sensor])
 
     # Provide price. This should give a 5h schedule, 19:00-24:00
     await coordinator.update_sensors()
@@ -131,13 +136,17 @@ async def test_coordinator_no_ready2(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_NO_READY, entry_id="test"
     )
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
-    coordinator = EVSmartChargingCoordinator(hass, config_entry)
+    assert await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
     assert coordinator is not None
-
-    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
-    assert sensor is not None
-    await coordinator.add_sensor([sensor])
 
     # Provide price. This should give a 5h schedule, 19:00-24:00
     await coordinator.update_sensors()

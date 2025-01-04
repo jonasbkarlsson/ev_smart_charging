@@ -4,12 +4,14 @@ from datetime import datetime
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
-from homeassistant.const import STATE_ON, STATE_OFF
+from homeassistant.const import STATE_ON, STATE_OFF, MAJOR_VERSION, MINOR_VERSION
 from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
 from homeassistant.helpers.entity_registry import EntityRegistry
 from homeassistant.util import dt as dt_util
 
+from custom_components.ev_smart_charging import async_setup_entry, async_unload_entry
 from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
@@ -44,28 +46,49 @@ async def test_coordinator(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_NO_TARGET_SOC, entry_id="test"
     )
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
-    coordinator = EVSmartChargingCoordinator(hass, config_entry)
+    assert await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
     assert coordinator is not None
-
-    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
-    assert sensor is not None
-    await coordinator.add_sensor([sensor])
 
     assert coordinator.ev_target_soc == 100
 
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()
 
+async def test_coordinator2(
+    hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
+):
+    """Test Coordinator."""
+
+    freezer.move_to("2022-09-30T14:00:00+02:00")
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+    MockSOCEntity.create(hass, entity_registry, "55")
+    MockTargetSOCEntity.create(hass, entity_registry, "80")
+    MockPriceEntity.create(hass, entity_registry, 123)
+    MockChargerEntity.create(hass, entity_registry, STATE_OFF)
+
     # Test turn on and off charging
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
-    coordinator = EVSmartChargingCoordinator(hass, config_entry)
+    assert await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
     assert coordinator is not None
-
-    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
-    assert sensor is not None
-    await coordinator.add_sensor([sensor])
     assert coordinator.ev_target_soc == 80
 
     await coordinator.turn_on_charging()
@@ -160,7 +183,6 @@ async def test_coordinator(
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()
 
-
 async def test_coordinator_min_soc1(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
 ):
@@ -178,13 +200,17 @@ async def test_coordinator_min_soc1(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test"
     )
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
-    coordinator = EVSmartChargingCoordinator(hass, config_entry)
-    assert coordinator
-
-    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
-    assert sensor is not None
-    await coordinator.add_sensor([sensor])
+    assert await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    assert coordinator is not None
 
     # Provide price
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
@@ -244,13 +270,17 @@ async def test_coordinator_min_soc2(
     config_entry = MockConfigEntry(
         domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test"
     )
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
-    coordinator = EVSmartChargingCoordinator(hass, config_entry)
-    assert coordinator
-
-    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
-    assert sensor is not None
-    await coordinator.add_sensor([sensor])
+    assert await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    assert coordinator is not None
 
     # Provide price
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
@@ -359,13 +389,18 @@ async def test_coordinator_fix_soc(
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
     config_entry.add_to_hass(hass)
-    coordinator = EVSmartChargingCoordinator(hass, config_entry)
+    assert await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
+    assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
+    )
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
     assert coordinator is not None
 
-    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
-    assert sensor is not None
-    await coordinator.add_sensor([sensor])
     assert coordinator.ev_target_soc == 80
 
     # Provide price
