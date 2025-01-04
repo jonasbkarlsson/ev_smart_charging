@@ -222,7 +222,7 @@ async def test_setup_new_integration_name(hass, bypass_validate_input_sensors):
     )
 
     # Change title
-    config_entry.title = "New title"
+    hass.config_entries.async_update_entry(config_entry, title="New title")
 
     # Reload the entry and assert that the data from above is still there
     assert await async_reload_entry(hass, config_entry) is None
@@ -239,7 +239,7 @@ async def test_setup_new_integration_name(hass, bypass_validate_input_sensors):
     assert device.name_by_user == "New title" or device.name == "New title"
 
     # Change a changed title
-    config_entry.title = "New title2"
+    hass.config_entries.async_update_entry(config_entry, title="New title2")
 
     # Reload the entry and assert that the data from above is still there
     assert await async_reload_entry(hass, config_entry) is None

@@ -1,2 +1,2 @@
 colorlog==6.9.0
-homeassistant==2024.7.4
+homeassistant==2024.12.5
