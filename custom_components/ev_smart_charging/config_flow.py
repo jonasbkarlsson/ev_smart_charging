@@ -4,6 +4,7 @@ from typing import Any, Optional
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.const import MAJOR_VERSION, MINOR_VERSION
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
@@ -114,7 +115,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
+        if MAJOR_VERSION < 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION <= 11):
+            self.config_entry = config_entry
         self._errors = {}
 
     async def async_step_init(self, user_input) -> FlowResult:
