@@ -179,7 +179,7 @@ async def test_is_price_state(hass, freezer):
         state="12.1",
         attributes={"current_price": None, "raw_today": thirteen_list},
     )
-    assert price_adaptor.is_price_state(price_state) is False
+    assert price_adaptor.is_price_state(price_state) is True
 
     freezer.move_to("2022-10-02T00:00:00+02:00")
 
@@ -447,7 +447,7 @@ async def test_validate_price_entity(hass: HomeAssistant):
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     user_input = {}
-    user_input[CONF_PRICE_SENSOR] = "button.nordpool_kwh_se3_sek_2_10_0"
+    user_input[CONF_PRICE_SENSOR] = "sensor.sensor_kwh_se3_sek_2_10_0"
 
     # Check with no price entity
     assert PriceAdaptor.validate_price_entity(hass, user_input) == (
@@ -455,14 +455,14 @@ async def test_validate_price_entity(hass: HomeAssistant):
         "price_not_found",
     )
 
-    # Check with wrong domain
+    # Check with wrong platform
     entity_registry.async_get_or_create(
-        domain=BUTTON,
-        platform=PLATFORM_NORDPOOL,
+        domain=SENSOR,
+        platform=SENSOR,
         unique_id="kwh_se3_sek_2_10_0",
     )
-    assert entity_registry.async_is_registered("button.nordpool_kwh_se3_sek_2_10_0")
-    hass.states.async_set("button.nordpool_kwh_se3_sek_2_10_0", "123")
+    assert entity_registry.async_is_registered("sensor.sensor_kwh_se3_sek_2_10_0")
+    hass.states.async_set("sensor.sensor_kwh_se3_sek_2_10_0", "123")
     assert PriceAdaptor.validate_price_entity(hass, user_input) == (
         "base",
         "sensor_is_not_price",
@@ -510,16 +510,13 @@ async def test_validate_price_entity(hass: HomeAssistant):
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
-    # Check with price entity with invalid state
+    # Check with price entity with invalid state. Is ok since the state is not used.
     hass.states.async_set(
         "sensor.nordpool_kwh_se3_sek_2_10_0",
         "123a",
         {"current_price": 123, "raw_today": None, "raw_tomorrow": None},
     )
-    assert PriceAdaptor.validate_price_entity(hass, user_input) == (
-        "base",
-        "sensor_is_not_price",
-    )
+    assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
 
 async def test_validate_price_entity_entsoe(hass: HomeAssistant):
@@ -563,13 +560,10 @@ async def test_validate_price_entity_entsoe(hass: HomeAssistant):
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
-    # Check with price entity with invalid state
+    # Check with price entity with invalid state. Is ok since the state is not used.
     hass.states.async_set(
         "sensor.entsoe_average_electricity_price_today",
         "123a",
         {"prices_today": None, "prices_tomorrow": None},
     )
-    assert PriceAdaptor.validate_price_entity(hass, user_input) == (
-        "base",
-        "sensor_is_not_price",
-    )
+    assert PriceAdaptor.validate_price_entity(hass, user_input) is None

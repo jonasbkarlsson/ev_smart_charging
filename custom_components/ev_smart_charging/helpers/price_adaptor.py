@@ -15,7 +15,7 @@ from custom_components.ev_smart_charging.const import (
     PLATFORM_GENERIC,
     PLATFORM_NORDPOOL,
 )
-from custom_components.ev_smart_charging.helpers.general import Validator, get_platform
+from custom_components.ev_smart_charging.helpers.general import get_platform
 from custom_components.ev_smart_charging.helpers.coordinator import Raw
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,19 +35,6 @@ class PriceAdaptor:
         """Check that argument is a Price sensor state"""
         if price_state is not None:
             if price_state.state != "unavailable":
-                # Check current_price
-                if self._price_platform in (
-                    PLATFORM_NORDPOOL,
-                    PLATFORM_ENERGIDATASERVICE,
-                ):
-                    try:
-                        if not Validator.is_float(
-                            price_state.attributes["current_price"]
-                        ):
-                            return False
-                    except KeyError:
-                        return False
-
                 # Check raw_today
                 try:
                     if not self.get_raw_today_local(price_state).is_valid(check_today_local = True):
@@ -85,14 +72,8 @@ class PriceAdaptor:
     def get_current_price(self, state) -> float:
         """Return current price."""
 
-        if self._price_platform in (PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE):
-            return state.attributes["current_price"]
-
-        if self._price_platform in (PLATFORM_ENTSOE, PLATFORM_TGE, PLATFORM_GENERIC):
-            time_now = dt.now()
-            return self.get_raw_today_local(state).get_value(time_now)
-
-        return None
+        time_now = dt.now()
+        return self.get_raw_today_local(state).get_value(time_now)
 
     @staticmethod
     def validate_price_entity(
@@ -108,15 +89,13 @@ class PriceAdaptor:
         price_platform = get_platform(hass, user_input[CONF_PRICE_SENSOR])
 
         if price_platform in (PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE):
-            if not "current_price" in price_state.attributes.keys():
-                _LOGGER.debug("No attribute current_price in price sensor")
-                return ("base", "sensor_is_not_price")
             if not "raw_today" in price_state.attributes.keys():
                 _LOGGER.debug("No attribute raw_today in price sensor")
                 return ("base", "sensor_is_not_price")
             if not "raw_tomorrow" in price_state.attributes.keys():
                 _LOGGER.debug("No attribute raw_tomorrow in price sensor")
                 return ("base", "sensor_is_not_price")
+            return None
 
         if price_platform in (PLATFORM_ENTSOE, PLATFORM_TGE, PLATFORM_GENERIC):
             if not "prices_today" in price_state.attributes.keys():
@@ -125,10 +104,7 @@ class PriceAdaptor:
             if not "prices_tomorrow" in price_state.attributes.keys():
                 _LOGGER.debug("No attribute prices tomorrow in price sensor")
                 return ("base", "sensor_is_not_price")
+            return None
 
-        if not Validator.is_float(price_state.state):
-            _LOGGER.debug("Price state is not float")
-            return ("base", "sensor_is_not_price")
-
-
-        return None
+        # Unknown platform
+        return ("base", "sensor_is_not_price")
