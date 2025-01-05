@@ -16,6 +16,7 @@ from .const import (
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_PRICE_SENSOR,
     CONF_CHARGER_ENTITY,
+    CONF_SOLAR_CHARGING_CONFIGURED,
     DOMAIN,
 )
 from .helpers.config_flow import DeviceNameCreator, FindEntity, FlowValidator
@@ -27,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow."""
 
-    VERSION = 6
+    VERSION = 7
     user_input: Optional[dict[str, Any]]
 
     def __init__(self):
@@ -63,6 +64,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ] = FindEntity.find_vw_target_soc_sensor(self.hass)
             user_input[CONF_CHARGER_ENTITY] = FindEntity.find_ocpp_device(self.hass)
             user_input[CONF_EV_CONTROLLED] = False
+            user_input[CONF_SOLAR_CHARGING_CONFIGURED] = False
 
         else:
             # process user_input
