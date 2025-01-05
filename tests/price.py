@@ -1109,3 +1109,201 @@ PRICE_20221001_ENTSOE = [
         "price": 72.19,
     },
 ]
+
+PRICE_20220930_TGE = [
+    {
+        "time": datetime(2022, 9, 30, 0, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 104.95,
+    },
+    {
+        "time": datetime(2022, 9, 30, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 99.74,
+    },
+    {
+        "time": datetime(2022, 9, 30, 2, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 93.42,
+    },
+    {
+        "time": datetime(2022, 9, 30, 3, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 93.25,
+    },
+    {
+        "time": datetime(2022, 9, 30, 4, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 96.9,
+    },
+    {
+        "time": datetime(2022, 9, 30, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 137.17,
+    },
+    {
+        "time": datetime(2022, 9, 30, 6, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 343.4,
+    },
+    {
+        "time": datetime(2022, 9, 30, 7, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 372.56,
+    },
+    {
+        "time": datetime(2022, 9, 30, 8, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 388.65,
+    },
+    {
+        "time": datetime(2022, 9, 30, 9, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 382.75,
+    },
+    {
+        "time": datetime(2022, 9, 30, 10, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 371.33,
+    },
+    {
+        "time": datetime(2022, 9, 30, 11, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 347.16,
+    },
+    {
+        "time": datetime(2022, 9, 30, 12, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 306.14,
+    },
+    {
+        "time": datetime(2022, 9, 30, 13, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 276.73,
+    },
+    {
+        "time": datetime(2022, 9, 30, 14, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 219.48,
+    },
+    {
+        "time": datetime(2022, 9, 30, 15, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 209.21,
+    },
+    {
+        "time": datetime(2022, 9, 30, 16, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 233.7,
+    },
+    {
+        "time": datetime(2022, 9, 30, 17, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 322.5,
+    },
+    {
+        "time": datetime(2022, 9, 30, 18, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 289.67,
+    },
+    {
+        "time": datetime(2022, 9, 30, 19, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 121.58,
+    },
+    {
+        "time": datetime(2022, 9, 30, 20, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 89.57,
+    },
+    {
+        "time": datetime(2022, 9, 30, 21, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 76.63,
+    },
+    {
+        "time": datetime(2022, 9, 30, 22, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 54.27,
+    },
+    {
+        "time": datetime(2022, 9, 30, 23, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 49.64,
+    },
+]
+
+PRICE_20221001_TGE = [
+    {
+        "time": datetime(2022, 10, 1, 0, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 68.63,
+    },
+    {
+        "time": datetime(2022, 10, 1, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 67.75,
+    },
+    {
+        "time": datetime(2022, 10, 1, 2, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 54.58,
+    },
+    {
+        "time": datetime(2022, 10, 1, 3, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 24.2,
+    },
+    {
+        "time": datetime(2022, 10, 1, 4, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 19.05,
+    },
+    {
+        "time": datetime(2022, 10, 1, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 18.03,
+    },
+    {
+        "time": datetime(2022, 10, 1, 6, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 17.63,
+    },
+    {
+        "time": datetime(2022, 10, 1, 7, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 26.67,
+    },
+    {
+        "time": datetime(2022, 10, 1, 8, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 49.15,
+    },
+    {
+        "time": datetime(2022, 10, 1, 9, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 70.31,
+    },
+    {
+        "time": datetime(2022, 10, 1, 10, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 70.12,
+    },
+    {
+        "time": datetime(2022, 10, 1, 11, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 68.09,
+    },
+    {
+        "time": datetime(2022, 10, 1, 12, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 59.96,
+    },
+    {
+        "time": datetime(2022, 10, 1, 13, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 63.87,
+    },
+    {
+        "time": datetime(2022, 10, 1, 14, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 66.27,
+    },
+    {
+        "time": datetime(2022, 10, 1, 15, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 70.16,
+    },
+    {
+        "time": datetime(2022, 10, 1, 16, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 74.4,
+    },
+    {
+        "time": datetime(2022, 10, 1, 17, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 81.39,
+    },
+    {
+        "time": datetime(2022, 10, 1, 18, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 88.17,
+    },
+    {
+        "time": datetime(2022, 10, 1, 19, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 84.94,
+    },
+    {
+        "time": datetime(2022, 10, 1, 20, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 73.95,
+    },
+    {
+        "time": datetime(2022, 10, 1, 21, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 70.38,
+    },
+    {
+        "time": datetime(2022, 10, 1, 22, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 72.88,
+    },
+    {
+        "time": datetime(2022, 10, 1, 23, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "price": 72.19,
+    },
+]

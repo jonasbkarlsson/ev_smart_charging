@@ -29,6 +29,7 @@ PLATFORMS = [SENSOR, SWITCH, BUTTON, NUMBER, SELECT]
 PLATFORM_NORDPOOL = "nordpool"
 PLATFORM_ENERGIDATASERVICE = "energidataservice"
 PLATFORM_ENTSOE = "entsoe"
+PLATFORM_TGE = "tge"
 PLATFORM_VW = "volkswagen_we_connect_id"
 PLATFORM_OCPP = "ocpp"
 PLATFORM_GENERIC = "generic"

@@ -11,6 +11,7 @@ from custom_components.ev_smart_charging.const import (
     CONF_PRICE_SENSOR,
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
+    PLATFORM_TGE,
     PLATFORM_GENERIC,
     PLATFORM_NORDPOOL,
 )
@@ -65,7 +66,7 @@ class PriceAdaptor:
         if self._price_platform in (PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE):
             return Raw(state.attributes["raw_today"], self._price_platform)
 
-        if self._price_platform in (PLATFORM_ENTSOE, PLATFORM_GENERIC):
+        if self._price_platform in (PLATFORM_ENTSOE, PLATFORM_TGE, PLATFORM_GENERIC):
             return Raw(state.attributes["prices_today"], self._price_platform)
 
         return Raw([])
@@ -76,7 +77,7 @@ class PriceAdaptor:
         if self._price_platform in (PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE):
             return Raw(state.attributes["raw_tomorrow"], self._price_platform)
 
-        if self._price_platform in (PLATFORM_ENTSOE, PLATFORM_GENERIC):
+        if self._price_platform in (PLATFORM_ENTSOE, PLATFORM_TGE, PLATFORM_GENERIC):
             return Raw(state.attributes["prices_tomorrow"], self._price_platform)
 
         return Raw([])
@@ -87,7 +88,7 @@ class PriceAdaptor:
         if self._price_platform in (PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE):
             return state.attributes["current_price"]
 
-        if self._price_platform in (PLATFORM_ENTSOE, PLATFORM_GENERIC):
+        if self._price_platform in (PLATFORM_ENTSOE, PLATFORM_TGE, PLATFORM_GENERIC):
             time_now = dt.now()
             return self.get_raw_today_local(state).get_value(time_now)
 
@@ -117,7 +118,7 @@ class PriceAdaptor:
                 _LOGGER.debug("No attribute raw_tomorrow in price sensor")
                 return ("base", "sensor_is_not_price")
 
-        if price_platform in (PLATFORM_ENTSOE, PLATFORM_GENERIC):
+        if price_platform in (PLATFORM_ENTSOE, PLATFORM_TGE, PLATFORM_GENERIC):
             if not "prices_today" in price_state.attributes.keys():
                 _LOGGER.debug("No attribute prices today in price sensor")
                 return ("base", "sensor_is_not_price")
