@@ -71,6 +71,9 @@ CONF_OPPORTUNISTIC_LEVEL = "opportunistic_level"
 CONF_LOW_PRICE_CHARGING_LEVEL = "low_price_charging_level"
 CONF_LOW_SOC_CHARGING_LEVEL = "low_soc_charging_level"
 CONF_MIN_SOC = "min_soc"
+CONF_SOLAR_CHARGING_CONFIGURED = "solar_charging_configured"
+CONF_GRID_USAGE_SENSOR = "grid_usage_sensor"
+CONF_GRID_VOLTAGE = "grid_voltage"
 
 HOURS = [
     "None",
