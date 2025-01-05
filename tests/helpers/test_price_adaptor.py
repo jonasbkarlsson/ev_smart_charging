@@ -526,16 +526,16 @@ async def test_validate_price_entity_entsoe(hass: HomeAssistant):
     user_input = {}
 
     # Check with price entity without attributes
-    user_input[CONF_PRICE_SENSOR] = "sensor.entsoe_average_electricity_price_today"
+    user_input[CONF_PRICE_SENSOR] = "sensor.entsoe_average_electricity_price"
     entity_registry.async_get_or_create(
         domain=SENSOR,
         platform=PLATFORM_ENTSOE,
-        unique_id="average_electricity_price_today",
+        unique_id="average_electricity_price",
     )
     assert entity_registry.async_is_registered(
-        "sensor.entsoe_average_electricity_price_today"
+        "sensor.entsoe_average_electricity_price"
     )
-    hass.states.async_set("sensor.entsoe_average_electricity_price_today", "123")
+    hass.states.async_set("sensor.entsoe_average_electricity_price", "123")
     assert PriceAdaptor.validate_price_entity(hass, user_input) == (
         "base",
         "sensor_is_not_price",
@@ -543,7 +543,7 @@ async def test_validate_price_entity_entsoe(hass: HomeAssistant):
 
     # Check with price entity with prices_today
     hass.states.async_set(
-        "sensor.entsoe_average_electricity_price_today",
+        "sensor.entsoe_average_electricity_price",
         "123",
         {"prices_today": None},
     )
@@ -554,7 +554,7 @@ async def test_validate_price_entity_entsoe(hass: HomeAssistant):
 
     # Check with price entity with prices_today and prices_tomorrow
     hass.states.async_set(
-        "sensor.entsoe_average_electricity_price_today",
+        "sensor.entsoe_average_electricity_price",
         "123",
         {"prices_today": None, "prices_tomorrow": None},
     )
@@ -562,7 +562,7 @@ async def test_validate_price_entity_entsoe(hass: HomeAssistant):
 
     # Check with price entity with invalid state. Is ok since the state is not used.
     hass.states.async_set(
-        "sensor.entsoe_average_electricity_price_today",
+        "sensor.entsoe_average_electricity_price",
         "123a",
         {"prices_today": None, "prices_tomorrow": None},
     )
