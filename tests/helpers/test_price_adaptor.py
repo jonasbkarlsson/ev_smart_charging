@@ -447,7 +447,7 @@ async def test_validate_price_entity(hass: HomeAssistant):
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     user_input = {}
-    user_input[CONF_PRICE_SENSOR] = "button.nordpool_kwh_se3_sek_2_10_0"
+    user_input[CONF_PRICE_SENSOR] = "sensor.sensor_kwh_se3_sek_2_10_0"
 
     # Check with no price entity
     assert PriceAdaptor.validate_price_entity(hass, user_input) == (
@@ -455,14 +455,14 @@ async def test_validate_price_entity(hass: HomeAssistant):
         "price_not_found",
     )
 
-    # Check with wrong domain
+    # Check with wrong platform
     entity_registry.async_get_or_create(
-        domain=BUTTON,
-        platform=PLATFORM_NORDPOOL,
+        domain=SENSOR,
+        platform=SENSOR,
         unique_id="kwh_se3_sek_2_10_0",
     )
-    assert entity_registry.async_is_registered("button.nordpool_kwh_se3_sek_2_10_0")
-    hass.states.async_set("button.nordpool_kwh_se3_sek_2_10_0", "123")
+    assert entity_registry.async_is_registered("sensor.sensor_kwh_se3_sek_2_10_0")
+    hass.states.async_set("sensor.sensor_kwh_se3_sek_2_10_0", "123")
     assert PriceAdaptor.validate_price_entity(hass, user_input) == (
         "base",
         "sensor_is_not_price",
