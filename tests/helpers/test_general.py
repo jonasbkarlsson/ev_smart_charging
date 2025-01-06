@@ -2,25 +2,17 @@
 
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
-from homeassistant.core import HomeAssistant, State
-from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
-from homeassistant.helpers.entity_registry import EntityRegistry
+from homeassistant.core import State
 
 from custom_components.ev_smart_charging.const import (
     CONF_MIN_SOC,
     CONF_PCT_PER_HOUR,
     CONF_READY_HOUR,
-    PLATFORM_ENERGIDATASERVICE,
-    PLATFORM_GENERIC,
-    PLATFORM_NORDPOOL,
 )
-from custom_components.ev_smart_charging.helpers.config_flow import FindEntity
 from custom_components.ev_smart_charging.helpers.general import (
     Validator,
     get_parameter,
-    get_platform,
 )
-from tests.helpers.helpers import MockPriceEntity, MockPriceEntityEnergiDataService
 
 from .const import MOCK_CONFIG_DATA, MOCK_CONFIG_OPTIONS
 
@@ -72,22 +64,3 @@ async def test_get_parameter(hass):
     assert get_parameter(config_entry, CONF_READY_HOUR) is None
     assert get_parameter(config_entry, CONF_READY_HOUR, 12) == 12
 
-
-async def test_get_platform(hass: HomeAssistant):
-    """Test the get_platform."""
-
-    entity_registry: EntityRegistry = async_entity_registry_get(hass)
-
-    # First create a couple of entities
-    MockPriceEntity.create(hass, entity_registry)
-    MockPriceEntityEnergiDataService.create(hass, entity_registry)
-
-    assert get_platform(hass, None) is None
-    assert (
-        get_platform(hass, FindEntity.find_nordpool_sensor(hass)) == PLATFORM_NORDPOOL
-    )
-    assert (
-        get_platform(hass, FindEntity.find_energidataservice_sensor(hass))
-        == PLATFORM_ENERGIDATASERVICE
-    )
-    assert get_platform(hass, "Non existant entity") is PLATFORM_GENERIC

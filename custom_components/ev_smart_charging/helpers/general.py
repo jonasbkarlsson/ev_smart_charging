@@ -51,17 +51,3 @@ def get_parameter(config_entry: ConfigEntry, parameter: str, default_val: Any = 
         return config_entry.data.get(parameter)
     return default_val
 
-
-def get_platform(hass: HomeAssistant, entity_id: str):
-    """Get the platform for the entity"""
-    if entity_id is None:
-        return None
-    entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    entities = entity_registry.entities
-    entry: RegistryEntry = entities.get(entity_id)
-    if entry is None or entry.platform == 'template':
-        return PLATFORM_GENERIC
-    if entry.platform == 'electricity_price':
-        return PLATFORM_NORDPOOL
-    platform = entry.platform
-    return platform
