@@ -11,6 +11,7 @@ from custom_components.ev_smart_charging.const import (
 )
 
 from custom_components.ev_smart_charging.helpers.coordinator import (
+    PriceFormat,
     Raw,
     Scheduler,
     get_charging_hours,
@@ -93,15 +94,12 @@ async def test_raw(hass, set_cet_timezone):
     assert not price.is_valid()
     assert price.last_value() is None
 
-    price = Raw(PRICE_20220930, "UNKNOWN")
-    assert not price.is_valid()
-    assert price.last_value() is None
-
 
 async def test_raw_energidataservice(hass, set_cet_timezone):
     """Test Raw"""
 
-    price = Raw(PRICE_20220930_ENERGIDATASERVICE, PLATFORM_ENERGIDATASERVICE)
+    price_format = PriceFormat(PLATFORM_ENERGIDATASERVICE)
+    price = Raw(PRICE_20220930_ENERGIDATASERVICE, price_format)
     assert price.get_raw() == PRICE_20220930
     assert price.is_valid()
     assert price.copy().get_raw() == PRICE_20220930
@@ -128,7 +126,7 @@ async def test_raw_energidataservice(hass, set_cet_timezone):
     assert price.get_value(time) is None
     assert price.get_item(time) is None
 
-    price2 = Raw(PRICE_20221001_ENERGIDATASERVICE, PLATFORM_ENERGIDATASERVICE)
+    price2 = Raw(PRICE_20221001_ENERGIDATASERVICE, price_format)
     price.extend(None)
     assert price.get_raw() == PRICE_20220930
     price.extend(price2)
@@ -146,7 +144,7 @@ async def test_raw_energidataservice(hass, set_cet_timezone):
     assert start.tzinfo == dt_util.get_time_zone("Europe/Stockholm")
     assert start.hour == 0
 
-    price = Raw([], PLATFORM_ENERGIDATASERVICE)
+    price = Raw([], price_format)
     assert not price.is_valid()
     assert price.last_value() is None
 
@@ -155,7 +153,8 @@ async def test_raw_entsoe(hass, set_cet_timezone, freezer):
     """Test Raw"""
 
     freezer.move_to("2022-09-30T00:10:00+02:00")
-    price = Raw(PRICE_20220930_ENTSOE, PLATFORM_ENTSOE)
+    price_format = PriceFormat(PLATFORM_ENTSOE)
+    price = Raw(PRICE_20220930_ENTSOE, price_format)
     assert price.get_raw() == PRICE_20220930
     assert price.is_valid()
     assert price.copy().get_raw() == PRICE_20220930
@@ -182,7 +181,7 @@ async def test_raw_entsoe(hass, set_cet_timezone, freezer):
     assert price.get_value(time) is None
     assert price.get_item(time) is None
 
-    price2 = Raw(PRICE_20221001_ENTSOE, PLATFORM_ENTSOE)
+    price2 = Raw(PRICE_20221001_ENTSOE, price_format)
     price.extend(None)
     assert price.get_raw() == PRICE_20220930
     price.extend(price2)
@@ -202,14 +201,15 @@ async def test_raw_entsoe(hass, set_cet_timezone, freezer):
     assert start.tzinfo == dt_util.get_time_zone("Europe/Stockholm")
     assert start.hour == 0
 
-    price = Raw([], PLATFORM_ENTSOE)
+    price = Raw([], price_format)
     assert not price.is_valid()
     assert price.last_value() is None
 
 async def test_raw_tge(hass, set_cet_timezone):
     """Test Raw"""
 
-    price = Raw(PRICE_20220930_TGE, PLATFORM_TGE)
+    price_format = PriceFormat(PLATFORM_TGE)
+    price = Raw(PRICE_20220930_TGE, price_format)
     assert price.get_raw() == PRICE_20220930
     assert price.is_valid()
     assert price.copy().get_raw() == PRICE_20220930
@@ -236,7 +236,7 @@ async def test_raw_tge(hass, set_cet_timezone):
     assert price.get_value(time) is None
     assert price.get_item(time) is None
 
-    price2 = Raw(PRICE_20221001_TGE, PLATFORM_TGE)
+    price2 = Raw(PRICE_20221001_TGE, price_format)
     price.extend(None)
     assert price.get_raw() == PRICE_20220930
     price.extend(price2)
@@ -254,7 +254,7 @@ async def test_raw_tge(hass, set_cet_timezone):
     assert start.tzinfo == dt_util.get_time_zone("Europe/Stockholm")
     assert start.hour == 0
 
-    price = Raw([], PLATFORM_TGE)
+    price = Raw([], price_format)
     assert not price.is_valid()
     assert price.last_value() is None
 

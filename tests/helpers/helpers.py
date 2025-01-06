@@ -16,7 +16,7 @@ from custom_components.ev_smart_charging.const import (
     SENSOR,
     SWITCH,
 )
-from custom_components.ev_smart_charging.helpers.coordinator import Raw
+from custom_components.ev_smart_charging.helpers.coordinator import Raw, PriceFormat
 
 
 class MockPriceEntity:
@@ -90,11 +90,12 @@ class MockPriceEntityEnergiDataService:
         # Find current price
         if new_price is None:
             new_price = "unavailable"
-            if price := Raw(new_raw_today, PLATFORM_ENERGIDATASERVICE).get_value(
+            price_format = PriceFormat(PLATFORM_ENERGIDATASERVICE)
+            if price := Raw(new_raw_today, price_format).get_value(
                 dt_util.now()
             ):
                 new_price = price
-            if price := Raw(new_raw_tomorrow, PLATFORM_ENERGIDATASERVICE).get_value(
+            if price := Raw(new_raw_tomorrow, price_format).get_value(
                 dt_util.now()
             ):
                 new_price = price
@@ -138,9 +139,10 @@ class MockPriceEntityEntsoe:
         # Find current price
         if new_price is None:
             new_price = "unavailable"
-            if price := Raw(new_raw_today, PLATFORM_ENTSOE).get_value(dt_util.now()):
+            price_format = PriceFormat(PLATFORM_ENTSOE)
+            if price := Raw(new_raw_today, price_format).get_value(dt_util.now()):
                 new_price = price
-            if price := Raw(new_raw_tomorrow, PLATFORM_ENTSOE).get_value(dt_util.now()):
+            if price := Raw(new_raw_tomorrow, price_format).get_value(dt_util.now()):
                 new_price = price
 
         # Set state
@@ -180,11 +182,12 @@ class MockPriceEntityTGE:
         # Find current price
         if new_price is None:
             new_price = "unavailable"
-            if price := Raw(new_raw_today, PLATFORM_TGE).get_value(
+            price_format = PriceFormat(PLATFORM_TGE)
+            if price := Raw(new_raw_today, price_format).get_value(
                 dt_util.now()
             ):
                 new_price = price
-            if price := Raw(new_raw_tomorrow, PLATFORM_TGE).get_value(
+            if price := Raw(new_raw_tomorrow, price_format).get_value(
                 dt_util.now()
             ):
                 new_price = price
@@ -226,9 +229,10 @@ class MockPriceEntityGeneric:
         # Find current price
         if new_price is None:
             new_price = "unavailable"
-            if price := Raw(new_raw_today, PLATFORM_GENERIC).get_value(dt_util.now()):
+            price_format = PriceFormat(PLATFORM_GENERIC)
+            if price := Raw(new_raw_today, price_format).get_value(dt_util.now()):
                 new_price = price
-            if price := Raw(new_raw_tomorrow, PLATFORM_GENERIC).get_value(dt_util.now()):
+            if price := Raw(new_raw_tomorrow, price_format).get_value(dt_util.now()):
                 new_price = price
 
         # Set state

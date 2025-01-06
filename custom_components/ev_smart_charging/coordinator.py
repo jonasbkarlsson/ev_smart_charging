@@ -83,7 +83,7 @@ from .helpers.coordinator import (
     get_ready_hour_utc,
     get_start_hour_utc,
 )
-from .helpers.general import Validator, get_parameter, get_platform
+from .helpers.general import Validator, get_parameter
 from .sensor import (
     EVSmartChargingSensor,
     EVSmartChargingSensorCharging,
@@ -456,9 +456,7 @@ class EVSmartChargingCoordinator:
                 self.sensor_status = sensor
 
         self.price_entity_id = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
-        self.price_adaptor.set_price_platform(
-            get_platform(self.hass, self.price_entity_id)
-        )
+        self.price_adaptor.initiate(self.price_entity_id)
         self.ev_soc_entity_id = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
         self.ev_target_soc_entity_id = get_parameter(
             self.config_entry, CONF_EV_TARGET_SOC_SENSOR

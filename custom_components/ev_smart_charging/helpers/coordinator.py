@@ -10,21 +10,52 @@ from homeassistant.util import dt
 from custom_components.ev_smart_charging.const import (
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
-    PLATFORM_TGE,
     PLATFORM_GENERIC,
-    PLATFORM_NORDPOOL,
+    PLATFORM_TGE,
     READY_HOUR_NONE,
     START_HOUR_NONE,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
+class PriceFormat:
+    """Described the formay of price information"""
 
-def convert_raw_item(
-    item: dict[str, Any], platform: str = PLATFORM_NORDPOOL
-) -> dict[str, Any]:
+    def __init__(self, platform: str = None):
+        self.start = None # Can be "start", "time" or "hour"
+        self.value = None # Can be "price" or "value"
+        self.start_is_string = None # True if start is a string in ISO format, False if it is a datetime object
+
+        if platform == PLATFORM_ENERGIDATASERVICE:
+            self.start = "hour"
+            self.value = "price"
+            self.start_is_string = False
+        if platform in [PLATFORM_ENTSOE, PLATFORM_GENERIC]:
+            self.start = "time"
+            self.value = "price"
+            self.start_is_string = True
+        if platform == PLATFORM_TGE:
+            self.start = "time"
+            self.value = "price"
+            self.start_is_string = False
+
+
+def convert_raw_item(item: dict[str, Any], price_format: PriceFormat) -> dict[str, Any]:
     """Convert raw item to the internal format"""
 
+    try:
+        item_new = {}
+        item_new["value"] = item[price_format.value]
+        if price_format.start_is_string:
+            item_new["start"] = datetime.fromisoformat(item[price_format.start])
+        else:
+            item_new["start"] = item[price_format.start]
+        item_new["end"] = item_new["start"] + timedelta(hours=1)
+    except (KeyError, ValueError, TypeError):
+        return None
+
+    # PLATFORM_NORDPOOL:
+    #
     # Array of item = {
     #   "start": datetime,
     #   "end": datetime,
@@ -36,10 +67,8 @@ def convert_raw_item(
     #         tzinfo=zoneinfo.ZoneInfo(key='Europe/Stockholm')),
     #  'value': 145.77}
 
-    if platform == PLATFORM_NORDPOOL:
-        if item["value"] is not None and isinstance(item["start"], datetime):
-            return item
-
+    # PLATFORM_ENERGIDATASERVICE
+    #
     # Array of item = {
     #   "hour": datetime,
     #   "price": float,
@@ -47,27 +76,17 @@ def convert_raw_item(
     # {'hour': datetime.datetime(2023, 3, 6, 0, 0,
     #          tzinfo=<DstTzInfo 'Europe/Stockholm' CET+1:00:00 STD>),
     #  'price': 146.96}
-    if platform == PLATFORM_ENERGIDATASERVICE:
-        if item["price"] is not None and isinstance(item["hour"], datetime):
-            item_new = {}
-            item_new["value"] = item["price"]
-            item_new["start"] = item["hour"]
-            item_new["end"] = item["hour"] + timedelta(hours=1)
-            return item_new
 
+    # PLATFORM_ENTSOE
+    #
     # Array of item = {
     #   "time": string,
     #   "price": float,
     # }
     # {'time': '2023-03-06 00:00:00+01:00', 'price': 0.1306} time is not datetime
-    if platform == PLATFORM_ENTSOE:
-        if item["price"] is not None and isinstance(item["time"], str):
-            item_new = {}
-            item_new["value"] = item["price"]
-            item_new["start"] = datetime.fromisoformat(item["time"])
-            item_new["end"] = item_new["start"] + timedelta(hours=1)
-            return item_new
 
+    # PLATFORM_TGE
+    #
     # Array of item = {
     #   "time": datetime,
     #   "price": float,
@@ -75,29 +94,16 @@ def convert_raw_item(
     # {'time': datetime.datetime(2023, 3, 6, 0, 0,
     #          tzinfo=<DstTzInfo 'Europe/Stockholm' CET+1:00:00 STD>),
     #  'price': 146.96}
-    if platform == PLATFORM_TGE:
-        if item["price"] is not None and isinstance(item["time"], datetime):
-            item_new = {}
-            item_new["value"] = item["price"]
-            item_new["start"] = item["time"]
-            item_new["end"] = item["time"] + timedelta(hours=1)
-            return item_new
 
+    # PLATFORM_GENERIC
+    #
     # Array of item = {
     #   "time": string,
     #   "price": float,
     # }
     # {'time': '2023-03-06 00:00:00+01:00', 'price': 0.1306} time is not datetime
-    if platform == PLATFORM_GENERIC:
-        if item["price"] is not None and isinstance(item["time"], str):
-            item_new = {}
-            item_new["value"] = item["price"]
-            item_new["start"] = datetime.fromisoformat(item["time"])
-            item_new["end"] = item_new["start"] + timedelta(hours=1)
-            return item_new
 
-    return None
-
+    return item_new
 
 class Raw:
     """Class to handle raw data
@@ -109,12 +115,18 @@ class Raw:
     }"""
 
     def __init__(
-        self, raw: list[dict[str, Any]], platform: str = PLATFORM_NORDPOOL
+        self, raw: list[dict[str, Any]], price_format: PriceFormat = None
     ) -> None:
         self.data = []
         if raw:
             for item in raw:
-                item_new = convert_raw_item(item, platform)
+                if price_format:
+                    item_new = convert_raw_item(item, price_format)
+                else:
+                    if item["value"] is not None and isinstance(item["start"], datetime):
+                        item_new = item
+                    else:
+                        item_new = None
                 if item_new is not None:
                     # Only use full hour price for now
                     if item_new['start'].minute == 0:
