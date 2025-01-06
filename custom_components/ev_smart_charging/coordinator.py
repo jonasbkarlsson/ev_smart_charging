@@ -456,7 +456,8 @@ class EVSmartChargingCoordinator:
                 self.sensor_status = sensor
 
         self.price_entity_id = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
-        self.price_adaptor.initiate(self.price_entity_id)
+        price_state = self.hass.states.get(self.price_entity_id)
+        self.price_adaptor.initiate(price_state)
         self.ev_soc_entity_id = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
         self.ev_target_soc_entity_id = get_parameter(
             self.config_entry, CONF_EV_TARGET_SOC_SENSOR

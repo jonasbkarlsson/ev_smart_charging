@@ -44,6 +44,10 @@ class PriceAdaptor:
     def initiate(self, price_state: State) -> bool:
         """Set the price format"""
 
+        if not price_state:
+            # This should only happen when testing
+            return True
+
         if "raw_today" in price_state.attributes:
             self._price_attribute_today = "raw_today"
             self._price_attribute_tomorrow = "raw_tomorrow"
@@ -96,6 +100,11 @@ class PriceAdaptor:
         """Check that argument is a Price sensor state"""
         if price_state is not None:
             if price_state.state != "unavailable":
+
+                # Make sure the adaptor is initiated. Is needed when testing.
+                if not self._price_attribute_today:
+                    self.initiate(price_state)
+
                 # Check raw_today
                 try:
                     if not self.get_raw_today_local(price_state).is_valid(check_today_local = True):

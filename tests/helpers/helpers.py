@@ -17,6 +17,7 @@ from custom_components.ev_smart_charging.const import (
     SWITCH,
 )
 from custom_components.ev_smart_charging.helpers.coordinator import Raw, PriceFormat
+from tests.price import PRICE_THIRTEEN_LIST
 
 
 class MockPriceEntity:
@@ -32,7 +33,7 @@ class MockPriceEntity:
             platform=PLATFORM_NORDPOOL,
             unique_id="kwh_se3_sek_2_10_0",
         )
-        MockPriceEntity.set_state(hass, None, None, price)
+        MockPriceEntity.set_state(hass, PRICE_THIRTEEN_LIST, None, price)
 
     @staticmethod
     def set_state(

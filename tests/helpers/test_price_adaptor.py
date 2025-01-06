@@ -1,6 +1,5 @@
 """Test ev_smart_charging/helpers/price_adaptor.py"""
 
-from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from homeassistant.core import HomeAssistant
@@ -32,84 +31,10 @@ from tests.price import (
     PRICE_20221001,
     PRICE_20221001_ENERGIDATASERVICE,
     PRICE_20221001_ENTSOE,
+    PRICE_ONE_LIST,
+    PRICE_THIRTEEN_LIST,
 )
 from tests.price_15min import PRICE_20220930_GENERIC_15MIN
-
-one_list = [
-    {
-        "value": 0.0,
-        "start": datetime(2022, 10, 1, 14, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 15, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    }
-]
-
-thirteen_list = [
-    {
-        "value": 1.0,
-        "start": datetime(2022, 10, 1, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 2, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-    {
-        "value": 2.0,
-        "start": datetime(2022, 10, 1, 2, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 3, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-    {
-        "value": 3.0,
-        "start": datetime(2022, 10, 1, 3, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 4, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-    {
-        "value": 4.0,
-        "start": datetime(2022, 10, 1, 4, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-    {
-        "value": 5.0,
-        "start": datetime(2022, 10, 1, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 6, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-    {
-        "value": 6.0,
-        "start": datetime(2022, 10, 1, 6, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 7, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-    {
-        "value": 7.0,
-        "start": datetime(2022, 10, 1, 7, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 8, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-    {
-        "value": 8.0,
-        "start": datetime(2022, 10, 1, 8, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 9, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-    {
-        "value": 9.0,
-        "start": datetime(2022, 10, 1, 9, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 10, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-    {
-        "value": 10.0,
-        "start": datetime(2022, 10, 1, 10, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 11, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-    {
-        "value": 11.0,
-        "start": datetime(2022, 10, 1, 11, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 12, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-    {
-        "value": 12.0,
-        "start": datetime(2022, 10, 1, 12, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 13, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-    {
-        "value": 13.0,
-        "start": datetime(2022, 10, 1, 13, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        "stop": datetime(2022, 10, 1, 14, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-    },
-]
 
 
 # pylint: disable=unused-argument
@@ -117,7 +42,6 @@ async def test_is_price_state(hass, freezer):
     """Test is_price_state"""
 
     dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
-
     freezer.move_to("2022-10-01T14:00:00+02:00")
 
     price_adaptor = PriceAdaptor()
@@ -159,7 +83,7 @@ async def test_is_price_state(hass, freezer):
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": 12.1, "raw_today": one_list},
+        attributes={"current_price": 12.1, "raw_today": PRICE_ONE_LIST},
     )
     price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is False
@@ -167,7 +91,7 @@ async def test_is_price_state(hass, freezer):
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": None, "raw_today": one_list},
+        attributes={"current_price": None, "raw_today": PRICE_ONE_LIST},
     )
     price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is False
@@ -175,7 +99,7 @@ async def test_is_price_state(hass, freezer):
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": 12.1, "raw_today": thirteen_list, "raw_tomorrow": None},
+        attributes={"current_price": 12.1, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
     )
     price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is True
@@ -183,7 +107,7 @@ async def test_is_price_state(hass, freezer):
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": None, "raw_today": thirteen_list, "raw_tomorrow": None},
+        attributes={"current_price": None, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
     )
     price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is True
@@ -193,7 +117,7 @@ async def test_is_price_state(hass, freezer):
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": 12.1, "raw_today": thirteen_list, "raw_tomorrow": None},
+        attributes={"current_price": 12.1, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
     )
     price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is False
@@ -208,6 +132,7 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
 
     # Test PLATFORM_NORDPOOL
     MockPriceEntity.create(hass, entity_registry)
+    MockPriceEntity.set_state(hass, None, None)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_nordpool_sensor(hass)
     assert price_sensor.startswith("sensor.nordpool")
@@ -500,7 +425,7 @@ async def test_validate_price_entity(hass: HomeAssistant, freezer):
     hass.states.async_set(
         "sensor.nordpool_kwh_se3_sek_2_10_0",
         "123",
-        {"current_price": 123, "raw_today": thirteen_list, "raw_tomorrow": None},
+        {"current_price": 123, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
@@ -508,7 +433,7 @@ async def test_validate_price_entity(hass: HomeAssistant, freezer):
     hass.states.async_set(
         "sensor.nordpool_kwh_se3_sek_2_10_0",
         "123a",
-        {"current_price": 123, "raw_today": thirteen_list, "raw_tomorrow": None},
+        {"current_price": 123, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
@@ -552,7 +477,7 @@ async def test_validate_price_entity_entsoe(hass: HomeAssistant, freezer):
     hass.states.async_set(
         "sensor.entsoe_average_electricity_price",
         "123",
-        {"prices_today": thirteen_list, "prices_tomorrow": None},
+        {"prices_today": PRICE_THIRTEEN_LIST, "prices_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
@@ -560,6 +485,6 @@ async def test_validate_price_entity_entsoe(hass: HomeAssistant, freezer):
     hass.states.async_set(
         "sensor.entsoe_average_electricity_price",
         "123a",
-        {"prices_today": thirteen_list, "prices_tomorrow": None},
+        {"prices_today": PRICE_THIRTEEN_LIST, "prices_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
