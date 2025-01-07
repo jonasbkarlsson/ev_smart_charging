@@ -19,7 +19,7 @@ The integration calculates the set of hours that will give the lowest price, by 
   - A compatible price integration shall provide prices either with attributes "prices_today" and "prices_tomorrow" or attributes "raw_today" and "raw_tomorrow".
   - The prices shall be provided with either the key "price" or "value".
   - The starting time for each price shall be provided with either the key "time", "start" or "hour".
-  - Compatible integrations includes, but is not limited to, the [Nordpool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice), the [Entso-e](https://github.com/JaccoR/hass-entso-e) and the [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations.
+  - Compatible integrations includes, but is not limited to, the (HACS) [Nordpool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice), the [Entso-e](https://github.com/JaccoR/hass-entso-e) and the [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations. Note that the [official Nordpool integration](https://www.home-assistant.io/integrations/nordpool) is not compatible.
 - Home Assistant version 2023.4 or newer.
 
 ## Features
