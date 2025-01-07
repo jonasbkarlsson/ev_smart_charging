@@ -8,7 +8,7 @@
                     "price_sensor": "Sensor for strømpris",
                     "ev_soc_sensor": "Elbil SOC-enhet (ladenivå)",
                     "ev_target_soc_sensor": "Enhet for ønsket SOC/ladenivå (mellomrom for å ta bort)",
-                    "charger_entity": "Ladekontrollbryter (mellomrom for å ta bort)",
+                    "charger_entity": "Ladekontrollenhet (mellomrom for å ta bort)",
                     "ev_controlled": "Elbilintegrasjon, brukes for å styre start og stopp av lading."
                 }
             }
@@ -21,8 +21,8 @@
             "ev_soc_invalid_data": "SOC-enheten gir ugyldige data.",
             "ev_target_soc_not_found": "Elbil mål-SOC-enhet ikke funnet.",
             "ev_target_soc_invalid_data": "Mål-SOC-enheten gir ugyldige data.",
-            "charger_control_switch_not_found": "Ladekontrollbryter ikke funnet.",
-            "charger_control_switch_not_switch": "Ladekontrollbryteren er ikke en bryter."
+            "charger_control_switch_not_found": "Ladekontrollenhet ikke funnet.",
+            "charger_control_switch_not_switch": "Ladekontrollenhet er ikke en bryter eller en input boolean."
         }
     },
     "options": {
@@ -33,7 +33,7 @@
                     "price_sensor": "Sensor for strømpris",
                     "ev_soc_sensor": "Elbil SOC-enhet",
                     "ev_target_soc_sensor": "Elbil mål-SOC-enhet (mellomrom for å ta bort)",
-                    "charger_entity": "Ladekontrollbryter (mellomrom for å ta bort)",
+                    "charger_entity": "Ladekontrollenhet (mellomrom for å ta bort)",
                     "ev_controlled": "Elbil-integrasjon for å kontrollere start/stopp av lading"
                 }
             }
@@ -46,8 +46,8 @@
             "ev_soc_invalid_data": "SOC-enheten gir ugyldige data.",
             "ev_target_soc_not_found": "Elbil mål-SOC-enhet ikke funnet.",
             "ev_target_soc_invalid_data": "Mål-SOC-enheten gir ugyldige data.",
-            "charger_control_switch_not_found": "Ladekontrollbryter ikke funnet.",
-            "charger_control_switch_not_switch": "Ladekontrollbryteren er ikke en bryter."
+            "charger_control_switch_not_found": "Ladekontrollenhet ikke funnet.",
+            "charger_control_switch_not_switch": "Ladekontrollenhet er ikke en bryter eller en input boolean."
         }
     },
     "entity": {

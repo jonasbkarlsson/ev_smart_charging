@@ -8,7 +8,7 @@
                     "price_sensor": "Sensor for strømpris",
                     "ev_soc_sensor": "Elbil SOC-enhed (ladeniveau)",
                     "ev_target_soc_sensor": "Enhed for ønsket SOC/ladeniveau (mellemrum for at fjerne)",
-                    "charger_entity": "Ladeafbryder (mellemrum for at fjerne)",
+                    "charger_entity": "Ladeenhed (mellemrum for at fjerne)",
                     "ev_controlled": "Elbilintegration, bruges til at styre start og stop af opladning."
                 }
             }
@@ -21,8 +21,8 @@
             "ev_soc_invalid_data": "SOC-enheden giver ugyldige data.",
             "ev_target_soc_not_found": "Elbil mål-SOC-enhed ikke fundet.",
             "ev_target_soc_invalid_data": "Mål-SOC-enheden giver ugyldige data.",
-            "charger_control_switch_not_found": "Ladeafbryder ikke fundet.",
-            "charger_control_switch_not_switch": "Ladeafbryderen er ikke en afbryder."
+            "charger_control_switch_not_found": "Ladeenhed ikke fundet.",
+            "charger_control_switch_not_switch": "Ladeenhed er ikke en afbryder eller en input boolean."
         }
     },
     "options": {
@@ -33,7 +33,7 @@
                     "price_sensor": "Sensor for strømpris",
                     "ev_soc_sensor": "Elbil SOC-enhed",
                     "ev_target_soc_sensor": "Elbil mål-SOC-enhed (mellemrum for at fjerne)",
-                    "charger_entity": "Ladeafbryder (mellemrum for at fjerne)",
+                    "charger_entity": "Ladeenhed (mellemrum for at fjerne)",
                     "ev_controlled": "Elbil-integration for at kontrollere start/stop af opladning"
                 }
             }
@@ -46,8 +46,8 @@
             "ev_soc_invalid_data": "SOC-enheden giver ugyldige data.",
             "ev_target_soc_not_found": "Elbil mål-SOC-enhed ikke fundet.",
             "ev_target_soc_invalid_data": "Mål-SOC-enheden giver ugyldige data.",
-            "charger_control_switch_not_found": "Ladeafbryder ikke fundet.",
-            "charger_control_switch_not_switch": "Ladeafbryderen er ikke en afbryder."
+            "charger_control_switch_not_found": "Ladeenhed ikke fundet.",
+            "charger_control_switch_not_switch": "Ladeenhed er ikke en afbryder eller en input boolean."
         }
     },
     "entity": {
