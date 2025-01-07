@@ -71,7 +71,7 @@ Name | Yes | The name of the instance.
 Electricity price entity | Yes | Sensor from any compatible price integration or a template sensor providing the price in the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). For the Entso-e integration, the entity called `sensor.average_electricity_price` should be used.
 EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100. Note that this entity is crucial for the integration. If live information about he SOC is not available, please carefully read the section below with more information about the EV SOC entity.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
-Charger control switch entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'.
+Charger control entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'. This entity can either be a Switch or an Input Boolean.
 Charging control by EV integration | Yes | Select this if an EV integration (and not a charger integration) will be used to control start/stop of charging. Also, if an EV integration is used to control start/stop of charging, it is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected`.
 
 With the exception of Name, the above configuration items can be changed after intial configuration in Settings -> Devices & Services -> Integrations -> EV Smart Charging -> 1 device -> Configure. To change Name, the native way to rename Integrations or Devices in Home Assistant can be used.
