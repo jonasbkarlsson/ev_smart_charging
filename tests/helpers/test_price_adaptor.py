@@ -1,5 +1,6 @@
 """Test ev_smart_charging/helpers/price_adaptor.py"""
 
+from datetime import date
 from zoneinfo import ZoneInfo
 
 from homeassistant.core import HomeAssistant
@@ -38,6 +39,82 @@ from tests.price_15min import PRICE_20220930_GENERIC_15MIN
 
 
 # pylint: disable=unused-argument
+async def test_inintiate(hass, freezer):
+    """Test initiate"""
+
+    dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
+    freezer.move_to("2022-10-01T14:00:00+02:00")
+
+    price_adaptor = PriceAdaptor()
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={"raw_today": []},
+    )
+    price_adaptor.initiate(price_state)
+    assert price_adaptor.is_price_state(price_state) is False
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={
+            "raw_today": [
+                {
+                    "price": 0.0,
+                    "NOT_SUPPORTED": "2022-10-01 00:00:00+02:00",
+                }
+            ]
+        },
+    )
+    price_adaptor.initiate(price_state)
+    assert price_adaptor.is_price_state(price_state) is False
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={
+            "raw_today": [
+                {
+                    "NOT_SUPPORTED": 0.0,
+                    "time": "2022-10-01 00:00:00+02:00",
+                }
+            ]
+        },
+    )
+    price_adaptor.initiate(price_state)
+    assert price_adaptor.is_price_state(price_state) is False
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={
+            "raw_today": [
+                {
+                    "price": 0.0,
+                    "time": "INCORRECT",
+                }
+            ]
+        },
+    )
+    price_adaptor.initiate(price_state)
+    assert price_adaptor.is_price_state(price_state) is False
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={
+            "raw_today": [
+                {
+                    "price": 0.0,
+                    "time": date(2022, 10, 1),
+                }
+            ]
+        },
+    )
+    price_adaptor.initiate(price_state)
+    assert price_adaptor.is_price_state(price_state) is False
+
+
 async def test_is_price_state(hass, freezer):
     """Test is_price_state"""
 
@@ -99,7 +176,11 @@ async def test_is_price_state(hass, freezer):
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": 12.1, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
+        attributes={
+            "current_price": 12.1,
+            "raw_today": PRICE_THIRTEEN_LIST,
+            "raw_tomorrow": None,
+        },
     )
     price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is True
@@ -107,7 +188,11 @@ async def test_is_price_state(hass, freezer):
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": None, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
+        attributes={
+            "current_price": None,
+            "raw_today": PRICE_THIRTEEN_LIST,
+            "raw_tomorrow": None,
+        },
     )
     price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is True
@@ -117,10 +202,15 @@ async def test_is_price_state(hass, freezer):
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": 12.1, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
+        attributes={
+            "current_price": 12.1,
+            "raw_today": PRICE_THIRTEEN_LIST,
+            "raw_tomorrow": None,
+        },
     )
     price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is False
+
 
 async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     """Test get_raw_today_local"""
@@ -216,6 +306,7 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
     assert raw_today_local.data == PRICE_20220930
+
 
 async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     """Test get_raw_tomorrow_local"""
@@ -415,6 +506,17 @@ async def test_validate_price_entity(hass: HomeAssistant, freezer):
         "sensor.nordpool_kwh_se3_sek_2_10_0",
         "123",
         {"current_price": 123, "raw_today": None},
+    )
+    assert PriceAdaptor.validate_price_entity(hass, user_input) == (
+        "base",
+        "sensor_is_not_price",
+    )
+
+    # Check with price entity with current_price, invalid raw_today and raw_tomorrow
+    hass.states.async_set(
+        "sensor.nordpool_kwh_se3_sek_2_10_0",
+        "123",
+        {"current_price": 123, "raw_today": PRICE_ONE_LIST, "raw_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) == (
         "base",

@@ -1,7 +1,7 @@
 """PriceAdaptor class"""
 
 # pylint: disable=relative-beyond-top-level
-from datetime import datetime, timedelta
+from datetime import datetime
 import logging
 
 from typing import Any
@@ -14,6 +14,7 @@ from custom_components.ev_smart_charging.const import (
 from custom_components.ev_smart_charging.helpers.coordinator import PriceFormat, Raw
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class PriceAdaptor:
     """PriceAdaptor class"""
@@ -57,7 +58,7 @@ class PriceAdaptor:
         else:
             return False
 
-        # Set _price_key.start
+        # Set _price_key.start and _price_key.value
         try:
             if "start" in price_state.attributes[self._price_attribute_today][0]:
                 self._price_format.start = "start"
@@ -67,11 +68,6 @@ class PriceAdaptor:
                 self._price_format.start = "hour"
             else:
                 return False
-        except (KeyError, IndexError, TypeError):
-            return False
-
-        # Set _price_key.value
-        try:
             if "price" in price_state.attributes[self._price_attribute_today][0]:
                 self._price_format.value = "price"
             elif "value" in price_state.attributes[self._price_attribute_today][0]:
@@ -82,10 +78,12 @@ class PriceAdaptor:
             return False
 
         # Determine if the start key is a string in ISO format or a datetime object
-        start_value = price_state.attributes[self._price_attribute_today][0][self._price_format.start]
+        start_value = price_state.attributes[self._price_attribute_today][0][
+            self._price_format.start
+        ]
         if isinstance(start_value, str):
             try:
-                dt.parse_datetime(start_value)
+                datetime.fromisoformat(start_value)
                 self._price_format.start_is_string = True
             except ValueError:
                 return False
@@ -107,11 +105,15 @@ class PriceAdaptor:
 
                 # Check raw_today
                 try:
-                    if not self.get_raw_today_local(price_state).is_valid(check_today_local = True):
+                    if not self.get_raw_today_local(price_state).is_valid(
+                        check_today_local=True
+                    ):
                         return False
                 except KeyError:
                     return False
                 except TypeError:
+                    return False
+                except AttributeError:
                     return False
                 # Don't check raw_tomorrow. It can be missing.
                 return True
