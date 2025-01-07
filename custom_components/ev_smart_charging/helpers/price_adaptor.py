@@ -49,30 +49,29 @@ class PriceAdaptor:
             # This should only happen when testing
             return True
 
-        if "raw_today" in price_state.attributes:
-            self._price_attribute_today = "raw_today"
-            self._price_attribute_tomorrow = "raw_tomorrow"
-        elif "prices_today" in price_state.attributes:
+        if "prices_today" in price_state.attributes:
             self._price_attribute_today = "prices_today"
             self._price_attribute_tomorrow = "prices_tomorrow"
+        elif "raw_today" in price_state.attributes:
+            self._price_attribute_today = "raw_today"
+            self._price_attribute_tomorrow = "raw_tomorrow"
         else:
             return False
 
         # Set _price_key.start and _price_key.value
         try:
-            if "start" in price_state.attributes[self._price_attribute_today][0]:
-                self._price_format.start = "start"
-            elif "time" in price_state.attributes[self._price_attribute_today][0]:
-                self._price_format.start = "time"
-            elif "hour" in price_state.attributes[self._price_attribute_today][0]:
-                self._price_format.start = "hour"
-            else:
-                return False
-            if "price" in price_state.attributes[self._price_attribute_today][0]:
-                self._price_format.value = "price"
-            elif "value" in price_state.attributes[self._price_attribute_today][0]:
-                self._price_format.value = "value"
-            else:
+            keys = price_state.attributes[self._price_attribute_today][0]
+            start_keys = ["time", "start", "hour"]
+            value_keys = ["price", "value"]
+
+            self._price_format.start = next(
+                (key for key in start_keys if key in keys), None
+            )
+            self._price_format.value = next(
+                (key for key in value_keys if key in keys), None
+            )
+
+            if not self._price_format.start or not self._price_format.value:
                 return False
         except (KeyError, IndexError, TypeError):
             return False

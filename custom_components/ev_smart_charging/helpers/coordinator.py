@@ -18,13 +18,14 @@ from custom_components.ev_smart_charging.const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class PriceFormat:
-    """Described the formay of price information"""
+    """Described the format of price information"""
 
     def __init__(self, platform: str = None):
-        self.start = None # Can be "start", "time" or "hour"
-        self.value = None # Can be "price" or "value"
-        self.start_is_string = None # True if start is a string in ISO format, False if it is a datetime object
+        self.start = None  # Can be "start", "time" or "hour"
+        self.value = None  # Can be "price" or "value"
+        self.start_is_string = None  # True if start is a string in ISO format, False if it is a datetime object
 
         if platform == PLATFORM_ENERGIDATASERVICE:
             self.start = "hour"
@@ -105,6 +106,7 @@ def convert_raw_item(item: dict[str, Any], price_format: PriceFormat) -> dict[st
 
     return item_new
 
+
 class Raw:
     """Class to handle raw data
 
@@ -123,13 +125,15 @@ class Raw:
                 if price_format:
                     item_new = convert_raw_item(item, price_format)
                 else:
-                    if item["value"] is not None and isinstance(item["start"], datetime):
+                    if item["value"] is not None and isinstance(
+                        item["start"], datetime
+                    ):
                         item_new = item
                     else:
                         item_new = None
                 if item_new is not None:
                     # Only use full hour price for now
-                    if item_new['start'].minute == 0:
+                    if item_new["start"].minute == 0:
                         self.data.append(item_new)
 
             self.valid = len(self.data) > 12
@@ -140,7 +144,7 @@ class Raw:
         """Get raw data"""
         return self.data
 
-    def is_valid(self, check_today_local = False) -> bool:
+    def is_valid(self, check_today_local=False) -> bool:
         """Get valid"""
         if not self.valid:
             return False
@@ -156,7 +160,9 @@ class Raw:
             if nrof_valid_prices > 12:
                 return True
             else:
-                _LOGGER.debug("Less than 12 valid prices for today found in %s", self.data)
+                _LOGGER.debug(
+                    "Less than 12 valid prices for today found in %s", self.data
+                )
                 return False
 
     def copy(self):
@@ -267,7 +273,7 @@ def get_lowest_hours_non_continuous(
         if item["start"] < time_end:
             time_end_index = index
 
-    if time_start_index is None or time_end_index is None: # pragma: no cover
+    if time_start_index is None or time_end_index is None:  # pragma: no cover
         _LOGGER.error("Is not able to calculate charging schedule!")
         _LOGGER.error("start_hour = %s", start_hour)
         _LOGGER.error("ready_hour = %s", ready_hour)
@@ -324,7 +330,7 @@ def get_lowest_hours_continuous(
         if item["start"] < time_end:
             time_end_index = index
 
-    if time_start_index is None or time_end_index is None: # pragma: no cover
+    if time_start_index is None or time_end_index is None:  # pragma: no cover
         _LOGGER.error("Is not able to calculate charging schedule!")
         _LOGGER.error("start_hour = %s", start_hour)
         _LOGGER.error("ready_hour = %s", ready_hour)
