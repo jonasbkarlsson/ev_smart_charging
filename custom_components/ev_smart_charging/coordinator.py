@@ -104,12 +104,10 @@ class ChargerSwitch:
         self.domain = None
 
         if len(entity_id) > 0:
-            entity_registry: EntityRegistry = async_entity_registry_get(hass)
-            entities = entity_registry.entities
-            entry: RegistryEntry = entities.get(entity_id)
-            if entry:
+            entity = hass.states.get(entity_id)
+            if entity and entity.domain:
                 self.entity_id = entity_id
-                self.domain = entry.domain
+                self.domain = entity.domain
 
 
 class EVSmartChargingCoordinator:

@@ -45,9 +45,6 @@ class FlowValidator:
     ) -> list[str]:
         """Validate step_user"""
 
-        entity_registry: EntityRegistry = async_entity_registry_get(hass)
-        entities = entity_registry.entities
-
         # Validate Price entity
         result = PriceAdaptor.validate_price_entity(hass, user_input)
         if result is not None:
@@ -90,13 +87,12 @@ class FlowValidator:
         user_input[CONF_CHARGER_ENTITY] = user_input[CONF_CHARGER_ENTITY].strip()
         if len(user_input[CONF_CHARGER_ENTITY]) > 0:
             entity = hass.states.get(user_input[CONF_CHARGER_ENTITY])
-            entry: RegistryEntry = entities.get(user_input[CONF_CHARGER_ENTITY])
-            if entity is None or entry is None:
+            if entity is None:
                 # Work around for https://github.com/home-assistant/core/issues/30381
                 # It's not possible for the user to input an emtpy string on the second attempt
                 user_input[CONF_CHARGER_ENTITY] = ""
                 return ("base", "charger_control_switch_not_found")
-            if entry.domain not in [SWITCH, INPUT_BOOLEAN_DOMAIN]:
+            if entity.domain not in [SWITCH, INPUT_BOOLEAN_DOMAIN]:
                 user_input[CONF_CHARGER_ENTITY] = ""
                 return ("base", "charger_control_switch_not_switch")
 
