@@ -142,6 +142,9 @@ class EVSmartChargingCoordinator:
         self.tomorrow_valid = False
         self.tomorrow_valid_previous = False
 
+        self.ev_soc_valid = False
+        self.ev_target_soc_valid = False
+
         self.raw_two_days = None
         self._charging_schedule = None
         self.charging_pct_per_hour = get_parameter(
@@ -193,9 +196,7 @@ class EVSmartChargingCoordinator:
             hass.bus.async_listen(EVENT_DEVICE_REGISTRY_UPDATED, self.device_updated)
         )
         # Update state once after intitialization
-        self.listeners.append(
-            async_call_later(hass, 10.0, self.update_initial)
-        )
+        self.listeners.append(async_call_later(hass, 10.0, self.update_initial))
 
     def unsubscribe_listeners(self):
         """Unsubscribed to listeners"""
@@ -757,8 +758,10 @@ class EVSmartChargingCoordinator:
             # Most likely due to the price entity updating its state in multiple steps,
             # resulting in invalid information before all the updates have been done.
             if dt.now().hour == 0 and dt.now().minute < 10:
-                _LOGGER.debug("Price sensor not valid directly after midnight. " \
-                              "Can usually be ignored.")
+                _LOGGER.debug(
+                    "Price sensor not valid directly after midnight. "
+                    "Can usually be ignored."
+                )
                 _LOGGER.debug("Price state: %s", price_state)
             else:
                 _LOGGER.error("Price sensor not valid")
@@ -766,6 +769,7 @@ class EVSmartChargingCoordinator:
 
         ev_soc_state = self.hass.states.get(self.ev_soc_entity_id)
         if Validator.is_soc_state(ev_soc_state):
+            self.ev_soc_valid = True
             self.sensor.ev_soc = ev_soc_state.state
             self.ev_soc = float(ev_soc_state.state)
             # To handle non-live SOC
@@ -773,15 +777,24 @@ class EVSmartChargingCoordinator:
                 self.ev_soc_previous = self.ev_soc
                 self.ev_soc_before_last_charging = -1
         else:
-            _LOGGER.error("SOC sensor not valid: %s", ev_soc_state)
+            if self.ev_soc_valid:
+                # Make only one error message per outage.
+                _LOGGER.error("SOC sensor not valid: %s", ev_soc_state)
+            self.ev_soc_valid = False
 
         if len(self.ev_target_soc_entity_id) > 0:
             ev_target_soc_state = self.hass.states.get(self.ev_target_soc_entity_id)
             if Validator.is_soc_state(ev_target_soc_state):
+                self.ev_target_soc_valid = True
                 self.sensor.ev_target_soc = ev_target_soc_state.state
                 self.ev_target_soc = float(ev_target_soc_state.state)
             else:
-                _LOGGER.error("Target SOC sensor not valid: %s", ev_target_soc_state)
+                if self.ev_target_soc_valid:
+                    # Make only one error message per outage.
+                    _LOGGER.error(
+                        "Target SOC sensor not valid: %s", ev_target_soc_state
+                    )
+                self.ev_target_soc_valid = False
 
         # Check if Opportunistic charging should be used
         if (
