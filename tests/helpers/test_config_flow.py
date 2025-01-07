@@ -1,11 +1,13 @@
 """Test ev_smart_charging/helpers/config_flow.py"""
 
 from copy import deepcopy
+from zoneinfo import ZoneInfo
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import async_get as async_device_registry_get
 from homeassistant.helpers.device_registry import DeviceRegistry
 from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
 from homeassistant.helpers.entity_registry import EntityRegistry
+from homeassistant.util import dt
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -42,10 +44,14 @@ from tests.helpers.helpers import (
     MockSOCEntity,
     MockTargetSOCEntity,
 )
+from tests.price import PRICE_THIRTEEN_LIST
 
 
-async def test_validate_step_user_price(hass: HomeAssistant):
+async def test_validate_step_user_price(hass: HomeAssistant, freezer):
     """Test the price entity in test_validate_step_user."""
+
+    dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
+    freezer.move_to("2022-10-01T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
 
@@ -105,7 +111,7 @@ async def test_validate_step_user_price(hass: HomeAssistant):
     hass.states.async_set(
         "sensor.nordpool_kwh_se3_sek_2_10_0",
         "123",
-        {"current_price": 123, "raw_today": None, "raw_tomorrow": None},
+        {"current_price": 123, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
     )
     assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) == (
         "base",
@@ -113,8 +119,11 @@ async def test_validate_step_user_price(hass: HomeAssistant):
     )
 
 
-async def test_validate_step_user_soc(hass: HomeAssistant):
+async def test_validate_step_user_soc(hass: HomeAssistant, freezer):
     """Test the soc entities in test_validate_step_user."""
+
+    dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
+    freezer.move_to("2022-10-01T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
 
@@ -176,8 +185,11 @@ async def test_validate_step_user_soc(hass: HomeAssistant):
     )
 
 
-async def test_validate_step_user_target_soc(hass: HomeAssistant):
+async def test_validate_step_user_target_soc(hass: HomeAssistant, freezer):
     """Test the target soc entities in test_validate_step_user."""
+
+    dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
+    freezer.move_to("2022-10-01T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
 
@@ -240,8 +252,11 @@ async def test_validate_step_user_target_soc(hass: HomeAssistant):
     )
 
 
-async def test_validate_step_user_charger(hass: HomeAssistant):
+async def test_validate_step_user_charger(hass: HomeAssistant, freezer):
     """Test the charger entity in test_validate_step_user."""
+
+    dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
+    freezer.move_to("2022-10-01T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
 

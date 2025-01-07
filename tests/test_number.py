@@ -42,6 +42,7 @@ from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_MIN_SOC
 
 # pylint: disable=unused-argument
 async def test_number(hass, bypass_validate_input_sensors):
+
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(

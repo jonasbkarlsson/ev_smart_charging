@@ -1307,3 +1307,79 @@ PRICE_20221001_TGE = [
         "price": 72.19,
     },
 ]
+
+PRICE_ONE_LIST = [
+    {
+        "value": 0.0,
+        "start": datetime(2022, 10, 1, 14, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 15, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    }
+]
+
+PRICE_THIRTEEN_LIST = [
+    {
+        "value": 1.0,
+        "start": datetime(2022, 10, 1, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 2, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+    {
+        "value": 2.0,
+        "start": datetime(2022, 10, 1, 2, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 3, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+    {
+        "value": 3.0,
+        "start": datetime(2022, 10, 1, 3, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 4, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+    {
+        "value": 4.0,
+        "start": datetime(2022, 10, 1, 4, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+    {
+        "value": 5.0,
+        "start": datetime(2022, 10, 1, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 6, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+    {
+        "value": 6.0,
+        "start": datetime(2022, 10, 1, 6, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 7, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+    {
+        "value": 7.0,
+        "start": datetime(2022, 10, 1, 7, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 8, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+    {
+        "value": 8.0,
+        "start": datetime(2022, 10, 1, 8, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 9, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+    {
+        "value": 9.0,
+        "start": datetime(2022, 10, 1, 9, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 10, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+    {
+        "value": 10.0,
+        "start": datetime(2022, 10, 1, 10, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 11, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+    {
+        "value": 11.0,
+        "start": datetime(2022, 10, 1, 11, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 12, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+    {
+        "value": 12.0,
+        "start": datetime(2022, 10, 1, 12, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 13, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+    {
+        "value": 13.0,
+        "start": datetime(2022, 10, 1, 13, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+        "stop": datetime(2022, 10, 1, 14, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
+    },
+]

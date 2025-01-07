@@ -1,6 +1,6 @@
 """Test ev_smart_charging/helpers/price_adaptor.py"""
 
-from datetime import datetime
+from datetime import date
 from zoneinfo import ZoneInfo
 
 from homeassistant.core import HomeAssistant
@@ -10,11 +10,8 @@ from homeassistant.helpers.entity_registry import EntityRegistry
 from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.const import (
-    BUTTON,
     CONF_PRICE_SENSOR,
-    PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
-    PLATFORM_GENERIC,
     PLATFORM_NORDPOOL,
     SENSOR,
 )
@@ -35,150 +32,169 @@ from tests.price import (
     PRICE_20221001,
     PRICE_20221001_ENERGIDATASERVICE,
     PRICE_20221001_ENTSOE,
+    PRICE_ONE_LIST,
+    PRICE_THIRTEEN_LIST,
 )
 from tests.price_15min import PRICE_20220930_GENERIC_15MIN
 
 
 # pylint: disable=unused-argument
+async def test_inintiate(hass, freezer):
+    """Test initiate"""
+
+    dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
+    freezer.move_to("2022-10-01T14:00:00+02:00")
+
+    price_adaptor = PriceAdaptor()
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={"raw_today": []},
+    )
+    price_adaptor.initiate(price_state)
+    assert price_adaptor.is_price_state(price_state) is False
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={
+            "raw_today": [
+                {
+                    "price": 0.0,
+                    "NOT_SUPPORTED": "2022-10-01 00:00:00+02:00",
+                }
+            ]
+        },
+    )
+    price_adaptor.initiate(price_state)
+    assert price_adaptor.is_price_state(price_state) is False
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={
+            "raw_today": [
+                {
+                    "NOT_SUPPORTED": 0.0,
+                    "time": "2022-10-01 00:00:00+02:00",
+                }
+            ]
+        },
+    )
+    price_adaptor.initiate(price_state)
+    assert price_adaptor.is_price_state(price_state) is False
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={
+            "raw_today": [
+                {
+                    "price": 0.0,
+                    "time": "INCORRECT",
+                }
+            ]
+        },
+    )
+    price_adaptor.initiate(price_state)
+    assert price_adaptor.is_price_state(price_state) is False
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={
+            "raw_today": [
+                {
+                    "price": 0.0,
+                    "time": date(2022, 10, 1),
+                }
+            ]
+        },
+    )
+    price_adaptor.initiate(price_state)
+    assert price_adaptor.is_price_state(price_state) is False
+
+
 async def test_is_price_state(hass, freezer):
     """Test is_price_state"""
 
     dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
-
     freezer.move_to("2022-10-01T14:00:00+02:00")
 
     price_adaptor = PriceAdaptor()
 
     assert price_adaptor.is_price_state(None) is False
     price_state = State(entity_id="sensor.test", state="unavailable")
+    price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is False
     price_state = State(entity_id="sensor.test", state="12.1")
+    price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is False
     price_state = State(
         entity_id="sensor.test", state="12.1", attributes={"current_price": 12.1}
     )
+    price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is False
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
         attributes={"current_price": 12.1, "raw_today": None},
     )
+    price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is False
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
         attributes={"current_price": 12.1, "raw_today": 12.1},
     )
+    price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is False
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
         attributes={"current_price": 12.1, "raw_today": []},
     )
-    assert price_adaptor.is_price_state(price_state) is False
-
-    one_list = [
-        {
-            "value": 0.0,
-            "start": datetime(2022, 10, 1, 14, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 15, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        }
-    ]
-
-    thirteen_list = [
-        {
-            "value": 1.0,
-            "start": datetime(2022, 10, 1, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 2, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-        {
-            "value": 2.0,
-            "start": datetime(2022, 10, 1, 2, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 3, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-        {
-            "value": 3.0,
-            "start": datetime(2022, 10, 1, 3, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 4, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-        {
-            "value": 4.0,
-            "start": datetime(2022, 10, 1, 4, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-        {
-            "value": 5.0,
-            "start": datetime(2022, 10, 1, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 6, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-        {
-            "value": 6.0,
-            "start": datetime(2022, 10, 1, 6, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 7, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-        {
-            "value": 7.0,
-            "start": datetime(2022, 10, 1, 7, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 8, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-        {
-            "value": 8.0,
-            "start": datetime(2022, 10, 1, 8, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 9, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-        {
-            "value": 9.0,
-            "start": datetime(2022, 10, 1, 9, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 10, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-        {
-            "value": 10.0,
-            "start": datetime(2022, 10, 1, 10, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 11, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-        {
-            "value": 11.0,
-            "start": datetime(2022, 10, 1, 11, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 12, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-        {
-            "value": 12.0,
-            "start": datetime(2022, 10, 1, 12, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 13, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-        {
-            "value": 13.0,
-            "start": datetime(2022, 10, 1, 13, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-            "stop": datetime(2022, 10, 1, 14, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
-        },
-    ]
-
-    price_state = State(
-        entity_id="sensor.test",
-        state="12.1",
-        attributes={"current_price": 12.1, "raw_today": one_list},
-    )
+    price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is False
 
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": None, "raw_today": one_list},
+        attributes={"current_price": 12.1, "raw_today": PRICE_ONE_LIST},
     )
+    price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is False
 
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": 12.1, "raw_today": thirteen_list},
+        attributes={"current_price": None, "raw_today": PRICE_ONE_LIST},
     )
+    price_adaptor.initiate(price_state)
+    assert price_adaptor.is_price_state(price_state) is False
+
+    price_state = State(
+        entity_id="sensor.test",
+        state="12.1",
+        attributes={
+            "current_price": 12.1,
+            "raw_today": PRICE_THIRTEEN_LIST,
+            "raw_tomorrow": None,
+        },
+    )
+    price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is True
 
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": None, "raw_today": thirteen_list},
+        attributes={
+            "current_price": None,
+            "raw_today": PRICE_THIRTEEN_LIST,
+            "raw_tomorrow": None,
+        },
     )
+    price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is True
 
     freezer.move_to("2022-10-02T00:00:00+02:00")
@@ -186,9 +202,15 @@ async def test_is_price_state(hass, freezer):
     price_state = State(
         entity_id="sensor.test",
         state="12.1",
-        attributes={"current_price": 12.1, "raw_today": thirteen_list},
+        attributes={
+            "current_price": 12.1,
+            "raw_today": PRICE_THIRTEEN_LIST,
+            "raw_tomorrow": None,
+        },
     )
+    price_adaptor.initiate(price_state)
     assert price_adaptor.is_price_state(price_state) is False
+
 
 async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     """Test get_raw_today_local"""
@@ -198,21 +220,15 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     price_adaptor = PriceAdaptor()
 
-    # Test UNKNOWN
-    price_adaptor.set_price_platform("UNKNOWN")
-    raw_today_local = price_adaptor.get_raw_today_local(None)
-    assert raw_today_local is not None
-    assert not raw_today_local.data
-
     # Test PLATFORM_NORDPOOL
-    price_adaptor.set_price_platform(PLATFORM_NORDPOOL)
-
     MockPriceEntity.create(hass, entity_registry)
+    MockPriceEntity.set_state(hass, None, None)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_nordpool_sensor(hass)
     assert price_sensor.startswith("sensor.nordpool")
     price_state = hass.states.get(price_sensor)
     assert price_state is not None
+    price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
     assert raw_today_local is not None
     assert not raw_today_local.data
@@ -220,18 +236,18 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     MockPriceEntity.set_state(hass, PRICE_20220930, None)
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
     assert raw_today_local.data == PRICE_20220930
 
     # Test PLATFORM_ENERGIDATASERVICE
-    price_adaptor.set_price_platform(PLATFORM_ENERGIDATASERVICE)
-
     MockPriceEntityEnergiDataService.create(hass, entity_registry)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_energidataservice_sensor(hass)
     assert price_sensor.startswith("sensor.energi")
     price_state = hass.states.get(price_sensor)
     assert price_state is not None
+    price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
     assert raw_today_local is not None
     assert not raw_today_local.data
@@ -241,18 +257,18 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     )
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
     assert raw_today_local.data == PRICE_20220930
 
     # Test PLATFORM_ENTSOE
-    price_adaptor.set_price_platform(PLATFORM_ENTSOE)
-
     MockPriceEntityEntsoe.create(hass, entity_registry)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_entsoe_sensor(hass)
     assert price_sensor.startswith("sensor.entsoe")
     price_state = hass.states.get(price_sensor)
     assert price_state is not None
+    price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
     assert raw_today_local is not None
     assert not raw_today_local.data
@@ -260,18 +276,18 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     MockPriceEntityEntsoe.set_state(hass, PRICE_20220930_ENTSOE, None)
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
     assert raw_today_local.data == PRICE_20220930
 
     # Test PLATFORM_GENERIC
-    price_adaptor.set_price_platform(PLATFORM_GENERIC)
-
     MockPriceEntityGeneric.create(hass, entity_registry)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_generic_sensor(hass)
     assert price_sensor.startswith("sensor.generic")
     price_state = hass.states.get(price_sensor)
     assert price_state is not None
+    price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
     assert raw_today_local is not None
     assert not raw_today_local.data
@@ -279,6 +295,7 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     MockPriceEntityGeneric.set_state(hass, PRICE_20220930_ENTSOE, None)
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
     assert raw_today_local.data == PRICE_20220930
 
@@ -286,8 +303,10 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     MockPriceEntityGeneric.set_state(hass, PRICE_20220930_GENERIC_15MIN, None)
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
     assert raw_today_local.data == PRICE_20220930
+
 
 async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     """Test get_raw_tomorrow_local"""
@@ -297,21 +316,14 @@ async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     price_adaptor = PriceAdaptor()
 
-    # Test UNKNOWN
-    price_adaptor.set_price_platform("UNKNOWN")
-    raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(None)
-    assert raw_tomorrow_local is not None
-    assert not raw_tomorrow_local.data
-
     # Test PLATFORM_NORDPOOL
-    price_adaptor.set_price_platform(PLATFORM_NORDPOOL)
-
     MockPriceEntity.create(hass, entity_registry)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_nordpool_sensor(hass)
     assert price_sensor.startswith("sensor.nordpool")
     price_state = hass.states.get(price_sensor)
     assert price_state is not None
+    price_adaptor.initiate(price_state)
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
     assert raw_tomorrow_local is not None
     assert not raw_tomorrow_local.data
@@ -319,18 +331,18 @@ async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
     assert raw_tomorrow_local.data == PRICE_20221001
 
     # Test PLATFORM_ENERGIDATASERVICE
-    price_adaptor.set_price_platform(PLATFORM_ENERGIDATASERVICE)
-
     MockPriceEntityEnergiDataService.create(hass, entity_registry)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_energidataservice_sensor(hass)
     assert price_sensor.startswith("sensor.energi")
     price_state = hass.states.get(price_sensor)
     assert price_state is not None
+    price_adaptor.initiate(price_state)
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
     assert raw_tomorrow_local is not None
     assert not raw_tomorrow_local.data
@@ -340,18 +352,18 @@ async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     )
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
     assert raw_tomorrow_local.data == PRICE_20221001
 
     # Test PLATFORM_ENTSOE
-    price_adaptor.set_price_platform(PLATFORM_ENTSOE)
-
     MockPriceEntityEntsoe.create(hass, entity_registry)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_entsoe_sensor(hass)
     assert price_sensor.startswith("sensor.entsoe")
     price_state = hass.states.get(price_sensor)
     assert price_state is not None
+    price_adaptor.initiate(price_state)
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
     assert raw_tomorrow_local is not None
     assert not raw_tomorrow_local.data
@@ -359,18 +371,18 @@ async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     MockPriceEntityEntsoe.set_state(hass, PRICE_20220930_ENTSOE, PRICE_20221001_ENTSOE)
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
     assert raw_tomorrow_local.data == PRICE_20221001
 
     # Test PLATFORM_GENERIC
-    price_adaptor.set_price_platform(PLATFORM_GENERIC)
-
     MockPriceEntityGeneric.create(hass, entity_registry)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_generic_sensor(hass)
     assert price_sensor.startswith("sensor.generic")
     price_state = hass.states.get(price_sensor)
     assert price_state is not None
+    price_adaptor.initiate(price_state)
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
     assert raw_tomorrow_local is not None
     assert not raw_tomorrow_local.data
@@ -378,6 +390,7 @@ async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     MockPriceEntityGeneric.set_state(hass, PRICE_20220930_ENTSOE, PRICE_20221001_ENTSOE)
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
     assert raw_tomorrow_local.data == PRICE_20221001
 
@@ -390,24 +403,18 @@ async def test_get_current_price(hass, set_cet_timezone, freezer):
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     price_adaptor = PriceAdaptor()
 
-    # Test UNKNOWN
-    price_adaptor.set_price_platform("UNKNOWN")
-    current_price = price_adaptor.get_current_price(None)
-    assert current_price is None
-
     # Test PLATFORM_NORDPOOL
-    price_adaptor.set_price_platform(PLATFORM_NORDPOOL)
     MockPriceEntity.create(hass, entity_registry)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_nordpool_sensor(hass)
     MockPriceEntity.set_state(hass, PRICE_20220930, None)
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     current_price = price_adaptor.get_current_price(price_state)
     assert current_price == 219.48
 
     # Test PLATFORM_ENERGIDATASERVICE
-    price_adaptor.set_price_platform(PLATFORM_ENERGIDATASERVICE)
     MockPriceEntityEnergiDataService.create(hass, entity_registry)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_energidataservice_sensor(hass)
@@ -416,34 +423,37 @@ async def test_get_current_price(hass, set_cet_timezone, freezer):
     )
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     current_price = price_adaptor.get_current_price(price_state)
     assert current_price == 219.48
 
     # Test PLATFORM_ENTSOE
-    price_adaptor.set_price_platform(PLATFORM_ENTSOE)
     MockPriceEntityEntsoe.create(hass, entity_registry)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_entsoe_sensor(hass)
     MockPriceEntityEntsoe.set_state(hass, PRICE_20220930_ENTSOE, None)
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     current_price = price_adaptor.get_current_price(price_state)
     assert current_price == 219.48
 
     # Test PLATFORM_GENERIC
-    price_adaptor.set_price_platform(PLATFORM_GENERIC)
     MockPriceEntityGeneric.create(hass, entity_registry)
     await hass.async_block_till_done()
     price_sensor = FindEntity.find_generic_sensor(hass)
     MockPriceEntityGeneric.set_state(hass, PRICE_20220930_ENTSOE, None)
     await hass.async_block_till_done()
     price_state = hass.states.get(price_sensor)
+    price_adaptor.initiate(price_state)
     current_price = price_adaptor.get_current_price(price_state)
     assert current_price == 219.48
 
 
-async def test_validate_price_entity(hass: HomeAssistant):
+async def test_validate_price_entity(hass: HomeAssistant, freezer):
     """Test the price entity in validate_price_entity."""
+
+    freezer.move_to("2022-10-01T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     user_input = {}
@@ -502,11 +512,22 @@ async def test_validate_price_entity(hass: HomeAssistant):
         "sensor_is_not_price",
     )
 
+    # Check with price entity with current_price, invalid raw_today and raw_tomorrow
+    hass.states.async_set(
+        "sensor.nordpool_kwh_se3_sek_2_10_0",
+        "123",
+        {"current_price": 123, "raw_today": PRICE_ONE_LIST, "raw_tomorrow": None},
+    )
+    assert PriceAdaptor.validate_price_entity(hass, user_input) == (
+        "base",
+        "sensor_is_not_price",
+    )
+
     # Check with price entity with current_price, raw_today and raw_tomorrow
     hass.states.async_set(
         "sensor.nordpool_kwh_se3_sek_2_10_0",
         "123",
-        {"current_price": 123, "raw_today": None, "raw_tomorrow": None},
+        {"current_price": 123, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
@@ -514,13 +535,15 @@ async def test_validate_price_entity(hass: HomeAssistant):
     hass.states.async_set(
         "sensor.nordpool_kwh_se3_sek_2_10_0",
         "123a",
-        {"current_price": 123, "raw_today": None, "raw_tomorrow": None},
+        {"current_price": 123, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
 
-async def test_validate_price_entity_entsoe(hass: HomeAssistant):
+async def test_validate_price_entity_entsoe(hass: HomeAssistant, freezer):
     """Test the price entity in validate_price_entity."""
+
+    freezer.move_to("2022-10-01T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     user_input = {}
@@ -556,7 +579,7 @@ async def test_validate_price_entity_entsoe(hass: HomeAssistant):
     hass.states.async_set(
         "sensor.entsoe_average_electricity_price",
         "123",
-        {"prices_today": None, "prices_tomorrow": None},
+        {"prices_today": PRICE_THIRTEEN_LIST, "prices_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
@@ -564,6 +587,6 @@ async def test_validate_price_entity_entsoe(hass: HomeAssistant):
     hass.states.async_set(
         "sensor.entsoe_average_electricity_price",
         "123a",
-        {"prices_today": None, "prices_tomorrow": None},
+        {"prices_today": PRICE_THIRTEEN_LIST, "prices_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
