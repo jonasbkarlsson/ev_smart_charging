@@ -8,7 +8,7 @@
                     "price_sensor": "Electriciteit prijs template entity",
                     "ev_soc_sensor": "EV SOC sensor",
                     "ev_target_soc_sensor": "EV doel SOC input (enkele spatie om niet te gebruiken)",
-                    "charger_entity": "Oplader bedienings entity (enkele spatie om niet te gebruiken)",
+                    "charger_entity": "Entity voor de oplader bedieningsschakelaar (enkele spatie om niet te gebruiken)",
                     "ev_controlled": "Een EV integratie bediend het starten/stoppen van het opladen"
                 }
             }
@@ -21,8 +21,8 @@
             "ev_soc_invalid_data": "De SOC sensor heeft ongeldige data.",
             "ev_target_soc_not_found": "EV doel SOC input niet gevonden.",
             "ev_target_soc_invalid_data": "De EV doel SOC input heeft ongeldige data.",
-            "charger_control_switch_not_found": "Oplader bedienings entity niet gevonden.",
-            "charger_control_switch_not_switch": "Oplader bedienings entity is geen switch of een input boolean."
+            "charger_control_switch_not_found": "Entity voor de oplader bedieningsschakelaar niet gevonden.",
+            "charger_control_switch_not_switch": "Oplader bedieningsschakelaar entity is geen switch of een input boolean."
         }
     },
     "options": {
@@ -33,7 +33,7 @@
                     "price_sensor": "Electriciteit prijs template entity",
                     "ev_soc_sensor": "EV SOC sensor",
                     "ev_target_soc_sensor": "EV doel SOC input (enkele spatie om niet te gebruiken)",
-                    "charger_entity": "Oplader bedienings entity (enkele spatie om niet te gebruiken)",
+                    "charger_entity": "Entity voor de oplader bedieningsschakelaar (enkele spatie om niet te gebruiken)",
                     "ev_controlled": "Een EV integratie bediend het starten/stoppen van het opladen"
                 }
             }
@@ -46,8 +46,8 @@
             "ev_soc_invalid_data": "De SOC sensor heeft ongeldige data.",
             "ev_target_soc_not_found": "EV doel SOC input niet gevonden.",
             "ev_target_soc_invalid_data": "De EV doel SOC input heeft ongeldige data.",
-            "charger_control_switch_not_found": "Oplader bedienings entity niet gevonden.",
-            "charger_control_switch_not_switch": "Oplader bedienings entity is geen switch of een input boolean."
+            "charger_control_switch_not_found": "Entity voor de oplader bedieningsschakelaar niet gevonden.",
+            "charger_control_switch_not_switch": "Oplader bedieningsschakelaar entity is geen switch of een input boolean."
         }
     },
     "entity": {
@@ -75,10 +75,10 @@
                     "ev_soc": {"name": "EV SOC"},
                     "ev_target_soc": {"name": "EV instelwaarde SOC"},
                     "charging_is_planned": {"name": "Opladen staat gepland"},
-                    "charging_start_time": {"name": "Start tijd opladen"},
-                    "charging_stop_time": {"name": "Gereed tijd opladen"},
+                    "charging_start_time": {"name": "Starttijd opladen"},
+                    "charging_stop_time": {"name": "Tijd opladen gereed"},
                     "charging_number_of_quarters": {"name": "Aantal uren opladen"},
-                    "raw_two_days": {"name": "Ruwe date van 2 dagen"},
+                    "raw_two_days": {"name": "Ruwe data van 2 dagen"},
                     "charging_schedule": {"name": "Oplaad schema"}
                 }
             },
