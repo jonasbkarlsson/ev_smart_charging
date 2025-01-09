@@ -19,12 +19,12 @@ The integration calculates the set of hours that will give the lowest price, by 
   - A compatible price integration shall provide prices either with attributes `prices_today` and `prices_tomorrow` or attributes `raw_today` and `raw_tomorrow`.
   - The prices shall be provided with either the key `price` or `value`.
   - The starting time for each price shall be provided with either the key `time`, `start` or `hour`.
-  - Compatible integrations includes, but is not limited to, the (HACS) [Nordpool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice), the [Entso-e](https://github.com/JaccoR/hass-entso-e) and the [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations. Note that the [official Nordpool integration](https://www.home-assistant.io/integrations/nordpool) is not compatible.
+  - Compatible integrations includes, but is not limited to, the (HACS) [Nord Pool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice), the [Entso-e](https://github.com/JaccoR/hass-entso-e) and the [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations. Note that the (Home Assistant) [Nord Pool](https://www.home-assistant.io/integrations/nordpool) integration is not compatible, but can be used with a [template sensor](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Nordpool-(Home-Assistant)).
 - Home Assistant version 2023.4 or newer.
 
 ## Features
 - Automatic EV charging control based on electricity prices.
-- Can automatically detect and use instances of the [Nordpool](https://github.com/custom-components/nordpool), [Energi Data Service](https://github.com/MTrab/energidataservice), [Entso-e](https://github.com/JaccoR/hass-entso-e) and [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations.
+- Can automatically detect and use instances of the (HACS) [Nord Pool](https://github.com/custom-components/nordpool), [Energi Data Service](https://github.com/MTrab/energidataservice), [Entso-e](https://github.com/JaccoR/hass-entso-e) and [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations.
 - Supports manual configuration of other price integrations that fulfills the listed requirements above.
 - Supports a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). A template sensor can be used to get price information from non-compatible price integrations and/or to construct other special price information.
 - Configuration of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
