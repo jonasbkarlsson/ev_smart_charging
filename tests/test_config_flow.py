@@ -1,9 +1,11 @@
 """Test ev_smart_charging config flow."""
+
 from typing import Any, Dict
 from unittest.mock import patch
 
-from homeassistant import config_entries, data_entry_flow
+from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResultType
 
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -45,7 +47,7 @@ async def test_successful_config_flow(hass: HomeAssistant, bypass_validate_step_
     )
 
     # Check that the config flow shows the user form as the first step
-    assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result["type"] == FlowResultType.FORM  # From HA 2022.7
     assert result["step_id"] == "user"
 
     result = await hass.config_entries.flow.async_configure(
@@ -54,7 +56,7 @@ async def test_successful_config_flow(hass: HomeAssistant, bypass_validate_step_
 
     # Check that the config flow is complete and a new entry is created with
     # the input data
-    assert result["type"] == data_entry_flow.RESULT_TYPE_CREATE_ENTRY
+    assert result["type"] == FlowResultType.CREATE_ENTRY
     assert result["title"] == "EV Smart Charging"
     assert result["data"] == MOCK_CONFIG_CHARGER_EXTRA
     if "errors" in result.keys():
@@ -72,7 +74,7 @@ async def test_unsuccessful_config_flow(hass: HomeAssistant):
     )
 
     # Check that the config flow shows the user form as the first step
-    assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "user"
 
     result = await hass.config_entries.flow.async_configure(
@@ -80,7 +82,7 @@ async def test_unsuccessful_config_flow(hass: HomeAssistant):
     )
 
     # Check that the config flow is not complete and that there are errors
-    assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "user"
     assert len(result["errors"]) > 0
 
@@ -110,7 +112,7 @@ async def test_successful_config_flow_option(
     )
 
     # Check that the option flow shows the init form
-    assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "init"
 
     result = await hass.config_entries.options.async_configure(
@@ -119,7 +121,7 @@ async def test_successful_config_flow_option(
 
     # Check that the option flow is complete and a new entry is created with
     # the input data
-    assert result["type"] == data_entry_flow.RESULT_TYPE_CREATE_ENTRY
+    assert result["type"] == FlowResultType.CREATE_ENTRY
     assert result["data"] == MOCK_CONFIG_USER
     if "errors" in result.keys():
         assert len(result["errors"]) == 0
@@ -149,7 +151,7 @@ async def test_unsuccessful_config_flow_option(hass: HomeAssistant):
     )
 
     # Check that the option flow shows the init form
-    assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "init"
 
     result = await hass.config_entries.options.async_configure(
@@ -157,6 +159,6 @@ async def test_unsuccessful_config_flow_option(hass: HomeAssistant):
     )
 
     # Check that the config flow is not complete and that there are errors
-    assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "init"
     assert len(result["errors"]) > 0
