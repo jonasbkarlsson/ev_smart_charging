@@ -35,5 +35,5 @@ run_next_test() {
 pip3 install -qq homeassistant==2024.12.5 pytest-homeassistant-custom-component==0.13.195
 run_first_test "auto"
 
-#pip3 install -qq homeassistant==2025.1.x pytest-homeassistant-custom-component==0.13.xxx
-#run_next_test "auto"
+pip3 install -qq homeassistant==2025.1.1 pytest-homeassistant-custom-component==0.13.202
+run_next_test "auto"
