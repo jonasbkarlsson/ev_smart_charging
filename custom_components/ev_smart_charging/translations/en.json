@@ -59,6 +59,7 @@
             "charging_speed": { "name": "Charging speed" },
             "electricity_price_limit": { "name": "Electricity price limit" },
             "opportunistic_level": { "name": "Opportunistic level" },
+            "opportunistic_type2_level": { "name": "Opportunistic type2 level" },
             "low_price_charging_level": { "name": "Low price charging level" },
             "low_soc_charging_level": { "name": "Low SOC charging level" },
             "minimum_ev_soc": { "name": "Minimum EV SOC" }
