@@ -41,7 +41,6 @@ from homeassistant.helpers.event import (
 from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
 from homeassistant.helpers.entity_registry import (
     EntityRegistry,
-    RegistryEntry,
     async_entries_for_config_entry,
 )
 from homeassistant.const import STATE_ON, STATE_OFF
@@ -139,6 +138,9 @@ class EVSmartChargingCoordinator:
         self.switch_opportunistic_unique_id = None
         self.switch_low_price_charging = None
         self.switch_low_soc_charging = None
+        self.switch_opportunistic_type2 = None
+        self.switch_opportunistic_type2_entity_id = None
+        self.switch_opportunistic_type2_unique_id = None
         self.price_entity_id = None
         self.price_adaptor = PriceAdaptor()
         self.ev_soc_entity_id = None
@@ -560,6 +562,12 @@ class EVSmartChargingCoordinator:
             self.switch_opportunistic_entity_id = self.get_entity_id_from_unique_id(
                 self.switch_opportunistic_unique_id
             )
+        if self.switch_opportunistic_type2_entity_id is None:
+            self.switch_opportunistic_type2_entity_id = (
+                self.get_entity_id_from_unique_id(
+                    self.switch_opportunistic_type2_unique_id
+                )
+            )
 
     async def switch_apply_limit_update(self, state: bool):
         """Handle the Apply Limit switch"""
@@ -626,6 +634,15 @@ class EVSmartChargingCoordinator:
                     service=SERVICE_TURN_OFF,
                     target={"entity_id": self.switch_opportunistic_entity_id},
                 )
+        # If state is True and Opportunistic Type2 is True, then turn off Opportunistic Type2
+        if state and self.switch_opportunistic_type2:
+            # Turn off Opportunistic Type2
+            if self.switch_opportunistic_type2_entity_id is not None:
+                await self.hass.services.async_call(
+                    domain=SWITCH,
+                    service=SERVICE_TURN_OFF,
+                    target={"entity_id": self.switch_opportunistic_type2_entity_id},
+                )
         # If state is True and Apply price limit is True, then turn off Apply price limit
         if state and self.switch_apply_limit:
             # Turn off Apply price limit
@@ -641,6 +658,7 @@ class EVSmartChargingCoordinator:
         """Handle the opportunistic charging switch"""
         turn_on_apply_price_limit = False
         turn_off_keep_charger_on = False
+        turn_off_opportunistic_type2 = False
 
         self.switch_opportunistic = state
         _LOGGER.debug("switch_opportunistic_update = %s", state)
@@ -653,6 +671,10 @@ class EVSmartChargingCoordinator:
         # If state is True and Keep charger on is True, then turn off Keep charger on
         if state and self.switch_keep_on:
             turn_off_keep_charger_on = True
+
+        # If state is True and Opportunistic Type2 is True, then turn off Opportunistic Type2
+        if state and self.switch_opportunistic_type2:
+            turn_off_opportunistic_type2 = True
 
         if turn_on_apply_price_limit:
             # Turn on Apply price limit
@@ -672,6 +694,41 @@ class EVSmartChargingCoordinator:
                     target={"entity_id": self.switch_keep_on_entity_id},
                 )
 
+        if turn_off_opportunistic_type2:
+            # Turn off Opportunistic Type2
+            if self.switch_opportunistic_type2_entity_id is not None:
+                await self.hass.services.async_call(
+                    domain=SWITCH,
+                    service=SERVICE_TURN_OFF,
+                    target={"entity_id": self.switch_opportunistic_type2_entity_id},
+                )
+
+        await self.update_configuration()
+
+    async def switch_opportunistic_type2_update(self, state: bool):
+        """Handle the opportunistic type2 switch"""
+
+        self.switch_opportunistic_type2 = state
+        _LOGGER.debug("switch_opportunistic_type2_update = %s", state)
+        self.get_all_entity_ids()
+        # If state is True and Keep charger on is True, then turn off Keep charger on
+        if state and self.switch_keep_on:
+            # Turn off Keep charger on
+            if self.switch_keep_on_entity_id is not None:
+                await self.hass.services.async_call(
+                    domain=SWITCH,
+                    service=SERVICE_TURN_OFF,
+                    target={"entity_id": self.switch_keep_on_entity_id},
+                )
+        # If state is True and Opportunistic is True, then turn off Opportunistic
+        if state and self.switch_opportunistic:
+            # Turn off Opportunistic
+            if self.switch_opportunistic_entity_id is not None:
+                await self.hass.services.async_call(
+                    domain=SWITCH,
+                    service=SERVICE_TURN_OFF,
+                    target={"entity_id": self.switch_opportunistic_entity_id},
+                )
         await self.update_configuration()
 
     async def switch_low_price_charging_update(self, state: bool):
