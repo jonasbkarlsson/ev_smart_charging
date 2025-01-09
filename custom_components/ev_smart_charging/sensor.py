@@ -1,4 +1,5 @@
 """Sensor platform for EV Smart Charging."""
+
 import logging
 
 from homeassistant.components.sensor import SensorEntity
@@ -38,6 +39,7 @@ class EVSmartChargingSensor(EVSmartChargingEntity, SensorEntity):
         self._attr_unique_id = ".".join([entry.entry_id, SENSOR, id_name])
         self.set_entity_id(SENSOR, self._entity_key)
 
+
 class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     """EV Smart Charging sensor class."""
 
@@ -62,6 +64,8 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
         self._charging_stop_time = None
         self._charging_number_of_hours = None
 
+        self._opportunistic = False
+
     def set_state(self, new_state):
         """Set new status."""
         self._attr_native_value = new_state
@@ -77,6 +81,7 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
             "charging_start_time": self._charging_start_time,
             "charging_stop_time": self._charging_stop_time,
             "charging_number_of_hours": self._charging_number_of_hours,
+            "opportunistic": self._opportunistic,
             "raw_two_days": self._raw_two_days,
             "charging_schedule": self._charging_schedule,
         }
@@ -169,6 +174,16 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     @charging_number_of_hours.setter
     def charging_number_of_hours(self, new_value):
         self._charging_number_of_hours = new_value
+        self.update_ha_state()
+
+    @property
+    def opportunistic(self):
+        """Getter for opportunistic."""
+        return self._opportunistic
+
+    @opportunistic.setter
+    def opportunistic(self, new_value):
+        self._opportunistic = new_value
         self.update_ha_state()
 
 

@@ -164,6 +164,7 @@ class EVSmartChargingCoordinator:
 
         self.ev_soc_valid = False
         self.ev_target_soc_valid = False
+        self.opportunistic_feature_triggered = False
 
         self.raw_two_days = None
         self._charging_schedule = None
@@ -886,8 +887,33 @@ class EVSmartChargingCoordinator:
             )
         ):
             max_price = self.max_price * self.number_opportunistic_level / 100.0
+            self.opportunistic_feature_triggered = True
         else:
             max_price = self.max_price
+            self.opportunistic_feature_triggered = False
+
+        # Check if Opportunistic type2 charging should be used
+        if self.switch_opportunistic_type2 is True and self.raw_two_days:
+            if self.raw_two_days.last_value() >= 0:
+                max_price = (
+                    self.raw_two_days.last_value()
+                    * self.number_opportunistic_type2_level
+                    / 100.0
+                )
+            else:
+                max_price = (
+                    self.raw_two_days.last_value()
+                    * (200 - self.number_opportunistic_type2_level)
+                    / 100.0
+                )
+            self.opportunistic_feature_triggered = True
+            if self.switch_apply_limit:
+                if self.max_price < max_price:
+                    max_price = self.max_price
+                    self.opportunistic_feature_triggered = False
+
+        if self.sensor.opportunistic != self.opportunistic_feature_triggered:
+            self.sensor.opportunistic = self.opportunistic_feature_triggered
 
         scheduling_params = {
             "ev_soc": self.ev_soc,
@@ -899,7 +925,8 @@ class EVSmartChargingCoordinator:
             ),
             "ready_hour": get_ready_hour_utc(self.ready_hour_local),
             "switch_active": self.switch_active,
-            "switch_apply_limit": self.switch_apply_limit,
+            "switch_apply_limit": self.switch_apply_limit
+            or self.opportunistic_feature_triggered,
             "switch_continuous": self.switch_continuous,
             "max_price": max_price,
         }
