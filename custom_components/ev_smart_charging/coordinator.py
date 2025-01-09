@@ -65,6 +65,7 @@ from .const import (
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
     CONF_OPPORTUNISTIC_LEVEL,
+    CONF_OPPORTUNISTIC_TYPE2_LEVEL,
     CONF_PCT_PER_HOUR,
     CONF_READY_HOUR,
     CONF_PRICE_SENSOR,
@@ -194,6 +195,9 @@ class EVSmartChargingCoordinator:
         self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC, 0.0))
         self.number_opportunistic_level = int(
             get_parameter(self.config_entry, CONF_OPPORTUNISTIC_LEVEL, 50.0)
+        )
+        self.number_opportunistic_type2_level = int(
+            get_parameter(self.config_entry, CONF_OPPORTUNISTIC_TYPE2_LEVEL, 90.0)
         )
         self.low_price_charging = float(
             get_parameter(self.config_entry, CONF_LOW_PRICE_CHARGING_LEVEL, 0.0)
