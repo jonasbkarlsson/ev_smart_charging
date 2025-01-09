@@ -105,7 +105,8 @@
             "keep_charger_on": { "name": "Keep charger on" },
             "opportunistic_charging": { "name": "Opportunistic charging" },
             "low_price_charging": { "name": "Low price charging" },
-            "low_soc_charging": { "name": "Low SOC charging" }
+            "low_soc_charging": { "name": "Low SOC charging" },
+            "opportunistic_type2_charging": { "name": "Opportunistic type2 charging" }
         }
     }
 }
