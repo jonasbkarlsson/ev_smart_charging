@@ -59,6 +59,7 @@
             "charging_speed": { "name": "Oplaadsnelheid" },
             "electricity_price_limit": { "name": "Limiet elektriciteitsprijs" },
             "opportunistic_level": { "name": "Opportunistisch niveau" },
+            "opportunistic_type2_level": { "name": "Opportunistisch type 2 niveau" },
             "low_price_charging_level": { "name": "Lage prijs oplaadniveau" },
             "low_soc_charging_level": { "name": "Lage SOC oplaadniveau" },
             "minimum_ev_soc": { "name": "Minimum EV SOC" }
@@ -78,6 +79,7 @@
                     "charging_start_time": {"name": "Starttijd opladen"},
                     "charging_stop_time": {"name": "Tijd opladen gereed"},
                     "charging_number_of_quarters": {"name": "Aantal uren opladen"},
+                    "opportunistic": {"name": "Opportunistisch"},
                     "raw_two_days": {"name": "Ruwe data van 2 dagen"},
                     "charging_schedule": {"name": "Oplaad schema"}
                 }
@@ -104,6 +106,7 @@
             "ev_connected": { "name": "EV aangesloten" },
             "keep_charger_on": { "name": "Oplader ingeschakeld houden" },
             "opportunistic_charging": { "name": "Opportunistisch opladen" },
+            "opportunistic_type2_charging": { "name": "Opportunistisch type 2 opladen" },
             "low_price_charging": { "name": "Lage prijs opladen" },
             "low_soc_charging": { "name": "Lage SOC opladen" }
         }

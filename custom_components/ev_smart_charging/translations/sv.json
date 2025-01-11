@@ -59,6 +59,7 @@
             "charging_speed": { "name": "Laddningshastighet" },
             "electricity_price_limit": { "name": "Elprisgräns" },
             "opportunistic_level": { "name": "Opportunistisk nivå" },
+            "opportunistic_type2_level": { "name": "Opportunistisk typ 2 nivå" },
             "low_price_charging_level": { "name": "Prisnivå för lågprisladdning" },
             "low_soc_charging_level": { "name": "Laddnivå för lågladdnivåladdning" },
             "minimum_ev_soc": { "name": "Lägsta laddnivå (SOC)" }
@@ -78,6 +79,7 @@
                     "charging_start_time": {"name": "Laddning starttid"},
                     "charging_stop_time": {"name": "Laddning sluttid"},
                     "charging_number_of_quarters": {"name": "Antal timmar laddning"},
+                    "opportunistic": {"name": "Opportunistisk"},
                     "raw_two_days": {"name": "Priser två dagar"},
                     "charging_schedule": {"name": "Laddningsschema"}
                 }
@@ -104,6 +106,7 @@
             "ev_connected": { "name": "Elbil ansluten" },
             "keep_charger_on": { "name": "Håll laddaren aktiv" },
             "opportunistic_charging": { "name": "Opportunistisk laddning" },
+            "opportunistic_type2_charging": { "name": "Opportunistisk typ 2 laddning" },
             "low_price_charging": { "name": "Laddning vid lågt pris" },
             "low_soc_charging": { "name": "Laddning vid låg laddnivå (SOC)" }
         }
