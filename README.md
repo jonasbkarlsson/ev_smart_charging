@@ -269,14 +269,14 @@ If the EV SOC is not available as the state of an entity but as a state attribut
 ```
 alias: EV SOC
 description: ""
-trigger:
-  - platform: state
+triggers:
+  - trigger: state
     entity_id:
       - sensor.my_ev
     attribute: ev_soc
-condition: []
-action:
-  - service: input_number.set_value
+conditions: []
+actions:
+  - action: input_number.set_value
     data:
       value: "{{ state_attr('sensor.my_ev', 'EV SOC') }}"
     target:
@@ -305,15 +305,15 @@ Some examples are given below. Additional examples are given in the [Wiki page](
 alias: EV Smart Charging - Start
 description: ""
 mode: single
-trigger:
-  - platform: state
+triggers:
+  - trigger: state
     entity_id:
       - sensor.ev_smart_charging_charging
     from: "off"
     to: "on"
-condition: []
-action:
-  - service: easee.set_circuit_dynamic_limit
+conditions: []
+actions:
+  - action: easee.set_circuit_dynamic_limit
     data:
       charger_id: exxxxxxx (replace with your charger id, which can be found in the Easee app (Charger Settings -> About -> Serial Number))
       currentP1: 16 (replace with your preferred charging current)
@@ -326,15 +326,15 @@ Please replace the contents of `action:` with suitable contents for your charger
 alias: EV Smart Charging - Stop
 description: ""
 mode: single
-trigger:
-  - platform: state
+triggers:
+  - trigger: state
     entity_id:
       - sensor.ev_smart_charging_charging
     from: "on"
     to: "off"
-condition: []
-action:
-  - service: easee.set_circuit_dynamic_limit
+conditions: []
+actions:
+  - action: easee.set_circuit_dynamic_limit
     data:
       charger_id: exxxxxxx (replace with your charger id, which can be found in the Easee app (Charger Settings -> About -> Serial Number))
       currentP1: 0 (something below 6 to make the charging stop)
@@ -346,18 +346,18 @@ Please replace the contents of `action:` with suitable contents for your charger
 ```
 alias: EV Smart Charging - EV connected
 description: ""
-trigger:
-  - platform: state
+triggers:
+  - trigger: state
     entity_id:
       - sensor.ocpp_status_connector
-condition: []
-action:
+conditions: []
+actions:
   - if:
       - condition: state
         entity_id: sensor.ocpp_status_connector
         state: Preparing
     then:
-      - service: switch.turn_on
+      - action: switch.turn_on
         data: {}
         target:
           entity_id: switch.ev_smart_charging_ev_connected
@@ -367,7 +367,7 @@ action:
             entity_id: sensor.ocpp_status_connector
             state: Available
         then:
-          - service: switch.turn_off
+          - action: switch.turn_off
             data: {}
             target:
               entity_id: switch.ev_smart_charging_ev_connected
