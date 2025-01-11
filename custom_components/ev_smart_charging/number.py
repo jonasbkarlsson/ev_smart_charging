@@ -1,4 +1,5 @@
 """Number platform for EV Smart Charging."""
+
 import logging
 from typing import Union
 
@@ -15,11 +16,13 @@ from .const import (
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
     CONF_OPPORTUNISTIC_LEVEL,
+    CONF_OPPORTUNISTIC_TYPE2_LEVEL,
     CONF_PCT_PER_HOUR,
     DOMAIN,
     ENTITY_KEY_CONF_LOW_PRICE_CHARGING_NUMBER,
     ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER,
     ENTITY_KEY_CONF_OPPORTUNISTIC_LEVEL_NUMBER,
+    ENTITY_KEY_CONF_OPPORTUNISTIC_TYPE2_LEVEL_NUMBER,
     ENTITY_KEY_CONF_PCT_PER_HOUR_NUMBER,
     ENTITY_KEY_CONF_MAX_PRICE_NUMBER,
     ENTITY_KEY_CONF_MIN_SOC_NUMBER,
@@ -45,11 +48,13 @@ async def async_setup_entry(
     numbers.append(EVSmartChargingNumberPriceLimit(entry, coordinator))
     numbers.append(EVSmartChargingNumberMinSOC(entry, coordinator))
     numbers.append(EVSmartChargingNumberOpportunistic(entry, coordinator))
+    numbers.append(EVSmartChargingNumberOpportunisticType2(entry, coordinator))
     numbers.append(EVSmartChargingNumberLowPriceCharging(entry, coordinator))
     numbers.append(EVSmartChargingNumberLowSocCharging(entry, coordinator))
     async_add_devices(numbers)
 
 
+# pylint: disable=abstract-method
 class EVSmartChargingNumber(EVSmartChargingEntity, RestoreNumber):
     """EV Smart Charging number class."""
 
@@ -180,6 +185,36 @@ class EVSmartChargingNumberOpportunistic(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.number_opportunistic_level = value
+        await self.coordinator.update_configuration()
+
+
+class EVSmartChargingNumberOpportunisticType2(EVSmartChargingNumber):
+    """EV Smart Charging opportunistic type2 number class."""
+
+    _entity_key = ENTITY_KEY_CONF_OPPORTUNISTIC_TYPE2_LEVEL_NUMBER
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value = 0.0
+    _attr_native_max_value = 200.0
+    _attr_native_step = 1.0
+    _attr_native_unit_of_measurement = "%"
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingNumberOpportunisticType2.__init__()")
+        super().__init__(entry, coordinator)
+        if self.value is None:
+            self._attr_native_value = get_parameter(
+                entry, CONF_OPPORTUNISTIC_TYPE2_LEVEL, 90.0
+            )
+            _LOGGER.debug(
+                "EVSmartChargingNumberOpportunisticType2.__init__() %s",
+                self._attr_native_value,
+            )
+            self.update_ha_state()
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set new value."""
+        await super().async_set_native_value(value)
+        self.coordinator.number_opportunistic_type2_level = value
         await self.coordinator.update_configuration()
 
 

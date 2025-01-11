@@ -59,6 +59,7 @@
             "charging_speed": { "name": "Charging speed" },
             "electricity_price_limit": { "name": "Electricity price limit" },
             "opportunistic_level": { "name": "Opportunistic level" },
+            "opportunistic_type2_level": { "name": "Opportunistic type2 level" },
             "low_price_charging_level": { "name": "Low price charging level" },
             "low_soc_charging_level": { "name": "Low SOC charging level" },
             "minimum_ev_soc": { "name": "Minimum EV SOC" }
@@ -78,6 +79,7 @@
                     "charging_start_time": {"name": "Charging start time"},
                     "charging_stop_time": {"name": "Charging stop time"},
                     "charging_number_of_hours": {"name": "Charging number of hours"},
+                    "opportunistic": {"name": "Opportunistic"},
                     "raw_two_days": {"name": "Raw two days"},
                     "charging_schedule": {"name": "Charging schedule"}
                 }
@@ -105,7 +107,8 @@
             "keep_charger_on": { "name": "Keep charger on" },
             "opportunistic_charging": { "name": "Opportunistic charging" },
             "low_price_charging": { "name": "Low price charging" },
-            "low_soc_charging": { "name": "Low SOC charging" }
+            "low_soc_charging": { "name": "Low SOC charging" },
+            "opportunistic_type2_charging": { "name": "Opportunistic type2 charging" }
         }
     }
 }
