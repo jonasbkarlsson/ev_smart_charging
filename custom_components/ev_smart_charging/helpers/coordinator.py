@@ -229,6 +229,20 @@ class Raw:
             item["end"] = dt.as_local(item["end"])
         return self
 
+    def today(self):
+        """Only keep today's data"""
+        today = dt.now().date()
+        self.data = [item for item in self.data if item["start"].date() == today]
+        self.valid = len(self.data) > 12
+        return self
+
+    def tomorrow(self):
+        """Only keep tomorrow's data"""
+        tomorrow = dt.now().date() + timedelta(days=1)
+        self.data = [item for item in self.data if item["start"].date() == tomorrow]
+        self.valid = len(self.data) > 12
+        return self
+
 
 def get_lowest_hours(
     start_hour: datetime,
