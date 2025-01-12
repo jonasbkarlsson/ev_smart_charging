@@ -49,20 +49,36 @@ class PriceAdaptor:
             # This should only happen when testing
             return True
 
+        # First try for the attributes used by integration using
+        # separate attributes for today and tomorrow.
         if "prices_today" in price_state.attributes:
             self._price_attribute_today = "prices_today"
             self._price_attribute_tomorrow = "prices_tomorrow"
         elif "raw_today" in price_state.attributes:
             self._price_attribute_today = "raw_today"
             self._price_attribute_tomorrow = "raw_tomorrow"
+
+        # Then try for the attributes used by integration using
+        # the same attribute for today and tomorrow.
         else:
+            self._price_attribute_today = next(
+                (
+                    attr
+                    for attr in ["prices", "data", "forecast"]
+                    if attr in price_state.attributes
+                ),
+                None,
+            )
+            self._price_attribute_tomorrow = self._price_attribute_today
+
+        if not self._price_attribute_today:
             return False
 
         # Set _price_key.start and _price_key.value
         try:
             keys = price_state.attributes[self._price_attribute_today][0]
-            start_keys = ["time", "start", "hour"]
-            value_keys = ["price", "value"]
+            start_keys = ["time", "start", "hour", "start_time", "datetime"]
+            value_keys = ["price", "value", "price_ct_per_kwh", "electricity_price"]
 
             self._price_format.start = next(
                 (key for key in start_keys if key in keys), None
@@ -120,11 +136,15 @@ class PriceAdaptor:
 
     def get_raw_today_local(self, state) -> Raw:
         """Get the today's prices in local timezone"""
-        return Raw(state.attributes[self._price_attribute_today], self._price_format)
+        return Raw(
+            state.attributes[self._price_attribute_today], self._price_format
+        ).today()
 
     def get_raw_tomorrow_local(self, state) -> Raw:
         """Get the tomorrow's prices in local timezone"""
-        return Raw(state.attributes[self._price_attribute_tomorrow], self._price_format)
+        return Raw(
+            state.attributes[self._price_attribute_tomorrow], self._price_format
+        ).tomorrow()
 
     def get_current_price(self, state) -> float:
         """Return current price."""

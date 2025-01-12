@@ -1,4 +1,5 @@
 """Test ev_smart_charging/helpers/coordinator.py"""
+
 from datetime import datetime
 
 from homeassistant.util import dt as dt_util
@@ -42,8 +43,10 @@ from tests.schedule import MOCK_SCHEDULE_20220930
 
 
 # pylint: disable=unused-argument
-async def test_raw(hass, set_cet_timezone):
+async def test_raw(hass, set_cet_timezone, freezer):
     """Test Raw"""
+
+    freezer.move_to("2022-09-30T00:10:00+02:00")
 
     price = Raw(PRICE_20220930)
     assert price.get_raw() == PRICE_20220930
@@ -52,6 +55,8 @@ async def test_raw(hass, set_cet_timezone):
     assert price.max_value() == 388.65
     assert price.last_value() == 49.64
     assert price.number_of_nonzero() == 24
+    assert len(price.copy().today().get_raw()) == 24
+    assert len(price.copy().tomorrow().get_raw()) == 0
 
     time = datetime(
         2022, 9, 30, 8, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
@@ -77,6 +82,8 @@ async def test_raw(hass, set_cet_timezone):
     assert price.get_raw() == PRICE_20220930
     price.extend(price2)
     assert price.number_of_nonzero() == 48
+    assert len(price.copy().today().get_raw()) == 24
+    assert len(price.copy().tomorrow().get_raw()) == 24
 
     start = price.data[0]["start"]
     assert start.tzinfo == dt_util.get_time_zone("Europe/Stockholm")
@@ -93,6 +100,9 @@ async def test_raw(hass, set_cet_timezone):
     price = Raw([])
     assert not price.is_valid()
     assert price.last_value() is None
+
+    price = Raw(PRICE_20221001)
+    assert len(price.copy().today().get_raw()) == 0
 
 
 async def test_raw_energidataservice(hass, set_cet_timezone):
@@ -205,6 +215,7 @@ async def test_raw_entsoe(hass, set_cet_timezone, freezer):
     assert not price.is_valid()
     assert price.last_value() is None
 
+
 async def test_raw_tge(hass, set_cet_timezone):
     """Test Raw"""
 
@@ -257,6 +268,7 @@ async def test_raw_tge(hass, set_cet_timezone):
     price = Raw([], price_format)
     assert not price.is_valid()
     assert price.last_value() is None
+
 
 async def test_get_lowest_hours_non_continuous(hass, set_cet_timezone, freezer):
     """Test get_lowest_hours()"""
