@@ -73,7 +73,7 @@ async def test_coordinator_ev_connected(hass: HomeAssistant, set_cet_timezone, f
     assert coordinator.sensor.state == STATE_OFF
 
     # This should give 1h charging, 05-07
-    assert coordinator.scheduler.charging_number_of_hours == 2
+    assert coordinator.scheduler.charging_number_of_quarters == 2
     assert coordinator.scheduler.charging_start_time.hour == 5
 
     # EV Connected == False
@@ -94,7 +94,7 @@ async def test_coordinator_ev_connected(hass: HomeAssistant, set_cet_timezone, f
     assert coordinator.sensor.state == STATE_OFF
 
     # This should give a new schedule, 2h charging, 06-08
-    assert coordinator.scheduler.charging_number_of_hours == 2
+    assert coordinator.scheduler.charging_number_of_quarters == 2
     assert coordinator.scheduler.charging_start_time.hour == 6
 
     # Unload the entry and verify that the data has been removed

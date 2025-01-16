@@ -1,4 +1,5 @@
 """Global fixtures for ev_smart_charging integration."""
+
 # Fixtures allow you to replace functions with a Mock object. You can perform
 # many options via the Mock to reflect a particular behavior from the original
 # function that you want to see without going through the function's actual logic.
@@ -90,14 +91,15 @@ def skip_service_calls_fixture():
         yield
 
 
-# This fixture is used to prevent calls to update_hourly().
-@pytest.fixture(name="skip_update_hourly")
-def skip_update_hourly_fixture():
-    """Skip update_hourly."""
+# This fixture is used to prevent calls to update_quarterly().
+@pytest.fixture(name="skip_update_quarterly")
+def skip_update_quarterly_fixture():
+    """Skip update_quarterly."""
     with patch(
-        "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.update_hourly"
+        "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.update_quarterly"
     ):
         yield
+
 
 # This fixture is used to prevent calls to update_initial().
 @pytest.fixture(name="skip_update_initial", autouse=True)
@@ -107,6 +109,7 @@ def skip_update_initial_fixture():
         "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.update_initial"
     ):
         yield
+
 
 # This fixture will result in calls to is_during_intialization to return False.
 @pytest.fixture(name="bypass_is_during_intialization", autouse=True)

@@ -13,19 +13,19 @@ from custom_components.ev_smart_charging import (
     async_unload_entry,
 )
 from custom_components.ev_smart_charging.const import (
-    CONF_READY_HOUR,
-    CONF_START_HOUR,
+    CONF_READY_QUARTER,
+    CONF_START_QUARTER,
     DOMAIN,
-    READY_HOUR_NONE,
+    READY_QUARTER_NONE,
     SELECT,
-    START_HOUR_NONE,
+    START_QUARTER_NONE,
 )
 from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
 from custom_components.ev_smart_charging.select import (
-    EVSmartChargingSelectReadyHour,
-    EVSmartChargingSelectStartHour,
+    EVSmartChargingSelectReadyQuarter,
+    EVSmartChargingSelectStartQuarter,
 )
 
 from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_MIN_SOC
@@ -42,7 +42,10 @@ async def test_select(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_MIN_SOC, entry_id="test", title="ev_smart_charging"
+        domain=DOMAIN,
+        data=MOCK_CONFIG_MIN_SOC,
+        entry_id="test",
+        title="ev_smart_charging",
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
@@ -60,35 +63,35 @@ async def test_select(hass, bypass_validate_input_sensors):
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     # Get the selects
-    select_start_hour: EVSmartChargingSelectStartHour = hass.data["entity_components"][
-        SELECT
-    ].get_entity("select.ev_smart_charging_charge_start_time")
-    select_ready_hour: EVSmartChargingSelectReadyHour = hass.data["entity_components"][
-        SELECT
-    ].get_entity("select.ev_smart_charging_charge_completion_time")
-    assert select_start_hour
-    assert select_ready_hour
-    assert isinstance(select_start_hour, EVSmartChargingSelectStartHour)
-    assert isinstance(select_ready_hour, EVSmartChargingSelectReadyHour)
+    select_start_quarter: EVSmartChargingSelectStartQuarter = hass.data[
+        "entity_components"
+    ][SELECT].get_entity("select.ev_smart_charging_charge_start_time")
+    select_ready_quarter: EVSmartChargingSelectReadyQuarter = hass.data[
+        "entity_components"
+    ][SELECT].get_entity("select.ev_smart_charging_charge_completion_time")
+    assert select_start_quarter
+    assert select_ready_quarter
+    assert isinstance(select_start_quarter, EVSmartChargingSelectStartQuarter)
+    assert isinstance(select_ready_quarter, EVSmartChargingSelectReadyQuarter)
 
     # Test the selects
 
-    assert select_start_hour.state == MOCK_CONFIG_MIN_SOC[CONF_START_HOUR]
-    assert select_ready_hour.state == MOCK_CONFIG_MIN_SOC[CONF_READY_HOUR]
+    assert select_start_quarter.state == MOCK_CONFIG_MIN_SOC[CONF_START_QUARTER]
+    assert select_ready_quarter.state == MOCK_CONFIG_MIN_SOC[CONF_READY_QUARTER]
 
-    await select_start_hour.async_select_option("00:00")
-    assert coordinator.start_hour_local == 0
-    await select_start_hour.async_select_option("13:00")
-    assert coordinator.start_hour_local == 13
-    await select_start_hour.async_select_option("None")
-    assert coordinator.start_hour_local == START_HOUR_NONE
+    await select_start_quarter.async_select_option("00:00")
+    assert coordinator.start_quarter_local == 0
+    await select_start_quarter.async_select_option("13:00")
+    assert coordinator.start_quarter_local == 13 * 4
+    await select_start_quarter.async_select_option("None")
+    assert coordinator.start_quarter_local == START_QUARTER_NONE
 
-    await select_ready_hour.async_select_option("00:00")
-    assert coordinator.ready_hour_local == 24
-    await select_ready_hour.async_select_option("13:00")
-    assert coordinator.ready_hour_local == 13
-    await select_ready_hour.async_select_option("None")
-    assert coordinator.ready_hour_local == READY_HOUR_NONE
+    await select_ready_quarter.async_select_option("00:00")
+    assert coordinator.ready_quarter_local == 24 * 4
+    await select_ready_quarter.async_select_option("13:00")
+    assert coordinator.ready_quarter_local == 13 * 4
+    await select_ready_quarter.async_select_option("None")
+    assert coordinator.ready_quarter_local == READY_QUARTER_NONE
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)
@@ -124,15 +127,15 @@ async def test_select_restore(
     await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
 
-    select_ready_hour: EVSmartChargingSelectReadyHour = hass.data["entity_components"][
-        SELECT
-    ].get_entity("select.ev_smart_charging_charge_completion_time")
+    select_ready_quarter: EVSmartChargingSelectReadyQuarter = hass.data[
+        "entity_components"
+    ][SELECT].get_entity("select.ev_smart_charging_charge_completion_time")
 
-    await select_ready_hour.async_select_option("10:00")
-    assert select_ready_hour.state == "10:00"
+    await select_ready_quarter.async_select_option("10:00")
+    assert select_ready_quarter.state == "10:00"
 
-    await select_ready_hour.async_added_to_hass()
-    assert select_ready_hour.state == "11:00"
+    await select_ready_quarter.async_added_to_hass()
+    assert select_ready_quarter.state == "11:00"
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)

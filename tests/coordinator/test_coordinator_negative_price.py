@@ -77,7 +77,7 @@ async def test_coordinator_negative_price_5(
     assert coordinator.sensor.state == STATE_OFF
 
     # This should give 1h charging, 05-07
-    assert coordinator.scheduler.charging_number_of_hours == 2
+    assert coordinator.scheduler.charging_number_of_quarters == 2
     assert coordinator.scheduler.charging_start_time.hour == 5
 
     # Unsubscribe to listeners
@@ -133,7 +133,7 @@ async def test_coordinator_negative_price_0(
     assert coordinator.sensor.state == STATE_OFF
 
     # This should give 1h charging, 05-07
-    assert coordinator.scheduler.charging_number_of_hours == 3
+    assert coordinator.scheduler.charging_number_of_quarters == 3
     assert coordinator.scheduler.charging_start_time.hour == 4
 
     # Unsubscribe to listeners

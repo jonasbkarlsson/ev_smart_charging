@@ -1,4 +1,5 @@
 """Test ev_smart_charging coordinator."""
+
 from datetime import datetime
 import asyncio
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -36,7 +37,7 @@ async def test_coordinator_reschedule(
     skip_service_calls,
     set_cet_timezone,
     freezer,
-    skip_update_hourly,
+    skip_update_quarterly,
 ):
     """Test Coordinator reschedule."""
 
@@ -58,7 +59,7 @@ async def test_coordinator_reschedule(
     )
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
     assert coordinator is not None
-    coordinator.ready_hour_local = 8
+    coordinator.ready_quarter_local = 8
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
     await coordinator.switch_apply_limit_update(False)
@@ -78,7 +79,7 @@ async def test_coordinator_reschedule(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 9, 30, 6, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 1
+    assert coordinator.sensor.charging_number_of_quarters == 1
 
     # Schedule 06-07
     await asyncio.sleep(5)
@@ -92,7 +93,7 @@ async def test_coordinator_reschedule(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 9, 30, 7, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 1
+    assert coordinator.sensor.charging_number_of_quarters == 1
 
     # No schedule
     MockSOCEntity.set_state(hass, "80")

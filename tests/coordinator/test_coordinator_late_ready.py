@@ -1,4 +1,5 @@
 """Test ev_smart_charging coordinator."""
+
 from datetime import datetime
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -78,7 +79,7 @@ async def test_coordinator_late_ready(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 9, 30, 17, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5
 
     # Move time to scheduled charging time
     freezer.move_to("2022-09-30T12:30:00+02:00")
@@ -110,7 +111,7 @@ async def test_coordinator_late_ready(
     #    await coordinator.update_state()
     # TODO: it should not be update_sensors() here!
     # In practice this should be ok. Not likely that
-    # charging should start directly after ready_hour.
+    # charging should start directly after ready_quarter.
     await coordinator.update_sensors()
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
@@ -122,7 +123,7 @@ async def test_coordinator_late_ready(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5
 
     # Move time to after midnight
     freezer.move_to("2022-10-01T00:30:00+02:00")
@@ -165,7 +166,7 @@ async def test_coordinator_late_ready(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 14, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 2
+    assert coordinator.sensor.charging_number_of_quarters == 2
 
     # Move time to scheduled charging time
     freezer.move_to("2022-10-01T12:30:00+02:00")
@@ -190,12 +191,12 @@ async def test_coordinator_late_ready(
     assert coordinator.sensor.state == STATE_OFF
     assert coordinator.sensor.charging_is_planned is False
 
-    # Move time to after ready_hour # Will give 2h charging, 05:00-07:00
+    # Move time to after ready_quarter # Will give 2h charging, 05:00-07:00
     freezer.move_to("2022-10-01T18:00:00+02:00")
     #    await coordinator.update_state()
     # TODO: it should not be update_sensors() here!
     # In practice this should be ok. Not likely that
-    # charging should start directly after ready_hour.
+    # charging should start directly after ready_quarter.
     await coordinator.update_sensors()
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
@@ -207,7 +208,7 @@ async def test_coordinator_late_ready(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 2, 7, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 2
+    assert coordinator.sensor.charging_number_of_quarters == 2
 
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()
@@ -265,7 +266,7 @@ async def test_coordinator_late_ready2(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5
 
     # Move time to after new price is available
     freezer.move_to("2022-09-30T13:30:00+02:00")
@@ -349,7 +350,7 @@ async def test_coordinator_late_ready3(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5
 
     # Move time to scheduled charging time
     freezer.move_to("2022-10-01T03:00:00+02:00")

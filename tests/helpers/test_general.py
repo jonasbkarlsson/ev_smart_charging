@@ -1,13 +1,12 @@
 """Test ev_smart_charging/helpers/general.py"""
 
-
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from homeassistant.core import State
 
 from custom_components.ev_smart_charging.const import (
     CONF_MIN_SOC,
     CONF_PCT_PER_HOUR,
-    CONF_READY_HOUR,
+    CONF_READY_QUARTER,
 )
 from custom_components.ev_smart_charging.helpers.general import (
     Validator,
@@ -61,6 +60,5 @@ async def test_get_parameter(hass):
     config_entry.add_to_hass(hass)
     assert get_parameter(config_entry, CONF_PCT_PER_HOUR) == 8.0
     assert get_parameter(config_entry, CONF_MIN_SOC) == 30.0
-    assert get_parameter(config_entry, CONF_READY_HOUR) is None
-    assert get_parameter(config_entry, CONF_READY_HOUR, 12) == 12
-
+    assert get_parameter(config_entry, CONF_READY_QUARTER) is None
+    assert get_parameter(config_entry, CONF_READY_QUARTER, 12) == 12
