@@ -277,55 +277,40 @@ async def test_get_lowest_quarters_non_continuous(hass, set_cet_timezone, freeze
     start_quarter: int = START_QUARTER_NONE
 
     freezer.move_to("2022-09-30T00:10:00+02:00")
-    ready_quarter: int = 9
-    quarters: int = 2
+    ready_quarter: int = 8 * 4
+    quarters: int = 2 * 4
     assert get_lowest_quarters(
         get_start_quarter_utc(start_quarter, ready_quarter),
         get_ready_quarter_utc(ready_quarter),
         False,
         raw_two_days,
         quarters,
-    ) == [
-        7,
-        8,
-    ]
+    ) == list(range(2 * 4, 4 * 4))
 
     freezer.move_to("2022-09-30T15:10:00+02:00")
     ready_quarter: int = 8 * 4
-    quarters: int = 5
+    quarters: int = 5 * 4
     assert get_lowest_quarters(
         get_start_quarter_utc(start_quarter, ready_quarter),
         get_ready_quarter_utc(ready_quarter),
         False,
         raw_two_days,
         quarters,
-    ) == [
-        91,
-        92,
-        93,
-        94,
-        95,
-    ]
+    ) == list(range(19 * 4, 24 * 4))
 
     raw2: Raw = Raw(PRICE_20221001)
     raw_two_days.extend(raw2)
 
     freezer.move_to("2022-09-30T15:10:00+02:00")
     ready_quarter: int = 8 * 4
-    quarters: int = 5
+    quarters: int = 5 * 4
     assert get_lowest_quarters(
         get_start_quarter_utc(start_quarter, ready_quarter),
         get_ready_quarter_utc(ready_quarter),
         False,
         raw_two_days,
         quarters,
-    ) == [
-        119,
-        120,
-        121,
-        122,
-        123,
-    ]
+    ) == list(range(27 * 4, 32 * 4))
 
     quarters: int = 5 * 4
     assert get_lowest_quarters(
@@ -432,6 +417,77 @@ async def test_get_lowest_quarters_non_continuous(hass, set_cet_timezone, freeze
         raw_two_days,
         quarters,
     ) == list(range(21 * 4, 24 * 4))
+
+
+async def test_get_lowest_quarters_non_continuous_15min(
+    hass, set_cet_timezone, freezer
+):
+    """Test get_lowest_quarters()"""
+
+    raw_two_days: Raw = Raw(PRICE_20220930)
+    start_quarter: int = START_QUARTER_NONE
+
+    freezer.move_to("2022-09-30T00:10:00+02:00")
+    ready_quarter: int = 9
+    quarters: int = 2
+    assert get_lowest_quarters(
+        get_start_quarter_utc(start_quarter, ready_quarter),
+        get_ready_quarter_utc(ready_quarter),
+        False,
+        raw_two_days,
+        quarters,
+    ) == [7, 8]
+
+    ready_quarter: int = 9
+    quarters: int = 4
+    assert get_lowest_quarters(
+        get_start_quarter_utc(start_quarter, ready_quarter),
+        get_ready_quarter_utc(ready_quarter),
+        False,
+        raw_two_days,
+        quarters,
+    ) == [5, 6, 7, 8]
+
+    ready_quarter: int = 10
+    quarters: int = 4
+    assert get_lowest_quarters(
+        get_start_quarter_utc(start_quarter, ready_quarter),
+        get_ready_quarter_utc(ready_quarter),
+        False,
+        raw_two_days,
+        quarters,
+    ) == [6, 7, 8, 9]
+
+    ready_quarter: int = 20
+    quarters: int = 9
+    assert get_lowest_quarters(
+        get_start_quarter_utc(start_quarter, ready_quarter),
+        get_ready_quarter_utc(ready_quarter),
+        False,
+        raw_two_days,
+        quarters,
+    ) == [8, 9, 10, 11, 12, 13, 14, 15, 16]
+
+    ready_quarter: int = 20
+    quarters: int = 11
+    assert get_lowest_quarters(
+        get_start_quarter_utc(start_quarter, ready_quarter),
+        get_ready_quarter_utc(ready_quarter),
+        False,
+        raw_two_days,
+        quarters,
+    ) == [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+
+    freezer.move_to("2022-09-30T14:10:00+02:00")
+    ready_quarter: int = 20 * 4
+    quarters: int = 10
+    assert get_lowest_quarters(
+        get_start_quarter_utc(start_quarter, ready_quarter),
+        get_ready_quarter_utc(ready_quarter),
+        False,
+        raw_two_days,
+        quarters,
+    ) == [58, 59, 60, 61, 62, 63, 76, 77, 78, 79]
 
 
 async def test_get_lowest_quarters_continuous(hass, set_cet_timezone, freezer):
