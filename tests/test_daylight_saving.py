@@ -1,4 +1,5 @@
 """Test ev_smart_charging coordinator."""
+
 from datetime import datetime
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -42,7 +43,7 @@ async def test_to_daylight_saving_time(
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     MockSOCEntity.create(hass, entity_registry, "11")
-    MockTargetSOCEntity.create(hass, entity_registry, "80")
+    MockTargetSOCEntity.create(hass, entity_registry, "83")
     MockPriceEntity.create(hass, entity_registry, 10)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
 
@@ -71,7 +72,7 @@ async def test_to_daylight_saving_time(
 
     # pylint: disable=protected-access
     raw_schedule: Raw = Raw(coordinator._charging_schedule)
-    assert raw_schedule.number_of_nonzero() == 12
+    assert raw_schedule.number_of_nonzero() == 12 * 4
     assert (
         raw_schedule.get_value(
             datetime(
@@ -120,7 +121,7 @@ async def test_to_daylight_saving_time(
 
     # pylint: disable=protected-access
     raw_schedule: Raw = Raw(coordinator._charging_schedule)
-    assert raw_schedule.number_of_nonzero() == 12
+    assert raw_schedule.number_of_nonzero() == 12 * 4
     assert (
         raw_schedule.get_value(
             datetime(
@@ -168,7 +169,7 @@ async def test_from_daylight_saving_time(
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     MockSOCEntity.create(hass, entity_registry, "11")
-    MockTargetSOCEntity.create(hass, entity_registry, "80")
+    MockTargetSOCEntity.create(hass, entity_registry, "83")
     MockPriceEntity.create(hass, entity_registry, 10)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
 
@@ -197,7 +198,7 @@ async def test_from_daylight_saving_time(
 
     # pylint: disable=protected-access
     raw_schedule: Raw = Raw(coordinator._charging_schedule)
-    assert raw_schedule.number_of_nonzero() == 12
+    assert raw_schedule.number_of_nonzero() == 12 * 4
     assert (
         raw_schedule.get_value(
             datetime(
@@ -246,7 +247,7 @@ async def test_from_daylight_saving_time(
 
     # pylint: disable=protected-access
     raw_schedule: Raw = Raw(coordinator._charging_schedule)
-    assert raw_schedule.number_of_nonzero() == 12
+    assert raw_schedule.number_of_nonzero() == 12 * 4
     assert (
         raw_schedule.get_value(
             datetime(

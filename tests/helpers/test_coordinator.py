@@ -33,6 +33,7 @@ from tests.price import (
     PRICE_20221001_ENTSOE,
     PRICE_20221001_TGE,
 )
+from tests.price_15min import PRICE_20220930_15MIN
 from tests.schedule import MOCK_SCHEDULE_20220930
 
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
@@ -49,9 +50,9 @@ async def test_raw(hass, set_cet_timezone, freezer):
     freezer.move_to("2022-09-30T00:10:00+02:00")
 
     price = Raw(PRICE_20220930)
-    #    assert price.get_raw() == PRICE_20220930
+    assert price.get_raw() == PRICE_20220930_15MIN
     assert price.is_valid()
-    #    assert price.copy().get_raw() == PRICE_20220930
+    assert price.copy().get_raw() == PRICE_20220930_15MIN
     assert price.max_value() == 388.65
     assert price.last_value() == 49.64
     assert price.number_of_nonzero() == 24 * 4
@@ -79,7 +80,7 @@ async def test_raw(hass, set_cet_timezone, freezer):
 
     price2 = Raw(PRICE_20221001)
     price.extend(None)
-    #    assert price.get_raw() == PRICE_20220930
+    assert price.get_raw() == PRICE_20220930_15MIN
     price.extend(price2)
     assert price.number_of_nonzero() == 48 * 4
     assert len(price.copy().today().get_raw()) == 24 * 4
@@ -110,9 +111,9 @@ async def test_raw_energidataservice(hass, set_cet_timezone):
 
     price_format = PriceFormat(PLATFORM_ENERGIDATASERVICE)
     price = Raw(PRICE_20220930_ENERGIDATASERVICE, price_format)
-    #    assert price.get_raw() == PRICE_20220930
+    assert price.get_raw() == PRICE_20220930_15MIN
     assert price.is_valid()
-    #    assert price.copy().get_raw() == PRICE_20220930
+    assert price.copy().get_raw() == PRICE_20220930_15MIN
     assert price.max_value() == 388.65
     assert price.last_value() == 49.64
     assert price.number_of_nonzero() == 24 * 4
@@ -138,7 +139,7 @@ async def test_raw_energidataservice(hass, set_cet_timezone):
 
     price2 = Raw(PRICE_20221001_ENERGIDATASERVICE, price_format)
     price.extend(None)
-    #    assert price.get_raw() == PRICE_20220930
+    assert price.get_raw() == PRICE_20220930_15MIN
     price.extend(price2)
     assert price.number_of_nonzero() == 48 * 4
 
@@ -165,9 +166,9 @@ async def test_raw_entsoe(hass, set_cet_timezone, freezer):
     freezer.move_to("2022-09-30T00:10:00+02:00")
     price_format = PriceFormat(PLATFORM_ENTSOE)
     price = Raw(PRICE_20220930_ENTSOE, price_format)
-    #    assert price.get_raw() == PRICE_20220930
+    assert price.get_raw() == PRICE_20220930_15MIN
     assert price.is_valid()
-    #    assert price.copy().get_raw() == PRICE_20220930
+    assert price.copy().get_raw() == PRICE_20220930_15MIN
     assert price.max_value() == 388.65
     assert price.last_value() == 49.64
     assert price.number_of_nonzero() == 24 * 4
@@ -193,7 +194,7 @@ async def test_raw_entsoe(hass, set_cet_timezone, freezer):
 
     price2 = Raw(PRICE_20221001_ENTSOE, price_format)
     price.extend(None)
-    #    assert price.get_raw() == PRICE_20220930
+    assert price.get_raw() == PRICE_20220930_15MIN
     price.extend(price2)
     assert price.number_of_nonzero() == 48 * 4
 
@@ -221,9 +222,9 @@ async def test_raw_tge(hass, set_cet_timezone):
 
     price_format = PriceFormat(PLATFORM_TGE)
     price = Raw(PRICE_20220930_TGE, price_format)
-    #    assert price.get_raw() == PRICE_20220930
+    assert price.get_raw() == PRICE_20220930_15MIN
     assert price.is_valid()
-    #    assert price.copy().get_raw() == PRICE_20220930
+    assert price.copy().get_raw() == PRICE_20220930_15MIN
     assert price.max_value() == 388.65
     assert price.last_value() == 49.64
     assert price.number_of_nonzero() == 24 * 4
@@ -249,7 +250,7 @@ async def test_raw_tge(hass, set_cet_timezone):
 
     price2 = Raw(PRICE_20221001_TGE, price_format)
     price.extend(None)
-    #    assert price.get_raw() == PRICE_20220930
+    assert price.get_raw() == PRICE_20220930_15MIN
     price.extend(price2)
     assert price.number_of_nonzero() == 48 * 4
 

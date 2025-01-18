@@ -7,6 +7,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import State
 from homeassistant.util import dt
 
+from custom_components.ev_smart_charging.const import QUARTERS
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,3 +57,12 @@ def get_parameter(config_entry: ConfigEntry, parameter: str, default_val: Any = 
     if parameter in config_entry.data.keys():
         return config_entry.data.get(parameter)
     return default_val
+
+
+def get_quarter_index(option: str) -> int:
+    """Get index of option."""
+
+    # Get index of option in QUARTERS minus 1. If option is "None", return None.
+    if option == "None":
+        return None
+    return QUARTERS.index(option) - 1

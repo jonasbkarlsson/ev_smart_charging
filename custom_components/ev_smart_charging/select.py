@@ -16,12 +16,13 @@ from .const import (
     ENTITY_KEY_CONF_START_QUARTER,
     QUARTERS,
     ICON_TIME,
+    READY_QUARTER_NONE,
     SELECT,
     START_QUARTER_NONE,
 )
 from .coordinator import EVSmartChargingCoordinator
 from .entity import EVSmartChargingEntity
-from .helpers.general import get_parameter
+from .helpers.general import get_parameter, get_quarter_index
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -82,10 +83,8 @@ class EVSmartChargingSelectStartQuarter(EVSmartChargingSelect):
         await super().async_select_option(option)
         if self.state:
             try:
-                self.coordinator.start_quarter_local = (
-                    self.options.index(self.state) - 1
-                )
-                if self.state == "None":
+                self.coordinator.start_quarter_local = get_quarter_index(self.state)
+                if self.coordinator.start_quarter_local is None:
                     self.coordinator.start_quarter_local = START_QUARTER_NONE
             except ValueError:
                 # Don't use start_quarter. Select a time in the past.
@@ -115,14 +114,12 @@ class EVSmartChargingSelectReadyQuarter(EVSmartChargingSelect):
         await super().async_select_option(option)
         if self.state:
             try:
-                self.coordinator.ready_quarter_local = (
-                    self.options.index(self.state) - 1
-                )
-                if self.state == "None":
-                    self.coordinator.ready_quarter_local = 72 * 4
+                self.coordinator.ready_quarter_local = get_quarter_index(self.state)
+                if self.coordinator.ready_quarter_local is None:
+                    self.coordinator.ready_quarter_local = READY_QUARTER_NONE
             except ValueError:
                 # Don't use ready_quarter. Select a time in the far future.
-                self.coordinator.ready_quarter_local = 72 * 4
+                self.coordinator.ready_quarter_local = READY_QUARTER_NONE
             if self.coordinator.ready_quarter_local == 0:
                 # Treat 00:00 as 24:00
                 self.coordinator.ready_quarter_local = 24 * 4

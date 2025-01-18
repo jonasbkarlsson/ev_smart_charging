@@ -84,7 +84,7 @@ from .helpers.coordinator import (
     get_ready_quarter_utc,
     get_start_quarter_utc,
 )
-from .helpers.general import Utils, Validator, get_parameter
+from .helpers.general import Utils, Validator, get_parameter, get_quarter_index
 from .sensor import (
     EVSmartChargingSensor,
     EVSmartChargingSensorCharging,
@@ -172,24 +172,20 @@ class EVSmartChargingCoordinator:
             self.config_entry, CONF_PCT_PER_HOUR, 6.0
         )
 
-        try:
-            self.start_quarter_local = int(
-                get_parameter(self.config_entry, CONF_START_QUARTER)[0:2]
-            )
-        except (ValueError, TypeError):
-            # Don't use start_quarter. Select a time in the past.
+        self.start_quarter_local = get_quarter_index(
+            get_parameter(self.config_entry, CONF_START_QUARTER)
+        )
+        if self.start_quarter_local is None:
             self.start_quarter_local = START_QUARTER_NONE
 
-        try:
-            self.ready_quarter_local = int(
-                get_parameter(self.config_entry, CONF_READY_QUARTER, "08:00")[0:2]
-            )
-        except (ValueError, TypeError):
-            # Don't use ready_quarter. Select a time in the far future.
+        self.ready_quarter_local = get_quarter_index(
+            get_parameter(self.config_entry, CONF_READY_QUARTER, "08:00")
+        )
+        if self.ready_quarter_local is None:
             self.ready_quarter_local = READY_QUARTER_NONE
         if self.ready_quarter_local == 0:
             # Treat 00:00 as 24:00
-            self.ready_quarter_local = 24
+            self.ready_quarter_local = 24 * 4
         self.ready_quarter_first = (
             True  # True for first update_sensor the ready_quarter
         )
