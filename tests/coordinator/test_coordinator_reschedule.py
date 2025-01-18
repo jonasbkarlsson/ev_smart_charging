@@ -42,7 +42,7 @@ async def test_coordinator_reschedule(
     """Test Coordinator reschedule."""
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "75")
+    MockSOCEntity.create(hass, entity_registry, "79")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -59,7 +59,7 @@ async def test_coordinator_reschedule(
     )
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
     assert coordinator is not None
-    coordinator.ready_quarter_local = 8
+    coordinator.ready_quarter_local = 8 * 4
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
     await coordinator.switch_apply_limit_update(False)
@@ -68,20 +68,20 @@ async def test_coordinator_reschedule(
     await coordinator.switch_keep_on_update(False)
     await hass.async_block_till_done()
 
-    # Schedule 05-06
+    # Schedule 05:45-06:00
     await coordinator.update_configuration()
     await asyncio.sleep(5)
     assert coordinator.sensor.state == STATE_ON
     assert coordinator.sensor.charging_is_planned is True
     assert coordinator.sensor.charging_start_time == datetime(
-        2022, 9, 30, 5, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+        2022, 9, 30, 5, 45, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 9, 30, 6, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
     assert coordinator.sensor.charging_number_of_quarters == 1
 
-    # Schedule 06-07
+    # Schedule 06:00-06:15
     await asyncio.sleep(5)
     await coordinator.update_sensors()
     await asyncio.sleep(5)
@@ -91,7 +91,7 @@ async def test_coordinator_reschedule(
         2022, 9, 30, 6, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
     assert coordinator.sensor.charging_stop_time == datetime(
-        2022, 9, 30, 7, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+        2022, 9, 30, 6, 15, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
     assert coordinator.sensor.charging_number_of_quarters == 1
 

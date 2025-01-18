@@ -83,7 +83,7 @@ async def test_coordinator_opportunistic_1(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 6, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 14
+    assert coordinator.sensor.charging_number_of_quarters == 14 * 4
 
     # Turn on switch_apply_limit
     await coordinator.switch_apply_limit_update(True)
@@ -100,7 +100,7 @@ async def test_coordinator_opportunistic_1(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 6, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 11
+    assert coordinator.sensor.charging_number_of_quarters == 11 * 4
 
     # Turn on switch_opportunistic
     await coordinator.switch_opportunistic_update(True)
@@ -117,12 +117,12 @@ async def test_coordinator_opportunistic_1(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 5, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 8
+    assert coordinator.sensor.charging_number_of_quarters == 8 * 4
 
     # Move time to next day
     freezer.move_to("2022-10-01T00:30:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20221001A, None)
-    MockSOCEntity.set_state(hass, "72")
+    MockSOCEntity.set_state(hass, "71")
     await coordinator.update_sensors()
     await hass.async_block_till_done()
 
@@ -137,7 +137,7 @@ async def test_coordinator_opportunistic_1(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 5, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 3
+    assert coordinator.sensor.charging_number_of_quarters == 3 * 4
 
     freezer.move_to("2022-10-01T02:00:00+02:00")
     await coordinator.update_sensors()

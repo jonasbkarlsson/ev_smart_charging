@@ -87,7 +87,7 @@ async def test_coordinator_opportunistic_type2_1(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 7
+    assert coordinator.sensor.charging_number_of_quarters == 7 * 4
 
     # Turn on switch_apply_limit
     await coordinator.switch_apply_limit_update(True)
@@ -104,7 +104,7 @@ async def test_coordinator_opportunistic_type2_1(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Turn on switch_opportunistic type 2
     await coordinator.switch_opportunistic_type2_update(True)
@@ -121,7 +121,7 @@ async def test_coordinator_opportunistic_type2_1(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 7, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 2
+    assert coordinator.sensor.charging_number_of_quarters == 2 * 4
 
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()
@@ -186,7 +186,7 @@ async def test_coordinator_opportunistic_type2_2(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 7
+    assert coordinator.sensor.charging_number_of_quarters == 7 * 4
 
     # Turn on switch_apply_limit
     await coordinator.switch_apply_limit_update(True)
@@ -203,7 +203,7 @@ async def test_coordinator_opportunistic_type2_2(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Turn on switch_opportunistic type 2
     await coordinator.switch_opportunistic_type2_update(True)
@@ -220,7 +220,7 @@ async def test_coordinator_opportunistic_type2_2(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 7, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 1
+    assert coordinator.sensor.charging_number_of_quarters == 1 * 4
 
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()

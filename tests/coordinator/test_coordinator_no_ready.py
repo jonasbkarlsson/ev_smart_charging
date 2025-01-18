@@ -36,7 +36,7 @@ async def test_coordinator_no_ready(
     freezer.move_to("2022-09-30T10:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "66")
+    MockSOCEntity.create(hass, entity_registry, "65")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -80,7 +80,7 @@ async def test_coordinator_no_ready(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Move time to after new price is available
     # This should give a 5h schedule, 03:00-08:00
@@ -97,7 +97,7 @@ async def test_coordinator_no_ready(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Set low SOC. This should give a 20h schedule
     MockSOCEntity.set_state(hass, "20")
@@ -111,7 +111,7 @@ async def test_coordinator_no_ready(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 2, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 20
+    assert coordinator.sensor.charging_number_of_quarters == 20 * 4
 
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()
@@ -125,7 +125,7 @@ async def test_coordinator_no_ready2(
     freezer.move_to("2022-09-30T10:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "66")
+    MockSOCEntity.create(hass, entity_registry, "65")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -169,7 +169,7 @@ async def test_coordinator_no_ready2(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_quarters == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Test that the schedule is removed if the ready_quarter setting is changed to a time tomorrow
     # when tomorrow's prices are not yet available.
