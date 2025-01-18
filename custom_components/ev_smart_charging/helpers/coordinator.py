@@ -349,7 +349,31 @@ def get_lowest_quarters_non_continuous(
 
     prices = price[time_start_index : time_end_index + 1]
     sorted_index = sorted(range(len(prices)), key=prices.__getitem__)
-    lowest_quarters = [x + time_start_index for x in sorted(sorted_index[0:quarters])]
+
+    # Find the lowest quarters. If the quarter with highest selected quarter has exactly the same price
+    # as some of the not selected quarters, then the selected the quarters with that price which are
+    # closest to the quarters with the second highest price.
+    selected_quarters = sorted_index[0:quarters]
+    highest_selected_price = prices[selected_quarters[-1]]
+    # Find quarters in the same hour as the last selected quarter
+    same_hour_quarters = [
+        i
+        for i in range(len(prices))
+        if prices[i] == highest_selected_price
+        and (i // 4) == (selected_quarters[-1] // 4)
+    ]
+    if same_hour_quarters[0] - 1 in selected_quarters:
+        # If the quarter before "same_hour_quarters" selected, then do nothing.
+        pass
+    elif same_hour_quarters[-1] + 1 in selected_quarters:
+        # If the quarter after "same_hour_quarters" selected, then make sure the selected quarters
+        # within "same_hour_quarter" are as late as possible within that hour, and in reverse order.
+        q1 = [i for i in selected_quarters if i not in same_hour_quarters]
+        n1 = len([i for i in same_hour_quarters if i in selected_quarters])
+        q2 = same_hour_quarters[::-1][0:n1]
+        selected_quarters = q1 + q2
+
+    lowest_quarters = [x + time_start_index for x in sorted(selected_quarters)]
 
     return lowest_quarters
 
