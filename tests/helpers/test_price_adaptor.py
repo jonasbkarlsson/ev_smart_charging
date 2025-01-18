@@ -35,7 +35,11 @@ from tests.price import (
     PRICE_ONE_LIST,
     PRICE_THIRTEEN_LIST,
 )
-from tests.price_15min import PRICE_20220930_GENERIC_15MIN
+from tests.price_15min import (
+    PRICE_20220930_GENERIC_15MIN,
+    PRICE_20220930_15MIN,
+    PRICE_20221001_15MIN,
+)
 
 
 # pylint: disable=unused-argument
@@ -238,7 +242,7 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     price_state = hass.states.get(price_sensor)
     price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
-    assert raw_today_local.data == PRICE_20220930
+    assert raw_today_local.data == PRICE_20220930_15MIN
 
     # Test PLATFORM_ENERGIDATASERVICE
     MockPriceEntityEnergiDataService.create(hass, entity_registry)
@@ -259,7 +263,7 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     price_state = hass.states.get(price_sensor)
     price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
-    assert raw_today_local.data == PRICE_20220930
+    assert raw_today_local.data == PRICE_20220930_15MIN
 
     # Test PLATFORM_ENTSOE
     MockPriceEntityEntsoe.create(hass, entity_registry)
@@ -278,7 +282,7 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     price_state = hass.states.get(price_sensor)
     price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
-    assert raw_today_local.data == PRICE_20220930
+    assert raw_today_local.data == PRICE_20220930_15MIN
 
     # Test PLATFORM_GENERIC
     MockPriceEntityGeneric.create(hass, entity_registry)
@@ -297,7 +301,7 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     price_state = hass.states.get(price_sensor)
     price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
-    assert raw_today_local.data == PRICE_20220930
+    assert raw_today_local.data == PRICE_20220930_15MIN
 
     # Test template sensor with price per 15 minutes
     MockPriceEntityGeneric.set_state(hass, PRICE_20220930_GENERIC_15MIN, None)
@@ -305,7 +309,7 @@ async def test_get_raw_today_local(hass, set_cet_timezone, freezer):
     price_state = hass.states.get(price_sensor)
     price_adaptor.initiate(price_state)
     raw_today_local = price_adaptor.get_raw_today_local(price_state)
-    assert raw_today_local.data == PRICE_20220930
+    assert raw_today_local.data == PRICE_20220930_15MIN
 
 
 async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
@@ -333,7 +337,7 @@ async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     price_state = hass.states.get(price_sensor)
     price_adaptor.initiate(price_state)
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
-    assert raw_tomorrow_local.data == PRICE_20221001
+    assert raw_tomorrow_local.data == PRICE_20221001_15MIN
 
     # Test PLATFORM_ENERGIDATASERVICE
     MockPriceEntityEnergiDataService.create(hass, entity_registry)
@@ -354,7 +358,7 @@ async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     price_state = hass.states.get(price_sensor)
     price_adaptor.initiate(price_state)
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
-    assert raw_tomorrow_local.data == PRICE_20221001
+    assert raw_tomorrow_local.data == PRICE_20221001_15MIN
 
     # Test PLATFORM_ENTSOE
     MockPriceEntityEntsoe.create(hass, entity_registry)
@@ -373,7 +377,7 @@ async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     price_state = hass.states.get(price_sensor)
     price_adaptor.initiate(price_state)
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
-    assert raw_tomorrow_local.data == PRICE_20221001
+    assert raw_tomorrow_local.data == PRICE_20221001_15MIN
 
     # Test PLATFORM_GENERIC
     MockPriceEntityGeneric.create(hass, entity_registry)
@@ -392,7 +396,7 @@ async def test_get_raw_tomorrow_local(hass, set_cet_timezone, freezer):
     price_state = hass.states.get(price_sensor)
     price_adaptor.initiate(price_state)
     raw_tomorrow_local = price_adaptor.get_raw_tomorrow_local(price_state)
-    assert raw_tomorrow_local.data == PRICE_20221001
+    assert raw_tomorrow_local.data == PRICE_20221001_15MIN
 
 
 async def test_get_current_price(hass, set_cet_timezone, freezer):
