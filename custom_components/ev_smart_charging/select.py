@@ -82,12 +82,8 @@ class EVSmartChargingSelectStartQuarter(EVSmartChargingSelect):
         """Change the selected option."""
         await super().async_select_option(option)
         if self.state:
-            try:
-                self.coordinator.start_quarter_local = get_quarter_index(self.state)
-                if self.coordinator.start_quarter_local is None:
-                    self.coordinator.start_quarter_local = START_QUARTER_NONE
-            except ValueError:
-                # Don't use start_quarter. Select a time in the past.
+            self.coordinator.start_quarter_local = get_quarter_index(self.state)
+            if self.coordinator.start_quarter_local is None:
                 self.coordinator.start_quarter_local = START_QUARTER_NONE
             await self.coordinator.update_configuration()
 
@@ -113,12 +109,8 @@ class EVSmartChargingSelectReadyQuarter(EVSmartChargingSelect):
         """Change the selected option."""
         await super().async_select_option(option)
         if self.state:
-            try:
-                self.coordinator.ready_quarter_local = get_quarter_index(self.state)
-                if self.coordinator.ready_quarter_local is None:
-                    self.coordinator.ready_quarter_local = READY_QUARTER_NONE
-            except ValueError:
-                # Don't use ready_quarter. Select a time in the far future.
+            self.coordinator.ready_quarter_local = get_quarter_index(self.state)
+            if self.coordinator.ready_quarter_local is None:
                 self.coordinator.ready_quarter_local = READY_QUARTER_NONE
             if self.coordinator.ready_quarter_local == 0:
                 # Treat 00:00 as 24:00

@@ -32,6 +32,7 @@ from tests.price import (
     PRICE_20221001_ENERGIDATASERVICE,
     PRICE_20221001_ENTSOE,
     PRICE_20221001_TGE,
+    PRICE_THIRTEEN_LIST_30MIN,
 )
 from tests.price_15min import PRICE_20220930_15MIN
 from tests.schedule import MOCK_SCHEDULE_20220930
@@ -104,6 +105,9 @@ async def test_raw(hass, set_cet_timezone, freezer):
 
     price = Raw(PRICE_20221001)
     assert len(price.copy().today().get_raw()) == 0
+
+    price = Raw(PRICE_THIRTEEN_LIST_30MIN)
+    assert not price.valid
 
 
 async def test_raw_energidataservice(hass, set_cet_timezone):
@@ -191,6 +195,10 @@ async def test_raw_entsoe(hass, set_cet_timezone, freezer):
     )
     assert price.get_value(time) is None
     assert price.get_item(time) is None
+
+    freezer.move_to("2022-10-01T00:10:00+02:00")
+    assert not price.is_valid(check_today_local=True)
+    freezer.move_to("2022-09-30T00:10:00+02:00")
 
     price2 = Raw(PRICE_20221001_ENTSOE, price_format)
     price.extend(None)

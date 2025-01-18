@@ -65,4 +65,6 @@ def get_quarter_index(option: str) -> int:
     # Get index of option in QUARTERS minus 1. If option is "None", return None.
     if option == "None":
         return None
-    return QUARTERS.index(option) - 1
+    if option in QUARTERS:
+        return QUARTERS.index(option) - 1
+    return None
