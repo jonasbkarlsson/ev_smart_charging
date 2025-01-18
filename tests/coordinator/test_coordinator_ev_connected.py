@@ -35,7 +35,7 @@ async def test_coordinator_ev_connected(hass: HomeAssistant, set_cet_timezone, f
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "70")
+    MockSOCEntity.create(hass, entity_registry, "68")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -72,9 +72,10 @@ async def test_coordinator_ev_connected(hass: HomeAssistant, set_cet_timezone, f
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
 
-    # This should give 1h charging, 05-07
-    assert coordinator.scheduler.charging_number_of_hours == 2
+    # This should give 2h charging, 05-07
+    assert coordinator.scheduler.charging_number_of_quarters == 2 * 4
     assert coordinator.scheduler.charging_start_time.hour == 5
+    assert coordinator.scheduler.charging_start_time.minute == 0
 
     # EV Connected == False
 
@@ -94,8 +95,9 @@ async def test_coordinator_ev_connected(hass: HomeAssistant, set_cet_timezone, f
     assert coordinator.sensor.state == STATE_OFF
 
     # This should give a new schedule, 2h charging, 06-08
-    assert coordinator.scheduler.charging_number_of_hours == 2
+    assert coordinator.scheduler.charging_number_of_quarters == 2 * 4
     assert coordinator.scheduler.charging_start_time.hour == 6
+    assert coordinator.scheduler.charging_start_time.minute == 0
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)

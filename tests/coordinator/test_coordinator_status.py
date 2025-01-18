@@ -98,7 +98,7 @@ async def test_coordinator_status(
     assert coordinator.sensor_status.native_value == CHARGING_STATUS_NO_PLAN
 
     # Ready hour 08:00. Charge 04:00-07:00
-    MockSOCEntity.set_state(hass, "67")
+    MockSOCEntity.set_state(hass, "62")
     await coordinator.switch_keep_on_update(True)
     await hass.async_block_till_done()
     assert coordinator.sensor_status.native_value == CHARGING_STATUS_WAITING_CHARGING

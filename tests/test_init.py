@@ -89,7 +89,7 @@ async def test_setup_with_migration_v1(hass, bypass_validate_input_sensors):
 
     # Migrate from version 1
     assert await async_migrate_entry(hass, config_entry)
-    assert config_entry.data["start_hour"] == "None"
+    assert config_entry.data["start_quarter"] == "None"
     assert config_entry.data["opportunistic_level"] == 50.0
 
     # Set up the entry and assert that the values set during setup are where we expect

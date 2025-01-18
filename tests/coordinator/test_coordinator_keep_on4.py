@@ -40,7 +40,7 @@ async def test_coordinator_keep_on_issue98(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)

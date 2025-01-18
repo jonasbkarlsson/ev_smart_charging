@@ -4,13 +4,10 @@
 import logging
 from typing import Any
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, State
-from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
-from homeassistant.helpers.entity_registry import (
-    EntityRegistry,
-    RegistryEntry,
-)
-from custom_components.ev_smart_charging.const import PLATFORM_GENERIC, PLATFORM_NORDPOOL
+from homeassistant.core import State
+from homeassistant.util import dt
+
+from custom_components.ev_smart_charging.const import QUARTERS
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -43,6 +40,16 @@ class Validator:
         return False
 
 
+class Utils:
+    """Utils"""
+
+    @staticmethod
+    def datetime_quarter(time: dt) -> int:
+        """Return the quarter of the day"""
+        total_minutes = time.hour * 60 + time.minute
+        return total_minutes // 15
+
+
 def get_parameter(config_entry: ConfigEntry, parameter: str, default_val: Any = None):
     """Get parameter from OptionsFlow or ConfigFlow"""
     if parameter in config_entry.options.keys():
@@ -51,3 +58,13 @@ def get_parameter(config_entry: ConfigEntry, parameter: str, default_val: Any = 
         return config_entry.data.get(parameter)
     return default_val
 
+
+def get_quarter_index(option: str) -> int:
+    """Get index of option."""
+
+    # Get index of option in QUARTERS minus 1. If option is "None", return None.
+    if option == "None":
+        return None
+    if option in QUARTERS:
+        return QUARTERS.index(option) - 1
+    return None

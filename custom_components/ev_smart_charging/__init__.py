@@ -25,7 +25,7 @@ from .const import (
     CONF_LOW_SOC_CHARGING_LEVEL,
     CONF_OPPORTUNISTIC_LEVEL,
     CONF_SOLAR_CHARGING_CONFIGURED,
-    CONF_START_HOUR,
+    CONF_START_QUARTER,
     DOMAIN,
     STARTUP_MESSAGE,
     PLATFORMS,
@@ -108,8 +108,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     return unloaded
 
+
 # Global lock
 ev_smart_charging_lock = asyncio.Lock()
+
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Reload config entry."""
@@ -130,7 +132,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
     if version == 1:
         # Set default values for new configuration parameters
-        new[CONF_START_HOUR] = "None"
+        new[CONF_START_QUARTER] = "None"
         version = 2
         migration = True
 

@@ -11,10 +11,12 @@ from custom_components.ev_smart_charging.const import (
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
     PLATFORM_GENERIC,
+    PLATFORM_NORDPOOL,
     PLATFORM_TGE,
-    READY_HOUR_NONE,
-    START_HOUR_NONE,
+    READY_QUARTER_NONE,
+    START_QUARTER_NONE,
 )
+from custom_components.ev_smart_charging.helpers.general import Utils
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,6 +29,10 @@ class PriceFormat:
         self.value = None  # Can be "price" or "value"
         self.start_is_string = None  # True if start is a string in ISO format, False if it is a datetime object
 
+        if platform == PLATFORM_NORDPOOL:
+            self.start = "start"
+            self.value = "value"
+            self.start_is_string = False
         if platform == PLATFORM_ENERGIDATASERVICE:
             self.start = "hour"
             self.value = "price"
@@ -51,7 +57,7 @@ def convert_raw_item(item: dict[str, Any], price_format: PriceFormat) -> dict[st
             item_new["start"] = datetime.fromisoformat(item[price_format.start])
         else:
             item_new["start"] = item[price_format.start]
-        item_new["end"] = item_new["start"] + timedelta(hours=1)
+        item_new["end"] = item_new["start"] + timedelta(minutes=15)
     except (KeyError, ValueError, TypeError):
         return None
 
@@ -116,25 +122,58 @@ class Raw:
         "value": float,
     }"""
 
+    def add_three_extra_items(self, item: dict[str, Any]) -> None:
+        """Add three extra items"""
+
+        extra_item1 = {}
+        extra_item1["value"] = item["value"]
+        extra_item1["start"] = item["start"] + timedelta(minutes=15)
+        extra_item1["end"] = item["start"] + timedelta(minutes=30)
+        self.data.append(extra_item1)
+        extra_item2 = {}
+        extra_item2["value"] = item["value"]
+        extra_item2["start"] = item["start"] + timedelta(minutes=30)
+        extra_item2["end"] = item["start"] + timedelta(minutes=45)
+        self.data.append(extra_item2)
+        extra_item3 = {}
+        extra_item3["value"] = item["value"]
+        extra_item3["start"] = item["start"] + timedelta(minutes=45)
+        extra_item3["end"] = item["start"] + timedelta(minutes=60)
+        self.data.append(extra_item3)
+
     def __init__(
         self, raw: list[dict[str, Any]], price_format: PriceFormat = None
     ) -> None:
         self.data = []
         if raw:
+            periodicity_60min = False
             for item in raw:
                 if price_format:
                     item_new = convert_raw_item(item, price_format)
                 else:
-                    if item["value"] is not None and isinstance(
-                        item["start"], datetime
-                    ):
-                        item_new = item
+                    item_new = convert_raw_item(item, PriceFormat(PLATFORM_NORDPOOL))
+
+                if len(self.data) == 1:
+                    if item_new["start"].minute - self.data[-1]["start"].minute == 0:
+                        # 60 minutes periodicity
+                        periodicity_60min = True
+                        self.add_three_extra_items(self.data[-1])
+                    elif item_new["start"].minute - self.data[-1]["start"].minute == 15:
+                        # 15 minutes periodicity
+                        pass
                     else:
-                        item_new = None
-                if item_new is not None:
-                    # Only use full hour price for now
-                    if item_new["start"].minute == 0:
-                        self.data.append(item_new)
+                        # Other periodicities not supported
+                        _LOGGER.error(
+                            "Periodicity %s minutes not supported",
+                            item_new["start"].minute - self.data[-1]["start"].minute,
+                        )
+                        self.data = []
+                        self.valid = False
+                        return
+
+                self.data.append(item_new)
+                if periodicity_60min and len(self.data) > 1:
+                    self.add_three_extra_items(self.data[-1])
 
             self.valid = len(self.data) > 12
         else:
@@ -244,40 +283,44 @@ class Raw:
         return self
 
 
-def get_lowest_hours(
-    start_hour: datetime,
-    ready_hour: datetime,
+def get_lowest_quarters(
+    start_quarter: datetime,
+    ready_quarter: datetime,
     continuous: bool,
     raw_two_days: Raw,
-    hours: int,
+    quarters: int,
 ) -> list:
-    """From the two-day prices, calculate the cheapest set of hours"""
+    """From the two-day prices, calculate the cheapest set of quarters"""
 
     if continuous:
-        return get_lowest_hours_continuous(start_hour, ready_hour, raw_two_days, hours)
+        return get_lowest_quarters_continuous(
+            start_quarter, ready_quarter, raw_two_days, quarters
+        )
 
-    return get_lowest_hours_non_continuous(start_hour, ready_hour, raw_two_days, hours)
+    return get_lowest_quarters_non_continuous(
+        start_quarter, ready_quarter, raw_two_days, quarters
+    )
 
 
-def get_lowest_hours_non_continuous(
-    start_hour: datetime, ready_hour: datetime, raw_two_days: Raw, hours: int
+def get_lowest_quarters_non_continuous(
+    start_quarter: datetime, ready_quarter: datetime, raw_two_days: Raw, quarters: int
 ) -> list:
-    """From the two-day prices, calculate the cheapest non-continues set of hours
+    """From the two-day prices, calculate the cheapest non-continues set of quarters
 
-    A non-continues range of hours will be choosen."""
+    A non-continues range of quarters will be choosen."""
 
-    _LOGGER.debug("ready_hour = %s", ready_hour)
+    _LOGGER.debug("ready_quarter = %s", ready_quarter)
 
-    if hours == 0:
+    if quarters == 0:
         return []
 
     price = []
     for item in raw_two_days.get_raw():
         price.append(item["value"])
     time_start = dt.utcnow()
-    if start_hour > time_start:
-        time_start = start_hour
-    time_end = ready_hour
+    if start_quarter > time_start:
+        time_start = start_quarter
+    time_end = ready_quarter
     time_start_index = None
     time_end_index = None
     for index in range(len(price)):
@@ -289,9 +332,9 @@ def get_lowest_hours_non_continuous(
 
     if time_start_index is None or time_end_index is None:  # pragma: no cover
         _LOGGER.error("Is not able to calculate charging schedule!")
-        _LOGGER.error("start_hour = %s", start_hour)
-        _LOGGER.error("ready_hour = %s", ready_hour)
-        _LOGGER.error("hours = %s", hours)
+        _LOGGER.error("start_quarter = %s", start_quarter)
+        _LOGGER.error("ready_quarter = %s", ready_quarter)
+        _LOGGER.error("quarters = %s", quarters)
         if raw_two_days:
             if raw_two_days.data:
                 _LOGGER.error("raw_two_days.data = %s", raw_two_days.data)
@@ -301,26 +344,50 @@ def get_lowest_hours_non_continuous(
             _LOGGER.error("raw_two_days = None")
         return []
 
-    if (time_end_index - time_start_index) < hours:
+    if (time_end_index - time_start_index) < quarters:
         return list(range(time_start_index, time_end_index + 1))
 
     prices = price[time_start_index : time_end_index + 1]
     sorted_index = sorted(range(len(prices)), key=prices.__getitem__)
-    lowest_hours = [x + time_start_index for x in sorted(sorted_index[0:hours])]
 
-    return lowest_hours
+    # Find the lowest quarters. If the quarter with highest selected quarter has exactly the same price
+    # as some of the not selected quarters, then the selected the quarters with that price which are
+    # closest to the quarters with the second highest price.
+    selected_quarters = sorted_index[0:quarters]
+    highest_selected_price = prices[selected_quarters[-1]]
+    # Find quarters in the same hour as the last selected quarter
+    same_hour_quarters = [
+        i
+        for i in range(len(prices))
+        if prices[i] == highest_selected_price
+        and (i // 4) == (selected_quarters[-1] // 4)
+    ]
+    if same_hour_quarters[0] - 1 in selected_quarters:
+        # If the quarter before "same_hour_quarters" selected, then do nothing.
+        pass
+    elif same_hour_quarters[-1] + 1 in selected_quarters:
+        # If the quarter after "same_hour_quarters" selected, then make sure the selected quarters
+        # within "same_hour_quarter" are as late as possible within that hour, and in reverse order.
+        q1 = [i for i in selected_quarters if i not in same_hour_quarters]
+        n1 = len([i for i in same_hour_quarters if i in selected_quarters])
+        q2 = same_hour_quarters[::-1][0:n1]
+        selected_quarters = q1 + q2
+
+    lowest_quarters = [x + time_start_index for x in sorted(selected_quarters)]
+
+    return lowest_quarters
 
 
-def get_lowest_hours_continuous(
-    start_hour: datetime, ready_hour: datetime, raw_two_days: Raw, hours: int
+def get_lowest_quarters_continuous(
+    start_quarter: datetime, ready_quarter: datetime, raw_two_days: Raw, quarters: int
 ) -> list:
-    """From the two-day prices, calculate the cheapest continues set of hours
+    """From the two-day prices, calculate the cheapest continues set of quarters
 
-    A continues range of hours will be choosen."""
+    A continues range of quarters will be choosen."""
 
-    _LOGGER.debug("ready_hour = %s", ready_hour)
+    _LOGGER.debug("ready_quarter = %s", ready_quarter)
 
-    if hours == 0:
+    if quarters == 0:
         return []
 
     price = []
@@ -329,11 +396,11 @@ def get_lowest_hours_continuous(
     lowest_index = None
     lowest_price = None
     time_start = dt.utcnow()
-    if start_hour > time_start:
-        time_start = start_hour
-    time_end = ready_hour
+    if start_quarter > time_start:
+        time_start = start_quarter
+    time_end = ready_quarter
     # time_end = dt.now().replace(
-    #     hour=ready_hour, minute=0, second=0, microsecond=0
+    #     quarter=ready_quarter, minute=0, second=0, microsecond=0
     # ) + timedelta(days=1)
     time_start_index = None
     time_end_index = None
@@ -346,9 +413,9 @@ def get_lowest_hours_continuous(
 
     if time_start_index is None or time_end_index is None:  # pragma: no cover
         _LOGGER.error("Is not able to calculate charging schedule!")
-        _LOGGER.error("start_hour = %s", start_hour)
-        _LOGGER.error("ready_hour = %s", ready_hour)
-        _LOGGER.error("hours = %s", hours)
+        _LOGGER.error("start_quarter = %s", start_quarter)
+        _LOGGER.error("ready_quarter = %s", ready_quarter)
+        _LOGGER.error("quarters = %s", quarters)
         if raw_two_days:
             if raw_two_days.data:
                 _LOGGER.error("raw_two_days.data = %s", raw_two_days.data)
@@ -358,34 +425,34 @@ def get_lowest_hours_continuous(
             _LOGGER.error("raw_two_days = None")
         return []
 
-    if (time_end_index - time_start_index) < hours:
+    if (time_end_index - time_start_index) < quarters:
         return list(range(time_start_index, time_end_index + 1))
 
-    for index in range(time_start_index, time_end_index - hours + 2):
+    for index in range(time_start_index, time_end_index - quarters + 2):
         if lowest_index is None:
             lowest_index = index
-            lowest_price = sum(price[index : (index + hours)])
+            lowest_price = sum(price[index : (index + quarters)])
             continue
-        new_price = sum(price[index : (index + hours)])
+        new_price = sum(price[index : (index + quarters)])
         if new_price < lowest_price:
             lowest_index = index
             lowest_price = new_price
 
-    res = list(range(lowest_index, lowest_index + hours))
+    res = list(range(lowest_index, lowest_index + quarters))
     return res
 
 
-def get_charging_original(lowest_hours: list[int], raw_two_days: Raw) -> list:
+def get_charging_original(lowest_quarters: list[int], raw_two_days: Raw) -> list:
     """Calculate charging information"""
 
     result = []
-    hour = 0
+    quarter = 0
     for item in raw_two_days.get_raw():
         new_item = deepcopy(item)
-        if hour not in lowest_hours:
+        if quarter not in lowest_quarters:
             new_item["value"] = None
         result.append(new_item)
-        hour = hour + 1
+        quarter = quarter + 1
 
     return result
 
@@ -413,14 +480,14 @@ def get_charging_update(
     return result
 
 
-def get_charging_hours(
+def get_charging_quarters(
     ev_soc: float, ev_target_soc: float, charing_pct_per_hour: float
 ) -> int:
-    """Calculate the number of charging hours"""
-    charging_hours = ceil(
-        min(max(((ev_target_soc - ev_soc) / charing_pct_per_hour), 0), 24)
+    """Calculate the number of charging quarters"""
+    charging_quarters = ceil(
+        min(max(((ev_target_soc - ev_soc) / charing_pct_per_hour * 4), 0), 24 * 4)
     )
-    return charging_hours
+    return charging_quarters
 
 
 def get_charging_value(charging):
@@ -432,42 +499,54 @@ def get_charging_value(charging):
     return None
 
 
-def get_ready_hour_utc(ready_hour_local: int) -> datetime:
-    """Get the UTC time for the ready hour"""
+def get_ready_quarter_utc(ready_quarter_local: int) -> datetime:
+    """Get the UTC time for the ready quarter"""
 
-    # if now_local <= ready_hour_local THEN ready_hour_utc is today
-    # if now_local > ready_hour_local THEN ready_hour_utc is tomorrow
+    # if now_local <= ready_quarter_local THEN ready_quarter_utc is today
+    # if now_local > ready_quarter_local THEN ready_quarter_utc is tomorrow
 
     time_local: datetime = dt.now()
-    if time_local.hour >= ready_hour_local or ready_hour_local == 24:
+    if Utils.datetime_quarter(
+        time_local
+    ) >= ready_quarter_local or ready_quarter_local == (
+        24 * 4
+    ):  # TODO is * 4 correct?
         time_local = time_local + timedelta(days=1)
-    if ready_hour_local == READY_HOUR_NONE:
+    if ready_quarter_local == READY_QUARTER_NONE:
         time_local = time_local + timedelta(days=3)
     time_local = time_local.replace(
-        hour=ready_hour_local % 24, minute=0, second=0, microsecond=0
+        hour=(ready_quarter_local // 4) % 24,
+        minute=(ready_quarter_local % 4) * 15,
+        second=0,
+        microsecond=0,
     )
     return dt.as_utc(time_local)
 
 
-def get_start_hour_utc(start_hour_local: int, ready_hour_local: int) -> datetime:
-    """Get the UTC time for the ready hour"""
+def get_start_quarter_utc(
+    start_quarter_local: int, ready_quarter_local: int
+) -> datetime:
+    """Get the UTC time for the ready quarter"""
 
-    # if now_local <= ready_hour_local THEN ready_hour_utc is today
-    # if now_local > ready_hour_local THEN ready_hour_utc is tomorrow
+    # if now_local <= ready_quarter_local THEN ready_quarter_utc is today
+    # if now_local > ready_quarter_local THEN ready_quarter_utc is tomorrow
 
     time_local: datetime = dt.now()
-    if start_hour_local == START_HOUR_NONE:
+    if start_quarter_local == START_QUARTER_NONE:
         time_local = time_local + timedelta(days=-2)
-    elif ready_hour_local != READY_HOUR_NONE:
-        if start_hour_local < ready_hour_local:
-            if time_local.hour >= ready_hour_local:
+    elif ready_quarter_local != READY_QUARTER_NONE:
+        if start_quarter_local < ready_quarter_local:
+            if Utils.datetime_quarter(time_local) >= ready_quarter_local:
                 time_local = time_local + timedelta(days=1)
         else:
-            if time_local.hour < ready_hour_local:
+            if Utils.datetime_quarter(time_local) < ready_quarter_local:
                 time_local = time_local + timedelta(days=-1)
 
     time_local = time_local.replace(
-        hour=start_hour_local % 24, minute=0, second=0, microsecond=0
+        hour=(start_quarter_local // 4) % 24,
+        minute=(start_quarter_local % 4) * 15,
+        second=0,
+        microsecond=0,
     )
     return dt.as_utc(time_local)
 
@@ -482,7 +561,7 @@ class Scheduler:
         self.charging_is_planned = False
         self.charging_start_time = None
         self.charging_stop_time = None
-        self.charging_number_of_hours = 0
+        self.charging_number_of_quarters = 0
 
     def create_base_schedule(
         self,
@@ -498,41 +577,43 @@ class Scheduler:
         ):
             return
 
-        charging_hours: int = get_charging_hours(
+        charging_quarters: int = get_charging_quarters(
             params["ev_soc"],
             params["ev_target_soc"],
             params["charging_pct_per_hour"],
         )
-        _LOGGER.debug("charging_hours = %s", charging_hours)
-        lowest_hours = get_lowest_hours(
-            params["start_hour"],
-            params["ready_hour"],
+        _LOGGER.debug("charging_quarters = %s", charging_quarters)
+        lowest_quarters = get_lowest_quarters(
+            params["start_quarter"],
+            params["ready_quarter"],
             params["switch_continuous"],
             raw_two_days,
-            charging_hours,
+            charging_quarters,
         )
-        _LOGGER.debug("lowest_hours = %s", lowest_hours)
-        self.schedule_base = get_charging_original(lowest_hours, raw_two_days)
+        _LOGGER.debug("lowest_quarters = %s", lowest_quarters)
+        self.schedule_base = get_charging_original(lowest_quarters, raw_two_days)
 
         if params["min_soc"] == 0.0:
             self.schedule_base_min_soc = []
             return
 
-        charging_hours: int = get_charging_hours(
+        charging_quarters: int = get_charging_quarters(
             params["ev_soc"],
             params["min_soc"],
             params["charging_pct_per_hour"],
         )
-        _LOGGER.debug("charging_hours_min_soc = %s", charging_hours)
-        lowest_hours = get_lowest_hours(
-            params["start_hour"],
-            params["ready_hour"],
+        _LOGGER.debug("charging_quarters_min_soc = %s", charging_quarters)
+        lowest_quarters = get_lowest_quarters(
+            params["start_quarter"],
+            params["ready_quarter"],
             params["switch_continuous"],
             raw_two_days,
-            charging_hours,
+            charging_quarters,
         )
-        _LOGGER.debug("lowest_hours_min_soc = %s", lowest_hours)
-        self.schedule_base_min_soc = get_charging_original(lowest_hours, raw_two_days)
+        _LOGGER.debug("lowest_quarters_min_soc = %s", lowest_quarters)
+        self.schedule_base_min_soc = get_charging_original(
+            lowest_quarters, raw_two_days
+        )
 
     def base_schedule_exists(self) -> bool:
         """Return true if base schedule exists"""
@@ -584,19 +665,19 @@ class Scheduler:
     def calc_schedule_summary(self):
         """Calculate summary of schedule"""
 
-        number_of_hours = 0
+        number_of_quarters = 0
         first_start = None
         last_stop = None
         if self.schedule is not None:
             for item in self.schedule:
                 if item["value"] != 0.0:
-                    number_of_hours = number_of_hours + 1
+                    number_of_quarters = number_of_quarters + 1
                     last_stop = dt.as_local(item["end"])
                     if first_start is None:
                         first_start = dt.as_local(item["start"])
 
-        self.charging_is_planned = number_of_hours != 0
-        self.charging_number_of_hours = number_of_hours
+        self.charging_is_planned = number_of_quarters != 0
+        self.charging_number_of_quarters = number_of_quarters
         self.charging_start_time = first_start
         self.charging_stop_time = last_stop
 
@@ -612,9 +693,9 @@ class Scheduler:
         """Get charging_stop_time"""
         return self.charging_stop_time
 
-    def get_charging_number_of_hours(self):
-        """Get charging_number_of_hours"""
-        return self.charging_number_of_hours
+    def get_charging_number_of_quarters(self):
+        """Get charging_number_of_quarters"""
+        return self.charging_number_of_quarters
 
     def set_empty_schedule(self):
         """Create an empty schedule"""
@@ -628,17 +709,17 @@ class Scheduler:
         """Create empty charging information"""
 
         start_time = dt.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        end_time = start_time + timedelta(hours=1)
+        end_time = start_time + timedelta(minutes=15)
         result = []
-        for hour in range(48):  # pylint: disable=unused-variable
+        for quarter in range(48 * 4):  # pylint: disable=unused-variable
             item = {
                 "start": start_time,
                 "end": end_time,
                 "value": 0.0,
             }
             result.append(item)
-            start_time = start_time + timedelta(hours=1)
-            end_time = end_time + timedelta(hours=1)
+            start_time = start_time + timedelta(minutes=15)
+            end_time = end_time + timedelta(minutes=15)
 
         return result
 
@@ -649,7 +730,7 @@ def main():  # pragma: no cover
     result = []
     value = [1, 4, 6, 6, 5, 3, 2, 2, 4, 4]
     start_time = dt.now().replace(minute=0, second=0, microsecond=0)
-    end_time = start_time + timedelta(hours=1)
+    end_time = start_time + timedelta(minutes=15)
     for nnnn in range(10):
         item = {
             "start": start_time,
@@ -660,9 +741,9 @@ def main():  # pragma: no cover
     raw2 = Raw(result)
     print("r2.raw = " + str(raw2.get_raw()))
     print("price = ", value)
-    lowest = get_lowest_hours_continuous(start_time, end_time, raw2, 2)
+    lowest = get_lowest_quarters_continuous(start_time, end_time, raw2, 2)
     print("lowest = " + str(lowest))
-    lowest = get_lowest_hours_non_continuous(start_time, end_time, raw2, 2)
+    lowest = get_lowest_quarters_non_continuous(start_time, end_time, raw2, 2)
     print("lowest = " + str(lowest))
 
 

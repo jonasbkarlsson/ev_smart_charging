@@ -35,7 +35,7 @@ async def test_coordinator_keep_on1(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -111,7 +111,7 @@ async def test_coordinator_keep_on1(
 
     # Move back time to recreate the schedule
     freezer.move_to("2022-09-30T20:00:00+02:00")
-    MockSOCEntity.set_state(hass, "40")
+    MockSOCEntity.set_state(hass, "38")
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
     await coordinator.switch_keep_on_update(True)
     await coordinator.update_sensors()
@@ -168,7 +168,7 @@ async def test_coordinator_keep_on2(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -247,7 +247,7 @@ async def test_coordinator_keep_on3(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -357,7 +357,7 @@ async def test_coordinator_keep_on4(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -422,7 +422,7 @@ async def test_coordinator_keep_on4(
     # Move back time to recreate the schedule
     freezer.move_to("2022-09-30T20:00:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
-    MockSOCEntity.set_state(hass, "40")
+    MockSOCEntity.set_state(hass, "38")
     await coordinator.switch_keep_on_update(True)
     await coordinator.update_sensors()
     await hass.async_block_till_done()
@@ -483,7 +483,7 @@ async def test_coordinator_keep_on4b(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -527,7 +527,7 @@ async def test_coordinator_keep_on4b(
     # Move time and turn on keep on
     freezer.move_to("2022-09-30T20:00:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
-    MockSOCEntity.set_state(hass, "40")
+    MockSOCEntity.set_state(hass, "38")
     await coordinator.switch_keep_on_update(True)
     await coordinator.update_sensors()
     await hass.async_block_till_done()
@@ -588,7 +588,7 @@ async def test_coordinator_keep_on5(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -665,7 +665,7 @@ async def test_coordinator_keep_on5(
 
     # Move back time to recreate the schedule
     freezer.move_to("2022-09-30T20:00:00+02:00")
-    MockSOCEntity.set_state(hass, "40")  # Restore SOC
+    MockSOCEntity.set_state(hass, "38")  # Restore SOC
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
     await coordinator.switch_keep_on_update(True)
     await coordinator.update_sensors()
@@ -722,7 +722,7 @@ async def test_coordinator_keep_on6(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -812,7 +812,7 @@ async def test_coordinator_keep_on6b(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -857,7 +857,7 @@ async def test_coordinator_keep_on6b(
     # Move time
     freezer.move_to("2022-09-30T20:00:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
-    MockSOCEntity.set_state(hass, "40")
+    MockSOCEntity.set_state(hass, "38")
     await coordinator.update_sensors()
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF

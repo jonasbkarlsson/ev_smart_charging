@@ -62,7 +62,7 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
         self._charging_is_planned = False
         self._charging_start_time = None
         self._charging_stop_time = None
-        self._charging_number_of_hours = None
+        self._charging_number_of_quarters = None
 
         self._opportunistic = False
 
@@ -80,7 +80,7 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
             "charging_is_planned": self._charging_is_planned,
             "charging_start_time": self._charging_start_time,
             "charging_stop_time": self._charging_stop_time,
-            "charging_number_of_hours": self._charging_number_of_hours,
+            "charging_number_of_quarters": self._charging_number_of_quarters,
             "opportunistic": self._opportunistic,
             "raw_two_days": self._raw_two_days,
             "charging_schedule": self._charging_schedule,
@@ -167,13 +167,13 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
         self.update_ha_state()
 
     @property
-    def charging_number_of_hours(self):
-        """Getter for charging_number_of_hours."""
-        return self._charging_number_of_hours
+    def charging_number_of_quarters(self):
+        """Getter for charging_number_of_quarters."""
+        return self._charging_number_of_quarters
 
-    @charging_number_of_hours.setter
-    def charging_number_of_hours(self, new_value):
-        self._charging_number_of_hours = new_value
+    @charging_number_of_quarters.setter
+    def charging_number_of_quarters(self, new_value):
+        self._charging_number_of_quarters = new_value
         self.update_ha_state()
 
     @property

@@ -1,4 +1,5 @@
 """Test ev_smart_charging coordinator."""
+
 from datetime import datetime
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -61,6 +62,7 @@ async def test_coordinator(
 
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator2(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -180,6 +182,7 @@ async def test_coordinator2(
 
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()
+
 
 async def test_coordinator_min_soc1(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -307,7 +310,7 @@ async def test_coordinator_min_soc2(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Move time to scheduled charging time
     freezer.move_to("2022-10-01T03:00:00+02:00")
@@ -327,7 +330,7 @@ async def test_coordinator_min_soc2(
     assert coordinator.sensor.charging_is_planned is False
     assert coordinator.sensor.charging_start_time is None
     assert coordinator.sensor.charging_stop_time is None
-    assert coordinator.sensor.charging_number_of_hours == 0
+    assert coordinator.sensor.charging_number_of_quarters == 0
 
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()
@@ -379,7 +382,7 @@ async def test_coordinator_fix_soc(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "70")
+    MockSOCEntity.create(hass, entity_registry, "68")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -444,7 +447,7 @@ async def test_coordinator_fix_soc(
     assert coordinator.auto_charging_state == STATE_OFF
     assert coordinator.sensor.state == STATE_OFF
 
-    # Move time to after ready_hour
+    # Move time to after ready_quarter
     freezer.move_to("2022-10-01T08:00:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20221001, None)
     await coordinator.update_sensors()

@@ -1,17 +1,17 @@
 """Test ev_smart_charging/helpers/general.py"""
 
-
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from homeassistant.core import State
 
 from custom_components.ev_smart_charging.const import (
     CONF_MIN_SOC,
     CONF_PCT_PER_HOUR,
-    CONF_READY_HOUR,
+    CONF_READY_QUARTER,
 )
 from custom_components.ev_smart_charging.helpers.general import (
     Validator,
     get_parameter,
+    get_quarter_index,
 )
 
 from .const import MOCK_CONFIG_DATA, MOCK_CONFIG_OPTIONS
@@ -61,6 +61,15 @@ async def test_get_parameter(hass):
     config_entry.add_to_hass(hass)
     assert get_parameter(config_entry, CONF_PCT_PER_HOUR) == 8.0
     assert get_parameter(config_entry, CONF_MIN_SOC) == 30.0
-    assert get_parameter(config_entry, CONF_READY_HOUR) is None
-    assert get_parameter(config_entry, CONF_READY_HOUR, 12) == 12
+    assert get_parameter(config_entry, CONF_READY_QUARTER) is None
+    assert get_parameter(config_entry, CONF_READY_QUARTER, 12) == 12
 
+
+async def test_get_quarter_index(hass):
+    """Test get_quarter_index"""
+
+    assert get_quarter_index("None") is None
+    assert get_quarter_index("00:00") is 0
+    assert get_quarter_index("00:15") is 1
+    assert get_quarter_index("23:45") is 95
+    assert get_quarter_index("12:34") is None

@@ -39,7 +39,7 @@ async def test_coordinator_keep_on_get_entities(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -109,7 +109,7 @@ async def test_coordinator_keep_on_schedule(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -215,7 +215,7 @@ async def test_coordinator_keep_on_connect(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -341,7 +341,7 @@ async def test_coordinator_keep_on_connect(
     # Connect EV with less SOC. The charging should not start.
     # Should lead to a schedule 02-09.
     freezer.move_to("2022-10-01T16:00:00+02:00")
-    MockSOCEntity.set_state(hass, "40")
+    MockSOCEntity.set_state(hass, "38")
     await coordinator.switch_ev_connected_update(True)
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
@@ -377,7 +377,7 @@ async def test_coordinator_keep_on_connect2(
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "40")
+    MockSOCEntity.create(hass, entity_registry, "38")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
@@ -466,7 +466,7 @@ async def test_coordinator_keep_on_connect2(
     # Connected with less SOC. The charging should not start.
     # Should lead to a schedule 02-09.
     freezer.move_to("2022-10-01T16:00:00+02:00")
-    MockSOCEntity.set_state(hass, "40")
+    MockSOCEntity.set_state(hass, "38")
     await coordinator.switch_ev_connected_update(True)
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_OFF
@@ -546,7 +546,7 @@ async def test_coordinator_keep_on_connect3(
     freezer.move_to("2022-09-30T16:00:00+02:00")
     await coordinator.update_state()
     await hass.async_block_till_done()
-    MockSOCEntity.set_state(hass, "40")
+    MockSOCEntity.set_state(hass, "38")
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON
@@ -565,7 +565,7 @@ async def test_coordinator_keep_on_connect3(
     MockPriceEntity.set_state(hass, PRICE_20221001, None)
     await coordinator.update_state()
     await hass.async_block_till_done()
-    MockSOCEntity.set_state(hass, "40")
+    MockSOCEntity.set_state(hass, "38")
     await hass.async_block_till_done()
     assert coordinator.auto_charging_state == STATE_ON
     assert coordinator.sensor.state == STATE_ON

@@ -1,4 +1,5 @@
 """Test ev_smart_charging coordinator."""
+
 from datetime import datetime
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -24,9 +25,9 @@ from tests.helpers.helpers import (
 )
 from tests.price import PRICE_20221001, PRICE_20221002
 from tests.coordinator.const import (
-    MOCK_CONFIG_START_HOUR_2A,
-    MOCK_CONFIG_START_HOUR_2B,
-    MOCK_CONFIG_START_HOUR_2C,
+    MOCK_CONFIG_START_QUARTER_2A,
+    MOCK_CONFIG_START_QUARTER_2B,
+    MOCK_CONFIG_START_QUARTER_2C,
 )
 
 
@@ -49,13 +50,13 @@ async def test_coordinator_start_hour_end_before_start_2a(
     freezer.move_to("2022-10-01T02:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "66")
+    MockSOCEntity.create(hass, entity_registry, "65")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
     MockPriceEntity.set_state(hass, PRICE_20221001, None)
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_START_HOUR_2A, entry_id="test"
+        domain=DOMAIN, data=MOCK_CONFIG_START_QUARTER_2A, entry_id="test"
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
@@ -87,7 +88,7 @@ async def test_coordinator_start_hour_end_before_start_2a(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 3, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 1
+    assert coordinator.sensor.charging_number_of_quarters == 1 * 4
 
     # Start_hour = 12:00, Ready_hour = 03:00
     # 5 hours => None
@@ -102,13 +103,13 @@ async def test_coordinator_start_hour_end_before_start_2a(
     assert coordinator.sensor.charging_is_planned is False
     assert coordinator.sensor.charging_start_time is None
     assert coordinator.sensor.charging_stop_time is None
-    assert coordinator.sensor.charging_number_of_hours == 0
+    assert coordinator.sensor.charging_number_of_quarters == 0
 
     # Start_hour = 12:00, Ready_hour = 03:00
     # 5 hours => 22:00-03:00
     freezer.move_to("2022-10-01T14:00:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20221001, PRICE_20221002)
-    MockSOCEntity.set_state(hass, "66")
+    MockSOCEntity.set_state(hass, "65")
     await coordinator.switch_active_update(False)
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
@@ -122,12 +123,12 @@ async def test_coordinator_start_hour_end_before_start_2a(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 2, 3, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Start_hour = 12:00, Ready_hour = 03:00
     # 5 hours => 23:00-03:00
     freezer.move_to("2022-10-01T23:00:00+02:00")
-    MockSOCEntity.set_state(hass, "67")
+    MockSOCEntity.set_state(hass, "68")
     await coordinator.switch_active_update(False)
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
@@ -141,7 +142,7 @@ async def test_coordinator_start_hour_end_before_start_2a(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 2, 3, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 4
+    assert coordinator.sensor.charging_number_of_quarters == 4 * 4
 
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()
@@ -165,13 +166,13 @@ async def test_coordinator_start_hour_end_before_start_2b(
     freezer.move_to("2022-10-01T02:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "66")
+    MockSOCEntity.create(hass, entity_registry, "65")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
     MockPriceEntity.set_state(hass, PRICE_20221001, None)
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_START_HOUR_2B, entry_id="test"
+        domain=DOMAIN, data=MOCK_CONFIG_START_QUARTER_2B, entry_id="test"
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
@@ -203,7 +204,7 @@ async def test_coordinator_start_hour_end_before_start_2b(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Start_hour = 22:00, Ready_hour = 09:00
     # 5 hours => None
@@ -218,13 +219,13 @@ async def test_coordinator_start_hour_end_before_start_2b(
     assert coordinator.sensor.charging_is_planned is False
     assert coordinator.sensor.charging_start_time is None
     assert coordinator.sensor.charging_stop_time is None
-    assert coordinator.sensor.charging_number_of_hours == 0
+    assert coordinator.sensor.charging_number_of_quarters == 0
 
     # Start_hour = 22:00, Ready_hour = 09:00
     # 5 hours => 03:00-08:00
     freezer.move_to("2022-10-01T14:00:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20221001, PRICE_20221002)
-    MockSOCEntity.set_state(hass, "66")
+    MockSOCEntity.set_state(hass, "65")
     await coordinator.switch_active_update(False)
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
@@ -238,12 +239,12 @@ async def test_coordinator_start_hour_end_before_start_2b(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 2, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Start_hour = 22:00, Ready_hour = 09:00
     # 5 hours => 03:00-08:00
     freezer.move_to("2022-10-01T23:00:00+02:00")
-    MockSOCEntity.set_state(hass, "67")
+    MockSOCEntity.set_state(hass, "65")
     await coordinator.switch_active_update(False)
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
@@ -257,7 +258,7 @@ async def test_coordinator_start_hour_end_before_start_2b(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 2, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()
@@ -281,13 +282,13 @@ async def test_coordinator_start_hour_end_before_start_2c(
     freezer.move_to("2022-10-01T02:00:00+02:00")
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
-    MockSOCEntity.create(hass, entity_registry, "66")
+    MockSOCEntity.create(hass, entity_registry, "65")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 123)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
     MockPriceEntity.set_state(hass, PRICE_20221001, None)
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_START_HOUR_2C, entry_id="test"
+        domain=DOMAIN, data=MOCK_CONFIG_START_QUARTER_2C, entry_id="test"
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
@@ -319,10 +320,10 @@ async def test_coordinator_start_hour_end_before_start_2c(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Start_hour = 22:00, Ready_hour = 15:00
-    # 5 hours => 17:00-22:00
+    # 1 hours => 14:00-15:00
     freezer.move_to("2022-10-01T14:00:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20221001, PRICE_20221002)
     MockSOCEntity.set_state(hass, "67")
@@ -339,12 +340,12 @@ async def test_coordinator_start_hour_end_before_start_2c(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 1, 15, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 1
+    assert coordinator.sensor.charging_number_of_quarters == 1 * 4
 
     # Start_hour = 22:00, Ready_hour = 15:00
     # 5 hours => 03:00-08:00
     freezer.move_to("2022-10-01T18:00:00+02:00")
-    MockSOCEntity.set_state(hass, "66")
+    MockSOCEntity.set_state(hass, "65")
     await coordinator.switch_active_update(False)
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
@@ -358,12 +359,12 @@ async def test_coordinator_start_hour_end_before_start_2c(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 2, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Start_hour = 22:00, Ready_hour = 15:00
     # 5 hours => 17:00-22:00
     freezer.move_to("2022-10-01T23:00:00+02:00")
-    MockSOCEntity.set_state(hass, "67")
+    MockSOCEntity.set_state(hass, "65")
     await coordinator.switch_active_update(False)
     await hass.async_block_till_done()
     await coordinator.switch_active_update(True)
@@ -377,7 +378,7 @@ async def test_coordinator_start_hour_end_before_start_2c(
     assert coordinator.sensor.charging_stop_time == datetime(
         2022, 10, 2, 8, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
-    assert coordinator.sensor.charging_number_of_hours == 5
+    assert coordinator.sensor.charging_number_of_quarters == 5 * 4
 
     # Unsubscribe to listeners
     coordinator.unsubscribe_listeners()
