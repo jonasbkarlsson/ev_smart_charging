@@ -102,9 +102,6 @@ async def test_sensor(hass, bypass_validate_input_sensors):
         2022, 9, 30, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
     )
 
-    sensor.charging_number_of_quarters = 4
-    assert sensor.charging_number_of_quarters == 4
-
     extra = sensor.extra_state_attributes
     assert extra["current_price"] == 12.1
     assert extra["ev_soc"] == 56
@@ -116,7 +113,16 @@ async def test_sensor(hass, bypass_validate_input_sensors):
     assert extra["charging_stop_time"] == datetime(
         2022, 9, 30, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
     )
-    assert extra["charging_number_of_quarters"] == 4
+
+    sensor.charging_number_of_quarters = 5
+    extra = sensor.extra_state_attributes
+    assert sensor.charging_number_of_quarters == 5
+    assert extra["charging_number_of_hours"] == 1.25
+
+    sensor.charging_number_of_quarters = 8
+    extra = sensor.extra_state_attributes
+    assert sensor.charging_number_of_quarters == 8
+    assert extra["charging_number_of_hours"] == 2
 
     # Test sensor_status
     sensor_status.set_status(CHARGING_STATUS_WAITING_CHARGING)
