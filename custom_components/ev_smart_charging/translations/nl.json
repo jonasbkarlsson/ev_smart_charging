@@ -78,7 +78,7 @@
                     "charging_is_planned": {"name": "Opladen staat gepland"},
                     "charging_start_time": {"name": "Starttijd opladen"},
                     "charging_stop_time": {"name": "Tijd opladen gereed"},
-                    "charging_number_of_quarters": {"name": "Aantal kwartieren opladen"},
+                    "charging_number_of_hours": {"name": "Aantal uren opladen"},
                     "opportunistic": {"name": "Opportunistisch"},
                     "raw_two_days": {"name": "Ruwe data van 2 dagen"},
                     "charging_schedule": {"name": "Oplaad schema"}

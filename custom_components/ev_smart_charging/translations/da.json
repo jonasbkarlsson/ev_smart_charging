@@ -78,7 +78,7 @@
                     "charging_is_planned": {"name": "Opladning er planlagt"},
                     "charging_start_time": {"name": "Starttidspunkt for opladning"},
                     "charging_stop_time": {"name": "Stoptidspunkt for opladning"},
-                    "charging_number_of_quarters": {"name": "Antal kvarter opladning"},
+                    "charging_number_of_hours": {"name": "Antal ladetimer"},
                     "opportunistic": {"name": "Opportunistisk"},
                     "raw_two_days": {"name": "Strømpriser to dage"},
                     "charging_schedule": {"name": "Ladeskema"}
