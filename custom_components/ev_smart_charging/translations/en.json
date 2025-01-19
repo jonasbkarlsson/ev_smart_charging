@@ -78,7 +78,7 @@
                     "charging_is_planned": {"name": "Charging is planned"},
                     "charging_start_time": {"name": "Charging start time"},
                     "charging_stop_time": {"name": "Charging stop time"},
-                    "charging_number_of_quarters": {"name": "Charging number of quarters"},
+                    "charging_number_of_hours": {"name": "Charging number of hours"},
                     "opportunistic": {"name": "Opportunistic"},
                     "raw_two_days": {"name": "Raw two days"},
                     "charging_schedule": {"name": "Charging schedule"}
