@@ -8,7 +8,7 @@
                     "price_sensor": "Elpris sensor",
                     "ev_soc_sensor": "Entitet för laddnivå (SOC)",
                     "ev_target_soc_sensor": "Entitet för önskad laddnivå (ett mellanslags för att ta bort)",
-                    "charger_entity": "Brytare för laddningsstyrning (ett mellanslags för att ta bort)",
+                    "charger_entity": "Entitet för laddningsstyrning (ett mellanslags för att ta bort)",
                     "ev_controlled": "Elbilsintegration kommer att styra start och stopp av laddning."
                 }
             }
@@ -21,8 +21,8 @@
             "ev_soc_invalid_data": "Entiteten för laddnivå ger inkorrekt data.",
             "ev_target_soc_not_found": "Entiteten för önskad laddnivå (SOC) hittas inte.",
             "ev_target_soc_invalid_data": "Entiteten för önskad laddnivå ger inkorrekt data.",
-            "charger_control_switch_not_found": "Brytare för laddningsstyrning hittas inte.",
-            "charger_control_switch_not_switch": "Entiteten för laddningsstyrning är inte en brytare."
+            "charger_control_switch_not_found": "Entitet för laddningsstyrning hittas inte.",
+            "charger_control_switch_not_switch": "Entiteten för laddningsstyrning är inte en brytare eller en input boolean."
         }
     },
     "options": {
@@ -33,7 +33,7 @@
                     "price_sensor": "Elpris sensor",
                     "ev_soc_sensor": "Entitet för laddnivå (SOC)",
                     "ev_target_soc_sensor": "Entitet för önskad laddnivå (ett mellanslags för att ta bort)",
-                    "charger_entity": "Brytare för laddningsstyrning (ett mellanslags för att ta bort)",
+                    "charger_entity": "Entitet för laddningsstyrning (ett mellanslags för att ta bort)",
                     "ev_controlled": "Elbilsintegration kommer att styra start och stopp av laddning."
                 }
             }
@@ -46,8 +46,8 @@
             "ev_soc_invalid_data": "Entiteten för laddnivå ger inkorrekt data.",
             "ev_target_soc_not_found": "Entiteten för önskad laddnivå hittas inte.",
             "ev_target_soc_invalid_data": "Entiteten för önskad laddnivå ger inkorrekt data.",
-            "charger_control_switch_not_found": "Brytare för laddningsstyrning hittas inte.",
-            "charger_control_switch_not_switch": "Entiteten för laddningsstyrning är inte en brytare."
+            "charger_control_switch_not_found": "Entitet för laddningsstyrning hittas inte.",
+            "charger_control_switch_not_switch": "Entiteten för laddningsstyrning är inte en brytare eller en input boolean."
         }
     },
     "entity": {
@@ -59,6 +59,7 @@
             "charging_speed": { "name": "Laddningshastighet" },
             "electricity_price_limit": { "name": "Elprisgräns" },
             "opportunistic_level": { "name": "Opportunistisk nivå" },
+            "opportunistic_type2_level": { "name": "Opportunistisk typ 2 nivå" },
             "low_price_charging_level": { "name": "Prisnivå för lågprisladdning" },
             "low_soc_charging_level": { "name": "Laddnivå för lågladdnivåladdning" },
             "minimum_ev_soc": { "name": "Lägsta laddnivå (SOC)" }
@@ -77,7 +78,8 @@
                     "charging_is_planned": {"name": "Laddning är planerad"},
                     "charging_start_time": {"name": "Laddning starttid"},
                     "charging_stop_time": {"name": "Laddning sluttid"},
-                    "charging_number_of_quarters": {"name": "Antal timmar laddning"},
+                    "charging_number_of_hours": {"name": "Antal timmar laddning"},
+                    "opportunistic": {"name": "Opportunistisk"},
                     "raw_two_days": {"name": "Priser två dagar"},
                     "charging_schedule": {"name": "Laddningsschema"}
                 }
@@ -104,6 +106,7 @@
             "ev_connected": { "name": "Elbil ansluten" },
             "keep_charger_on": { "name": "Håll laddaren aktiv" },
             "opportunistic_charging": { "name": "Opportunistisk laddning" },
+            "opportunistic_type2_charging": { "name": "Opportunistisk typ 2 laddning" },
             "low_price_charging": { "name": "Laddning vid lågt pris" },
             "low_soc_charging": { "name": "Laddning vid låg laddnivå (SOC)" }
         }

@@ -12,26 +12,25 @@
 
 The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration can get the electricity price information from a large number of integrations or from a template sensor that supports the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor).
 
-The integration calculates the set of hours that will give the lowest price, by default restricted to a continuous set. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight) or when the time of the day is before the configured charge completion time. When the automatic charging has started, changes of settings will not have any effect.
+The integration calculates the set of 15-minute intervals that will give the lowest price, by default restricted to a continuous set. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight) or when the time of the day is before the configured charge completion time. When the automatic charging has started, changes of settings will not have any effect.
 
 ## Requirements
-- A compatible price integration or a template sensor that generates price data using the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor).
-  - A compatible price integration shall provide prices either with attributes `prices_today` and `prices_tomorrow` or attributes `raw_today` and `raw_tomorrow`.
-  - The prices shall be provided with either the key `price` or `value`.
-  - The starting time for each price shall be provided with either the key `time`, `start` or `hour`.
-  - Compatible integrations includes, but is not limited to, the (HACS) [Nord Pool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice), the [Entso-e](https://github.com/JaccoR/hass-entso-e) and the [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations. Note that the (Home Assistant) [Nord Pool](https://www.home-assistant.io/integrations/nordpool) integration is not compatible, but can be used with a [template sensor](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Nordpool-(Home-Assistant)).
+- A [price integration with native support](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Supported-price-sensors) or a template sensor that generates price data using the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor).
+  - Integrations with native support includes, but is not limited to, the (HACS) [Nord Pool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice), the [Entso-e](https://github.com/JaccoR/hass-entso-e) and the [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations.
+  - Price integrations without native support can be used via a [template sensor](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Supported-price-sensors). This includes the Home Assistant native [Nord Pool](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Nordpool-(Home-Assistant)) integration.
 - Home Assistant version 2023.4 or newer.
 
 ## Features
 - Automatic EV charging control based on electricity prices.
 - Can automatically detect and use instances of the (HACS) [Nord Pool](https://github.com/custom-components/nordpool), [Energi Data Service](https://github.com/MTrab/energidataservice), [Entso-e](https://github.com/JaccoR/hass-entso-e) and [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations.
-- Supports manual configuration of other price integrations that fulfills the listed requirements above.
-- Supports a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). A template sensor can be used to get price information from non-compatible price integrations and/or to construct other special price information.
+- Supports manual configuration of other price integrations that fulfills [the listed requirements](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Supported-price-sensors).
+- Supports a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). A template sensor can be used to get price information from price integrations without native support and/or to construct other special price information.
+- Supports price information given with 15 minutes and 60 minutes intervals.
 - Configuration of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
 - Optional setting of minimum SOC level that should be reached independently of the electricity price.
 - Optional setting to only charge when the electricity price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
-- Optional setting to lower the level of maximum electricity price even further if the electricity price is very low at the end of the day tomorrow.
+- Two types of optional settings to lower the level of maximum electricity price even further if the electricity price is very low at the end of the day tomorrow.
 - Optional setting to start charging immediately if the SOC is below a configured level.
 - Optional setting to start charging immediately if the electricity price is lower than a configured level.
 - Optional possibility to provide information to the integration about when the EV is connected to the charger.
@@ -71,7 +70,7 @@ Name | Yes | The name of the instance.
 Electricity price entity | Yes | Sensor from any compatible price integration or a template sensor providing the price in the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). For the Entso-e integration, the entity called `sensor.average_electricity_price` should be used.
 EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100. Note that this entity is crucial for the integration. If live information about he SOC is not available, please carefully read the section below with more information about the EV SOC entity.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
-Charger control switch entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'.
+Charger control entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'. This entity can either be a Switch or an Input Boolean.
 Charging control by EV integration | Yes | Select this if an EV integration (and not a charger integration) will be used to control start/stop of charging. Also, if an EV integration is used to control start/stop of charging, it is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected`.
 
 With the exception of Name, the above configuration items can be changed after intial configuration in Settings -> Devices & Services -> Integrations -> EV Smart Charging -> 1 device -> Configure. To change Name, the native way to rename Integrations or Devices in Home Assistant can be used.
@@ -82,12 +81,13 @@ Additional parameters that affects how the charging will be performed are availa
 
 Entity | Type | Descriptions, valid value ranges and service calls
 -- | -- | --
-`select.ev_smart_charging_charge_start_time` | Select | The earliest time of the day for the charging to start. If `None` is selected, there will be no explicit limitation of the starting time. Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
-`select.ev_smart_charging_charge_completion_time` | Select | The latest time of the day for charging to reach the target State-of-Charge. If `None` is selected, charging will be optimized using all hours with available price information, including before tomorrow's prices are available. Valid options, "00:00", "01:00", ..., "23:00" and "None". Can be set by service call `select.select_option`.
+`select.ev_smart_charging_charge_start_time` | Select | The earliest time of the day for the charging to start. If `None` is selected, there will be no explicit limitation of the starting time. Valid options, "00:00", "00:15", ..., "23:45" and "None". Can be set by service call `select.select_option`.
+`select.ev_smart_charging_charge_completion_time` | Select | The latest time of the day for charging to reach the target State-of-Charge. If `None` is selected, charging will be optimized using all available price information, including before tomorrow's prices are available. Valid options, "00:00", "00:15", ..., "23:45" and "None". Can be set by service call `select.select_option`.
 `number.ev_smart_charging_charging_speed` | Number | The charging speed expressed as percent per hour. For example, if the EV has a 77 kWh battery and the charger can deliver 11 kW (3-phase 16 A), then set this parameter to 14.3 ((11/77)*100). If there are limitations in the charging power, it is preferred to choose a smaller number. Try and see what works for you! Valid values min=0.1, step=0.1, max=100. Can be set by service call `number.set_value`.
-`number.ev_smart_charging_electricity_price_limit` | Number | If the `switch.ev_smart_charging_apply_price_limit` switch is activated, charging will not be performed during hours when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge. Valid values min=-10000, step=0.01, max=10000. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_electricity_price_limit` | Number | If the `switch.ev_smart_charging_apply_price_limit` switch is activated, charging will not be performed when the electricity price is above this limit. NOTE that this might lead to that the EV will not be charged to the target State-of-Charge. Valid values min=-10000, step=0.01, max=10000. Can be set by service call `number.set_value`.
 `number.ev_smart_charging_minimum_ev_soc` | Number | The minimum State-of-Charge level that should be reached by scheduled charging, independently of the electricity price. Valid values min=0, step=1, max=100. Can be set by service call `number.set_value`.
-`number.ev_smart_charging_opportunistic_level` | Number | If the `switch.ev_smart_charging_opportunistic_charging` switch is activated, the price limit will be even further reduced if the price at the end of the day is lower than `Electricity price limit * Opportunistic level / 100`. For example, if the `Opportunistic level` is set to 50, the price limit will be set to 50% of the `Electricity price limit`. If the prices for tomorrow are available, the price at the end of the day tomorrow will be used as trigger. Valid values min=0, step=1, max=100. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_opportunistic_level` | Number | If the `switch.ev_smart_charging_opportunistic_charging` switch is activated, the price limit will be even further reduced if the last available price is lower than `Electricity price limit * Opportunistic level / 100`. For example, if the `Opportunistic level` is set to 50, the price limit will be set to 50% of the `Electricity price limit`. Valid values min=0, step=1, max=100. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_opportunistic_type2_level` | Number | If the `switch.ev_smart_charging_opportunistic_type2_charging` switch is activated, the price limit will be set based on `last available price * Opportunistic type2 level / 100`. For example, if the Opportunistic type2 level is set to 90, the price limit will be set to 90% of the last available price. If the last available price is negative, the price limit will be `last available price * (200 - Opportunistic type2 level) / 100`. If `switch.ev_smart_charging_apply_price_limit` is also activated, the lowest of the two price limits will be used. Valid values min=0, step=1, max=200. Can be set by service call number.set_value.
 `number.ev_smart_charging_low_soc_charging_level` | Number | If the `switch.ev_smart_charging_low_soc_charging` switch is activated, charging will be done immediately if the EV SOC is below this level. Valid values min=0.0, step=1.0, max=100. Can be set by service call `number.set_value`.
 `number.ev_smart_charging_low_price_charging_level` | Number | If the `switch.ev_smart_charging_low_price_charging` switch is activated, charging will be done immediately if the electricity price is below this level. Valid values min=-10000, step=0.01, max=10000. Can be set by service call `number.set_value`.
 
@@ -99,10 +99,11 @@ Entity | Type | Description
 `sensor.ev_smart_charging_status` | Sensor | The state is one of the following, "Waiting for new prices", "No charging planned", "Waiting for charging to begin", "Charging", "Keeping charger on", "Low price charging", "Low SOC charging", "Disconnected" and "Smart charging not active".
 `switch.ev_smart_charging_smart_charging_activated` | Switch | Turns the EV Smart Charging integration on and off.
 `switch.ev_smart_charging_apply_price_limit` | Switch | Applies the price limit.
-`switch.ev_smart_charging_opportunistic_charging` | Switch | Activates opportunistic charging. See the desciption of the configuration entity`number.ev_smart_charging_opportunistic_level`. This feature requires the feature `Electricity price limit` to be on.
+`switch.ev_smart_charging_opportunistic_charging` | Switch | Activates opportunistic charging, see the desciption of the configuration entity`number.ev_smart_charging_opportunistic_level`. This feature requires the feature `Electricity price limit` to be on.
+`switch.ev_smart_charging_opportunistic_type2_charging` | Switch | Activates opportunistic type 2 charging, see the desciption of the configuration entity `number.ev_smart_charging_opportunistic_type2_level`. The two types of opportunistic charging can not be used at the same time.
 `switch.ev_smart_charging_low_soc_charging` | Switch | Activates charging immediately if the EV SOC is lower than a configured level. It is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected` if this switch is set to on. Note that this charging is not shown as a scheduled charging. A typical use case is to charge the EV directly when returning home to a minimum level, and then do a complete charging using the scheduled charging when the price is lowest.
 `switch.ev_smart_charging_low_price_charging` | Switch | Activates charging immediately if the electricity price is lower than a configured level. It is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected` if this switch is set to on. Note that this charging is not shown as a scheduled charging.
-`switch.ev_smart_charging_continuous_charging_preferred` | Switch | If turned on, will as basis schedule one continuous charging session. If turned off, will schedule charging on the hours with lowest electricity price, even if they are not continuous.
+`switch.ev_smart_charging_continuous_charging_preferred` | Switch | If turned on, will as basis schedule one continuous charging session. If turned off, will schedule charging on the 15-minute intervals with lowest electricity price, even if they are not continuous.
 `switch.ev_smart_charging_keep_charger_on` | Switch | If "on", the `sensor.ev_smart_charging_charging` will not turn off after completed charge cycle. The feature is intended to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery. If this option is used, the feature `Electricity price limit` will be turned off, and vice versa. *NOTE* It is required that `switch.ev_smart_charging_ev_connected` is controlled in a proper way in order for this feature to work. Also, there is an assumption made that the EV itself will stop its charging when reaching the target SOC.
 `switch.ev_smart_charging_ev_connected` | Switch | Tells the integration that the EV is connected to the charger. Is preferable controlled by automations (see example below). Can avoid problems occuring when the EV is not connected to the charger at the time the charging should start. Using it will also ensure that the `sensor.ev_smart_charging_charging` is set to "off" when the EV is not connected to the charger.
 `button.ev_smart_charging_manually_start_charging` | Button | Manually start charging. This is totally independent of the automatic charging.
@@ -120,7 +121,8 @@ Attribute | Description
 `charging_is_planned` | `true` if charging is planned, otherwise `false`. Is set to `false` after charging is completed.
 `charging_start_time` | If charging is planned, the date and time when the charging will start.
 `charging_stop_time` | If charging is planned, the date and time when the charging will stop.
-`charging_number_of_hours` | If charging is planned, the number of hours that charging will be done. This might be less than the number of hours between the start and stop times, if the `apply_price_limit` switch is activated.
+`charging_number_of_hours` | If charging is planned, the number of hours that charging is planned. This might be less than the time between the start and stop times, if non-continuous charging is configured.
+`opportunistic` | `true` if an opportunistic charging feature has been triggered.
 `raw_two_days` | The electricity price today and tomorrow from the electricity price entity.
 `charging_schedule` | The calculated charging schedule. Can be used by an ApexCharts card to visulize the planned charging, see below.
 
@@ -266,14 +268,14 @@ If the EV SOC is not available as the state of an entity but as a state attribut
 ```
 alias: EV SOC
 description: ""
-trigger:
-  - platform: state
+triggers:
+  - trigger: state
     entity_id:
       - sensor.my_ev
     attribute: ev_soc
-condition: []
-action:
-  - service: input_number.set_value
+conditions: []
+actions:
+  - action: input_number.set_value
     data:
       value: "{{ state_attr('sensor.my_ev', 'EV SOC') }}"
     target:
@@ -302,15 +304,15 @@ Some examples are given below. Additional examples are given in the [Wiki page](
 alias: EV Smart Charging - Start
 description: ""
 mode: single
-trigger:
-  - platform: state
+triggers:
+  - trigger: state
     entity_id:
       - sensor.ev_smart_charging_charging
     from: "off"
     to: "on"
-condition: []
-action:
-  - service: easee.set_circuit_dynamic_limit
+conditions: []
+actions:
+  - action: easee.set_circuit_dynamic_limit
     data:
       charger_id: exxxxxxx (replace with your charger id, which can be found in the Easee app (Charger Settings -> About -> Serial Number))
       currentP1: 16 (replace with your preferred charging current)
@@ -323,15 +325,15 @@ Please replace the contents of `action:` with suitable contents for your charger
 alias: EV Smart Charging - Stop
 description: ""
 mode: single
-trigger:
-  - platform: state
+triggers:
+  - trigger: state
     entity_id:
       - sensor.ev_smart_charging_charging
     from: "on"
     to: "off"
-condition: []
-action:
-  - service: easee.set_circuit_dynamic_limit
+conditions: []
+actions:
+  - action: easee.set_circuit_dynamic_limit
     data:
       charger_id: exxxxxxx (replace with your charger id, which can be found in the Easee app (Charger Settings -> About -> Serial Number))
       currentP1: 0 (something below 6 to make the charging stop)
@@ -343,18 +345,18 @@ Please replace the contents of `action:` with suitable contents for your charger
 ```
 alias: EV Smart Charging - EV connected
 description: ""
-trigger:
-  - platform: state
+triggers:
+  - trigger: state
     entity_id:
       - sensor.ocpp_status_connector
-condition: []
-action:
+conditions: []
+actions:
   - if:
       - condition: state
         entity_id: sensor.ocpp_status_connector
         state: Preparing
     then:
-      - service: switch.turn_on
+      - action: switch.turn_on
         data: {}
         target:
           entity_id: switch.ev_smart_charging_ev_connected
@@ -364,7 +366,7 @@ action:
             entity_id: sensor.ocpp_status_connector
             state: Available
         then:
-          - service: switch.turn_off
+          - action: switch.turn_off
             data: {}
             target:
               entity_id: switch.ev_smart_charging_ev_connected

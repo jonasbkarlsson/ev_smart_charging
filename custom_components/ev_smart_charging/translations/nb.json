@@ -8,7 +8,7 @@
                     "price_sensor": "Sensor for strømpris",
                     "ev_soc_sensor": "Elbil SOC-enhet (ladenivå)",
                     "ev_target_soc_sensor": "Enhet for ønsket SOC/ladenivå (mellomrom for å ta bort)",
-                    "charger_entity": "Ladekontrollbryter (mellomrom for å ta bort)",
+                    "charger_entity": "Ladekontrollenhet (mellomrom for å ta bort)",
                     "ev_controlled": "Elbilintegrasjon, brukes for å styre start og stopp av lading."
                 }
             }
@@ -21,8 +21,8 @@
             "ev_soc_invalid_data": "SOC-enheten gir ugyldige data.",
             "ev_target_soc_not_found": "Elbil mål-SOC-enhet ikke funnet.",
             "ev_target_soc_invalid_data": "Mål-SOC-enheten gir ugyldige data.",
-            "charger_control_switch_not_found": "Ladekontrollbryter ikke funnet.",
-            "charger_control_switch_not_switch": "Ladekontrollbryteren er ikke en bryter."
+            "charger_control_switch_not_found": "Ladekontrollenhet ikke funnet.",
+            "charger_control_switch_not_switch": "Ladekontrollenhet er ikke en bryter eller en input boolean."
         }
     },
     "options": {
@@ -33,7 +33,7 @@
                     "price_sensor": "Sensor for strømpris",
                     "ev_soc_sensor": "Elbil SOC-enhet",
                     "ev_target_soc_sensor": "Elbil mål-SOC-enhet (mellomrom for å ta bort)",
-                    "charger_entity": "Ladekontrollbryter (mellomrom for å ta bort)",
+                    "charger_entity": "Ladekontrollenhet (mellomrom for å ta bort)",
                     "ev_controlled": "Elbil-integrasjon for å kontrollere start/stopp av lading"
                 }
             }
@@ -46,8 +46,8 @@
             "ev_soc_invalid_data": "SOC-enheten gir ugyldige data.",
             "ev_target_soc_not_found": "Elbil mål-SOC-enhet ikke funnet.",
             "ev_target_soc_invalid_data": "Mål-SOC-enheten gir ugyldige data.",
-            "charger_control_switch_not_found": "Ladekontrollbryter ikke funnet.",
-            "charger_control_switch_not_switch": "Ladekontrollbryteren er ikke en bryter."
+            "charger_control_switch_not_found": "Ladekontrollenhet ikke funnet.",
+            "charger_control_switch_not_switch": "Ladekontrollenhet er ikke en bryter eller en input boolean."
         }
     },
     "entity": {
@@ -59,6 +59,7 @@
             "charging_speed": { "name": "Ladehastighet" },
             "electricity_price_limit": { "name": "Maksimum strømpris" },
             "opportunistic_level": { "name": "Opportunistisk nivå" },
+            "opportunistic_type2_level": { "name": "Opportunistisk type 2 nivå" },
             "low_price_charging_level": { "name": "Lad ved lavt prisnivå" },
             "low_soc_charging_level": { "name": "Lad ved lavt ladenivå (SOC)" },
             "minimum_ev_soc": { "name": "Minimum ladenivå (SOC)" }
@@ -77,7 +78,8 @@
                     "charging_is_planned": {"name": "Lading er planlagt"},
                     "charging_start_time": {"name": "Starttidspunkt for lading"},
                     "charging_stop_time": {"name": "Stopptidspunkt for lading"},
-                    "charging_number_of_quarters": {"name": "Antall ladetimer"},
+                    "charging_number_of_hours": {"name": "Antall ladetimer"},
+                    "opportunistic": {"name": "Opportunistisk"},
                     "raw_two_days": {"name": "Strømpriser to dager"},
                     "charging_schedule": {"name": "Ladeskjema"}
                 }
@@ -104,6 +106,7 @@
             "ev_connected": { "name": "Elbil tilkoblet" },
             "keep_charger_on": { "name": "Hold laderen på" },
             "opportunistic_charging": { "name": "Opportunistisk lading" },
+            "opportunistic_type2_charging": { "name": "Opportunistisk type 2 lading" },
             "low_price_charging": { "name": "Lad ved lav pris" },
             "low_soc_charging": { "name": "Lad ved lavt ladenivå (SOC)" }
         }

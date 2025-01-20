@@ -8,7 +8,7 @@
                     "price_sensor": "Electricity price sensor",
                     "ev_soc_sensor": "EV SOC entity",
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
-                    "charger_entity": "Charger control switch (single space to remove)",
+                    "charger_entity": "Charger control entity (single space to remove)",
                     "ev_controlled": "An EV integration will control start/stop of charging"
                 }
             }
@@ -21,8 +21,8 @@
             "ev_soc_invalid_data": "The SOC entity gives invalid data.",
             "ev_target_soc_not_found": "EV Target SOC entity not found.",
             "ev_target_soc_invalid_data": "The Target SOC entity gives invalid data.",
-            "charger_control_switch_not_found": "Charger control switch entity not found.",
-            "charger_control_switch_not_switch": "Charger control switch entity is not a switch."
+            "charger_control_switch_not_found": "Charger control entity not found.",
+            "charger_control_switch_not_switch": "Charger control entity is not a switch or an input boolean."
         }
     },
     "options": {
@@ -33,7 +33,7 @@
                     "price_sensor": "Electricity price sensor",
                     "ev_soc_sensor": "EV SOC entity",
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
-                    "charger_entity": "Charger control switch (single space to remove)",
+                    "charger_entity": "Charger control entity (single space to remove)",
                     "ev_controlled": "An EV integration will control start/stop of charging"
                 }
             }
@@ -46,8 +46,8 @@
             "ev_soc_invalid_data": "The SOC entity gives invalid data.",
             "ev_target_soc_not_found": "EV Target SOC entity not found.",
             "ev_target_soc_invalid_data": "The Target SOC entity gives invalid data.",
-            "charger_control_switch_not_found": "Charger control switch entity not found.",
-            "charger_control_switch_not_switch": "Charger control switch entity is not a switch."
+            "charger_control_switch_not_found": "Charger control entity not found.",
+            "charger_control_switch_not_switch": "Charger control entity is not a switch or an input boolean."
         }
     },
     "entity": {
@@ -106,9 +106,9 @@
             "ev_connected": { "name": "EV connected" },
             "keep_charger_on": { "name": "Keep charger on" },
             "opportunistic_charging": { "name": "Opportunistic charging" },
+            "opportunistic_type2_charging": { "name": "Opportunistic type2 charging" },
             "low_price_charging": { "name": "Low price charging" },
-            "low_soc_charging": { "name": "Low SOC charging" },
-            "opportunistic_type2_charging": { "name": "Opportunistic type2 charging" }
+            "low_soc_charging": { "name": "Low SOC charging" }
         }
     }
 }
