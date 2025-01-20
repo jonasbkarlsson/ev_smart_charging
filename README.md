@@ -15,19 +15,16 @@ The EV Smart Charging integration will automatically charge the electric vehicle
 The integration calculates the set of 15-minute intervals that will give the lowest price, by default restricted to a continuous set. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight) or when the time of the day is before the configured charge completion time. When the automatic charging has started, changes of settings will not have any effect.
 
 ## Requirements
-- A compatible price integration or a template sensor that generates price data using the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor).
-  - A compatible price integration shall provide prices either with attributes `prices_today` and `prices_tomorrow` or attributes `raw_today` and `raw_tomorrow`.
-  - Prices shall be provided with either the key `price` or `value`.
-  - Starting time for each price shall be provided with either the key `time`, `start` or `hour`.
-  - Price information shall be given either with 15 minutes or with 60 minutes intervals.
-  - Compatible integrations includes, but is not limited to, the (HACS) [Nord Pool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice), the [Entso-e](https://github.com/JaccoR/hass-entso-e) and the [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations. Note that the (Home Assistant) [Nord Pool](https://www.home-assistant.io/integrations/nordpool) integration is not compatible, but can be used with a [template sensor](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Nordpool-(Home-Assistant)).
+- A [price integration with native support](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Supported-price-sensors) or a template sensor that generates price data using the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor).
+  - Integrations with native support includes, but is not limited to, the (HACS) [Nord Pool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice), the [Entso-e](https://github.com/JaccoR/hass-entso-e) and the [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations.
+  - Price integrations without native support can be used via a [template sensor](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Supported-price-sensors). This includes the Home Assistant native [Nord Pool](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Nordpool-(Home-Assistant)) integration.
 - Home Assistant version 2023.4 or newer.
 
 ## Features
 - Automatic EV charging control based on electricity prices.
 - Can automatically detect and use instances of the (HACS) [Nord Pool](https://github.com/custom-components/nordpool), [Energi Data Service](https://github.com/MTrab/energidataservice), [Entso-e](https://github.com/JaccoR/hass-entso-e) and [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations.
-- Supports manual configuration of other price integrations that fulfills the listed requirements above.
-- Supports a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). A template sensor can be used to get price information from non-compatible price integrations and/or to construct other special price information.
+- Supports manual configuration of other price integrations that fulfills [the listed requirements](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Supported-price-sensors).
+- Supports a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). A template sensor can be used to get price information from price integrations without native support and/or to construct other special price information.
 - Supports price information given with 15 minutes and 60 minutes intervals.
 - Configuration of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
