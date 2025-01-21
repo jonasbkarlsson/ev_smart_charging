@@ -360,7 +360,8 @@ def get_lowest_quarters_non_continuous(
         i
         for i in range(len(prices))
         if prices[i] == highest_selected_price
-        and (i // 4) == (selected_quarters[-1] // 4)
+        and ((i + time_start_index) // 4)
+        == ((selected_quarters[-1] + time_start_index) // 4)
     ]
     if same_hour_quarters[0] - 1 in selected_quarters:
         # If the quarter before "same_hour_quarters" selected, then do nothing.
