@@ -45,6 +45,10 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
 
     _entity_key = ENTITY_KEY_CHARGING_SENSOR
 
+    _unrecorded_attributes = frozenset(
+        ["raw_two_days", "charging_schedule"]
+    )
+
     def __init__(self, entry):
         _LOGGER.debug("EVSmartChargingSensor.__init__()")
         super().__init__(entry)
