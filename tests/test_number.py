@@ -41,7 +41,7 @@ from .const import MOCK_CONFIG_ALL, MOCK_CONFIG_MIN_SOC
 
 
 # pylint: disable=unused-argument
-async def test_number(hass, bypass_validate_input_output):
+async def test_number(hass, bypass_validate_input_and_control):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
@@ -135,7 +135,7 @@ def mock_last_state_number_fixture():
 
 
 async def test_number_restore(
-    hass: HomeAssistant, bypass_validate_input_output, mock_last_state_number
+    hass: HomeAssistant, bypass_validate_input_and_control, mock_last_state_number
 ):
     """Test sensor properties."""
 

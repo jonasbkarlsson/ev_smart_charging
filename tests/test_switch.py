@@ -35,7 +35,7 @@ from .const import MOCK_CONFIG_USER_NO_CHARGER
 
 
 # pylint: disable=unused-argument
-async def test_switch(hass, bypass_validate_input_output):
+async def test_switch(hass, bypass_validate_input_and_control):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
@@ -142,7 +142,7 @@ def mock_last_state_off_fixture():
 
 
 async def test_switch_off_restore(
-    hass: HomeAssistant, bypass_validate_input_output, mock_last_state_off
+    hass: HomeAssistant, bypass_validate_input_and_control, mock_last_state_off
 ):
     """Test sensor properties."""
 
@@ -190,7 +190,7 @@ def mock_last_state_on_fixture():
 
 
 async def test_switch_on_restore(
-    hass: HomeAssistant, bypass_validate_input_output, mock_last_state_on
+    hass: HomeAssistant, bypass_validate_input_and_control, mock_last_state_on
 ):
     """Test sensor properties."""
 

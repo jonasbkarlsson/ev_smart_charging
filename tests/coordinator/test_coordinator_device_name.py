@@ -26,7 +26,7 @@ from tests.const import MOCK_CONFIG_ALL
 
 
 # pylint: disable=unused-argument
-async def test_coordinator_device_name(hass, bypass_validate_input_output):
+async def test_coordinator_device_name(hass, bypass_validate_input_and_control):
     """Test entry setup with new integration name."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")

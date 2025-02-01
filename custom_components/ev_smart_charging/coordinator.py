@@ -1050,11 +1050,11 @@ class EVSmartChargingCoordinator:
 
         return None
 
-    def validate_output_entities(self) -> str:
-        """Check that all output entities are ready."""
+    def validate_control_entities(self) -> str:
+        """Check that all control entities are ready."""
 
         if self.charger_switch.entity_id:
             if self.charger_switch.domain is None:
-                return "Output entities not ready."
+                return "Control entities not ready."
 
         return None

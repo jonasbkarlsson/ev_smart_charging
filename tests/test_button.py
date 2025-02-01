@@ -29,7 +29,7 @@ from .const import MOCK_CONFIG_USER_NO_CHARGER
 
 
 # pylint: disable=unused-argument
-async def test_button(hass, bypass_validate_input_output):
+async def test_button(hass, bypass_validate_input_and_control):
     """Test buttons."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
