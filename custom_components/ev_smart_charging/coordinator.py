@@ -100,13 +100,12 @@ class ChargerSwitch:
     def __init__(self, hass, entity_id: str) -> None:
         """Initialize."""
 
-        self.entity_id = None
+        self.entity_id = entity_id
         self.domain = None
 
         if len(entity_id) > 0:
             entity = hass.states.get(entity_id)
             if entity and entity.domain:
-                self.entity_id = entity_id
                 self.domain = entity.domain
 
 
@@ -446,7 +445,10 @@ class EVSmartChargingCoordinator:
         if state is True:
             _LOGGER.debug("Turn on charging")
             self.sensor.set_state(STATE_ON)
-            if self.charger_switch.entity_id is not None:
+            if (
+                self.charger_switch.entity_id is not None
+                and self.charger_switch.domain is not None
+            ):
                 _LOGGER.debug(
                     "Before service call switch.turn_on: %s",
                     self.charger_switch.entity_id,
@@ -459,7 +461,10 @@ class EVSmartChargingCoordinator:
         else:
             _LOGGER.debug("Turn off charging")
             self.sensor.set_state(STATE_OFF)
-            if self.charger_switch.entity_id is not None:
+            if (
+                self.charger_switch.entity_id is not None
+                and self.charger_switch.domain is not None
+            ):
                 _LOGGER.debug(
                     "Before service call switch.turn_off: %s",
                     self.charger_switch.entity_id,
@@ -1042,5 +1047,14 @@ class EVSmartChargingCoordinator:
             ev_target_soc_state = self.hass.states.get(ev_target_soc)
             if ev_target_soc_state is None or ev_target_soc_state.state is None:
                 return "Input sensors not ready."
+
+        return None
+
+    def validate_control_entities(self) -> str:
+        """Check that all control entities are ready."""
+
+        if self.charger_switch.entity_id:
+            if self.charger_switch.domain is None:
+                return "Control entities not ready."
 
         return None

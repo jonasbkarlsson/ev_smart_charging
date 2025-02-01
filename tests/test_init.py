@@ -34,7 +34,7 @@ from .const import (
 
 # pylint: disable=unused-argument
 # async def test_setup_unload_and_reload_entry(hass, bypass_get_data):
-async def test_setup_unload_and_reload_entry(hass, bypass_validate_input_sensors):
+async def test_setup_unload_and_reload_entry(hass, bypass_validate_input_and_control):
     """Test entry setup and unload."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
@@ -77,7 +77,19 @@ async def test_setup_entry_exception(hass):
         assert await async_setup_entry(hass, config_entry)
 
 
-async def test_setup_with_migration_v1(hass, bypass_validate_input_sensors):
+async def test_setup_entry_exception2(hass, bypass_validate_input):
+    """Test ConfigEntryNotReady when validate_input_sensors returns an error message."""
+    config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
+    config_entry.add_to_hass(hass)
+
+    # In this case we are testing the condition where async_setup_entry raises
+    # ConfigEntryNotReady using the `error_on_get_data` fixture which simulates
+    # an error.
+    with pytest.raises(ConfigEntryNotReady):
+        assert await async_setup_entry(hass, config_entry)
+
+
+async def test_setup_with_migration_v1(hass, bypass_validate_input_and_control):
     """Test entry migration."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
@@ -116,7 +128,7 @@ async def test_setup_with_migration_v1(hass, bypass_validate_input_sensors):
     assert config_entry.entry_id not in hass.data[DOMAIN]
 
 
-async def test_setup_with_migration_v2(hass, bypass_validate_input_sensors):
+async def test_setup_with_migration_v2(hass, bypass_validate_input_and_control):
     """Test entry migration."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
@@ -154,7 +166,7 @@ async def test_setup_with_migration_v2(hass, bypass_validate_input_sensors):
     assert config_entry.entry_id not in hass.data[DOMAIN]
 
 
-async def test_setup_with_migration_v3(hass, bypass_validate_input_sensors):
+async def test_setup_with_migration_v3(hass, bypass_validate_input_and_control):
     """Test entry migration."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
@@ -192,7 +204,9 @@ async def test_setup_with_migration_v3(hass, bypass_validate_input_sensors):
     assert config_entry.entry_id not in hass.data[DOMAIN]
 
 
-async def test_setup_with_migration_from_future(hass, bypass_validate_input_sensors):
+async def test_setup_with_migration_from_future(
+    hass, bypass_validate_input_and_control
+):
     """Test entry migration."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
@@ -204,7 +218,7 @@ async def test_setup_with_migration_from_future(hass, bypass_validate_input_sens
     assert not await async_migrate_entry(hass, config_entry)
 
 
-async def test_setup_new_integration_name(hass, bypass_validate_input_sensors):
+async def test_setup_new_integration_name(hass, bypass_validate_input_and_control):
     """Test entry setup with new integration name."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")

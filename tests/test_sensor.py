@@ -36,7 +36,7 @@ from .const import MOCK_CONFIG_ALL
 
 
 # pylint: disable=unused-argument
-async def test_sensor(hass, bypass_validate_input_sensors):
+async def test_sensor(hass, bypass_validate_input_and_control):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")

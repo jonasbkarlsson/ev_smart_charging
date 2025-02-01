@@ -44,6 +44,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     coordinator = EVSmartChargingCoordinator(hass, entry)
     validation_error = coordinator.validate_input_sensors()
+    if not validation_error:
+        validation_error = coordinator.validate_control_entities()
     if validation_error is not None:
         _LOGGER.debug("%s", validation_error)
         for unsub in coordinator.listeners:
