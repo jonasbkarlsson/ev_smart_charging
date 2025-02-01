@@ -49,8 +49,21 @@ def skip_notifications_fixture():
 # the call return a value, we would add the `return_value=<VALUE_TO_RETURN>` parameter to the
 # patch call.
 # pylint: disable=line-too-long
-@pytest.fixture(name="bypass_validate_input_sensors")
-def bypass_validate_input_sensors_fixture():
+@pytest.fixture(name="bypass_validate_input")
+def bypass_validate_input_fixture():
+    """Skip calls to validate input sensors."""
+    with patch(
+        "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.validate_input_sensors",
+        return_value=None,
+    ):
+        yield
+
+
+# This fixture, when used, will result in calls to validate_input_sensors and validate_output_entities
+# to return None. To have the call return a value, we would add the `return_value=<VALUE_TO_RETURN>` parameter
+# to the patch call.
+@pytest.fixture(name="bypass_validate_input_output")
+def bypass_validate_input_output_fixture():
     """Skip calls to validate input sensors and output entities."""
     with patch(
         "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.validate_input_sensors",

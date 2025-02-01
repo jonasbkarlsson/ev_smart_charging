@@ -35,11 +35,14 @@ from .const import MOCK_CONFIG_USER_NO_CHARGER
 
 
 # pylint: disable=unused-argument
-async def test_switch(hass, bypass_validate_input_sensors):
+async def test_switch(hass, bypass_validate_input_output):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test", title="ev_smart_charging"
+        domain=DOMAIN,
+        data=MOCK_CONFIG_USER_NO_CHARGER,
+        entry_id="test",
+        title="ev_smart_charging",
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
@@ -128,7 +131,9 @@ async def test_switch(hass, bypass_validate_input_sensors):
 def mock_last_state_off_fixture():
     """Mock last state."""
 
-    restored = State(entity_id="switch.ev_smart_charging_smart_charging_activated", state=STATE_OFF)
+    restored = State(
+        entity_id="switch.ev_smart_charging_smart_charging_activated", state=STATE_OFF
+    )
     with patch(
         "homeassistant.helpers.restore_state.RestoreEntity.async_get_last_state",
         return_value=restored,
@@ -137,13 +142,16 @@ def mock_last_state_off_fixture():
 
 
 async def test_switch_off_restore(
-    hass: HomeAssistant, bypass_validate_input_sensors, mock_last_state_off
+    hass: HomeAssistant, bypass_validate_input_output, mock_last_state_off
 ):
     """Test sensor properties."""
 
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test", title="ev_smart_charging"
+        domain=DOMAIN,
+        data=MOCK_CONFIG_USER_NO_CHARGER,
+        entry_id="test",
+        title="ev_smart_charging",
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
@@ -171,7 +179,9 @@ async def test_switch_off_restore(
 def mock_last_state_on_fixture():
     """Mock last state."""
 
-    restored = State(entity_id="switch.ev_smart_charging_smart_charging_activated", state=STATE_ON)
+    restored = State(
+        entity_id="switch.ev_smart_charging_smart_charging_activated", state=STATE_ON
+    )
     with patch(
         "homeassistant.helpers.restore_state.RestoreEntity.async_get_last_state",
         return_value=restored,
@@ -180,13 +190,16 @@ def mock_last_state_on_fixture():
 
 
 async def test_switch_on_restore(
-    hass: HomeAssistant, bypass_validate_input_sensors, mock_last_state_on
+    hass: HomeAssistant, bypass_validate_input_output, mock_last_state_on
 ):
     """Test sensor properties."""
 
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test", title="ev_smart_charging"
+        domain=DOMAIN,
+        data=MOCK_CONFIG_USER_NO_CHARGER,
+        entry_id="test",
+        title="ev_smart_charging",
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)

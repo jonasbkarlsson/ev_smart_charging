@@ -29,11 +29,14 @@ from .const import MOCK_CONFIG_USER_NO_CHARGER
 
 
 # pylint: disable=unused-argument
-async def test_button(hass, bypass_validate_input_sensors):
+async def test_button(hass, bypass_validate_input_output):
     """Test buttons."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test", title="ev_smart_charging"
+        domain=DOMAIN,
+        data=MOCK_CONFIG_USER_NO_CHARGER,
+        entry_id="test",
+        title="ev_smart_charging",
     )
     if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
         config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
