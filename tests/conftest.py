@@ -51,9 +51,12 @@ def skip_notifications_fixture():
 # pylint: disable=line-too-long
 @pytest.fixture(name="bypass_validate_input_sensors")
 def bypass_validate_input_sensors_fixture():
-    """Skip calls to validate input sensors."""
+    """Skip calls to validate input sensors and output entities."""
     with patch(
         "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.validate_input_sensors",
+        return_value=None,
+    ), patch(
+        "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.validate_output_entities",
         return_value=None,
     ):
         yield
