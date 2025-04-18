@@ -11,6 +11,7 @@ from custom_components.ev_smart_charging.const import (
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
     PLATFORM_GENERIC,
+    PLATFORM_GESPOT,
     PLATFORM_NORDPOOL,
     PLATFORM_TGE,
     READY_QUARTER_NONE,
@@ -29,7 +30,7 @@ class PriceFormat:
         self.value = None  # Can be "price" or "value"
         self.start_is_string = None  # True if start is a string in ISO format, False if it is a datetime object
 
-        if platform == PLATFORM_NORDPOOL:
+        if platform in [PLATFORM_NORDPOOL, PLATFORM_GESPOT]:
             self.start = "start"
             self.value = "value"
             self.start_is_string = False

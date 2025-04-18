@@ -9,6 +9,7 @@ from custom_components.ev_smart_charging.const import (
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
     PLATFORM_GENERIC,
+    PLATFORM_GESPOT,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
     PLATFORM_TGE,
@@ -243,6 +244,51 @@ class MockPriceEntityGeneric:
             {
                 "prices_today": new_raw_today,
                 "prices_tomorrow": new_raw_tomorrow,
+            },
+        )
+
+
+class MockPriceEntityGESpot:
+    """Mockup for price entity GE-Spot"""
+
+    @staticmethod
+    def create(
+        hass: HomeAssistant, entity_registry: EntityRegistry, price: float = 123
+    ):
+        """Create a correct price entity"""
+        entity_registry.async_get_or_create(
+            domain=SENSOR,
+            platform=PLATFORM_GESPOT,
+            unique_id="kwh_se3_sek_2_10_0",
+        )
+        MockPriceEntityGESpot.set_state(hass, None, None, price)
+
+    @staticmethod
+    def set_state(
+        hass: HomeAssistant,
+        new_raw_today: list,
+        new_raw_tomorrow: list,
+        new_price: float = None,
+    ):
+        """Set state of MockPriceEntityGESpot"""
+
+        # Find current price
+        if new_price is None:
+            new_price = "unavailable"
+            price_format = PriceFormat(PLATFORM_GESPOT)
+            if price := Raw(new_raw_today, price_format).get_value(dt_util.now()):
+                new_price = price
+            if price := Raw(new_raw_tomorrow, price_format).get_value(dt_util.now()):
+                new_price = price
+
+        # Set state
+        hass.states.async_set(
+            "sensor.ge_spot_kwh_se3_sek_2_10_0",
+            f"{new_price}",
+            {
+                "current_price": new_price,
+                "raw_today": new_raw_today,
+                "raw_tomorrow": new_raw_tomorrow,
             },
         )
 

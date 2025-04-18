@@ -126,6 +126,10 @@ PRICE_20220930 = [
     },
 ]
 
+# GE-Spot uses the same data format as Nordpool
+PRICE_20220930_GESPOT = PRICE_20220930
+PRICE_20221001_GESPOT = PRICE_20221001
+
 PRICE_20221001 = [
     {
         "start": datetime(2022, 10, 1, 0, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),

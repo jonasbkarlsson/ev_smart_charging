@@ -25,6 +25,7 @@ from ..const import (
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
     PLATFORM_GENERIC,
+    PLATFORM_GESPOT,
     PLATFORM_NORDPOOL,
     PLATFORM_TGE,
     PLATFORM_OCPP,
@@ -111,6 +112,8 @@ class FindEntity:
         if len(sensor) == 0:
             sensor = FindEntity.find_energidataservice_sensor(hass)
         if len(sensor) == 0:
+            sensor = FindEntity.find_gespot_sensor(hass)
+        if len(sensor) == 0:
             sensor = FindEntity.find_tge_sensor(hass)
         if len(sensor) == 0:
             sensor = FindEntity.find_entsoe_sensor(hass)
@@ -137,6 +140,18 @@ class FindEntity:
         )
         for entry in registry_entries:
             if entry[1].platform == PLATFORM_ENERGIDATASERVICE:
+                return entry[1].entity_id
+        return ""
+
+    @staticmethod
+    def find_gespot_sensor(hass: HomeAssistant) -> str:
+        """Find GE-Spot sensor"""
+        entity_registry: EntityRegistry = async_entity_registry_get(hass)
+        registry_entries: UserDict[str, RegistryEntry] = (
+            entity_registry.entities.items()
+        )
+        for entry in registry_entries:
+            if entry[1].platform == PLATFORM_GESPOT:
                 return entry[1].entity_id
         return ""
 
