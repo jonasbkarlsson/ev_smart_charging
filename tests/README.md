@@ -19,6 +19,6 @@ This will install `homeassistant`, `pytest`, and `pytest-homeassistant-custom-co
 
 Command | Description
 ------- | -----------
-`python -m pytest tests/` | This will run all tests in `tests/` and tell you how many passed/failed
-`python -m pytest --durations=10 --cov-report term-missing --cov=custom_components.ev_smart_charging tests` | This tells `pytest` that your target module to test is `custom_components.ev_smart_charging` so that it can give you a [code coverage](https://en.wikipedia.org/wiki/Code_coverage) summary, including % of code that was executed and the line numbers of missed executions.
-`python -m pytest tests/test_init.py -k test_setup_unload_and_reload_entry` | Runs the `test_setup_unload_and_reload_entry` test function located in `tests/test_init.py`
+`pytest tests/` | This will run all tests in `tests/` and tell you how many passed/failed
+`pytest --durations=10 --cov-report term-missing --cov=custom_components.ev_smart_charging tests` | This tells `pytest` that your target module to test is `custom_components.ev_smart_charging` so that it can give you a [code coverage](https://en.wikipedia.org/wiki/Code_coverage) summary, including % of code that was executed and the line numbers of missed executions.
+`pytest tests/test_init.py -k test_setup_unload_and_reload_entry` | Runs the `test_setup_unload_and_reload_entry` test function located in `tests/test_init.py`

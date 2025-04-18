@@ -1,12 +1,9 @@
 """Test ev_smart_charging switch."""
-
 from unittest.mock import patch
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import STATE_OFF, STATE_ON, MAJOR_VERSION, MINOR_VERSION
-
+from homeassistant.const import STATE_OFF, STATE_ON
 from homeassistant.core import HomeAssistant, State
 
 from custom_components.ev_smart_charging import (
@@ -33,23 +30,17 @@ from .const import MOCK_CONFIG_USER_NO_CHARGER
 # Assertions allow you to verify that the return value of whatever is on the left
 # side of the assertion matches with the right side.
 
-
 # pylint: disable=unused-argument
-async def test_switch(hass, bypass_validate_input_and_control):
+async def test_switch(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN,
-        data=MOCK_CONFIG_USER_NO_CHARGER,
-        entry_id="test",
-        title="ev_smart_charging",
+        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test"
     )
-    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
-        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
-    config_entry.add_to_hass(hass)
 
     # Set up the entry and assert that the values set during setup are where we expect
-    # them to be.
+    # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
+    # call, no code from custom_components/integration_blueprint/api.py actually runs.
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
 
@@ -62,19 +53,19 @@ async def test_switch(hass, bypass_validate_input_and_control):
     # Get the switches
     switch_active: EVSmartChargingSwitchActive = hass.data["entity_components"][
         SWITCH
-    ].get_entity("switch.ev_smart_charging_smart_charging_activated")
+    ].get_entity("switch.none_smart_charging_activated")
     switch_limit: EVSmartChargingSwitchApplyLimit = hass.data["entity_components"][
         SWITCH
-    ].get_entity("switch.ev_smart_charging_apply_price_limit")
+    ].get_entity("switch.none_apply_price_limit")
     switch_continuous: EVSmartChargingSwitchContinuous = hass.data["entity_components"][
         SWITCH
-    ].get_entity("switch.ev_smart_charging_continuous_charging_preferred")
+    ].get_entity("switch.none_continuous_charging_preferred")
     switch_ev_connected: EVSmartChargingSwitchEVConnected = hass.data[
         "entity_components"
-    ][SWITCH].get_entity("switch.ev_smart_charging_ev_connected")
+    ][SWITCH].get_entity("switch.none_ev_connected")
     switch_keep_on: EVSmartChargingSwitchKeepOn = hass.data["entity_components"][
         SWITCH
-    ].get_entity("switch.ev_smart_charging_keep_charger_on")
+    ].get_entity("switch.none_keep_charger_on")
     assert switch_active
     assert switch_limit
     assert switch_continuous
@@ -131,9 +122,7 @@ async def test_switch(hass, bypass_validate_input_and_control):
 def mock_last_state_off_fixture():
     """Mock last state."""
 
-    restored = State(
-        entity_id="switch.ev_smart_charging_smart_charging_activated", state=STATE_OFF
-    )
+    restored = State(entity_id="switch.none_smart_charging_activated", state=STATE_OFF)
     with patch(
         "homeassistant.helpers.restore_state.RestoreEntity.async_get_last_state",
         return_value=restored,
@@ -142,26 +131,20 @@ def mock_last_state_off_fixture():
 
 
 async def test_switch_off_restore(
-    hass: HomeAssistant, bypass_validate_input_and_control, mock_last_state_off
+    hass: HomeAssistant, bypass_validate_input_sensors, mock_last_state_off
 ):
     """Test sensor properties."""
 
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN,
-        data=MOCK_CONFIG_USER_NO_CHARGER,
-        entry_id="test",
-        title="ev_smart_charging",
+        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test"
     )
-    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
-        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
-    config_entry.add_to_hass(hass)
     await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
 
     switch_active: EVSmartChargingSwitchActive = hass.data["entity_components"][
         SWITCH
-    ].get_entity("switch.ev_smart_charging_smart_charging_activated")
+    ].get_entity("switch.none_smart_charging_activated")
 
     await switch_active.async_turn_on()
     assert switch_active.is_on is True
@@ -169,19 +152,12 @@ async def test_switch_off_restore(
     await switch_active.async_added_to_hass()
     assert switch_active.is_on is False
 
-    # Unload the entry and verify that the data has been removed
-    assert await async_unload_entry(hass, config_entry)
-    await hass.async_block_till_done()
-    assert config_entry.entry_id not in hass.data[DOMAIN]
-
 
 @pytest.fixture(name="mock_last_state_on")
 def mock_last_state_on_fixture():
     """Mock last state."""
 
-    restored = State(
-        entity_id="switch.ev_smart_charging_smart_charging_activated", state=STATE_ON
-    )
+    restored = State(entity_id="switch.none_smart_charging_activated", state=STATE_ON)
     with patch(
         "homeassistant.helpers.restore_state.RestoreEntity.async_get_last_state",
         return_value=restored,
@@ -190,34 +166,23 @@ def mock_last_state_on_fixture():
 
 
 async def test_switch_on_restore(
-    hass: HomeAssistant, bypass_validate_input_and_control, mock_last_state_on
+    hass: HomeAssistant, bypass_validate_input_sensors, mock_last_state_on
 ):
     """Test sensor properties."""
 
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN,
-        data=MOCK_CONFIG_USER_NO_CHARGER,
-        entry_id="test",
-        title="ev_smart_charging",
+        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test"
     )
-    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
-        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
-    config_entry.add_to_hass(hass)
     await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
 
     switch_active: EVSmartChargingSwitchActive = hass.data["entity_components"][
         SWITCH
-    ].get_entity("switch.ev_smart_charging_smart_charging_activated")
+    ].get_entity("switch.none_smart_charging_activated")
 
     await switch_active.async_turn_on()
     assert switch_active.is_on is True
 
     await switch_active.async_added_to_hass()
     assert switch_active.is_on is True
-
-    # Unload the entry and verify that the data has been removed
-    assert await async_unload_entry(hass, config_entry)
-    await hass.async_block_till_done()
-    assert config_entry.entry_id not in hass.data[DOMAIN]

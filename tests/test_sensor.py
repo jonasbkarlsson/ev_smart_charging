@@ -1,11 +1,8 @@
 """Test ev_smart_charging sensor."""
-
 from zoneinfo import ZoneInfo
 from datetime import datetime
 
-from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import STATE_OFF, STATE_ON, MAJOR_VERSION, MINOR_VERSION
-
+from homeassistant.const import STATE_OFF, STATE_ON
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.ev_smart_charging import (
@@ -15,15 +12,8 @@ from custom_components.ev_smart_charging import (
 from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
-from custom_components.ev_smart_charging.const import (
-    CHARGING_STATUS_CHARGING,
-    CHARGING_STATUS_WAITING_CHARGING,
-    DOMAIN,
-)
-from custom_components.ev_smart_charging.sensor import (
-    EVSmartChargingSensorCharging,
-    EVSmartChargingSensorStatus,
-)
+from custom_components.ev_smart_charging.const import DOMAIN
+from custom_components.ev_smart_charging.sensor import EVSmartChargingSensor
 
 from .const import MOCK_CONFIG_ALL
 
@@ -34,18 +24,15 @@ from .const import MOCK_CONFIG_ALL
 # Assertions allow you to verify that the return value of whatever is on the left
 # side of the assertion matches with the right side.
 
-
 # pylint: disable=unused-argument
-async def test_sensor(hass, bypass_validate_input_and_control):
+async def test_sensor(hass, bypass_validate_input_sensors):
     """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
-    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
-        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
-    config_entry.add_to_hass(hass)
 
     # Set up the entry and assert that the values set during setup are where we expect
-    # them to be.
+    # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
+    # call, no code from custom_components/integration_blueprint/api.py actually runs.
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
 
@@ -55,17 +42,13 @@ async def test_sensor(hass, bypass_validate_input_and_control):
     )
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
     assert coordinator.sensor is not None
-    assert isinstance(coordinator.sensor, EVSmartChargingSensorCharging)
+    assert isinstance(coordinator.sensor, EVSmartChargingSensor)
     sensor = coordinator.sensor
 
-    assert coordinator.sensor_status is not None
-    assert isinstance(coordinator.sensor_status, EVSmartChargingSensorStatus)
-    sensor_status = coordinator.sensor_status
-
     # Test the sensor
-    sensor.set_state(STATE_OFF)
+    sensor.native_value = STATE_OFF
     assert sensor.native_value == STATE_OFF
-    sensor.set_state(STATE_ON)
+    sensor.native_value = STATE_ON
     assert sensor.native_value == STATE_ON
 
     sensor.current_price = 12.1
@@ -102,33 +85,21 @@ async def test_sensor(hass, bypass_validate_input_and_control):
         2022, 9, 30, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
     )
 
+    sensor.charging_number_of_hours = 4
+    assert sensor.charging_number_of_hours == 4
+
     extra = sensor.extra_state_attributes
     assert extra["current_price"] == 12.1
-    assert extra["ev_soc"] == 56
-    assert extra["ev_target_soc"] == 80
-    assert extra["charging_is_planned"] is True
-    assert extra["charging_start_time"] == datetime(
+    assert extra["EV SOC"] == 56
+    assert extra["EV target SOC"] == 80
+    assert extra["Charging is planned"] is True
+    assert extra["Charging start time"] == datetime(
         2022, 9, 30, 1, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
     )
-    assert extra["charging_stop_time"] == datetime(
+    assert extra["Charging stop time"] == datetime(
         2022, 9, 30, 5, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")
     )
-
-    sensor.charging_number_of_quarters = 5
-    extra = sensor.extra_state_attributes
-    assert sensor.charging_number_of_quarters == 5
-    assert extra["charging_number_of_hours"] == 1.25
-
-    sensor.charging_number_of_quarters = 8
-    extra = sensor.extra_state_attributes
-    assert sensor.charging_number_of_quarters == 8
-    assert extra["charging_number_of_hours"] == 2
-
-    # Test sensor_status
-    sensor_status.set_status(CHARGING_STATUS_WAITING_CHARGING)
-    assert sensor_status.native_value == CHARGING_STATUS_WAITING_CHARGING
-    sensor_status.set_status(CHARGING_STATUS_CHARGING)
-    assert sensor_status.native_value == CHARGING_STATUS_CHARGING
+    assert extra["Charging number of hours"] == 4
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)

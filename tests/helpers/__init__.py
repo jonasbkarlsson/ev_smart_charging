@@ -1,1 +1,1 @@
-"""Tests for ev_smart_charging integration."""
+"""Tests for ev_smart_charging/helpers"""

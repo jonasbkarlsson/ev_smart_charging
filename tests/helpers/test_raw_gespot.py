@@ -1,39 +1,28 @@
-"""Test ev_smart_charging/helpers/coordinator.py"""
+"""Test the Raw class with GE-Spot data."""
 from datetime import datetime
+import pytest
 
 from homeassistant.util import dt as dt_util
 from custom_components.ev_smart_charging.const import (
-    PLATFORM_ENERGIDATASERVICE,
     PLATFORM_GESPOT,
     READY_HOUR_NONE,
     START_HOUR_NONE,
 )
 
-from custom_components.ev_smart_charging.helpers.coordinator import (
-    Raw,
-    Scheduler,
-    get_charging_hours,
-    get_charging_original,
-    get_charging_update,
-    get_charging_value,
-    get_lowest_hours,
-    get_ready_hour_utc,
-    get_start_hour_utc,
-)
+from custom_components.ev_smart_charging.helpers.coordinator import Raw
 from tests.price import (
     PRICE_20220930,
-    PRICE_20220930_ENERGIDATASERVICE,
     PRICE_20220930_GESPOT,
     PRICE_20221001,
-    PRICE_20221001_ENERGIDATASERVICE,
     PRICE_20221001_GESPOT,
 )
-from tests.schedule import MOCK_SCHEDULE_20220930
 
 
+# pylint: disable=unused-argument
 async def test_raw_gespot(hass, set_cet_timezone):
     """Test Raw with GE-Spot data format"""
 
+    # Test with GE-Spot data
     price = Raw(PRICE_20220930_GESPOT, PLATFORM_GESPOT)
     assert price.get_raw() == PRICE_20220930
     assert price.is_valid()
@@ -42,6 +31,7 @@ async def test_raw_gespot(hass, set_cet_timezone):
     assert price.last_value() == 49.64
     assert price.number_of_nonzero() == 24
 
+    # Test getting value for a specific time
     time = datetime(
         2022, 9, 30, 8, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
@@ -55,18 +45,22 @@ async def test_raw_gespot(hass, set_cet_timezone):
         ),
         "value": 388.65,
     }
+
+    # Test getting value for a time not in the data
     time = datetime(
         2022, 9, 29, 8, 0, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
     assert price.get_value(time) is None
     assert price.get_item(time) is None
 
+    # Test extending with another day's data
     price2 = Raw(PRICE_20221001_GESPOT, PLATFORM_GESPOT)
     price.extend(None)
     assert price.get_raw() == PRICE_20220930
     price.extend(price2)
     assert price.number_of_nonzero() == 48
 
+    # Test timezone conversion
     start = price.data[0]["start"]
     assert start.tzinfo == dt_util.get_time_zone("Europe/Stockholm")
     assert start.hour == 0
@@ -79,6 +73,7 @@ async def test_raw_gespot(hass, set_cet_timezone):
     assert start.tzinfo == dt_util.get_time_zone("Europe/Stockholm")
     assert start.hour == 0
 
+    # Test with empty data
     price = Raw([], PLATFORM_GESPOT)
     assert not price.is_valid()
     assert price.last_value() is None

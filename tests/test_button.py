@@ -1,10 +1,7 @@
 """Test ev_smart_charging button."""
-
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import STATE_ON, STATE_OFF, MAJOR_VERSION, MINOR_VERSION
-
+from homeassistant.const import STATE_ON, STATE_OFF
 
 from custom_components.ev_smart_charging import (
     async_setup_entry,
@@ -21,29 +18,24 @@ from custom_components.ev_smart_charging.button import (
 
 from .const import MOCK_CONFIG_USER_NO_CHARGER
 
+
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
 # for a given test. We can also leverage fixtures and mocks that are available in
 # Home Assistant using the pytest_homeassistant_custom_component plugin.
 # Assertions allow you to verify that the return value of whatever is on the left
 # side of the assertion matches with the right side.
 
-
 # pylint: disable=unused-argument
-async def test_button(hass, bypass_validate_input_and_control):
-    """Test buttons."""
+async def test_button(hass, bypass_validate_input_sensors):
+    """Test sensor properties."""
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
-        domain=DOMAIN,
-        data=MOCK_CONFIG_USER_NO_CHARGER,
-        entry_id="test",
-        title="ev_smart_charging",
+        domain=DOMAIN, data=MOCK_CONFIG_USER_NO_CHARGER, entry_id="test"
     )
-    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
-        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
-    config_entry.add_to_hass(hass)
 
     # Set up the entry and assert that the values set during setup are where we expect
-    # them to be.
+    # them to be. Because we have patched the BlueprintDataUpdateCoordinator.async_get_data
+    # call, no code from custom_components/integration_blueprint/api.py actually runs.
     assert await async_setup_entry(hass, config_entry)
     await hass.async_block_till_done()
 
@@ -56,10 +48,10 @@ async def test_button(hass, bypass_validate_input_and_control):
     # Get the buttons
     button_start: EVSmartChargingButtonStart = hass.data["entity_components"][
         BUTTON
-    ].get_entity("button.ev_smart_charging_manually_start_charging")
+    ].get_entity("button.none_manually_start_charging")
     button_stop: EVSmartChargingButtonStop = hass.data["entity_components"][
         BUTTON
-    ].get_entity("button.ev_smart_charging_manually_stop_charging")
+    ].get_entity("button.none_manually_stop_charging")
     assert button_start
     assert button_stop
     assert isinstance(button_start, EVSmartChargingButtonStart)

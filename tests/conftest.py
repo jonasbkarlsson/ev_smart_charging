@@ -1,5 +1,4 @@
 """Global fixtures for ev_smart_charging integration."""
-
 # Fixtures allow you to replace functions with a Mock object. You can perform
 # many options via the Mock to reflect a particular behavior from the original
 # function that you want to see without going through the function's actual logic.
@@ -16,9 +15,9 @@
 # See here for more info: https://docs.pytest.org/en/latest/fixture.html (note that
 # pytest includes fixtures OOB which you can use as defined on this page)
 from unittest.mock import patch
-import pytest
 from homeassistant.util import dt as dt_util
 
+import pytest
 
 # pylint: disable=invalid-name
 pytest_plugins = "pytest_homeassistant_custom_component"
@@ -49,27 +48,11 @@ def skip_notifications_fixture():
 # the call return a value, we would add the `return_value=<VALUE_TO_RETURN>` parameter to the
 # patch call.
 # pylint: disable=line-too-long
-@pytest.fixture(name="bypass_validate_input")
-def bypass_validate_input_fixture():
+@pytest.fixture(name="bypass_validate_input_sensors")
+def bypass_validate_input_sensors_fixture():
     """Skip calls to validate input sensors."""
     with patch(
         "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.validate_input_sensors",
-        return_value=None,
-    ):
-        yield
-
-
-# This fixture, when used, will result in calls to validate_input_sensors and validate_control_entities
-# to return None. To have the call return a value, we would add the `return_value=<VALUE_TO_RETURN>` parameter
-# to the patch call.
-@pytest.fixture(name="bypass_validate_input_and_control")
-def bypass_validate_input_and_control_fixture():
-    """Skip calls to validate input sensors and control entities."""
-    with patch(
-        "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.validate_input_sensors",
-        return_value=None,
-    ), patch(
-        "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.validate_control_entities",
         return_value=None,
     ):
         yield
@@ -104,35 +87,4 @@ def set_cet_timezone_fixture():
 def skip_service_calls_fixture():
     """Skip service calls."""
     with patch("homeassistant.core.ServiceRegistry.async_call"):
-        yield
-
-
-# This fixture is used to prevent calls to update_quarterly().
-@pytest.fixture(name="skip_update_quarterly")
-def skip_update_quarterly_fixture():
-    """Skip update_quarterly."""
-    with patch(
-        "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.update_quarterly"
-    ):
-        yield
-
-
-# This fixture is used to prevent calls to update_initial().
-@pytest.fixture(name="skip_update_initial", autouse=True)
-def skip_update_initial_fixture():
-    """Skip update_initial."""
-    with patch(
-        "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.update_initial"
-    ):
-        yield
-
-
-# This fixture will result in calls to is_during_intialization to return False.
-@pytest.fixture(name="bypass_is_during_intialization", autouse=True)
-def bypass_is_during_intialization_fixture():
-    """Skip calls to check if initialization is on-going."""
-    with patch(
-        "custom_components.ev_smart_charging.coordinator.EVSmartChargingCoordinator.is_during_intialization",
-        return_value=False,
-    ):
         yield

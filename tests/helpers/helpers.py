@@ -1,310 +1,179 @@
-"""Helper functions"""
+"""Helper classes for tests"""
 
-from homeassistant.const import STATE_OFF
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import EntityRegistry
-from homeassistant.util import dt as dt_util
 
 from custom_components.ev_smart_charging.const import (
     PLATFORM_ENERGIDATASERVICE,
-    PLATFORM_ENTSOE,
-    PLATFORM_GENERIC,
+    PLATFORM_GESPOT,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
-    PLATFORM_TGE,
     PLATFORM_VW,
     SENSOR,
     SWITCH,
 )
-from custom_components.ev_smart_charging.helpers.coordinator import Raw, PriceFormat
-from tests.price import PRICE_THIRTEEN_LIST
 
 
 class MockPriceEntity:
-    """Mockup for price entity"""
+    """Mock price entity"""
 
     @staticmethod
-    def create(
-        hass: HomeAssistant, entity_registry: EntityRegistry, price: float = 123
-    ):
-        """Create a correct price entity"""
+    def create(hass: HomeAssistant, entity_registry: EntityRegistry):
+        """Create a mock price entity"""
         entity_registry.async_get_or_create(
             domain=SENSOR,
             platform=PLATFORM_NORDPOOL,
             unique_id="kwh_se3_sek_2_10_0",
         )
-        MockPriceEntity.set_state(hass, PRICE_THIRTEEN_LIST, None, price)
-
-    @staticmethod
-    def set_state(
-        hass: HomeAssistant,
-        new_raw_today: list,
-        new_raw_tomorrow: list,
-        new_price: float = None,
-    ):
-        """Set state of MockPriceEntity"""
-
-        # Find current price
-        if new_price is None:
-            new_price = "unavailable"
-            if price := Raw(new_raw_today).get_value(dt_util.now()):
-                new_price = price
-            if price := Raw(new_raw_tomorrow).get_value(dt_util.now()):
-                new_price = price
-
-        # Set state
+        assert entity_registry.async_is_registered("sensor.nordpool_kwh_se3_sek_2_10_0")
         hass.states.async_set(
             "sensor.nordpool_kwh_se3_sek_2_10_0",
-            f"{new_price}",
+            "123",
             {
-                "current_price": new_price,
-                "raw_today": new_raw_today,
-                "raw_tomorrow": new_raw_tomorrow,
+                "current_price": 123,
+                "raw_today": [
+                    {
+                        "value": 123,
+                        "start": "2022-09-30T00:00:00+02:00",
+                        "end": "2022-09-30T01:00:00+02:00",
+                    }
+                ],
+                "raw_tomorrow": [
+                    {
+                        "value": 123,
+                        "start": "2022-10-01T00:00:00+02:00",
+                        "end": "2022-10-01T01:00:00+02:00",
+                    }
+                ],
             },
         )
 
 
 class MockPriceEntityEnergiDataService:
-    """Mockup for price entity Energi Data Service"""
+    """Mock price entity for Energi Data Service"""
 
     @staticmethod
-    def create(
-        hass: HomeAssistant, entity_registry: EntityRegistry, price: float = 123
-    ):
-        """Create a correct price entity"""
+    def create(hass: HomeAssistant, entity_registry: EntityRegistry):
+        """Create a mock price entity"""
         entity_registry.async_get_or_create(
             domain=SENSOR,
             platform=PLATFORM_ENERGIDATASERVICE,
-            unique_id="energi_data_service",
+            unique_id="kwh_dk1_dkk_2_10_0",
         )
-        MockPriceEntityEnergiDataService.set_state(hass, None, None, price)
-
-    @staticmethod
-    def set_state(
-        hass: HomeAssistant,
-        new_raw_today: list,
-        new_raw_tomorrow: list,
-        new_price: float = None,
-    ):
-        """Set state of MockPriceEntity"""
-
-        # Find current price
-        if new_price is None:
-            new_price = "unavailable"
-            price_format = PriceFormat(PLATFORM_ENERGIDATASERVICE)
-            if price := Raw(new_raw_today, price_format).get_value(
-                dt_util.now()
-            ):
-                new_price = price
-            if price := Raw(new_raw_tomorrow, price_format).get_value(
-                dt_util.now()
-            ):
-                new_price = price
-
-        # Set state
+        assert entity_registry.async_is_registered(
+            "sensor.energidataservice_kwh_dk1_dkk_2_10_0"
+        )
         hass.states.async_set(
-            "sensor.energidataservice_energi_data_service",
-            f"{new_price}",
+            "sensor.energidataservice_kwh_dk1_dkk_2_10_0",
+            "123",
             {
-                "current_price": new_price,
-                "raw_today": new_raw_today,
-                "raw_tomorrow": new_raw_tomorrow,
+                "current_price": 123,
+                "raw_today": [
+                    {
+                        "hour": "2022-09-30T00:00:00+02:00",
+                        "price": 123,
+                    }
+                ],
+                "raw_tomorrow": [
+                    {
+                        "hour": "2022-10-01T00:00:00+02:00",
+                        "price": 123,
+                    }
+                ],
             },
         )
 
 
-class MockPriceEntityEntsoe:
-    """Mockup for price entity Entsoe"""
+class MockPriceEntityGESpot:
+    """Mock price entity for GE-Spot"""
 
     @staticmethod
-    def create(
-        hass: HomeAssistant, entity_registry: EntityRegistry, price: float = 123
-    ):
-        """Create a correct price entity"""
+    def create(hass: HomeAssistant, entity_registry: EntityRegistry):
+        """Create a mock price entity"""
         entity_registry.async_get_or_create(
             domain=SENSOR,
-            platform=PLATFORM_ENTSOE,
-            unique_id="average_electricity_price",
+            platform=PLATFORM_GESPOT,
+            unique_id="kwh_se3_sek_2_10_0",
         )
-        MockPriceEntityEntsoe.set_state(hass, None, None, price)
-
-    @staticmethod
-    def set_state(
-        hass: HomeAssistant,
-        new_raw_today: list,
-        new_raw_tomorrow: list,
-        new_price: float = None,
-    ):
-        """Set state of MockPriceEntity"""
-
-        # Find current price
-        if new_price is None:
-            new_price = "unavailable"
-            price_format = PriceFormat(PLATFORM_ENTSOE)
-            if price := Raw(new_raw_today, price_format).get_value(dt_util.now()):
-                new_price = price
-            if price := Raw(new_raw_tomorrow, price_format).get_value(dt_util.now()):
-                new_price = price
-
-        # Set state
+        assert entity_registry.async_is_registered(
+            "sensor.ge_spot_kwh_se3_sek_2_10_0"
+        )
         hass.states.async_set(
-            "sensor.entsoe_average_electricity_price",
-            f"{new_price}",
+            "sensor.ge_spot_kwh_se3_sek_2_10_0",
+            "123",
             {
-                "prices_today": new_raw_today,
-                "prices_tomorrow": new_raw_tomorrow,
-            },
-        )
-
-class MockPriceEntityTGE:
-    """Mockup for price entity TGE"""
-
-    @staticmethod
-    def create(
-        hass: HomeAssistant, entity_registry: EntityRegistry, price: float = 123
-    ):
-        """Create a correct price entity"""
-        entity_registry.async_get_or_create(
-            domain=SENSOR,
-            platform=PLATFORM_TGE,
-            unique_id="tge_sensor_fixing1_rate",
-        )
-        MockPriceEntityTGE.set_state(hass, None, None, price)
-
-    @staticmethod
-    def set_state(
-        hass: HomeAssistant,
-        new_raw_today: list,
-        new_raw_tomorrow: list,
-        new_price: float = None,
-    ):
-        """Set state of MockPriceEntity"""
-
-        # Find current price
-        if new_price is None:
-            new_price = "unavailable"
-            price_format = PriceFormat(PLATFORM_TGE)
-            if price := Raw(new_raw_today, price_format).get_value(
-                dt_util.now()
-            ):
-                new_price = price
-            if price := Raw(new_raw_tomorrow, price_format).get_value(
-                dt_util.now()
-            ):
-                new_price = price
-
-        # Set state
-        hass.states.async_set(
-            "sensor.tge_sensor_fixing1_rate",
-            f"{new_price}",
-            {
-                "prices_today": new_raw_today,
-                "prices_tomorrow": new_raw_tomorrow,
-            },
-        )
-
-class MockPriceEntityGeneric:
-    """Mockup for a generic price entity"""
-
-    @staticmethod
-    def create(
-        hass: HomeAssistant, entity_registry: EntityRegistry, price: float = 123
-    ):
-        """Create a correct price entity"""
-        entity_registry.async_get_or_create(
-            domain=SENSOR,
-            platform=PLATFORM_GENERIC,
-            unique_id="price_template_sensor",
-        )
-        MockPriceEntityGeneric.set_state(hass, None, None, price)
-
-    @staticmethod
-    def set_state(
-        hass: HomeAssistant,
-        new_raw_today: list,
-        new_raw_tomorrow: list,
-        new_price: float = None,
-    ):
-        """Set state of MockPriceEntityGeneric"""
-
-        # Find current price
-        if new_price is None:
-            new_price = "unavailable"
-            price_format = PriceFormat(PLATFORM_GENERIC)
-            if price := Raw(new_raw_today, price_format).get_value(dt_util.now()):
-                new_price = price
-            if price := Raw(new_raw_tomorrow, price_format).get_value(dt_util.now()):
-                new_price = price
-
-        # Set state
-        hass.states.async_set(
-            "sensor.generic_price_template_sensor",
-            f"{new_price}",
-            {
-                "prices_today": new_raw_today,
-                "prices_tomorrow": new_raw_tomorrow,
+                "current_price": 123,
+                "raw_today": [
+                    {
+                        "value": 123,
+                        "start": "2022-09-30T00:00:00+02:00",
+                        "end": "2022-09-30T01:00:00+02:00",
+                    }
+                ],
+                "raw_tomorrow": [
+                    {
+                        "value": 123,
+                        "start": "2022-10-01T00:00:00+02:00",
+                        "end": "2022-10-01T01:00:00+02:00",
+                    }
+                ],
             },
         )
 
 
 class MockSOCEntity:
-    """Mockup for SOC entity"""
+    """Mock SOC entity"""
 
     @staticmethod
-    def create(hass: HomeAssistant, entity_registry: EntityRegistry, value: str = "55"):
-        """Create a correct soc entity"""
+    def create(hass: HomeAssistant, entity_registry: EntityRegistry):
+        """Create a mock SOC entity"""
         entity_registry.async_get_or_create(
             domain=SENSOR,
             platform=PLATFORM_VW,
             unique_id="state_of_charge",
         )
-        MockSOCEntity.set_state(hass, value)
-
-    @staticmethod
-    def set_state(hass: HomeAssistant, new_state: str):
-        """Set state"""
+        assert entity_registry.async_is_registered(
+            "sensor.volkswagen_we_connect_id_state_of_charge"
+        )
         hass.states.async_set(
-            "sensor.volkswagen_we_connect_id_state_of_charge", new_state
+            "sensor.volkswagen_we_connect_id_state_of_charge",
+            "55",
         )
 
 
 class MockTargetSOCEntity:
-    """Mockup for SOC entity"""
+    """Mock Target SOC entity"""
 
     @staticmethod
-    def create(hass: HomeAssistant, entity_registry: EntityRegistry, value: str = "80"):
-        """Create a correct target soc entity"""
+    def create(hass: HomeAssistant, entity_registry: EntityRegistry):
+        """Create a mock Target SOC entity"""
         entity_registry.async_get_or_create(
             domain=SENSOR,
             platform=PLATFORM_VW,
             unique_id="target_state_of_charge",
         )
-        MockTargetSOCEntity.set_state(hass, value)
-
-    @staticmethod
-    def set_state(hass: HomeAssistant, new_state: str):
-        """Set state"""
+        assert entity_registry.async_is_registered(
+            "sensor.volkswagen_we_connect_id_target_state_of_charge"
+        )
         hass.states.async_set(
-            "sensor.volkswagen_we_connect_id_target_state_of_charge", new_state
+            "sensor.volkswagen_we_connect_id_target_state_of_charge",
+            "80",
         )
 
 
 class MockChargerEntity:
-    """Mockup for charger entity"""
+    """Mock Charger entity"""
 
     @staticmethod
-    def create(
-        hass: HomeAssistant, entity_registry: EntityRegistry, value: str = STATE_OFF
-    ):
-        """Create a correct charge control entity"""
+    def create(hass: HomeAssistant, entity_registry: EntityRegistry):
+        """Create a mock Charger entity"""
         entity_registry.async_get_or_create(
             domain=SWITCH,
             platform=PLATFORM_OCPP,
             unique_id="charge_control",
         )
-        MockChargerEntity.set_state(hass, value)
-
-    @staticmethod
-    def set_state(hass: HomeAssistant, new_state: str):
-        """Set state"""
-        hass.states.async_set("switch.ocpp_charge_control", new_state)
+        assert entity_registry.async_is_registered("switch.ocpp_charge_control")
+        hass.states.async_set(
+            "switch.ocpp_charge_control",
+            "off",
+        )

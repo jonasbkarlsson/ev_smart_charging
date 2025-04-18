@@ -11,7 +11,7 @@ from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
 from custom_components.ev_smart_charging.const import DOMAIN
-from custom_components.ev_smart_charging.sensor import EVSmartChargingSensorCharging
+from custom_components.ev_smart_charging.sensor import EVSmartChargingSensor
 
 from tests.helpers.helpers import (
     MockChargerEntity,
@@ -21,7 +21,6 @@ from tests.helpers.helpers import (
 )
 from tests.price import PRICE_20221001
 from tests.const import MOCK_CONFIG_ALL
-
 
 # pylint: disable=unused-argument
 async def test_external_issue_nordpool_235(
@@ -44,18 +43,13 @@ async def test_external_issue_nordpool_235(
     MockPriceEntity.set_state(hass, PRICE_20221001, PRICE_20221001)
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
-    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator is not None
 
-    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
+    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor([sensor])
+    await coordinator.add_sensor(sensor)
 
     await coordinator.update_sensors()
     await hass.async_block_till_done()
     assert coordinator.tomorrow_valid is False
-
-    # Unsubscribe to listeners
-    for unsub in coordinator.listeners:
-        unsub()

@@ -1,5 +1,4 @@
 """Number platform for EV Smart Charging."""
-
 import logging
 from typing import Union
 
@@ -11,21 +10,15 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 
 from .const import (
-    CONF_LOW_PRICE_CHARGING_LEVEL,
-    CONF_LOW_SOC_CHARGING_LEVEL,
     CONF_MAX_PRICE,
     CONF_MIN_SOC,
     CONF_OPPORTUNISTIC_LEVEL,
-    CONF_OPPORTUNISTIC_TYPE2_LEVEL,
     CONF_PCT_PER_HOUR,
     DOMAIN,
-    ENTITY_KEY_CONF_LOW_PRICE_CHARGING_NUMBER,
-    ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER,
-    ENTITY_KEY_CONF_OPPORTUNISTIC_LEVEL_NUMBER,
-    ENTITY_KEY_CONF_OPPORTUNISTIC_TYPE2_LEVEL_NUMBER,
-    ENTITY_KEY_CONF_PCT_PER_HOUR_NUMBER,
-    ENTITY_KEY_CONF_MAX_PRICE_NUMBER,
-    ENTITY_KEY_CONF_MIN_SOC_NUMBER,
+    ENTITY_NAME_CONF_OPPORTUNISTIC_LEVEL_NUMBER,
+    ENTITY_NAME_CONF_PCT_PER_HOUR_NUMBER,
+    ENTITY_NAME_CONF_MAX_PRICE_NUMBER,
+    ENTITY_NAME_CONF_MIN_SOC_NUMBER,
     ICON_BATTERY_50,
     ICON_CASH,
     NUMBER,
@@ -48,13 +41,9 @@ async def async_setup_entry(
     numbers.append(EVSmartChargingNumberPriceLimit(entry, coordinator))
     numbers.append(EVSmartChargingNumberMinSOC(entry, coordinator))
     numbers.append(EVSmartChargingNumberOpportunistic(entry, coordinator))
-    numbers.append(EVSmartChargingNumberOpportunisticType2(entry, coordinator))
-    numbers.append(EVSmartChargingNumberLowPriceCharging(entry, coordinator))
-    numbers.append(EVSmartChargingNumberLowSocCharging(entry, coordinator))
     async_add_devices(numbers)
 
 
-# pylint: disable=abstract-method
 class EVSmartChargingNumber(EVSmartChargingEntity, RestoreNumber):
     """EV Smart Charging number class."""
 
@@ -65,9 +54,8 @@ class EVSmartChargingNumber(EVSmartChargingEntity, RestoreNumber):
         _LOGGER.debug("EVSmartChargingNumber.__init__()")
         super().__init__(entry)
         self.coordinator = coordinator
-        id_name = self._entity_key.replace("_", "").lower()
+        id_name = self._attr_name.replace(" ", "").lower()
         self._attr_unique_id = ".".join([entry.entry_id, NUMBER, id_name])
-        self.set_entity_id(NUMBER, self._entity_key)
 
     async def async_set_native_value(self, value: float) -> None:
         """Set new value."""
@@ -88,12 +76,11 @@ class EVSmartChargingNumber(EVSmartChargingEntity, RestoreNumber):
 class EVSmartChargingNumberChargingSpeed(EVSmartChargingNumber):
     """EV Smart Charging active number class."""
 
-    _entity_key = ENTITY_KEY_CONF_PCT_PER_HOUR_NUMBER
+    _attr_name = ENTITY_NAME_CONF_PCT_PER_HOUR_NUMBER
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value = 0.1
     _attr_native_max_value = 100.0
     _attr_native_step = 0.1
-    _attr_native_unit_of_measurement = "%/h"
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingNumberChargingSpeed.__init__()")
@@ -112,10 +99,10 @@ class EVSmartChargingNumberChargingSpeed(EVSmartChargingNumber):
 class EVSmartChargingNumberPriceLimit(EVSmartChargingNumber):
     """EV Smart Charging apply limit number class."""
 
-    _entity_key = ENTITY_KEY_CONF_MAX_PRICE_NUMBER
+    _attr_name = ENTITY_NAME_CONF_MAX_PRICE_NUMBER
     _attr_icon = ICON_CASH
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value = -10000.0
+    _attr_native_min_value = 0.0
     _attr_native_max_value = 10000.0
     _attr_native_step = 0.01
 
@@ -136,13 +123,12 @@ class EVSmartChargingNumberPriceLimit(EVSmartChargingNumber):
 class EVSmartChargingNumberMinSOC(EVSmartChargingNumber):
     """EV Smart Charging continuous number class."""
 
-    _entity_key = ENTITY_KEY_CONF_MIN_SOC_NUMBER
+    _attr_name = ENTITY_NAME_CONF_MIN_SOC_NUMBER
     _attr_icon = ICON_BATTERY_50
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value = 0.0
     _attr_native_max_value = 100.0
     _attr_native_step = 1.0
-    _attr_native_unit_of_measurement = "%"
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingNumberMinSOC.__init__()")
@@ -161,12 +147,11 @@ class EVSmartChargingNumberMinSOC(EVSmartChargingNumber):
 class EVSmartChargingNumberOpportunistic(EVSmartChargingNumber):
     """EV Smart Charging opportunistic number class."""
 
-    _entity_key = ENTITY_KEY_CONF_OPPORTUNISTIC_LEVEL_NUMBER
+    _attr_name = ENTITY_NAME_CONF_OPPORTUNISTIC_LEVEL_NUMBER
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value = 0.0
     _attr_native_max_value = 100.0
     _attr_native_step = 1.0
-    _attr_native_unit_of_measurement = "%"
 
     def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
         _LOGGER.debug("EVSmartChargingNumberOpportunistic.__init__()")
@@ -185,87 +170,4 @@ class EVSmartChargingNumberOpportunistic(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.number_opportunistic_level = value
-        await self.coordinator.update_configuration()
-
-
-class EVSmartChargingNumberOpportunisticType2(EVSmartChargingNumber):
-    """EV Smart Charging opportunistic type2 number class."""
-
-    _entity_key = ENTITY_KEY_CONF_OPPORTUNISTIC_TYPE2_LEVEL_NUMBER
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value = 0.0
-    _attr_native_max_value = 200.0
-    _attr_native_step = 1.0
-    _attr_native_unit_of_measurement = "%"
-
-    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
-        _LOGGER.debug("EVSmartChargingNumberOpportunisticType2.__init__()")
-        super().__init__(entry, coordinator)
-        if self.value is None:
-            self._attr_native_value = get_parameter(
-                entry, CONF_OPPORTUNISTIC_TYPE2_LEVEL, 90.0
-            )
-            _LOGGER.debug(
-                "EVSmartChargingNumberOpportunisticType2.__init__() %s",
-                self._attr_native_value,
-            )
-            self.update_ha_state()
-
-    async def async_set_native_value(self, value: float) -> None:
-        """Set new value."""
-        await super().async_set_native_value(value)
-        self.coordinator.number_opportunistic_type2_level = value
-        await self.coordinator.update_configuration()
-
-
-class EVSmartChargingNumberLowPriceCharging(EVSmartChargingNumber):
-    """EV Smart Charging low price charging number class."""
-
-    _entity_key = ENTITY_KEY_CONF_LOW_PRICE_CHARGING_NUMBER
-    _attr_icon = ICON_CASH
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value = -10000.0
-    _attr_native_max_value = 10000.0
-    _attr_native_step = 0.01
-
-    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
-        _LOGGER.debug("EVSmartChargingNumberLowPriceCharging.__init__()")
-        super().__init__(entry, coordinator)
-        if self.value is None:
-            self._attr_native_value = get_parameter(
-                entry, CONF_LOW_PRICE_CHARGING_LEVEL, 0.0
-            )
-            self.update_ha_state()
-
-    async def async_set_native_value(self, value: float) -> None:
-        """Set new value."""
-        await super().async_set_native_value(value)
-        self.coordinator.low_price_charging = value
-        await self.coordinator.update_configuration()
-
-
-class EVSmartChargingNumberLowSocCharging(EVSmartChargingNumber):
-    """EV Smart Charging low SOC charging number class."""
-
-    _entity_key = ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER
-    _attr_icon = ICON_BATTERY_50
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value = 0.0
-    _attr_native_max_value = 100.0
-    _attr_native_step = 1.0
-    _attr_native_unit_of_measurement = "%"
-
-    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
-        _LOGGER.debug("EVSmartChargingNumberLowSocCharging.__init__()")
-        super().__init__(entry, coordinator)
-        if self.value is None:
-            self._attr_native_value = get_parameter(
-                entry, CONF_LOW_SOC_CHARGING_LEVEL, 20.0
-            )
-            self.update_ha_state()
-
-    async def async_set_native_value(self, value: float) -> None:
-        """Set new value."""
-        await super().async_set_native_value(value)
-        self.coordinator.low_soc_charging = value
         await self.coordinator.update_configuration()

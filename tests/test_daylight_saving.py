@@ -1,5 +1,4 @@
 """Test ev_smart_charging coordinator."""
-
 from datetime import datetime
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -14,7 +13,7 @@ from custom_components.ev_smart_charging.coordinator import (
 )
 from custom_components.ev_smart_charging.const import DOMAIN
 from custom_components.ev_smart_charging.helpers.coordinator import Raw
-from custom_components.ev_smart_charging.sensor import EVSmartChargingSensorCharging
+from custom_components.ev_smart_charging.sensor import EVSmartChargingSensor
 
 from tests.helpers.helpers import (
     MockChargerEntity,
@@ -32,7 +31,6 @@ from tests.price_daylight_saving import (
 )
 from .const import MOCK_CONFIG_ALL
 
-
 # pylint: disable=unused-argument
 async def test_to_daylight_saving_time(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -43,20 +41,19 @@ async def test_to_daylight_saving_time(
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     MockSOCEntity.create(hass, entity_registry, "11")
-    MockTargetSOCEntity.create(hass, entity_registry, "83")
+    MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 10)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
-    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator
 
-    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
+    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor([sensor])
+    await coordinator.add_sensor(sensor)
     await coordinator.switch_active_update(True)
-    await coordinator.switch_apply_limit_update(False)
+    await coordinator.switch_apply_limit_update(True)
     await coordinator.switch_continuous_update(True)
 
     # Provide price
@@ -72,7 +69,7 @@ async def test_to_daylight_saving_time(
 
     # pylint: disable=protected-access
     raw_schedule: Raw = Raw(coordinator._charging_schedule)
-    assert raw_schedule.number_of_nonzero() == 12 * 4
+    assert raw_schedule.number_of_nonzero() == 12
     assert (
         raw_schedule.get_value(
             datetime(
@@ -121,7 +118,7 @@ async def test_to_daylight_saving_time(
 
     # pylint: disable=protected-access
     raw_schedule: Raw = Raw(coordinator._charging_schedule)
-    assert raw_schedule.number_of_nonzero() == 12 * 4
+    assert raw_schedule.number_of_nonzero() == 12
     assert (
         raw_schedule.get_value(
             datetime(
@@ -155,10 +152,6 @@ async def test_to_daylight_saving_time(
         == 0
     )
 
-    # Unsubscribe to listeners
-    for unsub in coordinator.listeners:
-        unsub()
-
 
 async def test_from_daylight_saving_time(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
@@ -169,20 +162,19 @@ async def test_from_daylight_saving_time(
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     MockSOCEntity.create(hass, entity_registry, "11")
-    MockTargetSOCEntity.create(hass, entity_registry, "83")
+    MockTargetSOCEntity.create(hass, entity_registry, "80")
     MockPriceEntity.create(hass, entity_registry, 10)
     MockChargerEntity.create(hass, entity_registry, STATE_OFF)
 
     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test")
-    config_entry.add_to_hass(hass)
     coordinator = EVSmartChargingCoordinator(hass, config_entry)
     assert coordinator
 
-    sensor: EVSmartChargingSensorCharging = EVSmartChargingSensorCharging(config_entry)
+    sensor: EVSmartChargingSensor = EVSmartChargingSensor(config_entry)
     assert sensor is not None
-    await coordinator.add_sensor([sensor])
+    await coordinator.add_sensor(sensor)
     await coordinator.switch_active_update(True)
-    await coordinator.switch_apply_limit_update(False)
+    await coordinator.switch_apply_limit_update(True)
     await coordinator.switch_continuous_update(True)
 
     # Provide price
@@ -198,7 +190,7 @@ async def test_from_daylight_saving_time(
 
     # pylint: disable=protected-access
     raw_schedule: Raw = Raw(coordinator._charging_schedule)
-    assert raw_schedule.number_of_nonzero() == 12 * 4
+    assert raw_schedule.number_of_nonzero() == 12
     assert (
         raw_schedule.get_value(
             datetime(
@@ -247,7 +239,7 @@ async def test_from_daylight_saving_time(
 
     # pylint: disable=protected-access
     raw_schedule: Raw = Raw(coordinator._charging_schedule)
-    assert raw_schedule.number_of_nonzero() == 12 * 4
+    assert raw_schedule.number_of_nonzero() == 12
     assert (
         raw_schedule.get_value(
             datetime(
@@ -280,7 +272,3 @@ async def test_from_daylight_saving_time(
         )
         == 0
     )
-
-    # Unsubscribe to listeners
-    for unsub in coordinator.listeners:
-        unsub()
