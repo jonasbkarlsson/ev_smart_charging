@@ -45,27 +45,50 @@ class Validator:
         price_state: State, price_platform: str = PLATFORM_NORDPOOL
     ) -> bool:
         """Check that argument is a Price sensor state"""
-        if price_state is not None:
-            if price_state.state != "unavailable":
-                # Check current_price
-                try:
-                    if not Validator.is_float(price_state.attributes["current_price"]):
-                        return False
-                except KeyError:
+        if price_state is None or price_state.state == "unavailable":
+            return False
+
+        # Check current_price
+        try:
+            if not Validator.is_float(price_state.attributes["current_price"]):
+                return False
+        except KeyError:
+            return False
+
+        # Check raw_today
+        try:
+            # For GE-Spot, try multiple price formats if the initial validation fails
+            if price_platform == PLATFORM_GESPOT:
+                # First try with GE-Spot's default format (same as Nordpool)
+                if Raw(price_state.attributes["raw_today"], PLATFORM_GESPOT).is_valid():
+                    return True
+                
+                # If that fails, try with other formats that GE-Spot might be using
+                # based on its configured primary source
+                for alt_platform in [PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE, PLATFORM_ENTSOE]:
+                    if Raw(price_state.attributes["raw_today"], alt_platform).is_valid():
+                        return True
+                
+                # If all validations fail, check if GE-Spot has fallback data
+                if "source_info" in price_state.attributes:
+                    source_info = price_state.attributes["source_info"]
+                    # If GE-Spot is using a fallback source, it's still valid
+                    if isinstance(source_info, dict) and "is_using_fallback" in source_info:
+                        return True
+                
+                # All validation attempts failed
+                return False
+            else:
+                # For other platforms, use the standard validation
+                if not Raw(price_state.attributes["raw_today"], price_platform).is_valid():
                     return False
-                # Check raw_today
-                try:
-                    if not Raw(
-                        price_state.attributes["raw_today"], price_platform
-                    ).is_valid():
-                        return False
-                except KeyError:
-                    return False
-                except TypeError:
-                    return False
-                # Don't check raw_tomorrow. It can be missing.
-                return True
-        return False
+        except KeyError:
+            return False
+        except TypeError:
+            return False
+
+        # Don't check raw_tomorrow. It can be missing.
+        return True
 
 
 class Utils:
