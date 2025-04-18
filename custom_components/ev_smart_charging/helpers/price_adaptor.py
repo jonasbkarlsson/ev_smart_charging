@@ -11,7 +11,7 @@ from homeassistant.util import dt
 from custom_components.ev_smart_charging.const import (
     CONF_PRICE_SENSOR,
 )
-from custom_components.ev_smart_charging.helpers.coordinator import PriceFormat, Raw
+from custom_components.ev_smart_charging.helpers.raw import PriceFormat, Raw
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -17,7 +17,7 @@ from custom_components.ev_smart_charging.const import (
     SENSOR,
     SWITCH,
 )
-from custom_components.ev_smart_charging.helpers.coordinator import Raw, PriceFormat
+from custom_components.ev_smart_charging.helpers.raw import Raw, PriceFormat
 from tests.price import PRICE_THIRTEEN_LIST
 
 

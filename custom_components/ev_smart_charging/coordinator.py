@@ -78,12 +78,12 @@ from .const import (
     SWITCH,
 )
 from .helpers.coordinator import (
-    Raw,
     Scheduler,
     get_charging_value,
     get_ready_quarter_utc,
     get_start_quarter_utc,
 )
+from .helpers.raw import Raw
 from .helpers.general import Utils, Validator, get_parameter, get_quarter_index
 from .sensor import (
     EVSmartChargingSensor,

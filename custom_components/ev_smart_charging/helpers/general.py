@@ -7,8 +7,14 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import State
 from homeassistant.util import dt
 
-from custom_components.ev_smart_charging.const import PLATFORM_GESPOT, PLATFORM_NORDPOOL, QUARTERS
-from .coordinator import Raw
+from custom_components.ev_smart_charging.const import (
+    PLATFORM_ENERGIDATASERVICE,
+    PLATFORM_ENTSOE,
+    PLATFORM_GESPOT,
+    PLATFORM_NORDPOOL,
+    QUARTERS,
+)
+from .raw import Raw
 
 
 _LOGGER = logging.getLogger(__name__)
