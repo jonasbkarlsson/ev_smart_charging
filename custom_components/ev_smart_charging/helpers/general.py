@@ -7,7 +7,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import State
 from homeassistant.util import dt
 
-from custom_components.ev_smart_charging.const import QUARTERS
+from custom_components.ev_smart_charging.const import PLATFORM_GESPOT, PLATFORM_NORDPOOL, QUARTERS
+from .coordinator import Raw
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,6 +38,33 @@ class Validator:
                     return False
                 if 0.0 <= float(soc) <= 100.0:
                     return True
+        return False
+
+    @staticmethod
+    def is_price_state(
+        price_state: State, price_platform: str = PLATFORM_NORDPOOL
+    ) -> bool:
+        """Check that argument is a Price sensor state"""
+        if price_state is not None:
+            if price_state.state != "unavailable":
+                # Check current_price
+                try:
+                    if not Validator.is_float(price_state.attributes["current_price"]):
+                        return False
+                except KeyError:
+                    return False
+                # Check raw_today
+                try:
+                    if not Raw(
+                        price_state.attributes["raw_today"], price_platform
+                    ).is_valid():
+                        return False
+                except KeyError:
+                    return False
+                except TypeError:
+                    return False
+                # Don't check raw_tomorrow. It can be missing.
+                return True
         return False
 
 
