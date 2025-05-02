@@ -93,8 +93,9 @@ async def test_coordinator_status(
     await hass.async_block_till_done()
     assert coordinator.sensor_status.native_value == CHARGING_STATUS_WAITING_NEW_PRICE
 
-    freezer.move_to("2022-09-30T14:00:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001)
+    freezer.move_to("2022-09-30T14:00:00+02:00")
+    await coordinator.update_sensors()
     await hass.async_block_till_done()
     assert coordinator.sensor_status.native_value == CHARGING_STATUS_NO_PLAN
 
@@ -104,8 +105,9 @@ async def test_coordinator_status(
     await hass.async_block_till_done()
     assert coordinator.sensor_status.native_value == CHARGING_STATUS_WAITING_CHARGING
 
-    freezer.move_to("2022-10-01T04:00:00+02:00")
     MockPriceEntity.set_state(hass, PRICE_20221001, None)
+    freezer.move_to("2022-10-01T04:00:00+02:00")
+    await coordinator.update_sensors()
     await hass.async_block_till_done()
     assert coordinator.sensor_status.native_value == CHARGING_STATUS_CHARGING
 

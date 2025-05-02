@@ -235,7 +235,6 @@ class EVSmartChargingCoordinator:
         )
         # Update state once after intitialization
         self.listeners.append(async_call_later(hass, 10.0, self.update_initial))
-        self.listeners.append(async_call_later(hass, 10.0, self.update_initial))
 
         # Solar charging
         self.solar_charging = None
@@ -1094,7 +1093,9 @@ class EVSmartChargingCoordinator:
 
         if (
             (self.ev_soc is not None and self.ev_target_soc is not None)
-            and (self.ev_soc > self.ev_soc_before_last_charging)
+            and (
+                self.ev_soc > self.ev_soc_before_last_charging
+            )  # TODO: This causes a problem if no charging happened during the scheduled charging. No new schedule is made.
             and (
                 (self.ev_soc >= self.ev_target_soc)
                 or (
