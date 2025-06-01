@@ -171,6 +171,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_EV_CONTROLLED,
                 default=get_parameter(self.config_entry, CONF_EV_CONTROLLED),
             ): cv.boolean,
+            vol.Optional(
+                CONF_CHARGING_TIME_ENTITY, default=get_parameter(self.config_entry, CONF_CHARGING_TIME_ENTITY)
+            ): EntitySelector(EntitySelectorConfig(
+                filter=EntityFilterSelectorConfig(device_class=SensorDeviceClass.DURATION))),
         }
 
         return self.async_show_form(
