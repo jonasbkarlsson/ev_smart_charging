@@ -76,6 +76,7 @@ from .const import (
     READY_QUARTER_NONE,
     START_QUARTER_NONE,
     SWITCH,
+    CONF_CHARGING_TIME_ENTITY,
 )
 from .helpers.coordinator import (
     Raw,
@@ -145,12 +146,13 @@ class EVSmartChargingCoordinator:
         self.price_adaptor = PriceAdaptor()
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
+        self.charging_time_entity_id = get_parameter(self.config_entry, CONF_CHARGING_TIME_ENTITY)
 
         self.charger_switch = ChargerSwitch(
             hass, get_parameter(self.config_entry, CONF_CHARGER_ENTITY)
         )
 
-        self.scheduler = Scheduler()
+        self.scheduler = Scheduler(hass, self.charging_time_entity_id)
 
         self.ev_soc = None
         self.ev_soc_before_last_charging = -1
@@ -491,6 +493,7 @@ class EVSmartChargingCoordinator:
         price_state = self.hass.states.get(self.price_entity_id)
         self.price_adaptor.initiate(price_state)
         self.ev_soc_entity_id = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
+        self.charging_time_entity_id = get_parameter(self.config_entry, CONF_CHARGING_TIME_ENTITY)
         self.ev_target_soc_entity_id = get_parameter(
             self.config_entry, CONF_EV_TARGET_SOC_SENSOR
         )
@@ -514,7 +517,7 @@ class EVSmartChargingCoordinator:
                     self.hass,
                     [
                         self.price_entity_id,
-                        self.ev_soc_entity_id,
+                        self.ev_soc_entity_id
                     ],
                     self.update_sensors_new,
                 )
@@ -546,6 +549,30 @@ class EVSmartChargingCoordinator:
             # Set default Target SOC when there is no sensor
             self.sensor.ev_target_soc = DEFAULT_TARGET_SOC
             self.ev_target_soc = DEFAULT_TARGET_SOC
+
+        if self.charging_time_entity_id is not None:
+            if MAJOR_VERSION <= 2023 or (MAJOR_VERSION == 2024 and MINOR_VERSION <= 5):
+                # Use for Home Assistant 2024.5 or older
+                self.listeners.append(
+                    async_track_state_change(
+                        self.hass,
+                        [
+                            self.charging_time_entity_id,
+                        ],
+                        self.update_sensors,
+                    )
+                )
+            else:
+                # Use for Home Assistant 2024.6 or newer
+                self.listeners.append(
+                    async_track_state_change_event(
+                        self.hass,
+                        [
+                            self.charging_time_entity_id,
+                        ],
+                        self.update_sensors_new,
+                    )
+                )
 
         self._charging_schedule = Scheduler.get_empty_schedule()
         self.sensor.charging_schedule = self._charging_schedule

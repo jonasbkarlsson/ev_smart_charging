@@ -4,10 +4,16 @@ from typing import Any, Optional
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import MAJOR_VERSION, MINOR_VERSION
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.selector import (
+    EntitySelector,
+    EntitySelectorConfig,
+    EntityFilterSelectorConfig,
+)
 
 from .const import (
     CONF_DEVICE_NAME,
@@ -18,6 +24,7 @@ from .const import (
     CONF_CHARGER_ENTITY,
     CONF_SOLAR_CHARGING_CONFIGURED,
     DOMAIN,
+    CONF_CHARGING_TIME_ENTITY,
 )
 from .helpers.config_flow import DeviceNameCreator, FindEntity, FlowValidator
 from .helpers.general import get_parameter
@@ -28,7 +35,7 @@ _LOGGER = logging.getLogger(__name__)
 class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow."""
 
-    VERSION = 7
+    VERSION = 8
     user_input: Optional[dict[str, Any]]
 
     def __init__(self):
@@ -63,6 +70,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_EV_TARGET_SOC_SENSOR
             ] = FindEntity.find_vw_target_soc_sensor(self.hass)
             user_input[CONF_CHARGER_ENTITY] = FindEntity.find_ocpp_device(self.hass)
+            user_input[CONF_CHARGING_TIME_ENTITY] = None
             user_input[CONF_EV_CONTROLLED] = False
             user_input[CONF_SOLAR_CHARGING_CONFIGURED] = False
 
@@ -102,6 +110,10 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Optional(
                 CONF_EV_CONTROLLED, default=user_input[CONF_EV_CONTROLLED]
             ): cv.boolean,
+            vol.Optional(
+                CONF_CHARGING_TIME_ENTITY, default=user_input[CONF_CHARGING_TIME_ENTITY]
+            ): EntitySelector(EntitySelectorConfig(
+                filter=EntityFilterSelectorConfig(device_class=SensorDeviceClass.DURATION))),
         }
 
         return self.async_show_form(
