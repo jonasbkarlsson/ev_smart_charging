@@ -496,8 +496,11 @@ def get_charging_quarters(
 
 def get_charging_quarters_from_entity(
         hass: HomeAssistant,
-        charging_time_entity: str
-)-> int:
+        charging_time_entity: str | None
+) -> int:
+    if charging_time_entity is None:
+        _LOGGER.debug('get_charging_quarters_from_entity() called with charging_time_entity=None')
+        return 0
     state = hass.states.get(charging_time_entity)
     if state is None:
         return 0
@@ -607,8 +610,10 @@ class Scheduler:
             params["ev_target_soc"],
             params["charging_pct_per_hour"],
         )
-        if self.charging_time_entity is not None:
-            charging_quarters = get_charging_quarters_from_entity(self.hass, self.charging_time_entity)
+        from_entity = get_charging_quarters_from_entity(self.hass, self.charging_time_entity)
+        if self.charging_time_entity is not None and from_entity >= 0:
+            _LOGGER.debug("Using external entity to calculate charging_quarters, %s", self.charging_time_entity)
+            charging_quarters = from_entity
         _LOGGER.debug("charging_quarters = %s", charging_quarters)
         lowest_quarters = get_lowest_quarters(
             params["start_quarter"],
@@ -629,8 +634,9 @@ class Scheduler:
             params["min_soc"],
             params["charging_pct_per_hour"],
         )
-        if self.charging_time_entity is not None:
-            charging_quarters = get_charging_quarters_from_entity(self.hass, self.charging_time_entity)
+        if self.charging_time_entity is not None and from_entity >= 0:
+            _LOGGER.debug("Using external entity to calculate charging_quarters, %s", self.charging_time_entity)
+            charging_quarters = from_entity
         _LOGGER.debug("charging_quarters_min_soc = %s", charging_quarters)
         lowest_quarters = get_lowest_quarters(
             params["start_quarter"],
