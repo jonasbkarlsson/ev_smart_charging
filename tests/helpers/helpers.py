@@ -48,9 +48,9 @@ class MockPriceEntity:
         # Find current price
         if new_price is None:
             new_price = "unavailable"
-            if price := Raw(new_raw_today).get_value(dt_util.now()):
+            if new_raw_today and (price := Raw(new_raw_today, PLATFORM_NORDPOOL).get_value(dt_util.now())):
                 new_price = price
-            if price := Raw(new_raw_tomorrow).get_value(dt_util.now()):
+            if new_raw_tomorrow and (price := Raw(new_raw_tomorrow, PLATFORM_NORDPOOL).get_value(dt_util.now())):
                 new_price = price
 
         # Set state

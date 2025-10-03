@@ -140,3 +140,54 @@ class TestGESpotIntegration:
             state="unavailable",
         )
         assert Validator.is_price_state(price_state, PLATFORM_GESPOT) is False
+
+    async def test_96_interval_data(self, hass, set_cet_timezone):
+        """Verify GE-Spot v1.2.0 data with 96 intervals works."""
+        # Verify test data has correct structure
+        assert len(PRICE_20220930_GESPOT) == 96, "Should have 96 15-minute intervals"
+        assert len(PRICE_20221001_GESPOT) == 96, "Should have 96 15-minute intervals"
+        
+        # Verify each interval is 15 minutes
+        for i in range(len(PRICE_20220930_GESPOT) - 1):
+            current = PRICE_20220930_GESPOT[i]
+            next_item = PRICE_20220930_GESPOT[i + 1]
+            
+            duration = (current["end"] - current["start"]).total_seconds() / 60
+            assert duration == 15, f"Interval {i} should be 15 minutes, got {duration}"
+            
+            # Verify continuous (no gaps)
+            assert current["end"] == next_item["start"], f"Gap between intervals {i} and {i+1}"
+        
+        # Verify validator accepts this data
+        price_state = State(
+            entity_id="sensor.gespot_current_price",
+            state="163.08",
+            attributes={
+                "current_price": 163.08,
+                "raw_today": PRICE_20220930_GESPOT,
+                "raw_tomorrow": PRICE_20221001_GESPOT,
+            },
+        )
+        
+        assert Validator.is_price_state(price_state, PLATFORM_GESPOT) is True
+
+    async def test_raw_price_handler_96_intervals(self, hass, set_cet_timezone):
+        """Test that Raw price handler processes 96 intervals correctly."""
+        # Create Raw object with 96-interval data
+        raw = Raw(PRICE_20220930_GESPOT, PLATFORM_GESPOT)
+        
+        # Verify it's valid
+        assert raw.is_valid() is True
+        
+        # Verify it processes all 96 intervals
+        assert raw.data is not None
+        assert len(raw.data) == 96
+        
+        # Verify first and last interval
+        first = raw.data[0]
+        last = raw.data[-1]
+        
+        assert first["start"].hour == 0
+        assert first["start"].minute == 0
+        assert last["start"].hour == 23
+        assert last["start"].minute == 45

@@ -143,9 +143,22 @@ class Raw:
     ) -> None:
         self.data = []
         if raw:
+            # Check if data is already processed (has both 'start' and 'end' keys)
+            # If so, just copy it directly without re-processing
+            if raw and isinstance(raw[0].get("start"), datetime) and isinstance(raw[0].get("end"), datetime):
+                self.data = raw
+                self.valid = len(self.data) > 12
+                return
+            
             periodicity_60min = False
-            for item in raw:
+            
+            # Handle both string platform and PriceFormat object
+            if isinstance(platform, PriceFormat):
+                price_format = platform
+            else:
                 price_format = PriceFormat(platform)
+            
+            for item in raw:
                 item_new = convert_raw_item(item, price_format)
 
                 if len(self.data) == 1:

@@ -2,6 +2,75 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+def generate_15min_intervals(
+    base_date,
+    base_price: float,
+    interval_count: int = 96,
+    price_variation: float = 0.15
+):
+    """
+    Generate realistic 15-minute interval test data for GE-Spot.
+    
+    Args:
+        base_date: Starting date (datetime object)
+        base_price: Base price (e.g., 163.08 SEK/MWh)
+        interval_count: Number of intervals (96 for normal, 92 for spring DST, 100 for fall DST)
+        price_variation: Max price variation as fraction (0.15 = ±15%)
+    
+    Returns:
+        List of price intervals matching GE-Spot format
+    """
+    from datetime import timedelta
+    import math
+    
+    prices = []
+    tz = ZoneInfo(key="Europe/Stockholm")
+    
+    for i in range(interval_count):
+        hour = i // 4  # 4 intervals per hour
+        minute = (i % 4) * 15  # 0, 15, 30, 45
+        
+        # Handle potential overflow (e.g., for 100 intervals on DST fall back)
+        if hour >= 24:
+            extra_days = hour // 24
+            hour = hour % 24
+            start_time = base_date.replace(
+                hour=hour,
+                minute=minute,
+                second=0,
+                microsecond=0,
+                tzinfo=tz
+            ) + timedelta(days=extra_days)
+        else:
+            start_time = base_date.replace(
+                hour=hour,
+                minute=minute,
+                second=0,
+                microsecond=0,
+                tzinfo=tz
+            )
+        
+        end_time = start_time + timedelta(minutes=15)
+        
+        # Create realistic price variation using sine wave
+        # Prices typically lower at night, higher during day
+        effective_hour = (i / 4) % 24  # Convert interval to hour-of-day
+        time_of_day_factor = math.sin((effective_hour / 24) * 2 * math.pi - math.pi / 2)
+        
+        # Add some randomness per interval
+        interval_variation = ((i % 7) - 3) * 0.02  # Small per-interval variation
+        
+        price = base_price * (1 + (time_of_day_factor * price_variation) + interval_variation)
+        
+        prices.append({
+            "start": start_time,
+            "end": end_time,
+            "value": round(price, 2),
+        })
+    
+    return prices
+
+
 PRICE_20220930 = [
     {
         "start": datetime(2022, 9, 30, 0, 0, tzinfo=ZoneInfo(key="Europe/Stockholm")),
@@ -447,8 +516,17 @@ PRICE_20221001_ENERGIDATASERVICE = [
 ]
 
 # GE-Spot uses the same data format as Nordpool
-PRICE_20220930_GESPOT = PRICE_20220930
-PRICE_20221001_GESPOT = PRICE_20221001
+
+# GE-Spot v1.2.0 provides 96 15-minute intervals per day
+PRICE_20220930_GESPOT = generate_15min_intervals(
+    base_date=datetime(2022, 9, 30),
+    base_price=163.08,  # Average price for that day
+)
+
+PRICE_20221001_GESPOT = generate_15min_intervals(
+    base_date=datetime(2022, 10, 1),
+    base_price=156.42,  # Average price for that day
+)
 
 # Define PRICE_ONE_LIST, PRICE_THIRTEEN_LIST and PRICE_THIRTEEN_LIST_30MIN for testing
 PRICE_ONE_LIST = [
