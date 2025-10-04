@@ -32,6 +32,7 @@ from tests.price import (
     PRICE_20221001,
     PRICE_20221001_ENERGIDATASERVICE,
     PRICE_20221001_ENTSOE,
+    PRICE_20221001_THIRTEEN,
     PRICE_ONE_LIST,
     PRICE_THIRTEEN_LIST,
 )
@@ -182,7 +183,7 @@ async def test_is_price_state(hass, freezer):
         state="12.1",
         attributes={
             "current_price": 12.1,
-            "raw_today": PRICE_THIRTEEN_LIST,
+            "raw_today": PRICE_20221001_THIRTEEN,
             "raw_tomorrow": None,
         },
     )
@@ -194,7 +195,7 @@ async def test_is_price_state(hass, freezer):
         state="12.1",
         attributes={
             "current_price": None,
-            "raw_today": PRICE_THIRTEEN_LIST,
+            "raw_today": PRICE_20221001_THIRTEEN,
             "raw_tomorrow": None,
         },
     )
@@ -208,7 +209,7 @@ async def test_is_price_state(hass, freezer):
         state="12.1",
         attributes={
             "current_price": 12.1,
-            "raw_today": PRICE_THIRTEEN_LIST,
+            "raw_today": PRICE_20221001_THIRTEEN,
             "raw_tomorrow": None,
         },
     )
@@ -531,7 +532,7 @@ async def test_validate_price_entity(hass: HomeAssistant, freezer):
     hass.states.async_set(
         "sensor.nordpool_kwh_se3_sek_2_10_0",
         "123",
-        {"current_price": 123, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
+        {"current_price": 123, "raw_today": PRICE_20221001_THIRTEEN, "raw_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
@@ -539,7 +540,7 @@ async def test_validate_price_entity(hass: HomeAssistant, freezer):
     hass.states.async_set(
         "sensor.nordpool_kwh_se3_sek_2_10_0",
         "123a",
-        {"current_price": 123, "raw_today": PRICE_THIRTEEN_LIST, "raw_tomorrow": None},
+        {"current_price": 123, "raw_today": PRICE_20221001_THIRTEEN, "raw_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
@@ -583,7 +584,7 @@ async def test_validate_price_entity_entsoe(hass: HomeAssistant, freezer):
     hass.states.async_set(
         "sensor.entsoe_average_electricity_price",
         "123",
-        {"prices_today": PRICE_THIRTEEN_LIST, "prices_tomorrow": None},
+        {"prices_today": PRICE_20221001_THIRTEEN, "prices_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None
 
@@ -591,6 +592,6 @@ async def test_validate_price_entity_entsoe(hass: HomeAssistant, freezer):
     hass.states.async_set(
         "sensor.entsoe_average_electricity_price",
         "123a",
-        {"prices_today": PRICE_THIRTEEN_LIST, "prices_tomorrow": None},
+        {"prices_today": PRICE_20221001_THIRTEEN, "prices_tomorrow": None},
     )
     assert PriceAdaptor.validate_price_entity(hass, user_input) is None

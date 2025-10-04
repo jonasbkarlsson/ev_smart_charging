@@ -12,8 +12,6 @@ from custom_components.ev_smart_charging.const import (
 )
 
 from custom_components.ev_smart_charging.helpers.coordinator import (
-    PriceFormat,
-    Raw,
     Scheduler,
     get_charging_quarters,
     get_charging_original,
@@ -22,6 +20,10 @@ from custom_components.ev_smart_charging.helpers.coordinator import (
     get_lowest_quarters,
     get_ready_quarter_utc,
     get_start_quarter_utc,
+)
+from custom_components.ev_smart_charging.helpers.raw import (
+    PriceFormat,
+    Raw,
 )
 from tests.price import (
     PRICE_20220930,
@@ -32,7 +34,6 @@ from tests.price import (
     PRICE_20221001_ENERGIDATASERVICE,
     PRICE_20221001_ENTSOE,
     PRICE_20221001_TGE,
-    PRICE_THIRTEEN_LIST_30MIN,
 )
 from tests.price_15min import PRICE_20220930_15MIN
 from tests.schedule import MOCK_SCHEDULE_20220930
@@ -105,9 +106,6 @@ async def test_raw(hass, set_cet_timezone, freezer):
 
     price = Raw(PRICE_20221001)
     assert len(price.copy().today().get_raw()) == 0
-
-    price = Raw(PRICE_THIRTEEN_LIST_30MIN)
-    assert not price.valid
 
 
 async def test_raw_energidataservice(hass, set_cet_timezone):
