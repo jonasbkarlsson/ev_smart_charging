@@ -272,7 +272,7 @@ class MockPriceEntityGESpot:
         entity_registry.async_get_or_create(
             domain=SENSOR,
             platform=PLATFORM_GESPOT,
-            unique_id="kwh_se3_sek_2_10_0",
+            unique_id="gespot_current_price_se4",
         )
         MockPriceEntityGESpot.set_state(hass, None, None, price)
 
@@ -300,7 +300,7 @@ class MockPriceEntityGESpot:
 
         # Set state
         hass.states.async_set(
-            "sensor.ge_spot_kwh_se3_sek_2_10_0",
+            "sensor.gespot_current_price_se4",
             f"{new_price}",
             {
                 "current_price": new_price,

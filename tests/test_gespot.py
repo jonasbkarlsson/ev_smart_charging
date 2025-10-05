@@ -74,7 +74,7 @@ class TestGESpotIntegration:
 
         # Test with valid GE-Spot data
         price_state = State(
-            entity_id="sensor.ge_spot_kwh_se3_sek_2_10_0",
+            entity_id="sensor.gespot_current_price_se4",
             state="123",
             attributes={
                 "current_price": 123,
@@ -86,7 +86,7 @@ class TestGESpotIntegration:
 
         # Test with invalid GE-Spot data
         price_state = State(
-            entity_id="sensor.ge_spot_kwh_se3_sek_2_10_0",
+            entity_id="sensor.gespot_current_price_se4",
             state="123",
             attributes={
                 "current_price": 123,
@@ -98,7 +98,7 @@ class TestGESpotIntegration:
 
         # Test with GE-Spot data using fallback
         price_state = State(
-            entity_id="sensor.ge_spot_kwh_se3_sek_2_10_0",
+            entity_id="sensor.gespot_current_price_se4",
             state="123",
             attributes={
                 "current_price": 123,
@@ -111,7 +111,7 @@ class TestGESpotIntegration:
 
         # Test with an invalid GE-Spot state (missing current_price)
         price_state = State(
-            entity_id="sensor.ge_spot_kwh_se3_sek_2_10_0",
+            entity_id="sensor.gespot_current_price_se4",
             state="123",
             attributes={
                 "raw_today": PRICE_20220930_GESPOT,
@@ -122,7 +122,7 @@ class TestGESpotIntegration:
 
         # Test with an invalid GE-Spot state (missing raw_today)
         price_state = State(
-            entity_id="sensor.ge_spot_kwh_se3_sek_2_10_0",
+            entity_id="sensor.gespot_current_price_se4",
             state="123",
             attributes={
                 "current_price": 123,
@@ -136,7 +136,7 @@ class TestGESpotIntegration:
 
         # Test with unavailable state
         price_state = State(
-            entity_id="sensor.ge_spot_kwh_se3_sek_2_10_0",
+            entity_id="sensor.gespot_current_price_se4",
             state="unavailable",
         )
         assert Validator.is_price_state(price_state, PLATFORM_GESPOT) is False
@@ -160,7 +160,7 @@ class TestGESpotIntegration:
 
         # Verify validator accepts this data
         price_state = State(
-            entity_id="sensor.gespot_current_price",
+                entity_id="sensor.gespot_current_price_se4",
             state="163.08",
             attributes={
                 "current_price": 163.08,
