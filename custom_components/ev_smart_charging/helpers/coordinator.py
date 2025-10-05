@@ -8,7 +8,6 @@ from typing import Any
 from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.const import (
-    PLATFORM_NORDPOOL,
     READY_QUARTER_NONE,
     START_QUARTER_NONE,
 )
@@ -135,9 +134,6 @@ def get_lowest_quarters_continuous(
     if start_quarter > time_start:
         time_start = start_quarter
     time_end = ready_quarter
-    # time_end = dt.now().replace(
-    #     quarter=ready_quarter, minute=0, second=0, microsecond=0
-    # ) + timedelta(days=1)
     time_start_index = None
     time_end_index = None
     for index in range(len(price)):
@@ -165,15 +161,14 @@ def get_lowest_quarters_continuous(
         return list(range(time_start_index, time_end_index + 1))
 
     for index in range(time_start_index, time_end_index - quarters + 2):
-        if lowest_index is None:
+        window_sum = sum(price[index : (index + quarters)])
+        if lowest_index is None or lowest_price is None or window_sum < lowest_price:
             lowest_index = index
-            lowest_price = sum(price[index : (index + quarters)])
-            continue
-        new_price = sum(price[index : (index + quarters)])
-        if new_price < lowest_price:
-            lowest_index = index
-            lowest_price = new_price
+            lowest_price = window_sum
 
+    if lowest_index is None:
+        _LOGGER.error("Could not determine lowest_index (unexpected)")
+        return []
     res = list(range(lowest_index, lowest_index + quarters))
     return res
 
@@ -242,14 +237,13 @@ def get_ready_quarter_utc(ready_quarter_local: int) -> datetime:
     # if now_local > ready_quarter_local THEN ready_quarter_utc is tomorrow
 
     time_local: datetime = dt.now()
-    if Utils.datetime_quarter(
-        time_local
-    ) >= ready_quarter_local or ready_quarter_local == (
-        24 * 4
-    ):  # TODO is * 4 correct?
-        time_local = time_local + timedelta(days=1)
+    if (
+        Utils.datetime_quarter(time_local) >= ready_quarter_local
+        or ready_quarter_local == 24 * 4  # 24*4 = 96 quarters in a day
+    ):
+        time_local += timedelta(days=1)
     if ready_quarter_local == READY_QUARTER_NONE:
-        time_local = time_local + timedelta(days=3)
+        time_local += timedelta(days=3)
     time_local = time_local.replace(
         hour=(ready_quarter_local // 4) % 24,
         minute=(ready_quarter_local % 4) * 15,
@@ -361,7 +355,7 @@ class Scheduler:
         if "switch_active" not in params or "switch_apply_limit" not in params:
             self.schedule = None
             self.calc_schedule_summary()
-            return self.schedule
+            return []
 
         schedule = get_charging_update(
             self.schedule_base,
@@ -396,7 +390,7 @@ class Scheduler:
         _LOGGER.debug("Use schedule")
         self.schedule = schedule
         self.calc_schedule_summary()
-        return self.schedule
+        return self.schedule if self.schedule is not None else []
 
     def calc_schedule_summary(self):
         """Calculate summary of schedule"""
@@ -458,30 +452,4 @@ class Scheduler:
             end_time = end_time + timedelta(minutes=15)
 
         return result
-
-
-def main():  # pragma: no cover
-    """Main function to test code."""
-
-    result = []
-    value = [1, 4, 6, 6, 5, 3, 2, 2, 4, 4]
-    start_time = dt.now().replace(minute=0, second=0, microsecond=0)
-    end_time = start_time + timedelta(minutes=15)
-    for nnnn in range(10):
-        item = {
-            "start": start_time,
-            "end": end_time,
-            "value": value[nnnn],
-        }
-        result.append(item)
-    raw2 = Raw(result)
-    print("r2.raw = " + str(raw2.get_raw()))
-    print("price = ", value)
-    lowest = get_lowest_quarters_continuous(start_time, end_time, raw2, 2)
-    print("lowest = " + str(lowest))
-    lowest = get_lowest_quarters_non_continuous(start_time, end_time, raw2, 2)
-    print("lowest = " + str(lowest))
-
-
-if __name__ == "__main__":  # pragma: no cover
-    main()
+    

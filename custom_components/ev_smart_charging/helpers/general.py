@@ -3,6 +3,7 @@
 # pylint: disable=relative-beyond-top-level
 import logging
 from typing import Any
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import State
 from homeassistant.util import dt
@@ -68,20 +69,20 @@ class Validator:
                 # First try with GE-Spot's default format (same as Nordpool)
                 if Raw(price_state.attributes["raw_today"], PLATFORM_GESPOT).is_valid():
                     return True
-                
+
                 # If that fails, try with other formats that GE-Spot might be using
                 # based on its configured primary source
                 for alt_platform in [PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE, PLATFORM_ENTSOE]:
                     if Raw(price_state.attributes["raw_today"], alt_platform).is_valid():
                         return True
-                
+
                 # If all validations fail, check if GE-Spot has fallback data
                 if "source_info" in price_state.attributes:
                     source_info = price_state.attributes["source_info"]
                     # If GE-Spot is using a fallback source, it's still valid
                     if isinstance(source_info, dict) and "is_using_fallback" in source_info:
                         return True
-                
+
                 # All validation attempts failed
                 return False
             else:
@@ -101,8 +102,16 @@ class Utils:
     """Utils"""
 
     @staticmethod
-    def datetime_quarter(time: dt) -> int:
-        """Return the quarter of the day"""
+    def datetime_quarter(time=None) -> int:
+        """Return the quarter index (0-95) using Home Assistant's local time.
+
+        If time is None, dt.now() is used. If a naive datetime is passed,
+        it will be converted to local time with dt.as_local for safety.
+        """
+        if time is None:
+            time = dt.now()
+        elif getattr(time, "tzinfo", None) is None:  # naive -> local
+            time = dt.as_local(time)
         total_minutes = time.hour * 60 + time.minute
         return total_minutes // 15
 
@@ -116,7 +125,7 @@ def get_parameter(config_entry: ConfigEntry, parameter: str, default_val: Any = 
     return default_val
 
 
-def get_quarter_index(option: str) -> int:
+def get_quarter_index(option: str) -> int | None:
     """Get index of option."""
 
     # Get index of option in QUARTERS minus 1. If option is "None", return None.
