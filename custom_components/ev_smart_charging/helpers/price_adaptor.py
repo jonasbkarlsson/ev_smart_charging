@@ -128,28 +128,28 @@ class PriceAdaptor:
 
     def _convert_dict_to_list(self, price_dict: dict, reference_date: Optional[date] = None) -> list:
         """Convert GE-Spot dictionary format to list format.
-        
+
         Args:
             price_dict: Dictionary with time strings as keys and prices as values
             reference_date: Optional reference date to use for creating full datetime objects
-        
+
         Returns:
             List of dictionaries with 'start', 'end', and 'value' keys
         """
         if not isinstance(price_dict, dict):
             return price_dict  # Already in list format
-        
+
         result = []
         if reference_date is None:
             reference_date = dt.now().date()
-        
+
         for time_str, price in sorted(price_dict.items()):
             try:
                 # Parse time string (e.g., "14:30")
                 time_parts = time_str.split(":")
                 hour = int(time_parts[0])
                 minute = int(time_parts[1]) if len(time_parts) > 1 else 0
-                
+
                 # Create datetime using dt.start_of_local_day() for proper timezone handling
                 day_start = dt.start_of_local_day(dt.now().replace(
                     year=reference_date.year,
@@ -158,7 +158,7 @@ class PriceAdaptor:
                 ))
                 start_time = day_start + timedelta(hours=hour, minutes=minute)
                 end_time = start_time + timedelta(minutes=15)  # GE-Spot uses 15-min intervals
-                
+
                 result.append({
                     "start": start_time,
                     "end": end_time,
@@ -167,7 +167,7 @@ class PriceAdaptor:
             except (ValueError, IndexError, KeyError) as e:
                 _LOGGER.warning("Failed to parse time '%s': %s", time_str, e)
                 continue
-        
+
         return result
 
     def is_price_state(self, price_state: State) -> bool:
@@ -198,26 +198,26 @@ class PriceAdaptor:
     def get_raw_today_local(self, state) -> Raw:
         """Get the today's prices in local timezone"""
         price_data = state.attributes[self._price_attribute_today]
-        
+
         # Convert dictionary format to list format if needed (GE-Spot)
         if isinstance(price_data, dict):
             price_data = self._convert_dict_to_list(price_data, dt.now().date())
             # Data is now in the correct format, no need for PriceFormat
             return Raw(price_data).today()
-        
+
         return Raw(price_data, self._price_format).today()
 
     def get_raw_tomorrow_local(self, state) -> Raw:
         """Get the tomorrow's prices in local timezone"""
         price_data = state.attributes[self._price_attribute_tomorrow]
-        
+
         # Convert dictionary format to list format if needed (GE-Spot)
         if isinstance(price_data, dict):
             tomorrow = dt.now().date() + timedelta(days=1)
             price_data = self._convert_dict_to_list(price_data, tomorrow)
             # Data is now in the correct format, no need for PriceFormat
             return Raw(price_data).tomorrow()
-        
+
         return Raw(price_data, self._price_format).tomorrow()
 
     def get_current_price(self, state) -> float:
