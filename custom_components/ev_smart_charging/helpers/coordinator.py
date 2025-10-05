@@ -452,4 +452,3 @@ class Scheduler:
             end_time = end_time + timedelta(minutes=15)
 
         return result
-
