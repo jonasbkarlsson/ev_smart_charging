@@ -67,8 +67,7 @@ class MockPriceEntity:
                 "raw_today": new_raw_today,
                 "raw_tomorrow": new_raw_tomorrow,
             },
-        )
-
+    )
 
 class MockPriceEntityEnergiDataService:
     """Mockup for price entity Energi Data Service"""
@@ -212,8 +211,7 @@ class MockPriceEntityTGE:
                 "prices_today": new_raw_today,
                 "prices_tomorrow": new_raw_tomorrow,
             },
-        )
-
+    )
 
 class MockPriceEntityGeneric:
     """Mockup for a generic price entity"""
