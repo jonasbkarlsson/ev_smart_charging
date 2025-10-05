@@ -166,6 +166,7 @@ class MockPriceEntityEntsoe:
             },
         )
 
+
 class MockPriceEntityTGE:
     """Mockup for price entity TGE"""
 
@@ -212,6 +213,7 @@ class MockPriceEntityTGE:
                 "prices_tomorrow": new_raw_tomorrow,
             },
         )
+
 
 class MockPriceEntityGeneric:
     """Mockup for a generic price entity"""

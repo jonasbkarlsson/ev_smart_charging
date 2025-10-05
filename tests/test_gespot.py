@@ -156,11 +156,11 @@ class TestGESpotIntegration:
             assert duration == 15, f"Interval {i} should be 15 minutes, got {duration}"
 
             # Verify continuous (no gaps)
-            assert current["end"] == next_item["start"], f"Gap between intervals {i} and {i+1}"
+            assert current["end"] == next_item["start"], f"Gap between intervals {i} and {i + 1}"
 
         # Verify validator accepts this data
         price_state = State(
-                entity_id="sensor.gespot_current_price_se4",
+            entity_id="sensor.gespot_current_price_se4",
             state="163.08",
             attributes={
                 "current_price": 163.08,
