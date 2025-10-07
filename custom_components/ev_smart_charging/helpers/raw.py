@@ -139,43 +139,10 @@ class Raw:
         self.data.append(extra_item3)
 
     def __init__(
-        self, raw: list[dict[str, Any]], platform: str | PriceFormat | None = None
+        self, raw: list[dict[str, Any]], platform: str | PriceFormat | None = PLATFORM_NORDPOOL
     ) -> None:
         self.data = []
         if raw:
-            # Check if data already has 'start' and 'end' as datetime objects
-            # and is already in 15-minute intervals - if so, skip processing
-            if (raw and
-                len(raw) > 1 and
-                isinstance(raw[0].get("start"), datetime) and
-                isinstance(raw[0].get("end"), datetime)):
-
-                # Calculate the interval between first two entries
-                interval = raw[1]["start"] - raw[0]["start"]
-
-                # 15-minute intervals - already in correct format, pass through
-                if interval == timedelta(minutes=15):
-                    self.data = raw
-                    self.valid = len(self.data) > 48  # More than 12 hours of 15-min data
-                    return
-
-                # 60-minute intervals - needs conversion to 15-min
-                # Process it by expanding each hour into 4x 15-minute entries
-                elif interval == timedelta(hours=1):
-                    for item in raw:
-                        # Add the first 15-minute slot
-                        self.data.append({
-                            "start": item["start"],
-                            "end": item["start"] + timedelta(minutes=15),
-                            "value": item["value"]
-                        })
-                        # Add three more 15-minute slots to complete the hour
-                        self.add_three_extra_items(self.data[-1])
-                    self.valid = len(self.data) > 48  # More than 12 hours (now in 15-min format)
-                    return
-
-            # For all other data formats (e.g., Energi Data Service with 'hour' and 'price' keys),
-            # process using the platform-specific format conversion
             periodicity_60min = False
 
             # Handle both string platform and PriceFormat object
