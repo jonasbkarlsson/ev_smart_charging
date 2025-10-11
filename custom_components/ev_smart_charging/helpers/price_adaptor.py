@@ -58,8 +58,8 @@ class PriceAdaptor:
             self._price_attribute_today = "raw_today"
             self._price_attribute_tomorrow = "raw_tomorrow"
         # Check for GE-Spot dictionary format attributes
-        elif "interval_prices" in price_state.attributes:
-            self._price_attribute_today = "interval_prices"
+        elif "today_interval_prices" in price_state.attributes:
+            self._price_attribute_today = "today_interval_prices"
             self._price_attribute_tomorrow = "tomorrow_interval_prices"
 
         # Then try for the attributes used by integration using
