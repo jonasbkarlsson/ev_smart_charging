@@ -61,10 +61,6 @@ class PriceAdaptor:
         elif "interval_prices" in price_state.attributes:
             self._price_attribute_today = "interval_prices"
             self._price_attribute_tomorrow = "tomorrow_interval_prices"
-        # Check for GE-Spot with timestamps
-        elif "today_with_timestamps" in price_state.attributes:
-            self._price_attribute_today = "today_with_timestamps"
-            self._price_attribute_tomorrow = "tomorrow_with_timestamps"
 
         # Then try for the attributes used by integration using
         # the same attribute for today and tomorrow.
