@@ -91,7 +91,7 @@ class EVSmartChargingNumberChargingSpeed(EVSmartChargingNumber):
     _entity_key = ENTITY_KEY_CONF_PCT_PER_HOUR_NUMBER
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value = 0.1
-    _attr_native_max_value = 100.0
+    _attr_native_max_value = 400.0
     _attr_native_step = 0.1
     _attr_native_unit_of_measurement = "%/h"
 
