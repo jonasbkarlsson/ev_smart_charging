@@ -136,15 +136,29 @@ class PriceAdaptor:
 
     def get_raw_today_local(self, state) -> Raw:
         """Get the today's prices in local timezone"""
+        price_data_today = state.attributes[self._price_attribute_today] or []
+        price_data_tomorrow = []
+        if self._price_attribute_today != self._price_attribute_tomorrow:
+            price_data_tomorrow = state.attributes[self._price_attribute_tomorrow] or []
+        price_data = price_data_today + price_data_tomorrow
+
         return Raw(
-            state.attributes[self._price_attribute_today], self._price_format
+            price_data, self._price_format
         ).today()
 
     def get_raw_tomorrow_local(self, state) -> Raw:
         """Get the tomorrow's prices in local timezone"""
-        return Raw(
-            state.attributes[self._price_attribute_tomorrow], self._price_format
-        ).tomorrow()
+        price_data_tomorrow = state.attributes[self._price_attribute_tomorrow] or []
+        if not price_data_tomorrow:
+            # No tomorrow prices available, return empty Raw object
+            return Raw([], self._price_format)
+
+        price_data_today = []
+        if self._price_attribute_today != self._price_attribute_tomorrow:
+            price_data_today = state.attributes[self._price_attribute_today] or []
+        price_data = price_data_today + price_data_tomorrow
+
+        return Raw(price_data, self._price_format).tomorrow()
 
     def get_current_price(self, state) -> float:
         """Return current price."""
