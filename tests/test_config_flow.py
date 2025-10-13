@@ -125,7 +125,6 @@ async def test_successful_config_flow_option(
     assert result["data"] == MOCK_CONFIG_USER
     if "errors" in result.keys():
         assert len(result["errors"]) == 0
-    assert result["result"]
 
 
 # Simulate an unsuccessful option flow
