@@ -35,5 +35,29 @@ run_next_test() {
 pip3 install -qq homeassistant==2024.12.5 pytest-homeassistant-custom-component==0.13.195
 run_first_test "auto"
 
-pip3 install -qq homeassistant==2025.1.1 pytest-homeassistant-custom-component==0.13.202
+pip3 install -qq homeassistant==2025.1.4 pytest-homeassistant-custom-component==0.13.205
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2025.2.5 pytest-homeassistant-custom-component==0.13.215
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2025.3.4 pytest-homeassistant-custom-component==0.13.225
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2025.4.4 pytest-homeassistant-custom-component==0.13.236
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2025.5.3 pytest-homeassistant-custom-component==0.13.246
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2025.6.3 pytest-homeassistant-custom-component==0.13.254
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2025.7.4 pytest-homeassistant-custom-component==0.13.264
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2025.8.3 pytest-homeassistant-custom-component==0.13.272
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2025.9.4 pytest-homeassistant-custom-component==0.13.281
 run_next_test "auto"

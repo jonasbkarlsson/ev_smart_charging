@@ -99,6 +99,17 @@ def set_cet_timezone_fixture():
         yield
 
 
+# This fixture is used to set EET time zone.
+@pytest.fixture(name="set_eet_timezone")
+def set_eet_timezone_fixture():
+    """Set EET timezone."""
+    with patch(
+        "homeassistant.util.dt.DEFAULT_TIME_ZONE",
+        dt_util.get_time_zone("Europe/Helsinki"),
+    ):
+        yield
+
+
 # This fixture is used to prevent HomeAssistant from doing Service Calls.
 @pytest.fixture(name="skip_service_calls")
 def skip_service_calls_fixture():
