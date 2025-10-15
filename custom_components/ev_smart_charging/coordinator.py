@@ -829,6 +829,13 @@ class EVSmartChargingCoordinator:
             # Change to UTC time
             self.raw_two_days = self.raw_today_local.copy().to_utc()
             self.raw_two_days.extend(self.raw_tomorrow_local.copy().to_utc())
+            
+            # Defensive check: Ensure raw_two_days is valid before using it
+            if not self.raw_two_days or not self.raw_two_days.is_valid():
+                _LOGGER.warning("Price data not yet valid, deferring initialization")
+                self.raw_two_days = None
+                return
+            
             # Change to local time
             self.sensor.raw_two_days_local = (
                 self.raw_two_days.copy().to_local().get_raw()
@@ -989,7 +996,10 @@ class EVSmartChargingCoordinator:
                 )
             )
         ):
-            self.scheduler.create_base_schedule(scheduling_params, self.raw_two_days)
+            if self.raw_two_days is not None:
+                self.scheduler.create_base_schedule(scheduling_params, self.raw_two_days)
+            else:
+                _LOGGER.debug("Deferring schedule creation: price data not yet available")
 
         # If the ready_quarter is updated to next day before next day's prices are available,
         # then remove the schedule
@@ -1000,7 +1010,7 @@ class EVSmartChargingCoordinator:
         ):
             self.scheduler.set_empty_schedule()
 
-        if self.scheduler.base_schedule_exists() is True:
+        if self.scheduler.base_schedule_exists() is True and self.raw_two_days is not None:
             max_value = self.raw_two_days.max_value()
             # Make sure max_value > 0
             if max_value <= 0:

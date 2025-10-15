@@ -251,11 +251,13 @@ PRICE_20221001 = [
 
 
 def generate_15min_intervals(base_date, hour_values=None, base_price: float | None = None, interval_count: int | None = None):
-    """Generate 15-minute interval price list.
+    """Generate 15-minute interval price list in GE-Spot format.
 
     Supports two modes:
     1) Pass hour_values dict {hour: price} -> expanded to 4 * len(hours) intervals.
     2) Pass base_price and interval_count (used by DST tests) -> create that many sequential 15-min intervals starting at 00:00.
+    
+    Returns GE-Spot format: [{"time": datetime, "value": float}, ...]
     """
     from datetime import timedelta
     tz = ZoneInfo("Europe/Stockholm")
@@ -266,8 +268,7 @@ def generate_15min_intervals(base_date, hour_values=None, base_price: float | No
             for q in range(4):
                 start = start_hour + timedelta(minutes=15 * q)
                 results.append({
-                    "start": start,
-                    "end": start + timedelta(minutes=15),
+                    "time": start,  # GE-Spot uses "time" not "start"
                     "value": price,
                 })
         return results
@@ -280,8 +281,7 @@ def generate_15min_intervals(base_date, hour_values=None, base_price: float | No
     for i in range(interval_count):
         start = start_base + timedelta(minutes=15 * i)
         results.append({
-            "start": start,
-            "end": start + timedelta(minutes=15),
+            "time": start,  # GE-Spot uses "time" not "start"
             "value": base_price,
         })
     return results

@@ -26,8 +26,12 @@ class PriceFormat:
         self.value = None  # Can be "price" or "value"
         self.start_is_string = None  # True if start is a string in ISO format, False if it is a datetime object
 
-        if platform in [PLATFORM_NORDPOOL, PLATFORM_GESPOT]:
+        if platform == PLATFORM_NORDPOOL:
             self.start = "start"
+            self.value = "value"
+            self.start_is_string = False
+        if platform == PLATFORM_GESPOT:
+            self.start = "time"
             self.value = "value"
             self.start_is_string = False
         if platform == PLATFORM_ENERGIDATASERVICE:

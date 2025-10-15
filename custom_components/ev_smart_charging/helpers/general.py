@@ -9,9 +9,6 @@ from homeassistant.core import State
 from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.const import (
-    PLATFORM_ENERGIDATASERVICE,
-    PLATFORM_ENTSOE,
-    PLATFORM_GESPOT,
     PLATFORM_NORDPOOL,
     QUARTERS,
 )
@@ -64,31 +61,9 @@ class Validator:
 
         # Check raw_today
         try:
-            # For GE-Spot, try multiple price formats if the initial validation fails
-            if price_platform == PLATFORM_GESPOT:
-                # First try with GE-Spot's default format (same as Nordpool)
-                if Raw(price_state.attributes["raw_today"], PLATFORM_GESPOT).is_valid():
-                    return True
-
-                # If that fails, try with other formats that GE-Spot might be using
-                # based on its configured primary source
-                for alt_platform in [PLATFORM_NORDPOOL, PLATFORM_ENERGIDATASERVICE, PLATFORM_ENTSOE]:
-                    if Raw(price_state.attributes["raw_today"], alt_platform).is_valid():
-                        return True
-
-                # If all validations fail, check if GE-Spot has fallback data
-                if "source_info" in price_state.attributes:
-                    source_info = price_state.attributes["source_info"]
-                    # If GE-Spot is using a fallback source, it's still valid
-                    if isinstance(source_info, dict) and "is_using_fallback" in source_info:
-                        return True
-
-                # All validation attempts failed
+            # Standard validation works for all platforms now (including GE-Spot)
+            if not Raw(price_state.attributes["raw_today"], price_platform).is_valid():
                 return False
-            else:
-                # For other platforms, use the standard validation
-                if not Raw(price_state.attributes["raw_today"], price_platform).is_valid():
-                    return False
         except KeyError:
             return False
         except TypeError:

@@ -96,19 +96,6 @@ class TestGESpotIntegration:
         )
         assert Validator.is_price_state(price_state, PLATFORM_GESPOT) is False
 
-        # Test with GE-Spot data using fallback
-        price_state = State(
-            entity_id="sensor.gespot_current_price_se4",
-            state="123",
-            attributes={
-                "current_price": 123,
-                "raw_today": [],
-                "raw_tomorrow": [],
-                "source_info": {"is_using_fallback": True},
-            },
-        )
-        assert Validator.is_price_state(price_state, PLATFORM_GESPOT) is True
-
         # Test with an invalid GE-Spot state (missing current_price)
         price_state = State(
             entity_id="sensor.gespot_current_price_se4",
@@ -142,21 +129,23 @@ class TestGESpotIntegration:
         assert Validator.is_price_state(price_state, PLATFORM_GESPOT) is False
 
     async def test_96_interval_data(self, hass, set_cet_timezone):
-        """Verify GE-Spot v1.2.0 data with 96 intervals works."""
+        """Verify GE-Spot v1.5.0 data with 96 intervals works."""
         # Verify test data has correct structure
         assert len(PRICE_20220930_GESPOT) == 96, "Should have 96 15-minute intervals"
         assert len(PRICE_20221001_GESPOT) == 96, "Should have 96 15-minute intervals"
 
-        # Verify each interval is 15 minutes
+        # Verify each interval has the correct GE-Spot format
         for i in range(len(PRICE_20220930_GESPOT) - 1):
             current = PRICE_20220930_GESPOT[i]
             next_item = PRICE_20220930_GESPOT[i + 1]
 
-            duration = (current["end"] - current["start"]).total_seconds() / 60
-            assert duration == 15, f"Interval {i} should be 15 minutes, got {duration}"
-
-            # Verify continuous (no gaps)
-            assert current["end"] == next_item["start"], f"Gap between intervals {i} and {i + 1}"
+            # GE-Spot format: {"time": datetime, "value": float}
+            assert "time" in current, f"Interval {i} should have 'time' key"
+            assert "value" in current, f"Interval {i} should have 'value' key"
+            
+            # Verify 15-minute intervals
+            time_diff = (next_item["time"] - current["time"]).total_seconds() / 60
+            assert time_diff == 15, f"Interval {i} to {i+1} should be 15 minutes, got {time_diff}"
 
         # Verify validator accepts this data
         price_state = State(
