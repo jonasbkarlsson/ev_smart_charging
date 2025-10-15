@@ -53,9 +53,15 @@ class MockPriceEntity:
         # Find current price
         if new_price is None:
             new_price = "unavailable"
-            if new_raw_today and (price := Raw(new_raw_today, PLATFORM_NORDPOOL).get_value(dt_util.now())):
+            if new_raw_today and (
+                price := Raw(new_raw_today, PLATFORM_NORDPOOL).get_value(dt_util.now())
+            ):
                 new_price = price
-            if new_raw_tomorrow and (price := Raw(new_raw_tomorrow, PLATFORM_NORDPOOL).get_value(dt_util.now())):
+            if new_raw_tomorrow and (
+                price := Raw(new_raw_tomorrow, PLATFORM_NORDPOOL).get_value(
+                    dt_util.now()
+                )
+            ):
                 new_price = price
 
         # Set state
@@ -67,7 +73,8 @@ class MockPriceEntity:
                 "raw_today": new_raw_today,
                 "raw_tomorrow": new_raw_tomorrow,
             },
-    )
+        )
+
 
 class MockPriceEntityEnergiDataService:
     """Mockup for price entity Energi Data Service"""
@@ -211,7 +218,8 @@ class MockPriceEntityTGE:
                 "prices_today": new_raw_today,
                 "prices_tomorrow": new_raw_tomorrow,
             },
-    )
+        )
+
 
 class MockPriceEntityGeneric:
     """Mockup for a generic price entity"""

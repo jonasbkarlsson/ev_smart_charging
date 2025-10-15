@@ -34,7 +34,6 @@ from tests.price import (
     PRICE_20221001_ENTSOE,
     PRICE_20221001_THIRTEEN,
     PRICE_ONE_LIST,
-    PRICE_THIRTEEN_LIST,
 )
 from tests.price_15min import (
     PRICE_20220930_GENERIC_15MIN,

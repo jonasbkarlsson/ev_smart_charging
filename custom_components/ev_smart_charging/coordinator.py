@@ -829,13 +829,6 @@ class EVSmartChargingCoordinator:
             # Change to UTC time
             self.raw_two_days = self.raw_today_local.copy().to_utc()
             self.raw_two_days.extend(self.raw_tomorrow_local.copy().to_utc())
-            
-            # Defensive check: Ensure raw_two_days is valid before using it
-            if not self.raw_two_days or not self.raw_two_days.is_valid():
-                _LOGGER.warning("Price data not yet valid, deferring initialization")
-                self.raw_two_days = None
-                return
-            
             # Change to local time
             self.sensor.raw_two_days_local = (
                 self.raw_two_days.copy().to_local().get_raw()
