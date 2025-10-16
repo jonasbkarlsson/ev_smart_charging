@@ -34,6 +34,7 @@ from tests.price import (
     PRICE_20221001_ENERGIDATASERVICE,
     PRICE_20221001_ENTSOE,
     PRICE_20221001_TGE,
+    PRICE_THIRTEEN_LIST_30MIN,
 )
 from tests.price_15min import PRICE_20220930_15MIN
 from tests.schedule import MOCK_SCHEDULE_20220930
@@ -106,6 +107,9 @@ async def test_raw(hass, set_cet_timezone, freezer):
 
     price = Raw(PRICE_20221001)
     assert len(price.copy().today().get_raw()) == 0
+
+    price = Raw(PRICE_THIRTEEN_LIST_30MIN)
+    assert not price.valid
 
 
 async def test_raw_energidataservice(hass, set_cet_timezone):

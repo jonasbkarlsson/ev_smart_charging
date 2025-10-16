@@ -1,7 +1,7 @@
 """Price data"""
 
+from datetime import date as _date, datetime
 from zoneinfo import ZoneInfo
-from datetime import datetime
 
 PRICE_20220930 = [
     {
@@ -250,51 +250,63 @@ PRICE_20221001 = [
 ]
 
 
-def generate_15min_intervals(base_date, hour_values=None, base_price: float | None = None, interval_count: int | None = None):
+def generate_15min_intervals(
+    base_date,
+    hour_values=None,
+    base_price: float | None = None,
+    interval_count: int | None = None,
+):
     """Generate 15-minute interval price list in GE-Spot format.
 
     Supports two modes:
     1) Pass hour_values dict {hour: price} -> expanded to 4 * len(hours) intervals.
-    2) Pass base_price and interval_count (used by DST tests) -> create that many sequential 15-min intervals starting at 00:00.
-    
+    2) Pass base_price and interval_count (used by DST tests) -> create that many sequential
+       15-min intervals starting at 00:00.
+
     Returns GE-Spot format: [{"time": datetime, "value": float}, ...]
     """
     from datetime import timedelta
+
     tz = ZoneInfo("Europe/Stockholm")
     results = []
     if hour_values is not None:
         for hour, price in sorted(hour_values.items()):
-            start_hour = datetime(base_date.year, base_date.month, base_date.day, hour, 0, tzinfo=tz)
+            start_hour = datetime(
+                base_date.year, base_date.month, base_date.day, hour, 0, tzinfo=tz
+            )
             for q in range(4):
                 start = start_hour + timedelta(minutes=15 * q)
-                results.append({
-                    "time": start,  # GE-Spot uses "time" not "start"
-                    "value": price,
-                })
+                results.append(
+                    {
+                        "time": start,  # GE-Spot uses "time" not "start"
+                        "value": price,
+                    }
+                )
         return results
     # Fallback: generate interval_count uniform-price intervals
     if base_price is None:
         base_price = 0.0
     if interval_count is None:
         interval_count = 96
-    start_base = datetime(base_date.year, base_date.month, base_date.day, 0, 0, tzinfo=tz)
+    start_base = datetime(
+        base_date.year, base_date.month, base_date.day, 0, 0, tzinfo=tz
+    )
     for i in range(interval_count):
         start = start_base + timedelta(minutes=15 * i)
-        results.append({
-            "time": start,  # GE-Spot uses "time" not "start"
-            "value": base_price,
-        })
+        results.append(
+            {
+                "time": start,  # GE-Spot uses "time" not "start"
+                "value": base_price,
+            }
+        )
     return results
 
-from datetime import date as _date
+
 _hourly_20220930 = {i: entry["value"] for i, entry in enumerate(PRICE_20220930)}
 _hourly_20221001 = {i: entry["value"] for i, entry in enumerate(PRICE_20221001)}
 
 PRICE_20220930_GESPOT = generate_15min_intervals(_date(2022, 9, 30), _hourly_20220930)
 PRICE_20221001_GESPOT = generate_15min_intervals(_date(2022, 10, 1), _hourly_20221001)
-
-# 13-hour subset used in adaptor tests (mimics shortened tomorrow list)
-PRICE_20221001_THIRTEEN = PRICE_20221001[:13]
 
 PRICE_20221002 = [
     {
