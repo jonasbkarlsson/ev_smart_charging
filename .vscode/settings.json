@@ -12,5 +12,10 @@
     "python.testing.pytestEnabled": true,
     "python.analysis.extraPaths": [
         "/home/vscode/.local/lib/python3.13/site-packages/homeassistant"
-    ]
+    ],
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.black-formatter"
+    }
 }
