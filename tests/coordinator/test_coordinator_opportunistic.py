@@ -47,6 +47,9 @@ async def test_coordinator_opportunistic_switches(
 
     freezer.move_to("2022-09-30T14:00:00+02:00")
 
+    # Mock persistent_notification.create service to avoid ServiceNotFound error
+    hass.services.async_register("persistent_notification", "create", lambda call: None)
+
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     MockSOCEntity.create(hass, entity_registry, "40")
     MockTargetSOCEntity.create(hass, entity_registry, "80")
@@ -151,6 +154,9 @@ async def test_coordinator_opportunistic_switches2(
     # if ON turn OFF switch_apply_limit
 
     freezer.move_to("2022-09-30T14:00:00+02:00")
+
+    # Mock persistent_notification.create service to avoid ServiceNotFound error
+    hass.services.async_register("persistent_notification", "create", lambda call: None)
 
     entity_registry: EntityRegistry = async_entity_registry_get(hass)
     MockSOCEntity.create(hass, entity_registry, "40")

@@ -37,6 +37,9 @@ from .const import MOCK_CONFIG_USER_NO_CHARGER
 # pylint: disable=unused-argument
 async def test_switch(hass, bypass_validate_input_and_control):
     """Test sensor properties."""
+    # Mock persistent_notification.create service to avoid ServiceNotFound error
+    hass.services.async_register("persistent_notification", "create", lambda call: None)
+
     # Create a mock entry so we don't have to go through config flow
     config_entry = MockConfigEntry(
         domain=DOMAIN,
