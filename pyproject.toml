@@ -7,4 +7,4 @@ log_date_format = "%Y-%m-%d %H:%M:%S"
 asyncio_mode = "auto"
 
 [tool.black]
-line-length = 99
+line-length = 88
