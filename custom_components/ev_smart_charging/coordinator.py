@@ -78,12 +78,12 @@ from .const import (
     SWITCH,
 )
 from .helpers.coordinator import (
-    Raw,
     Scheduler,
     get_charging_value,
     get_ready_quarter_utc,
     get_start_quarter_utc,
 )
+from .helpers.raw import Raw
 from .helpers.general import Utils, Validator, get_parameter, get_quarter_index
 from .sensor import (
     EVSmartChargingSensor,
@@ -989,7 +989,10 @@ class EVSmartChargingCoordinator:
                 )
             )
         ):
-            self.scheduler.create_base_schedule(scheduling_params, self.raw_two_days)
+            if self.raw_two_days is not None:
+                self.scheduler.create_base_schedule(scheduling_params, self.raw_two_days)
+            else:
+                _LOGGER.debug("Deferring schedule creation: price data not yet available")
 
         # If the ready_quarter is updated to next day before next day's prices are available,
         # then remove the schedule
@@ -1000,7 +1003,7 @@ class EVSmartChargingCoordinator:
         ):
             self.scheduler.set_empty_schedule()
 
-        if self.scheduler.base_schedule_exists() is True:
+        if self.scheduler.base_schedule_exists() is True and self.raw_two_days is not None:
             max_value = self.raw_two_days.max_value()
             # Make sure max_value > 0
             if max_value <= 0:

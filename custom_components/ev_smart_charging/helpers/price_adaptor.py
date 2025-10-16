@@ -11,7 +11,7 @@ from homeassistant.util import dt
 from custom_components.ev_smart_charging.const import (
     CONF_PRICE_SENSOR,
 )
-from custom_components.ev_smart_charging.helpers.coordinator import PriceFormat, Raw
+from custom_components.ev_smart_charging.helpers.raw import PriceFormat, Raw
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -57,6 +57,10 @@ class PriceAdaptor:
         elif "raw_today" in price_state.attributes:
             self._price_attribute_today = "raw_today"
             self._price_attribute_tomorrow = "raw_tomorrow"
+        # Check for GE-Spot dictionary format attributes
+        elif "today_interval_prices" in price_state.attributes:
+            self._price_attribute_today = "today_interval_prices"
+            self._price_attribute_tomorrow = "tomorrow_interval_prices"
 
         # Then try for the attributes used by integration using
         # the same attribute for today and tomorrow.
@@ -74,9 +78,10 @@ class PriceAdaptor:
         if not self._price_attribute_today:
             return False
 
-        # Set _price_key.start and _price_key.value
+        # Set _price_key.start and _price_key.value for array format
         try:
-            keys = price_state.attributes[self._price_attribute_today][0]
+            price_data = price_state.attributes[self._price_attribute_today]
+            keys = price_data[0]
             start_keys = ["time", "start", "hour", "start_time", "datetime"]
             value_keys = ["price", "value", "price_ct_per_kwh", "electricity_price"]
 
@@ -168,7 +173,7 @@ class PriceAdaptor:
     @staticmethod
     def validate_price_entity(
         hass: HomeAssistant, user_input: dict[str, Any]
-    ) -> list[str]:
+    ) -> tuple[str, str] | None:
         """Validate Price entity"""
 
         # Validate Price entity

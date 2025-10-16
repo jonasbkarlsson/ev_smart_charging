@@ -9,6 +9,7 @@ from custom_components.ev_smart_charging.const import (
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
     PLATFORM_GENERIC,
+    PLATFORM_GESPOT,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
     PLATFORM_TGE,
@@ -16,7 +17,7 @@ from custom_components.ev_smart_charging.const import (
     SENSOR,
     SWITCH,
 )
-from custom_components.ev_smart_charging.helpers.coordinator import Raw, PriceFormat
+from custom_components.ev_smart_charging.helpers.raw import Raw, PriceFormat
 from tests.price import PRICE_THIRTEEN_LIST
 
 
@@ -33,23 +34,34 @@ class MockPriceEntity:
             platform=PLATFORM_NORDPOOL,
             unique_id="kwh_se3_sek_2_10_0",
         )
+        # NOTE: We intentionally seed with PRICE_THIRTEEN_LIST (a truncated list)
+        # because the config flow validation logic has branches that trigger
+        # specific error messages when the 'tomorrow' / incomplete data shape
+        # is present. Using a full 24h list here would bypass those branches
+        # and make tests assert different (incorrect for our scenario) errors.
         MockPriceEntity.set_state(hass, PRICE_THIRTEEN_LIST, None, price)
 
     @staticmethod
     def set_state(
         hass: HomeAssistant,
-        new_raw_today: list,
-        new_raw_tomorrow: list,
-        new_price: float = None,
-    ):
+        new_raw_today: list | None,
+        new_raw_tomorrow: list | None,
+        new_price: float | str | None = None,
+    ) -> None:
         """Set state of MockPriceEntity"""
 
         # Find current price
         if new_price is None:
             new_price = "unavailable"
-            if price := Raw(new_raw_today).get_value(dt_util.now()):
+            if new_raw_today and (
+                price := Raw(new_raw_today, PLATFORM_NORDPOOL).get_value(dt_util.now())
+            ):
                 new_price = price
-            if price := Raw(new_raw_tomorrow).get_value(dt_util.now()):
+            if new_raw_tomorrow and (
+                price := Raw(new_raw_tomorrow, PLATFORM_NORDPOOL).get_value(
+                    dt_util.now()
+                )
+            ):
                 new_price = price
 
         # Set state
@@ -82,22 +94,22 @@ class MockPriceEntityEnergiDataService:
     @staticmethod
     def set_state(
         hass: HomeAssistant,
-        new_raw_today: list,
-        new_raw_tomorrow: list,
-        new_price: float = None,
-    ):
+        new_raw_today: list | None,
+        new_raw_tomorrow: list | None,
+        new_price: float | str | None = None,
+    ) -> None:
         """Set state of MockPriceEntity"""
 
         # Find current price
         if new_price is None:
             new_price = "unavailable"
             price_format = PriceFormat(PLATFORM_ENERGIDATASERVICE)
-            if price := Raw(new_raw_today, price_format).get_value(
-                dt_util.now()
+            if new_raw_today and (
+                price := Raw(new_raw_today, price_format).get_value(dt_util.now())
             ):
                 new_price = price
-            if price := Raw(new_raw_tomorrow, price_format).get_value(
-                dt_util.now()
+            if new_raw_tomorrow and (
+                price := Raw(new_raw_tomorrow, price_format).get_value(dt_util.now())
             ):
                 new_price = price
 
@@ -131,19 +143,23 @@ class MockPriceEntityEntsoe:
     @staticmethod
     def set_state(
         hass: HomeAssistant,
-        new_raw_today: list,
-        new_raw_tomorrow: list,
-        new_price: float = None,
-    ):
+        new_raw_today: list | None,
+        new_raw_tomorrow: list | None,
+        new_price: float | str | None = None,
+    ) -> None:
         """Set state of MockPriceEntity"""
 
         # Find current price
         if new_price is None:
             new_price = "unavailable"
             price_format = PriceFormat(PLATFORM_ENTSOE)
-            if price := Raw(new_raw_today, price_format).get_value(dt_util.now()):
+            if new_raw_today and (
+                price := Raw(new_raw_today, price_format).get_value(dt_util.now())
+            ):
                 new_price = price
-            if price := Raw(new_raw_tomorrow, price_format).get_value(dt_util.now()):
+            if new_raw_tomorrow and (
+                price := Raw(new_raw_tomorrow, price_format).get_value(dt_util.now())
+            ):
                 new_price = price
 
         # Set state
@@ -155,6 +171,7 @@ class MockPriceEntityEntsoe:
                 "prices_tomorrow": new_raw_tomorrow,
             },
         )
+
 
 class MockPriceEntityTGE:
     """Mockup for price entity TGE"""
@@ -174,22 +191,22 @@ class MockPriceEntityTGE:
     @staticmethod
     def set_state(
         hass: HomeAssistant,
-        new_raw_today: list,
-        new_raw_tomorrow: list,
-        new_price: float = None,
-    ):
+        new_raw_today: list | None,
+        new_raw_tomorrow: list | None,
+        new_price: float | str | None = None,
+    ) -> None:
         """Set state of MockPriceEntity"""
 
         # Find current price
         if new_price is None:
             new_price = "unavailable"
             price_format = PriceFormat(PLATFORM_TGE)
-            if price := Raw(new_raw_today, price_format).get_value(
-                dt_util.now()
+            if new_raw_today and (
+                price := Raw(new_raw_today, price_format).get_value(dt_util.now())
             ):
                 new_price = price
-            if price := Raw(new_raw_tomorrow, price_format).get_value(
-                dt_util.now()
+            if new_raw_tomorrow and (
+                price := Raw(new_raw_tomorrow, price_format).get_value(dt_util.now())
             ):
                 new_price = price
 
@@ -202,6 +219,7 @@ class MockPriceEntityTGE:
                 "prices_tomorrow": new_raw_tomorrow,
             },
         )
+
 
 class MockPriceEntityGeneric:
     """Mockup for a generic price entity"""
@@ -221,19 +239,23 @@ class MockPriceEntityGeneric:
     @staticmethod
     def set_state(
         hass: HomeAssistant,
-        new_raw_today: list,
-        new_raw_tomorrow: list,
-        new_price: float = None,
-    ):
+        new_raw_today: list | None,
+        new_raw_tomorrow: list | None,
+        new_price: float | str | None = None,
+    ) -> None:
         """Set state of MockPriceEntityGeneric"""
 
         # Find current price
         if new_price is None:
             new_price = "unavailable"
             price_format = PriceFormat(PLATFORM_GENERIC)
-            if price := Raw(new_raw_today, price_format).get_value(dt_util.now()):
+            if new_raw_today and (
+                price := Raw(new_raw_today, price_format).get_value(dt_util.now())
+            ):
                 new_price = price
-            if price := Raw(new_raw_tomorrow, price_format).get_value(dt_util.now()):
+            if new_raw_tomorrow and (
+                price := Raw(new_raw_tomorrow, price_format).get_value(dt_util.now())
+            ):
                 new_price = price
 
         # Set state
@@ -243,6 +265,55 @@ class MockPriceEntityGeneric:
             {
                 "prices_today": new_raw_today,
                 "prices_tomorrow": new_raw_tomorrow,
+            },
+        )
+
+
+class MockPriceEntityGESpot:
+    """Mockup for price entity GE-Spot"""
+
+    @staticmethod
+    def create(
+        hass: HomeAssistant, entity_registry: EntityRegistry, price: float = 123
+    ):
+        """Create a correct price entity"""
+        entity_registry.async_get_or_create(
+            domain=SENSOR,
+            platform=PLATFORM_GESPOT,
+            unique_id="gespot_current_price_se4",
+        )
+        MockPriceEntityGESpot.set_state(hass, None, None, price)
+
+    @staticmethod
+    def set_state(
+        hass: HomeAssistant,
+        new_raw_today: list | None,
+        new_raw_tomorrow: list | None,
+        new_price: float | str | None = None,
+    ) -> None:
+        """Set state of MockPriceEntityGESpot"""
+
+        # Find current price
+        if new_price is None:
+            new_price = "unavailable"
+            price_format = PriceFormat(PLATFORM_GESPOT)
+            if new_raw_today and (
+                price := Raw(new_raw_today, price_format).get_value(dt_util.now())
+            ):
+                new_price = price
+            if new_raw_tomorrow and (
+                price := Raw(new_raw_tomorrow, price_format).get_value(dt_util.now())
+            ):
+                new_price = price
+
+        # Set state
+        hass.states.async_set(
+            "sensor.gespot_current_price_se4",
+            f"{new_price}",
+            {
+                "current_price": new_price,
+                "raw_today": new_raw_today,
+                "raw_tomorrow": new_raw_tomorrow,
             },
         )
 

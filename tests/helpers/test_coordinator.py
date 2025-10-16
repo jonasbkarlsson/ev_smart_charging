@@ -12,8 +12,6 @@ from custom_components.ev_smart_charging.const import (
 )
 
 from custom_components.ev_smart_charging.helpers.coordinator import (
-    PriceFormat,
-    Raw,
     Scheduler,
     get_charging_quarters,
     get_charging_original,
@@ -22,6 +20,10 @@ from custom_components.ev_smart_charging.helpers.coordinator import (
     get_lowest_quarters,
     get_ready_quarter_utc,
     get_start_quarter_utc,
+)
+from custom_components.ev_smart_charging.helpers.raw import (
+    PriceFormat,
+    Raw,
 )
 from tests.price import (
     PRICE_20220930,

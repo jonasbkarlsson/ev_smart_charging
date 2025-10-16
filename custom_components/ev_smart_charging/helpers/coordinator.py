@@ -8,279 +8,13 @@ from typing import Any
 from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.const import (
-    PLATFORM_ENERGIDATASERVICE,
-    PLATFORM_ENTSOE,
-    PLATFORM_GENERIC,
-    PLATFORM_NORDPOOL,
-    PLATFORM_TGE,
     READY_QUARTER_NONE,
     START_QUARTER_NONE,
 )
 from custom_components.ev_smart_charging.helpers.general import Utils
+from custom_components.ev_smart_charging.helpers.raw import Raw
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class PriceFormat:
-    """Described the format of price information"""
-
-    def __init__(self, platform: str = None):
-        self.start = None  # Can be "start", "time" or "hour"
-        self.value = None  # Can be "price" or "value"
-        self.start_is_string = None  # True if start is a string in ISO format, False if it is a datetime object
-
-        if platform == PLATFORM_NORDPOOL:
-            self.start = "start"
-            self.value = "value"
-            self.start_is_string = False
-        if platform == PLATFORM_ENERGIDATASERVICE:
-            self.start = "hour"
-            self.value = "price"
-            self.start_is_string = False
-        if platform in [PLATFORM_ENTSOE, PLATFORM_GENERIC]:
-            self.start = "time"
-            self.value = "price"
-            self.start_is_string = True
-        if platform == PLATFORM_TGE:
-            self.start = "time"
-            self.value = "price"
-            self.start_is_string = False
-
-
-def convert_raw_item(item: dict[str, Any], price_format: PriceFormat) -> dict[str, Any]:
-    """Convert raw item to the internal format"""
-
-    try:
-        item_new = {}
-        item_new["value"] = item[price_format.value]
-        if price_format.start_is_string:
-            item_new["start"] = datetime.fromisoformat(item[price_format.start])
-        else:
-            item_new["start"] = item[price_format.start]
-        item_new["end"] = item_new["start"] + timedelta(minutes=15)
-    except (KeyError, ValueError, TypeError):
-        return None
-
-    # PLATFORM_NORDPOOL:
-    #
-    # Array of item = {
-    #   "start": datetime,
-    #   "end": datetime,
-    #   "value": float,
-    # }
-    # {'start': datetime.datetime(2023, 3, 6, 0, 0,
-    #           tzinfo=zoneinfo.ZoneInfo(key='Europe/Stockholm')),
-    #  'end': datetime.datetime(2023, 3, 6, 1, 0,
-    #         tzinfo=zoneinfo.ZoneInfo(key='Europe/Stockholm')),
-    #  'value': 145.77}
-
-    # PLATFORM_ENERGIDATASERVICE
-    #
-    # Array of item = {
-    #   "hour": datetime,
-    #   "price": float,
-    # }
-    # {'hour': datetime.datetime(2023, 3, 6, 0, 0,
-    #          tzinfo=<DstTzInfo 'Europe/Stockholm' CET+1:00:00 STD>),
-    #  'price': 146.96}
-
-    # PLATFORM_ENTSOE
-    #
-    # Array of item = {
-    #   "time": string,
-    #   "price": float,
-    # }
-    # {'time': '2023-03-06 00:00:00+01:00', 'price': 0.1306} time is not datetime
-
-    # PLATFORM_TGE
-    #
-    # Array of item = {
-    #   "time": datetime,
-    #   "price": float,
-    # }
-    # {'time': datetime.datetime(2023, 3, 6, 0, 0,
-    #          tzinfo=<DstTzInfo 'Europe/Stockholm' CET+1:00:00 STD>),
-    #  'price': 146.96}
-
-    # PLATFORM_GENERIC
-    #
-    # Array of item = {
-    #   "time": string,
-    #   "price": float,
-    # }
-    # {'time': '2023-03-06 00:00:00+01:00', 'price': 0.1306} time is not datetime
-
-    return item_new
-
-
-class Raw:
-    """Class to handle raw data
-
-    Array of item = {
-        "start": datetime,
-        "end": datetime,
-        "value": float,
-    }"""
-
-    def add_three_extra_items(self, item: dict[str, Any]) -> None:
-        """Add three extra items"""
-
-        extra_item1 = {}
-        extra_item1["value"] = item["value"]
-        extra_item1["start"] = item["start"] + timedelta(minutes=15)
-        extra_item1["end"] = item["start"] + timedelta(minutes=30)
-        self.data.append(extra_item1)
-        extra_item2 = {}
-        extra_item2["value"] = item["value"]
-        extra_item2["start"] = item["start"] + timedelta(minutes=30)
-        extra_item2["end"] = item["start"] + timedelta(minutes=45)
-        self.data.append(extra_item2)
-        extra_item3 = {}
-        extra_item3["value"] = item["value"]
-        extra_item3["start"] = item["start"] + timedelta(minutes=45)
-        extra_item3["end"] = item["start"] + timedelta(minutes=60)
-        self.data.append(extra_item3)
-
-    def __init__(
-        self, raw: list[dict[str, Any]], price_format: PriceFormat = None
-    ) -> None:
-        self.data = []
-        if raw:
-            periodicity_60min = False
-            for item in raw:
-                if price_format:
-                    item_new = convert_raw_item(item, price_format)
-                else:
-                    item_new = convert_raw_item(item, PriceFormat(PLATFORM_NORDPOOL))
-
-                if len(self.data) == 1:
-                    if item_new["start"].minute - self.data[-1]["start"].minute == 0:
-                        # 60 minutes periodicity
-                        periodicity_60min = True
-                        self.add_three_extra_items(self.data[-1])
-                    elif item_new["start"].minute - self.data[-1]["start"].minute == 15:
-                        # 15 minutes periodicity
-                        pass
-                    else:
-                        # Other periodicities not supported
-                        _LOGGER.error(
-                            "Periodicity %s minutes not supported",
-                            item_new["start"].minute - self.data[-1]["start"].minute,
-                        )
-                        self.data = []
-                        self.valid = False
-                        return
-
-                self.data.append(item_new)
-                if periodicity_60min and len(self.data) > 1:
-                    self.add_three_extra_items(self.data[-1])
-
-            self.valid = len(self.data) > 12
-        else:
-            self.valid = False
-
-    def get_raw(self):
-        """Get raw data"""
-        return self.data
-
-    def is_valid(self, check_today_local=False) -> bool:
-        """Get valid"""
-        if not self.valid:
-            return False
-        if not check_today_local:
-            return True
-        else:
-            # Check that self.data contains at least 12 valid prices for today
-            nrof_valid_prices = 0
-            for item in self.data:
-                if item["start"].day == dt.now().day:
-                    nrof_valid_prices = nrof_valid_prices + 1
-
-            if nrof_valid_prices > 12:
-                return True
-            else:
-                _LOGGER.debug(
-                    "Less than 12 valid prices for today found in %s", self.data
-                )
-                return False
-
-    def copy(self):
-        """Get a copy of Raw"""
-        return Raw(deepcopy(self.data))
-
-    def extend(self, raw2):
-        """Extend raw data with data from raw2."""
-        if self.valid and raw2 is not None and raw2.is_valid():
-            self.data.extend(raw2.get_raw())
-        return self
-
-    def max_value(self) -> float:
-        """Return the largest value"""
-        largest = None
-        for item in self.data:
-            if largest is None:
-                largest = item["value"]
-                continue
-            if item["value"] > largest:
-                largest = item["value"]
-        return largest
-
-    def last_value(self) -> float:
-        """Return the last value"""
-        if len(self.data) == 0:
-            return None
-        else:
-            return self.data[-1]["value"]
-
-    def number_of_nonzero(self) -> int:
-        """Return the number of nonzero values"""
-        number_items = 0
-        for item in self.data:
-            if item["value"] > 0.0:
-                number_items = number_items + 1
-        return number_items
-
-    def get_value(self, time: datetime) -> float:
-        """Get the value at time dt"""
-        for item in self.data:
-            if item["start"] <= time < item["end"]:
-                return item["value"]
-        return None
-
-    def get_item(self, time: datetime) -> dict[str, Any]:
-        """Get the item at time dt"""
-        for item in self.data:
-            if item["start"] <= time < item["end"]:
-                return item
-        return None
-
-    def to_utc(self):
-        """Change to UTC timezone"""
-        for item in self.data:
-            item["start"] = dt.as_utc(item["start"])
-            item["end"] = dt.as_utc(item["end"])
-        return self
-
-    def to_local(self):
-        """Change to local timezone"""
-        for item in self.data:
-            item["start"] = dt.as_local(item["start"])
-            item["end"] = dt.as_local(item["end"])
-        return self
-
-    def today(self):
-        """Only keep today's data"""
-        today = dt.now().date()
-        self.data = [item for item in self.data if item["start"].date() == today]
-        self.valid = len(self.data) > 12
-        return self
-
-    def tomorrow(self):
-        """Only keep tomorrow's data"""
-        tomorrow = dt.now().date() + timedelta(days=1)
-        self.data = [item for item in self.data if item["start"].date() == tomorrow]
-        self.valid = len(self.data) > 12
-        return self
 
 
 def get_lowest_quarters(
@@ -400,9 +134,6 @@ def get_lowest_quarters_continuous(
     if start_quarter > time_start:
         time_start = start_quarter
     time_end = ready_quarter
-    # time_end = dt.now().replace(
-    #     quarter=ready_quarter, minute=0, second=0, microsecond=0
-    # ) + timedelta(days=1)
     time_start_index = None
     time_end_index = None
     for index in range(len(price)):
@@ -430,15 +161,14 @@ def get_lowest_quarters_continuous(
         return list(range(time_start_index, time_end_index + 1))
 
     for index in range(time_start_index, time_end_index - quarters + 2):
-        if lowest_index is None:
+        window_sum = sum(price[index : (index + quarters)])
+        if lowest_index is None or lowest_price is None or window_sum < lowest_price:
             lowest_index = index
-            lowest_price = sum(price[index : (index + quarters)])
-            continue
-        new_price = sum(price[index : (index + quarters)])
-        if new_price < lowest_price:
-            lowest_index = index
-            lowest_price = new_price
+            lowest_price = window_sum
 
+    if lowest_index is None:
+        _LOGGER.error("Could not determine lowest_index (unexpected)")
+        return []
     res = list(range(lowest_index, lowest_index + quarters))
     return res
 
@@ -507,14 +237,13 @@ def get_ready_quarter_utc(ready_quarter_local: int) -> datetime:
     # if now_local > ready_quarter_local THEN ready_quarter_utc is tomorrow
 
     time_local: datetime = dt.now()
-    if Utils.datetime_quarter(
-        time_local
-    ) >= ready_quarter_local or ready_quarter_local == (
-        24 * 4
-    ):  # TODO is * 4 correct?
-        time_local = time_local + timedelta(days=1)
+    if (
+        Utils.datetime_quarter(time_local) >= ready_quarter_local
+        or ready_quarter_local == 24 * 4  # 24*4 = 96 quarters in a day
+    ):
+        time_local += timedelta(days=1)
     if ready_quarter_local == READY_QUARTER_NONE:
-        time_local = time_local + timedelta(days=3)
+        time_local += timedelta(days=3)
     time_local = time_local.replace(
         hour=(ready_quarter_local // 4) % 24,
         minute=(ready_quarter_local % 4) * 15,
@@ -626,7 +355,7 @@ class Scheduler:
         if "switch_active" not in params or "switch_apply_limit" not in params:
             self.schedule = None
             self.calc_schedule_summary()
-            return self.schedule
+            return []
 
         schedule = get_charging_update(
             self.schedule_base,
@@ -661,7 +390,7 @@ class Scheduler:
         _LOGGER.debug("Use schedule")
         self.schedule = schedule
         self.calc_schedule_summary()
-        return self.schedule
+        return self.schedule if self.schedule is not None else []
 
     def calc_schedule_summary(self):
         """Calculate summary of schedule"""
@@ -723,30 +452,3 @@ class Scheduler:
             end_time = end_time + timedelta(minutes=15)
 
         return result
-
-
-def main():  # pragma: no cover
-    """Main function to test code."""
-
-    result = []
-    value = [1, 4, 6, 6, 5, 3, 2, 2, 4, 4]
-    start_time = dt.now().replace(minute=0, second=0, microsecond=0)
-    end_time = start_time + timedelta(minutes=15)
-    for nnnn in range(10):
-        item = {
-            "start": start_time,
-            "end": end_time,
-            "value": value[nnnn],
-        }
-        result.append(item)
-    raw2 = Raw(result)
-    print("r2.raw = " + str(raw2.get_raw()))
-    print("price = ", value)
-    lowest = get_lowest_quarters_continuous(start_time, end_time, raw2, 2)
-    print("lowest = " + str(lowest))
-    lowest = get_lowest_quarters_non_continuous(start_time, end_time, raw2, 2)
-    print("lowest = " + str(lowest))
-
-
-if __name__ == "__main__":  # pragma: no cover
-    main()
