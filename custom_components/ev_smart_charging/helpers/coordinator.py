@@ -5,6 +5,9 @@ from datetime import datetime, timedelta
 import logging
 from math import ceil
 from typing import Any
+
+from homeassistant.const import ATTR_UNIT_OF_MEASUREMENT, UnitOfTime
+from homeassistant.core import HomeAssistant
 from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.const import (
@@ -221,6 +224,28 @@ def get_charging_quarters(
     return charging_quarters
 
 
+def get_charging_quarters_from_entity(
+        hass: HomeAssistant,
+        charging_time_entity: str | None
+) -> int:
+    if charging_time_entity is None:
+        _LOGGER.debug('get_charging_quarters_from_entity() called with charging_time_entity=None')
+        return 0
+    state = hass.states.get(charging_time_entity)
+    if state is None:
+        return 0
+    unit = state.attributes.get(ATTR_UNIT_OF_MEASUREMENT)
+    if unit is None:
+        return 0
+    if unit == UnitOfTime.SECONDS:
+        return ceil(float(state.state) / 60 / 15)
+    if unit == UnitOfTime.MINUTES:
+        return ceil(float(state.state) / 15)
+    if unit == UnitOfTime.HOURS:
+        return ceil(float(state.state) * 4)
+    return 0
+
+
 def get_charging_value(charging):
     """Get value for charging now"""
     time_now = dt.now()
@@ -284,7 +309,9 @@ def get_start_quarter_utc(
 class Scheduler:
     """Class to handle charging schedules"""
 
-    def __init__(self) -> None:
+    def __init__(self, hass: HomeAssistant, charging_time_entity: str | None) -> None:
+        self.hass = hass
+        self.charging_time_entity = charging_time_entity
         self.schedule_base = []
         self.schedule_base_min_soc = []
         self.schedule = None
@@ -312,6 +339,10 @@ class Scheduler:
             params["ev_target_soc"],
             params["charging_pct_per_hour"],
         )
+        from_entity = get_charging_quarters_from_entity(self.hass, self.charging_time_entity)
+        if self.charging_time_entity is not None and from_entity >= 0:
+            _LOGGER.debug("Using external entity to calculate charging_quarters, %s", self.charging_time_entity)
+            charging_quarters = from_entity
         _LOGGER.debug("charging_quarters = %s", charging_quarters)
         lowest_quarters = get_lowest_quarters(
             params["start_quarter"],
@@ -332,6 +363,9 @@ class Scheduler:
             params["min_soc"],
             params["charging_pct_per_hour"],
         )
+        if self.charging_time_entity is not None and from_entity >= 0:
+            _LOGGER.debug("Using external entity to calculate charging_quarters, %s", self.charging_time_entity)
+            charging_quarters = from_entity
         _LOGGER.debug("charging_quarters_min_soc = %s", charging_quarters)
         lowest_quarters = get_lowest_quarters(
             params["start_quarter"],
