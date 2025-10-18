@@ -604,7 +604,7 @@ class EVSmartChargingCoordinator:
                 )
         # If state is True and the price limit is set to zero,
         # then make a notification to warn the user.
-        if state and self.max_price == 0:
+        if state and self.max_price == 0 and not self.is_during_intialization():
             await self.hass.services.async_call(
                 "persistent_notification",
                 "create",
@@ -758,7 +758,11 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("switch_low_price_charging_update = %s", state)
         # If state is True and low price charging level is set to zero,
         # then make a notification to warn the user.
-        if state and self.low_price_charging == 0:
+        if (
+            state
+            and self.low_price_charging == 0
+            and not self.is_during_intialization()
+        ):
             await self.hass.services.async_call(
                 "persistent_notification",
                 "create",
@@ -776,7 +780,7 @@ class EVSmartChargingCoordinator:
         _LOGGER.debug("switch_low_soc_charging_update = %s", state)
         # If state is True and low SOC charging level is set to zero,
         # then make a notification to warn the user.
-        if state and self.low_soc_charging == 0:
+        if state and self.low_soc_charging == 0 and not self.is_during_intialization():
             await self.hass.services.async_call(
                 "persistent_notification",
                 "create",
