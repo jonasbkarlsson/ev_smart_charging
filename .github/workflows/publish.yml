@@ -34,7 +34,7 @@ jobs:
           bash ${{ github.workspace }}/scripts/update_const ${{ steps.version.outputs.version }}
 
       - name: 📤 Upload zip to action
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ github.event_name == 'push' }}
         with:
           name: ev_smart_charging
