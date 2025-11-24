@@ -62,7 +62,8 @@
             "opportunistic_type2_level": { "name": "Opportunistisk type 2 nivå" },
             "low_price_charging_level": { "name": "Lad ved lavt prisnivå" },
             "low_soc_charging_level": { "name": "Lad ved lavt ladenivå (SOC)" },
-            "minimum_ev_soc": { "name": "Minimum ladenivå (SOC)" }
+            "minimum_ev_soc": { "name": "Minimum ladenivå (SOC)" },
+            "minimum_session_duration": { "name": "Minimum øktvarighet" }
         },
         "select": {
             "charge_start_time": { "name": "Starttidspunkt for lading" },
