@@ -95,7 +95,8 @@
                     "disconnected": "Losgekoppeld",
                     "smart_charging_not_active": "Slim opladen niet actief",
                     "low_price_charging": "Lage prijs opladen",
-                    "low_soc_charging": "Lage SOC opladen"
+                    "low_soc_charging": "Lage SOC opladen",
+                    "manual_charging": "Handmatig opladen"
                 }
             }
         },

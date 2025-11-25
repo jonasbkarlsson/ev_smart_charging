@@ -48,7 +48,7 @@ class EVSmartChargingButtonStart(EVSmartChargingButton):
 
     async def async_press(self) -> None:
         """Press the button."""
-        await self.coordinator.turn_on_charging()
+        await self.coordinator.turn_on_charging(manual=True)
 
 
 class EVSmartChargingButtonStop(EVSmartChargingButton):
@@ -59,4 +59,4 @@ class EVSmartChargingButtonStop(EVSmartChargingButton):
 
     async def async_press(self) -> None:
         """Press the button."""
-        await self.coordinator.turn_off_charging()
+        await self.coordinator.turn_off_charging(manual=True)

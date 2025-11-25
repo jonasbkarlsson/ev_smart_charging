@@ -95,7 +95,8 @@
                     "disconnected": "Frakoblet",
                     "smart_charging_not_active": "Smart opladning ikke aktiv",
                     "low_price_charging": "Oplad ved lav pris",
-                    "low_soc_charging": "Oplad ved lavt ladeniveau (SOC)"
+                    "low_soc_charging": "Oplad ved lavt ladeniveau (SOC)",
+                    "manual_charging": "Manuel opladning"
                 }
             }
         },

@@ -95,7 +95,8 @@
                     "disconnected": "Frånkopplad",
                     "smart_charging_not_active": "Smart laddning inte aktiverad",
                     "low_price_charging": "Laddar, lågt pris",
-                    "low_soc_charging": "Laddar, låg laddnivå (SOC)"
+                    "low_soc_charging": "Laddar, låg laddnivå (SOC)",
+                    "manual_charging": "Manuell laddning"
                 }
             }
         },
