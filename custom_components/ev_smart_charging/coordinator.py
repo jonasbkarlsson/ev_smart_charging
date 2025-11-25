@@ -52,6 +52,7 @@ from .const import (
     CHARGING_STATUS_CHARGING,
     CHARGING_STATUS_DISCONNECTED,
     CHARGING_STATUS_KEEP_ON,
+    CHARGING_STATUS_MANUAL,
     CHARGING_STATUS_NO_PLAN,
     CHARGING_STATUS_NOT_ACTIVE,
     CHARGING_STATUS_WAITING_CHARGING,
@@ -207,6 +208,7 @@ class EVSmartChargingCoordinator:
         self.auto_charging_state = STATE_OFF
         self.low_price_charging_state = STATE_OFF
         self.low_soc_charging_state = STATE_OFF
+        self.manual_charging_state = STATE_OFF
 
         # Update state once per quarter.
         self.listeners.append(
@@ -398,7 +400,9 @@ class EVSmartChargingCoordinator:
                     self.scheduler.get_charging_number_of_quarters()
                 )
                 if self.sensor_status:
-                    if not self.switch_ev_connected:
+                    if self.manual_charging_state == STATE_ON:
+                        self.sensor_status.set_status(CHARGING_STATUS_MANUAL)
+                    elif not self.switch_ev_connected:
                         self.sensor_status.set_status(CHARGING_STATUS_DISCONNECTED)
                     elif self.low_soc_charging_state == STATE_ON:
                         self.sensor_status.set_status(CHARGING_STATUS_LOW_SOC_CHARGING)
@@ -417,7 +421,9 @@ class EVSmartChargingCoordinator:
                 self.sensor.charging_stop_time = None
                 self.sensor.charging_number_of_quarters = 0
                 if self.sensor_status:
-                    if not self.switch_active:
+                    if self.manual_charging_state == STATE_ON:
+                        self.sensor_status.set_status(CHARGING_STATUS_MANUAL)
+                    elif not self.switch_active:
                         self.sensor_status.set_status(CHARGING_STATUS_NOT_ACTIVE)
                     elif not self.switch_ev_connected:
                         self.sensor_status.set_status(CHARGING_STATUS_DISCONNECTED)
@@ -439,12 +445,16 @@ class EVSmartChargingCoordinator:
                 self._charging_schedule = Scheduler.get_empty_schedule()
                 self.sensor.charging_schedule = self._charging_schedule
 
-    async def turn_on_charging(self, state: bool = True):
+    async def turn_on_charging(self, state: bool = True, manual: bool = False):
         """Turn on charging"""
 
         if state is True:
             _LOGGER.debug("Turn on charging")
             self.sensor.set_state(STATE_ON)
+            if manual:
+                self.manual_charging_state = STATE_ON
+                if self.sensor_status:
+                    self.sensor_status.set_status(CHARGING_STATUS_MANUAL)
             if (
                 self.charger_switch.entity_id is not None
                 and self.charger_switch.domain is not None
@@ -461,6 +471,8 @@ class EVSmartChargingCoordinator:
         else:
             _LOGGER.debug("Turn off charging")
             self.sensor.set_state(STATE_OFF)
+            if manual:
+                self.manual_charging_state = STATE_OFF
             if (
                 self.charger_switch.entity_id is not None
                 and self.charger_switch.domain is not None
@@ -475,9 +487,9 @@ class EVSmartChargingCoordinator:
                     target={"entity_id": self.charger_switch.entity_id},
                 )
 
-    async def turn_off_charging(self):
+    async def turn_off_charging(self, manual: bool = False):
         """Turn off charging"""
-        await self.turn_on_charging(False)
+        await self.turn_on_charging(False, manual=manual)
 
     async def add_sensor(self, sensors: list[EVSmartChargingSensor]):
         """Set up sensor"""

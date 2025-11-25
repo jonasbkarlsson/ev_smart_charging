@@ -190,6 +190,7 @@ CHARGING_STATUS_DISCONNECTED = "disconnected"
 CHARGING_STATUS_NOT_ACTIVE = "smart_charging_not_active"
 CHARGING_STATUS_LOW_PRICE_CHARGING = "low_price_charging"
 CHARGING_STATUS_LOW_SOC_CHARGING = "low_soc_charging"
+CHARGING_STATUS_MANUAL = "manual_charging"
 
 # Defaults
 DEFAULT_NAME = DOMAIN
