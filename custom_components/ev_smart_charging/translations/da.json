@@ -9,6 +9,7 @@
                     "ev_soc_sensor": "Elbil SOC-enhed (ladeniveau)",
                     "ev_target_soc_sensor": "Enhed for ønsket SOC/ladeniveau (mellemrum for at fjerne)",
                     "charger_entity": "Ladeenhed (mellemrum for at fjerne)",
+                    "charging_state_entity": "Enhed for lade status (mellemrum for at fjerne)",
                     "ev_controlled": "Elbilintegration, bruges til at styre start og stop af opladning."
                 }
             }

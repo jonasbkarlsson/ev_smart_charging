@@ -72,6 +72,7 @@ from .const import (
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_START_QUARTER,
+    CONF_CHARGING_STATE_ENTITY,
     DEFAULT_TARGET_SOC,
     READY_QUARTER_NONE,
     START_QUARTER_NONE,
@@ -149,6 +150,15 @@ class EVSmartChargingCoordinator:
         self.charger_switch = ChargerSwitch(
             hass, get_parameter(self.config_entry, CONF_CHARGER_ENTITY)
         )
+        # Store the entity that reflects actual charging state
+        self.charging_state_entity_id = get_parameter(self.config_entry, CONF_CHARGING_STATE_ENTITY, "")
+
+        # Set up periodic check for actual charging state (every minute)
+        self.listeners.append(
+            async_track_time_change(
+                hass, self.periodic_check_charging_state, minute="/1", second=0
+            )
+        )
 
         self.scheduler = Scheduler()
 
@@ -220,6 +230,25 @@ class EVSmartChargingCoordinator:
         )
         # Update state once after intitialization
         self.listeners.append(async_call_later(hass, 10.0, self.update_initial))
+
+    async def periodic_check_charging_state(self, date_time=None):
+        """Periodically check if charging has actually started, and retry if not."""
+        if not self.charging_state_entity_id:
+            return
+        # Only check if we think we should be charging
+        should_be_charging = self.auto_charging_state == STATE_ON
+        if not should_be_charging:
+            return
+        # Get the actual state of the charging state entity
+        state_obj = self.hass.states.get(self.charging_state_entity_id)
+        if state_obj is None:
+            return
+        is_actually_charging = state_obj.state == STATE_ON
+        if not is_actually_charging:
+            _LOGGER.warning(
+                f"EV Smart Charging: Charging should be ON but {self.charging_state_entity_id} is not ON. Retrying start."
+            )
+            await self.turn_on_charging()
 
     def unsubscribe_listeners(self):
         """Unsubscribed to listeners"""

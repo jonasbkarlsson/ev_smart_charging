@@ -9,6 +9,7 @@
                     "ev_soc_sensor": "Entitet för laddnivå (SOC)",
                     "ev_target_soc_sensor": "Entitet för önskad laddnivå (ett mellanslags för att ta bort)",
                     "charger_entity": "Entitet för laddningsstyrning (ett mellanslags för att ta bort)",
+                    "charging_state_entity": "Entitet för laddningsstatus (ett mellanslags för att ta bort)",
                     "ev_controlled": "Elbilsintegration kommer att styra start och stopp av laddning."
                 }
             }

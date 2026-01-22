@@ -17,6 +17,7 @@ from .const import (
     CONF_PRICE_SENSOR,
     CONF_CHARGER_ENTITY,
     CONF_SOLAR_CHARGING_CONFIGURED,
+    CONF_CHARGING_STATE_ENTITY,
     DOMAIN,
 )
 from .helpers.config_flow import DeviceNameCreator, FindEntity, FlowValidator
@@ -65,6 +66,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_input[CONF_CHARGER_ENTITY] = FindEntity.find_ocpp_device(self.hass)
             user_input[CONF_EV_CONTROLLED] = False
             user_input[CONF_SOLAR_CHARGING_CONFIGURED] = False
+            user_input[CONF_CHARGING_STATE_ENTITY] = ""
 
         else:
             # process user_input
@@ -98,6 +100,9 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ): cv.string,
             vol.Optional(
                 CONF_CHARGER_ENTITY, default=user_input[CONF_CHARGER_ENTITY]
+            ): cv.string,
+            vol.Optional(
+                CONF_CHARGING_STATE_ENTITY, default=user_input[CONF_CHARGING_STATE_ENTITY]
             ): cv.string,
             vol.Optional(
                 CONF_EV_CONTROLLED, default=user_input[CONF_EV_CONTROLLED]

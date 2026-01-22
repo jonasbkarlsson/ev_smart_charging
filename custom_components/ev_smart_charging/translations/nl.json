@@ -9,6 +9,7 @@
                     "ev_soc_sensor": "EV SOC sensor",
                     "ev_target_soc_sensor": "EV doel SOC input (enkele spatie om niet te gebruiken)",
                     "charger_entity": "Entity voor de oplader bedieningsschakelaar (enkele spatie om niet te gebruiken)",
+                    "charging_state_entity": "Entity voor de laadstatus (enkele spatie om niet te gebruiken)",
                     "ev_controlled": "Een EV integratie bediend het starten/stoppen van het opladen"
                 }
             }

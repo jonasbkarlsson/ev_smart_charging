@@ -9,6 +9,7 @@
                     "ev_soc_sensor": "Elbil SOC-enhet (ladenivå)",
                     "ev_target_soc_sensor": "Enhet for ønsket SOC/ladenivå (mellomrom for å ta bort)",
                     "charger_entity": "Ladekontrollenhet (mellomrom for å ta bort)",
+                    "charging_state_entity": "Enhet for lade status (mellomrom for å ta bort)",
                     "ev_controlled": "Elbilintegrasjon, brukes for å styre start og stopp av lading."
                 }
             }
