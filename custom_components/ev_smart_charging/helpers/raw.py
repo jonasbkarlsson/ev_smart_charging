@@ -52,7 +52,7 @@ def convert_raw_item(item: dict[str, Any], price_format: PriceFormat) -> dict[st
     """Convert raw item to the internal format"""
 
     try:
-        item_new = {}
+        item_new = deepcopy(item)
         item_new["value"] = item[price_format.value]
         if price_format.start_is_string:
             item_new["start"] = datetime.fromisoformat(item[price_format.start])
@@ -284,5 +284,12 @@ class Raw:
         """Only keep tomorrow's data"""
         tomorrow = dt.now().date() + timedelta(days=1)
         self.data = [item for item in self.data if item["start"].date() == tomorrow]
+        self.valid = len(self.data) > 12
+        return self
+
+    def tomorrow_and_later(self):
+        """Keep tomorrow and all later data"""
+        tomorrow = dt.now().date() + timedelta(days=1)
+        self.data = [item for item in self.data if item["start"].date() >= tomorrow]
         self.valid = len(self.data) > 12
         return self
