@@ -72,10 +72,29 @@ EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 a
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'. This entity can either be a Switch or an Input Boolean.
 Charging control by EV integration | Yes | Select this if an EV integration (and not a charger integration) will be used to control start/stop of charging. Also, if an EV integration is used to control start/stop of charging, it is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected`.
+EPEX Predictor country code | No | Country code used by the built-in EPEX Predictor request (for example `NL`, `SE`, `DE`). Only used when `switch.ev_smart_charging_use_predicted_epex_data` is turned on.
+EPEX Predictor fixed price | No | Fixed price component sent to the built-in EPEX Predictor API. Only used when `switch.ev_smart_charging_use_predicted_epex_data` is turned on.
+EPEX Predictor tax percent | No | Tax percent sent to the built-in EPEX Predictor API. Only used when `switch.ev_smart_charging_use_predicted_epex_data` is turned on.
+EPEX Predictor unit | No | Unit sent to the built-in EPEX Predictor API (default `EUR_PER_KWH`). Only used when `switch.ev_smart_charging_use_predicted_epex_data` is turned on.
 
 With the exception of Name, the above configuration items can be changed after intial configuration in Settings -> Devices & Services -> Integrations -> EV Smart Charging -> 1 device -> Configure. To change Name, the native way to rename Integrations or Devices in Home Assistant can be used.
 
 Additional parameters that affects how the charging will be performed are available as configuration entities. These entities can be placed in the dashboard and can be controlled using automations.
+
+### Built-in EPEX Predictor
+
+When `switch.ev_smart_charging_use_predicted_epex_data` is enabled, the integration fetches predicted tomorrow-and-later prices and merges them into `raw_two_days` for scheduling and dashboard visualization.
+
+The predictor input fields in the config flow/options flow are:
+- EPEX Predictor country code
+- EPEX Predictor fixed price
+- EPEX Predictor tax percent
+- EPEX Predictor unit
+
+For predictor model details and supported input semantics, see:
+- https://github.com/b3nn0/EpexPredictor
+
+Thanks to [b3nn0](https://github.com/b3nn0) for EpexPredictor.
 
 ### Configuration entities
 
@@ -103,6 +122,7 @@ Entity | Type | Description
 `switch.ev_smart_charging_opportunistic_type2_charging` | Switch | Activates opportunistic type 2 charging, see the desciption of the configuration entity `number.ev_smart_charging_opportunistic_type2_level`. The two types of opportunistic charging can not be used at the same time.
 `switch.ev_smart_charging_low_soc_charging` | Switch | Activates charging immediately if the EV SOC is lower than a configured level. It is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected` if this switch is set to on. Note that this charging is not shown as a scheduled charging. A typical use case is to charge the EV directly when returning home to a minimum level, and then do a complete charging using the scheduled charging when the price is lowest.
 `switch.ev_smart_charging_low_price_charging` | Switch | Activates charging immediately if the electricity price is lower than a configured level. It is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected` if this switch is set to on. Note that this charging is not shown as a scheduled charging.
+`switch.ev_smart_charging_use_predicted_epex_data` | Switch | Enables use of built-in EPEX Predictor prices for tomorrow and later. When off, only non-predicted prices are used.
 `switch.ev_smart_charging_continuous_charging_preferred` | Switch | If turned on, will as basis schedule one continuous charging session. If turned off, will schedule charging on the 15-minute intervals with lowest electricity price, even if they are not continuous.
 `switch.ev_smart_charging_keep_charger_on` | Switch | If "on", the `sensor.ev_smart_charging_charging` will not turn off after completed charge cycle. The feature is intended to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery. If this option is used, the feature `Electricity price limit` will be turned off, and vice versa. *NOTE* It is required that `switch.ev_smart_charging_ev_connected` is controlled in a proper way in order for this feature to work. Also, there is an assumption made that the EV itself will stop its charging when reaching the target SOC.
 `switch.ev_smart_charging_ev_connected` | Switch | Tells the integration that the EV is connected to the charger. Is preferable controlled by automations (see example below). Can avoid problems occuring when the EV is not connected to the charger at the time the charging should start. Using it will also ensure that the `sensor.ev_smart_charging_charging` is set to "off" when the EV is not connected to the charger.
@@ -123,7 +143,7 @@ Attribute | Description
 `charging_stop_time` | If charging is planned, the date and time when the charging will stop.
 `charging_number_of_hours` | If charging is planned, the number of hours that charging is planned. This might be less than the time between the start and stop times, if non-continuous charging is configured.
 `opportunistic` | `true` if an opportunistic charging feature has been triggered.
-`raw_two_days` | The electricity price today and tomorrow from the electricity price entity.
+`raw_two_days` | Available price data used for scheduling and graphing. With built-in EPEX Predictor enabled, this can include tomorrow and later predicted prices.
 `charging_schedule` | The calculated charging schedule. Can be used by an ApexCharts card to visulize the planned charging, see below.
 
 ## Lovelace UI
@@ -178,7 +198,7 @@ cards:
       xaxis:
         labels:
           show: true
-          format: HH
+          format: ddd HH
           rotate: -45
           rotateAlways: true
           hideOverlappingLabels: true
@@ -257,6 +277,76 @@ cards:
     icon: mdi:battery-70
     unit: '%'
 ```
+
+### Dynamic dashboard period (recommended)
+
+The static `graph_span: 2d` example above is easy to start with, but it will always render a fixed range.
+
+If you want the chart/table to show exactly the period that is really available:
+- 1 day if only today is available,
+- 2 days when tomorrow is available,
+- up to 5 days when EPEX Predictor is enabled,
+
+use `config-template-card` and derive the range from `raw_two_days`.
+
+```yaml
+type: custom:config-template-card
+entities:
+  - sensor.ev_smart_charging_charging
+  - switch.ev_smart_charging_use_predicted_epex_data
+variables:
+  # Keep only rows that should be visualized for the current predictor mode.
+  - >
+    const ev = states['sensor.ev_smart_charging_charging'];
+    const usePred = states['switch.ev_smart_charging_use_predicted_epex_data']?.state === 'on';
+    const rows = ev?.attributes?.raw_two_days || [];
+    return rows.filter((r) => usePred || !r.predicted);
+  # Number of unique days in the filtered data (minimum 1 day).
+  - >
+    const keys = [...new Set(vars[0].map((r) => new Date(r.start).toDateString()))];
+    return Math.max(keys.length, 1);
+  # Chart start.
+  - >
+    if (!vars[0].length) return Date.now();
+    return new Date(vars[0][0].start).getTime();
+  # Chart end (last interval end if available).
+  - >
+    if (!vars[0].length) return Date.now() + 24 * 60 * 60 * 1000;
+    const last = vars[0][vars[0].length - 1];
+    if (last.end) return new Date(last.end).getTime();
+    return new Date(last.start).getTime() + 15 * 60 * 1000;
+card:
+  type: custom:apexcharts-card
+  locale: en
+  graph_span: "${vars[1] + 'd'}"
+  apex_config:
+    xaxis:
+      labels:
+        format: "${vars[1] > 1 ? 'ddd HH:mm' : 'HH:mm'}"
+      min: ${vars[2]}
+      max: ${vars[3]}
+  series:
+    - entity: sensor.ev_smart_charging_charging
+      name: Electricity price
+      type: line
+      data_generator: >
+        return vars[0].map((r) => [new Date(r.start), r.value]);
+    - entity: sensor.ev_smart_charging_charging
+      name: Charging
+      type: area
+      curve: stepline
+      color: black
+      data_generator: >
+        const minTs = vars[2];
+        const maxTs = vars[3];
+        const schedule = entity.attributes.charging_schedule || [];
+        return schedule
+          .filter((r) => r.value && r.value > 0)
+          .map((r) => [new Date(r.start), r.value])
+          .filter((p) => p[0].getTime() >= minTs && p[0].getTime() <= maxTs);
+```
+
+For table cards, reuse the same filtered list (`vars[0]`) so the table only shows rows that are also shown in the chart.
 
 ## Integrating with EVs
 

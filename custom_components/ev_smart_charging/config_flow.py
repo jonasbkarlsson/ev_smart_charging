@@ -81,8 +81,12 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_input[CONF_SOLAR_CHARGING_CONFIGURED] = False
             user_input[CONF_CHARGING_STATE_ENTITY] = ""
             user_input[CONF_EPEX_PREDICTOR_COUNTRY] = DEFAULT_EPEX_PREDICTOR_COUNTRY
-            user_input[CONF_EPEX_PREDICTOR_FIXED_PRICE] = DEFAULT_EPEX_PREDICTOR_FIXED_PRICE
-            user_input[CONF_EPEX_PREDICTOR_TAX_PERCENT] = DEFAULT_EPEX_PREDICTOR_TAX_PERCENT
+            user_input[CONF_EPEX_PREDICTOR_FIXED_PRICE] = (
+                DEFAULT_EPEX_PREDICTOR_FIXED_PRICE
+            )
+            user_input[CONF_EPEX_PREDICTOR_TAX_PERCENT] = (
+                DEFAULT_EPEX_PREDICTOR_TAX_PERCENT
+            )
             user_input[CONF_EPEX_PREDICTOR_UNIT] = DEFAULT_EPEX_PREDICTOR_UNIT
 
         else:

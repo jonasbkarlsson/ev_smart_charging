@@ -961,6 +961,12 @@ class EVSmartChargingCoordinator:
         if not isinstance(timestamps, list) or not isinstance(prices, list):
             return Raw([])
 
+        _LOGGER.debug(
+            "Predicted EPEX payload received: points=%s unit=%s",
+            len(prices),
+            self.epex_unit,
+        )
+
         items = []
         for idx, timestamp in enumerate(timestamps):
             if idx >= len(prices):
@@ -983,11 +989,62 @@ class EVSmartChargingCoordinator:
             return Raw([])
         return Raw(items)
 
+    @staticmethod
+    def _median_numeric(values: list[float]) -> float | None:
+        """Return median for a numeric list or None when empty."""
+        if not values:
+            return None
+        sorted_values = sorted(values)
+        mid = len(sorted_values) // 2
+        if len(sorted_values) % 2 == 1:
+            return float(sorted_values[mid])
+        return float((sorted_values[mid - 1] + sorted_values[mid]) / 2)
+
     async def _merge_predicted_prices(self):
         """Merge predicted EPEX prices into tomorrow-and-later raw data."""
         predicted_raw = await self._fetch_predicted_epex_raw_local()
         if not predicted_raw.is_valid():
             return
+
+        predicted_items = predicted_raw.get_raw()
+
+        # Auto-normalize predicted values to the same magnitude as live prices
+        # (for example EUR/kWh vs ct/kWh).
+        reference_values = []
+        if self.raw_today_local and self.raw_today_local.is_valid():
+            reference_values.extend(
+                [float(item["value"]) for item in self.raw_today_local.get_raw()]
+            )
+        if self.raw_tomorrow_local and self.raw_tomorrow_local.is_valid():
+            reference_values.extend(
+                [float(item["value"]) for item in self.raw_tomorrow_local.get_raw()]
+            )
+        predicted_values = [float(item["value"]) for item in predicted_items]
+
+        reference_median = self._median_numeric(reference_values)
+        predicted_median = self._median_numeric(predicted_values)
+        scale_factor = 1.0
+        if reference_median is not None and predicted_median is not None:
+            if reference_median >= 10 and predicted_median < 5:
+                scale_factor = 100.0
+            elif reference_median < 5 and predicted_median >= 10:
+                scale_factor = 0.01
+
+        if scale_factor != 1.0:
+            for item in predicted_items:
+                item["value"] = float(item["value"]) * scale_factor
+            _LOGGER.warning(
+                "Scaled predicted EPEX prices by factor %.2f (ref median %.4f, predicted median %.4f)",
+                scale_factor,
+                reference_median,
+                predicted_median,
+            )
+        else:
+            _LOGGER.debug(
+                "Predicted EPEX scaling unchanged (ref median=%s, predicted median=%s)",
+                reference_median,
+                predicted_median,
+            )
 
         now_local = dt.now()
         future_start = now_local.replace(
@@ -999,7 +1056,7 @@ class EVSmartChargingCoordinator:
         existing_starts = {item["start"] for item in existing}
 
         merged = list(existing)
-        for item in predicted_raw.get_raw():
+        for item in predicted_items:
             if item["start"] < future_start:
                 continue
             if item["start"] in existing_starts:
@@ -1042,20 +1099,6 @@ class EVSmartChargingCoordinator:
             return None
         return (dt.now() + timedelta(days=offset)).date()
 
-    async def _save_day_dates_to_options(self):
-        """Persist resolved day dates so they don't drift after midnight."""
-        current_options = dict(self.config_entry.options)
-        current_options[CONF_START_DATE] = (
-            self.start_date_local.isoformat() if self.start_date_local else ""
-        )
-        current_options[CONF_READY_DATE] = (
-            self.ready_date_local.isoformat() if self.ready_date_local else ""
-        )
-        self.hass.config_entries.async_update_entry(
-            self.config_entry,
-            options=current_options,
-        )
-
     async def set_start_day(self, day_value: str):
         """Update start day and lock it to a concrete date when not Auto."""
         self.start_day_local = day_value
@@ -1064,7 +1107,6 @@ class EVSmartChargingCoordinator:
             if day_value == START_DAY_AUTO
             else self._resolve_day_to_date(day_value)
         )
-        await self._save_day_dates_to_options()
         await self.update_configuration()
 
     async def set_ready_day(self, day_value: str):
@@ -1075,7 +1117,6 @@ class EVSmartChargingCoordinator:
             if day_value == READY_DAY_AUTO
             else self._resolve_day_to_date(day_value)
         )
-        await self._save_day_dates_to_options()
         await self.update_configuration()
 
     async def update_configuration(self):
@@ -1139,6 +1180,12 @@ class EVSmartChargingCoordinator:
             self.raw_tomorrow_local = self.price_adaptor.get_raw_tomorrow_local(
                 price_state
             )
+
+            # When predicted prices are disabled, only use tomorrow's native prices.
+            # Some price sensors expose multiple future days in the "tomorrow" payload.
+            if not self.switch_use_predicted_epex_data:
+                self.raw_tomorrow_local = self.raw_tomorrow_local.copy().tomorrow()
+
             self.tomorrow_valid = self.raw_tomorrow_local.is_valid()
 
             if self.switch_use_predicted_epex_data:

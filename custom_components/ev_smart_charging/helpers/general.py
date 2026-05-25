@@ -14,7 +14,6 @@ from custom_components.ev_smart_charging.const import (
 )
 from .raw import Raw
 
-
 _LOGGER = logging.getLogger(__name__)
 
 

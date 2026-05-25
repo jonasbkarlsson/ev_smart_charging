@@ -6,7 +6,7 @@ from homeassistant.const import __version__ as HA_VERSION
 NAME = "EV Smart Charging"
 DOMAIN = "ev_smart_charging"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "2.5.1-beta-01"
+VERSION = "2.5.2-beta-01"
 ISSUE_URL = "https://github.com/jonasbkarlsson/ev_smart_charging/issues"
 
 # Icons
@@ -98,7 +98,7 @@ CONF_EPEX_PREDICTOR_FIXED_PRICE = "epex_predictor_fixed_price"
 CONF_EPEX_PREDICTOR_TAX_PERCENT = "epex_predictor_tax_percent"
 CONF_EPEX_PREDICTOR_UNIT = "epex_predictor_unit"
 
-# Deprecated legacy option keys; retained for backward compatibility with existing installs.
+# Deprecated aliases retained for backward compatibility.
 CONF_EPEX_COUNTRY = "epex_country"
 CONF_EPEX_FIXED_PRICE = "epex_fixed_price"
 CONF_EPEX_TAX_PERCENT = "epex_tax_percent"
