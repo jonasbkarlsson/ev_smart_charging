@@ -1,4 +1,5 @@
 """Adds config flow for EV Smart Charging."""
+
 import logging
 from typing import Any, Optional
 import voluptuous as vol
@@ -11,12 +12,21 @@ import homeassistant.helpers.config_validation as cv
 
 from .const import (
     CONF_DEVICE_NAME,
+    CONF_EPEX_COUNTRY,
+    CONF_EPEX_FIXED_PRICE,
+    CONF_EPEX_TAX_PERCENT,
+    CONF_EPEX_UNIT,
     CONF_EV_CONTROLLED,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_PRICE_SENSOR,
     CONF_CHARGER_ENTITY,
     CONF_SOLAR_CHARGING_CONFIGURED,
+    CONF_CHARGING_STATE_ENTITY,
+    DEFAULT_EPEX_COUNTRY,
+    DEFAULT_EPEX_FIXED_PRICE,
+    DEFAULT_EPEX_TAX_PERCENT,
+    DEFAULT_EPEX_UNIT,
     DOMAIN,
 )
 from .helpers.config_flow import DeviceNameCreator, FindEntity, FlowValidator
@@ -59,12 +69,17 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_input[CONF_DEVICE_NAME] = DeviceNameCreator.create(self.hass)
             user_input[CONF_PRICE_SENSOR] = FindEntity.find_price_sensor(self.hass)
             user_input[CONF_EV_SOC_SENSOR] = FindEntity.find_vw_soc_sensor(self.hass)
-            user_input[
-                CONF_EV_TARGET_SOC_SENSOR
-            ] = FindEntity.find_vw_target_soc_sensor(self.hass)
+            user_input[CONF_EV_TARGET_SOC_SENSOR] = (
+                FindEntity.find_vw_target_soc_sensor(self.hass)
+            )
             user_input[CONF_CHARGER_ENTITY] = FindEntity.find_ocpp_device(self.hass)
             user_input[CONF_EV_CONTROLLED] = False
             user_input[CONF_SOLAR_CHARGING_CONFIGURED] = False
+            user_input[CONF_CHARGING_STATE_ENTITY] = ""
+            user_input[CONF_EPEX_COUNTRY] = DEFAULT_EPEX_COUNTRY
+            user_input[CONF_EPEX_FIXED_PRICE] = DEFAULT_EPEX_FIXED_PRICE
+            user_input[CONF_EPEX_TAX_PERCENT] = DEFAULT_EPEX_TAX_PERCENT
+            user_input[CONF_EPEX_UNIT] = DEFAULT_EPEX_UNIT
 
         else:
             # process user_input
@@ -99,6 +114,20 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Optional(
                 CONF_CHARGER_ENTITY, default=user_input[CONF_CHARGER_ENTITY]
             ): cv.string,
+            vol.Optional(
+                CONF_CHARGING_STATE_ENTITY,
+                default=user_input[CONF_CHARGING_STATE_ENTITY],
+            ): cv.string,
+            vol.Optional(
+                CONF_EPEX_COUNTRY, default=user_input[CONF_EPEX_COUNTRY]
+            ): cv.string,
+            vol.Optional(
+                CONF_EPEX_FIXED_PRICE, default=user_input[CONF_EPEX_FIXED_PRICE]
+            ): vol.Coerce(float),
+            vol.Optional(
+                CONF_EPEX_TAX_PERCENT, default=user_input[CONF_EPEX_TAX_PERCENT]
+            ): vol.Coerce(float),
+            vol.Optional(CONF_EPEX_UNIT, default=user_input[CONF_EPEX_UNIT]): cv.string,
             vol.Optional(
                 CONF_EV_CONTROLLED, default=user_input[CONF_EV_CONTROLLED]
             ): cv.boolean,
@@ -154,6 +183,36 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(
                 CONF_CHARGER_ENTITY,
                 default=get_parameter(self.config_entry, CONF_CHARGER_ENTITY),
+            ): cv.string,
+            vol.Optional(
+                CONF_CHARGING_STATE_ENTITY,
+                default=get_parameter(
+                    self.config_entry, CONF_CHARGING_STATE_ENTITY, ""
+                ),
+            ): cv.string,
+            vol.Optional(
+                CONF_EPEX_COUNTRY,
+                default=get_parameter(
+                    self.config_entry, CONF_EPEX_COUNTRY, DEFAULT_EPEX_COUNTRY
+                ),
+            ): cv.string,
+            vol.Optional(
+                CONF_EPEX_FIXED_PRICE,
+                default=get_parameter(
+                    self.config_entry, CONF_EPEX_FIXED_PRICE, DEFAULT_EPEX_FIXED_PRICE
+                ),
+            ): vol.Coerce(float),
+            vol.Optional(
+                CONF_EPEX_TAX_PERCENT,
+                default=get_parameter(
+                    self.config_entry, CONF_EPEX_TAX_PERCENT, DEFAULT_EPEX_TAX_PERCENT
+                ),
+            ): vol.Coerce(float),
+            vol.Optional(
+                CONF_EPEX_UNIT,
+                default=get_parameter(
+                    self.config_entry, CONF_EPEX_UNIT, DEFAULT_EPEX_UNIT
+                ),
             ): cv.string,
             vol.Optional(
                 CONF_EV_CONTROLLED,

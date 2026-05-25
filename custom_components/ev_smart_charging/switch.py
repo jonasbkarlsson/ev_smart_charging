@@ -19,6 +19,7 @@ from .const import (
     ENTITY_KEY_KEEP_ON_SWITCH,
     ENTITY_KEY_LOW_SOC_CHARGING_SWITCH,
     ENTITY_KEY_OPPORTUNISTIC_SWITCH,
+    ENTITY_KEY_USE_PREDICTED_EPEX_SWITCH,
     ICON_CONNECTION,
     SWITCH,
 )
@@ -44,6 +45,7 @@ async def async_setup_entry(
     switches.append(EVSmartChargingSwitchLowPriceCharging(entry, coordinator))
     switches.append(EVSmartChargingSwitchLowSocCharging(entry, coordinator))
     switches.append(EVSmartChargingSwitchOpportunisticType2(entry, coordinator))
+    switches.append(EVSmartChargingSwitchUsePredictedEpexData(entry, coordinator))
     async_add_devices(switches)
 
 
@@ -296,3 +298,27 @@ class EVSmartChargingSwitchOpportunisticType2(EVSmartChargingSwitch):
         """Turn the entity off."""
         await super().async_turn_off(**kwargs)
         await self.coordinator.switch_opportunistic_type2_update(False)
+
+
+class EVSmartChargingSwitchUsePredictedEpexData(EVSmartChargingSwitch):
+    """EV Smart Charging predicted EPEX data switch class."""
+
+    _entity_key = ENTITY_KEY_USE_PREDICTED_EPEX_SWITCH
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSwitchUsePredictedEpexData.__init__()")
+        super().__init__(entry, coordinator)
+        if self.is_on is None:
+            self._attr_is_on = False
+            self.update_ha_state()
+        self.coordinator.switch_use_predicted_epex_data = self.is_on
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+        await super().async_turn_on(**kwargs)
+        await self.coordinator.switch_use_predicted_epex_data_update(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""
+        await super().async_turn_off(**kwargs)
+        await self.coordinator.switch_use_predicted_epex_data_update(False)

@@ -3,6 +3,11 @@
 from custom_components.ev_smart_charging.const import (
     CONF_CHARGER_ENTITY,
     CONF_DEVICE_NAME,
+    CONF_CHARGING_STATE_ENTITY,
+    CONF_EPEX_COUNTRY,
+    CONF_EPEX_FIXED_PRICE,
+    CONF_EPEX_TAX_PERCENT,
+    CONF_EPEX_UNIT,
     CONF_EV_CONTROLLED,
     CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_LOW_SOC_CHARGING_LEVEL,
@@ -15,6 +20,10 @@ from custom_components.ev_smart_charging.const import (
     CONF_PCT_PER_HOUR,
     CONF_READY_QUARTER,
     CONF_START_QUARTER,
+    DEFAULT_EPEX_COUNTRY,
+    DEFAULT_EPEX_FIXED_PRICE,
+    DEFAULT_EPEX_TAX_PERCENT,
+    DEFAULT_EPEX_UNIT,
     NAME,
 )
 
@@ -24,6 +33,11 @@ MOCK_CONFIG_USER = {
     CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
     CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
     CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
+    CONF_CHARGING_STATE_ENTITY: "",
+    CONF_EPEX_COUNTRY: DEFAULT_EPEX_COUNTRY,
+    CONF_EPEX_FIXED_PRICE: DEFAULT_EPEX_FIXED_PRICE,
+    CONF_EPEX_TAX_PERCENT: DEFAULT_EPEX_TAX_PERCENT,
+    CONF_EPEX_UNIT: DEFAULT_EPEX_UNIT,
     CONF_EV_CONTROLLED: False,
 }
 
@@ -70,6 +84,11 @@ MOCK_CONFIG_CHARGER_EXTRA = {
     CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
     CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
     CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
+    CONF_CHARGING_STATE_ENTITY: "",
+    CONF_EPEX_COUNTRY: DEFAULT_EPEX_COUNTRY,
+    CONF_EPEX_FIXED_PRICE: DEFAULT_EPEX_FIXED_PRICE,
+    CONF_EPEX_TAX_PERCENT: DEFAULT_EPEX_TAX_PERCENT,
+    CONF_EPEX_UNIT: DEFAULT_EPEX_UNIT,
     CONF_EV_CONTROLLED: False,
 }
 

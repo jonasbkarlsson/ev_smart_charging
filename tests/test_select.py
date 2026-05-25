@@ -16,15 +16,22 @@ from custom_components.ev_smart_charging.const import (
     CONF_READY_QUARTER,
     CONF_START_QUARTER,
     DOMAIN,
+    READY_DAYS,
+    READY_DAYS_NO_PREDICTION,
     READY_QUARTER_NONE,
+    START_DAYS,
+    START_DAYS_NO_PREDICTION,
     SELECT,
+    SWITCH,
     START_QUARTER_NONE,
 )
 from custom_components.ev_smart_charging.coordinator import (
     EVSmartChargingCoordinator,
 )
 from custom_components.ev_smart_charging.select import (
+    EVSmartChargingSelectReadyDay,
     EVSmartChargingSelectReadyQuarter,
+    EVSmartChargingSelectStartDay,
     EVSmartChargingSelectStartQuarter,
 )
 
@@ -69,10 +76,20 @@ async def test_select(hass, bypass_validate_input_and_control):
     select_ready_quarter: EVSmartChargingSelectReadyQuarter = hass.data[
         "entity_components"
     ][SELECT].get_entity("select.ev_smart_charging_charge_completion_time")
+    select_start_day: EVSmartChargingSelectStartDay = hass.data["entity_components"][
+        SELECT
+    ].get_entity("select.ev_smart_charging_charge_start_day")
+    select_ready_day: EVSmartChargingSelectReadyDay = hass.data["entity_components"][
+        SELECT
+    ].get_entity("select.ev_smart_charging_charge_completion_day")
     assert select_start_quarter
     assert select_ready_quarter
+    assert select_start_day
+    assert select_ready_day
     assert isinstance(select_start_quarter, EVSmartChargingSelectStartQuarter)
     assert isinstance(select_ready_quarter, EVSmartChargingSelectReadyQuarter)
+    assert isinstance(select_start_day, EVSmartChargingSelectStartDay)
+    assert isinstance(select_ready_day, EVSmartChargingSelectReadyDay)
 
     # Test the selects
 
@@ -92,6 +109,17 @@ async def test_select(hass, bypass_validate_input_and_control):
     assert coordinator.ready_quarter_local == 13 * 4
     await select_ready_quarter.async_select_option("None")
     assert coordinator.ready_quarter_local == READY_QUARTER_NONE
+
+    # Day selectors are restricted when predicted prices are disabled.
+    assert select_start_day.options == START_DAYS_NO_PREDICTION
+    assert select_ready_day.options == READY_DAYS_NO_PREDICTION
+
+    switch_use_predicted = hass.data["entity_components"][SWITCH].get_entity(
+        "switch.ev_smart_charging_use_predicted_epex_data"
+    )
+    await switch_use_predicted.async_turn_on()
+    assert select_start_day.options == START_DAYS
+    assert select_ready_day.options == READY_DAYS
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)

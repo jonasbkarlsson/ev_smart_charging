@@ -1,7 +1,7 @@
 """Helpers for coordinator"""
 
 from copy import deepcopy
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import logging
 from math import ceil
 from typing import Any
@@ -9,6 +9,19 @@ from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.const import (
     READY_QUARTER_NONE,
+    READY_DAY_3,
+    READY_DAY_4,
+    READY_DAY_5,
+    READY_DAY_AUTO,
+    READY_DAY_TODAY,
+    READY_DAY_TOMORROW,
+    START_DAYS,
+    START_DAY_AUTO,
+    START_DAY_TODAY,
+    START_DAY_TOMORROW,
+    START_DAY_3,
+    START_DAY_4,
+    START_DAY_5,
     START_QUARTER_NONE,
 )
 from custom_components.ev_smart_charging.helpers.general import Utils
@@ -23,21 +36,40 @@ def get_lowest_quarters(
     continuous: bool,
     raw_two_days: Raw,
     quarters: int,
+    blackout_start: int,
+    blackout_end: int,
 ) -> list:
     """From the two-day prices, calculate the cheapest set of quarters"""
 
     if continuous:
         return get_lowest_quarters_continuous(
-            start_quarter, ready_quarter, raw_two_days, quarters
+            start_quarter, ready_quarter, raw_two_days, quarters, blackout_start, blackout_end
         )
 
     return get_lowest_quarters_non_continuous(
-        start_quarter, ready_quarter, raw_two_days, quarters
+        start_quarter, ready_quarter, raw_two_days, quarters, blackout_start, blackout_end
     )
 
 
+def is_blackout(index: int, start: int, end: int) -> bool:
+    """Check if the quarter index is in a blackout period"""
+    if start == START_QUARTER_NONE or end == START_QUARTER_NONE:
+        return False
+    if start == end:
+        return False
+    if start < end:
+        return start <= index < end
+    # Crosses midnight
+    return index >= start or index < end
+
+
 def get_lowest_quarters_non_continuous(
-    start_quarter: datetime, ready_quarter: datetime, raw_two_days: Raw, quarters: int
+    start_quarter: datetime,
+    ready_quarter: datetime,
+    raw_two_days: Raw,
+    quarters: int,
+    blackout_start: int,
+    blackout_end: int,
 ) -> list:
     """From the two-day prices, calculate the cheapest non-continues set of quarters
 
@@ -82,7 +114,17 @@ def get_lowest_quarters_non_continuous(
         return list(range(time_start_index, time_end_index + 1))
 
     prices = price[time_start_index : time_end_index + 1]
-    sorted_index = sorted(range(len(prices)), key=prices.__getitem__)
+    # Penalize prices during blackout periods
+    # use a local copy to not change the original price list
+    prices_with_blackout = deepcopy(prices)
+    for i in range(len(prices_with_blackout)):
+        item = raw_two_days.get_raw()[i + time_start_index]
+        local_time = dt.as_local(item["start"])
+        local_quarter_index = local_time.hour * 4 + (local_time.minute // 15)
+        if is_blackout(local_quarter_index, blackout_start, blackout_end):
+            prices_with_blackout[i] = 1000000.0  # Very high price
+
+    sorted_index = sorted(range(len(prices_with_blackout)), key=prices_with_blackout.__getitem__)
 
     # Find the lowest quarters. If the quarter with highest selected quarter has exactly the same price
     # as some of the not selected quarters, then the selected the quarters with that price which are
@@ -114,7 +156,12 @@ def get_lowest_quarters_non_continuous(
 
 
 def get_lowest_quarters_continuous(
-    start_quarter: datetime, ready_quarter: datetime, raw_two_days: Raw, quarters: int
+    start_quarter: datetime,
+    ready_quarter: datetime,
+    raw_two_days: Raw,
+    quarters: int,
+    blackout_start: int,
+    blackout_end: int,
 ) -> list:
     """From the two-day prices, calculate the cheapest continues set of quarters
 
@@ -161,7 +208,18 @@ def get_lowest_quarters_continuous(
         return list(range(time_start_index, time_end_index + 1))
 
     for index in range(time_start_index, time_end_index - quarters + 2):
-        window_sum = sum(price[index : (index + quarters)])
+        window = price[index : (index + quarters)]
+        # Penalize prices during blackout periods
+        # Check if any quarter in the window is in a blackout period
+        blackout_penalty = 0.0
+        for i in range(quarters):
+            item = raw_two_days.get_raw()[index + i]
+            local_time = dt.as_local(item["start"])
+            local_quarter_index = local_time.hour * 4 + (local_time.minute // 15)
+            if is_blackout(local_quarter_index, blackout_start, blackout_end):
+                blackout_penalty += 1000000.0
+
+        window_sum = sum(window) + blackout_penalty
         if lowest_index is None or lowest_price is None or window_sum < lowest_price:
             lowest_index = index
             lowest_price = window_sum
@@ -230,18 +288,40 @@ def get_charging_value(charging):
     return None
 
 
-def get_ready_quarter_utc(ready_quarter_local: int) -> datetime:
+def get_ready_quarter_utc(
+    ready_quarter_local: int,
+    ready_day_local: str = READY_DAY_AUTO,
+    ready_date_local: date | None = None,
+) -> datetime:
     """Get the UTC time for the ready quarter"""
 
     # if now_local <= ready_quarter_local THEN ready_quarter_utc is today
     # if now_local > ready_quarter_local THEN ready_quarter_utc is tomorrow
 
     time_local: datetime = dt.now()
-    if (
-        Utils.datetime_quarter(time_local) >= ready_quarter_local
-        or ready_quarter_local == 24 * 4  # 24*4 = 96 quarters in a day
-    ):
+    if ready_date_local is not None:
+        time_local = time_local.replace(
+            year=ready_date_local.year,
+            month=ready_date_local.month,
+            day=ready_date_local.day,
+        )
+    elif ready_day_local == READY_DAY_AUTO:
+        if (
+            Utils.datetime_quarter(time_local) >= ready_quarter_local
+            or ready_quarter_local == 24 * 4  # 24*4 = 96 quarters in a day
+        ):
+            time_local += timedelta(days=1)
+    elif ready_day_local == READY_DAY_TODAY:
+        pass
+    elif ready_day_local == READY_DAY_TOMORROW:
         time_local += timedelta(days=1)
+    elif ready_day_local == READY_DAY_3:
+        time_local += timedelta(days=2)
+    elif ready_day_local == READY_DAY_4:
+        time_local += timedelta(days=3)
+    elif ready_day_local == READY_DAY_5:
+        time_local += timedelta(days=4)
+
     if ready_quarter_local == READY_QUARTER_NONE:
         time_local += timedelta(days=3)
     time_local = time_local.replace(
@@ -254,7 +334,10 @@ def get_ready_quarter_utc(ready_quarter_local: int) -> datetime:
 
 
 def get_start_quarter_utc(
-    start_quarter_local: int, ready_quarter_local: int
+    start_quarter_local: int,
+    ready_quarter_local: int,
+    start_day_local: str = START_DAY_AUTO,
+    start_date_local: date | None = None,
 ) -> datetime:
     """Get the UTC time for the ready quarter"""
 
@@ -264,13 +347,30 @@ def get_start_quarter_utc(
     time_local: datetime = dt.now()
     if start_quarter_local == START_QUARTER_NONE:
         time_local = time_local + timedelta(days=-2)
-    elif ready_quarter_local != READY_QUARTER_NONE:
-        if start_quarter_local < ready_quarter_local:
-            if Utils.datetime_quarter(time_local) >= ready_quarter_local:
-                time_local = time_local + timedelta(days=1)
-        else:
-            if Utils.datetime_quarter(time_local) < ready_quarter_local:
-                time_local = time_local + timedelta(days=-1)
+    elif start_date_local is not None:
+        time_local = time_local.replace(
+            year=start_date_local.year,
+            month=start_date_local.month,
+            day=start_date_local.day,
+        )
+    elif start_day_local == START_DAY_AUTO:
+        if ready_quarter_local != READY_QUARTER_NONE:
+            if start_quarter_local < ready_quarter_local:
+                if Utils.datetime_quarter(time_local) >= ready_quarter_local:
+                    time_local = time_local + timedelta(days=1)
+            else:
+                if Utils.datetime_quarter(time_local) < ready_quarter_local:
+                    time_local = time_local + timedelta(days=-1)
+    elif start_day_local == START_DAY_TODAY:
+        pass
+    elif start_day_local == START_DAY_TOMORROW:
+        time_local += timedelta(days=1)
+    elif start_day_local == START_DAY_3:
+        time_local += timedelta(days=2)
+    elif start_day_local == START_DAY_4:
+        time_local += timedelta(days=3)
+    elif start_day_local == START_DAY_5:
+        time_local += timedelta(days=4)
 
     time_local = time_local.replace(
         hour=(start_quarter_local // 4) % 24,
@@ -319,6 +419,8 @@ class Scheduler:
             params["switch_continuous"],
             raw_two_days,
             charging_quarters,
+            params.get("blackout_start", START_QUARTER_NONE),
+            params.get("blackout_end", START_QUARTER_NONE),
         )
         _LOGGER.debug("lowest_quarters = %s", lowest_quarters)
         self.schedule_base = get_charging_original(lowest_quarters, raw_two_days)
@@ -339,6 +441,8 @@ class Scheduler:
             params["switch_continuous"],
             raw_two_days,
             charging_quarters,
+            params.get("blackout_start", START_QUARTER_NONE),
+            params.get("blackout_end", START_QUARTER_NONE),
         )
         _LOGGER.debug("lowest_quarters_min_soc = %s", lowest_quarters)
         self.schedule_base_min_soc = get_charging_original(

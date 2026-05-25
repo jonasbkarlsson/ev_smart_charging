@@ -69,6 +69,8 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
         self._charging_number_of_hours = None
 
         self._opportunistic = False
+        self._blackout_start = None
+        self._blackout_end = None
 
     def set_state(self, new_state):
         """Set new status."""
@@ -88,6 +90,8 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
             "opportunistic": self._opportunistic,
             "raw_two_days": self._raw_two_days,
             "charging_schedule": self._charging_schedule,
+            "blackout_start": self._blackout_start,
+            "blackout_end": self._blackout_end,
         }
 
     @property
@@ -188,6 +192,26 @@ class EVSmartChargingSensorCharging(EVSmartChargingSensor):
     @opportunistic.setter
     def opportunistic(self, new_value):
         self._opportunistic = new_value
+        self.update_ha_state()
+
+    @property
+    def blackout_start(self):
+        """Getter for blackout_start."""
+        return self._blackout_start
+
+    @blackout_start.setter
+    def blackout_start(self, new_value):
+        self._blackout_start = new_value
+        self.update_ha_state()
+
+    @property
+    def blackout_end(self):
+        """Getter for blackout_end."""
+        return self._blackout_end
+
+    @blackout_end.setter
+    def blackout_end(self, new_value):
+        self._blackout_end = new_value
         self.update_ha_state()
 
 

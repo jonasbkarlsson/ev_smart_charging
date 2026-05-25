@@ -9,6 +9,11 @@
                     "ev_soc_sensor": "Entitet för laddnivå (SOC)",
                     "ev_target_soc_sensor": "Entitet för önskad laddnivå (ett mellanslags för att ta bort)",
                     "charger_entity": "Entitet för laddningsstyrning (ett mellanslags för att ta bort)",
+                    "charging_state_entity": "Entitet för laddningsstatus (ett mellanslags för att ta bort)",
+                    "epex_country": "EPEX landskod",
+                    "epex_fixed_price": "EPEX fast pris",
+                    "epex_tax_percent": "EPEX skatteprocent",
+                    "epex_unit": "EPEX enhet",
                     "ev_controlled": "Elbilsintegration kommer att styra start och stopp av laddning."
                 }
             }
@@ -34,6 +39,11 @@
                     "ev_soc_sensor": "Entitet för laddnivå (SOC)",
                     "ev_target_soc_sensor": "Entitet för önskad laddnivå (ett mellanslags för att ta bort)",
                     "charger_entity": "Entitet för laddningsstyrning (ett mellanslags för att ta bort)",
+                    "charging_state_entity": "Entitet för laddningsstatus (ett mellanslags för att ta bort)",
+                    "epex_country": "EPEX landskod",
+                    "epex_fixed_price": "EPEX fast pris",
+                    "epex_tax_percent": "EPEX skatteprocent",
+                    "epex_unit": "EPEX enhet",
                     "ev_controlled": "Elbilsintegration kommer att styra start och stopp av laddning."
                 }
             }
@@ -108,7 +118,8 @@
             "opportunistic_charging": { "name": "Opportunistisk laddning" },
             "opportunistic_type2_charging": { "name": "Opportunistisk typ 2 laddning" },
             "low_price_charging": { "name": "Laddning vid lågt pris" },
-            "low_soc_charging": { "name": "Laddning vid låg laddnivå (SOC)" }
+            "low_soc_charging": { "name": "Laddning vid låg laddnivå (SOC)" },
+            "use_predicted_epex_data": { "name": "Använd predikterade EPEX-data" }
         }
     }
 }

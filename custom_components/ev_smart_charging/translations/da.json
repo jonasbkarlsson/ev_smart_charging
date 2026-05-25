@@ -9,6 +9,11 @@
                     "ev_soc_sensor": "Elbil SOC-enhed (ladeniveau)",
                     "ev_target_soc_sensor": "Enhed for ønsket SOC/ladeniveau (mellemrum for at fjerne)",
                     "charger_entity": "Ladeenhed (mellemrum for at fjerne)",
+                    "charging_state_entity": "Enhed for lade status (mellemrum for at fjerne)",
+                    "epex_country": "EPEX landekode",
+                    "epex_fixed_price": "EPEX fast pris",
+                    "epex_tax_percent": "EPEX momsprocent",
+                    "epex_unit": "EPEX enhed",
                     "ev_controlled": "Elbilintegration, bruges til at styre start og stop af opladning."
                 }
             }
@@ -34,6 +39,11 @@
                     "ev_soc_sensor": "Elbil SOC-enhed",
                     "ev_target_soc_sensor": "Elbil mål-SOC-enhed (mellemrum for at fjerne)",
                     "charger_entity": "Ladeenhed (mellemrum for at fjerne)",
+                    "charging_state_entity": "Enhed for lade status (mellemrum for at fjerne)",
+                    "epex_country": "EPEX landekode",
+                    "epex_fixed_price": "EPEX fast pris",
+                    "epex_tax_percent": "EPEX momsprocent",
+                    "epex_unit": "EPEX enhed",
                     "ev_controlled": "Elbil-integration for at kontrollere start/stop af opladning"
                 }
             }
@@ -108,7 +118,8 @@
             "opportunistic_charging": { "name": "Opportunistisk opladning" },
             "opportunistic_type2_charging": { "name": "Opportunistisk type 2 opladning" },
             "low_price_charging": { "name": "Oplad ved lav pris" },
-            "low_soc_charging": { "name": "Oplad ved lavt ladeniveau (SOC)" }
+            "low_soc_charging": { "name": "Oplad ved lavt ladeniveau (SOC)" },
+            "use_predicted_epex_data": { "name": "Brug forudsagte EPEX-data" }
         }
     }
 }

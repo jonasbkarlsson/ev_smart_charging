@@ -9,6 +9,11 @@
                     "ev_soc_sensor": "EV SOC sensor",
                     "ev_target_soc_sensor": "EV doel SOC input (enkele spatie om niet te gebruiken)",
                     "charger_entity": "Entity voor de oplader bedieningsschakelaar (enkele spatie om niet te gebruiken)",
+                    "charging_state_entity": "Entity voor de laadstatus (enkele spatie om niet te gebruiken)",
+                    "epex_country": "EPEX landcode",
+                    "epex_fixed_price": "EPEX vaste prijs",
+                    "epex_tax_percent": "EPEX belastingpercentage",
+                    "epex_unit": "EPEX eenheid",
                     "ev_controlled": "Een EV integratie bediend het starten/stoppen van het opladen"
                 }
             }
@@ -34,6 +39,11 @@
                     "ev_soc_sensor": "EV SOC sensor",
                     "ev_target_soc_sensor": "EV doel SOC input (enkele spatie om niet te gebruiken)",
                     "charger_entity": "Entity voor de oplader bedieningsschakelaar (enkele spatie om niet te gebruiken)",
+                    "charging_state_entity": "Entity voor de laadstatus (enkele spatie om niet te gebruiken)",
+                    "epex_country": "EPEX landcode",
+                    "epex_fixed_price": "EPEX vaste prijs",
+                    "epex_tax_percent": "EPEX belastingpercentage",
+                    "epex_unit": "EPEX eenheid",
                     "ev_controlled": "Een EV integratie bediend het starten/stoppen van het opladen"
                 }
             }
@@ -66,7 +76,31 @@
         },
         "select": {
             "charge_start_time": { "name": "Oplaad starttijd" },
-            "charge_completion_time": { "name": "Oplaad voltooiingstijd" }
+            "charge_start_day": {
+                "name": "Oplaad startdag",
+                "state": {
+                    "Auto": "Auto",
+                    "Today": "Vandaag",
+                    "Tomorrow": "Morgen",
+                    "Day 3": "Dag 3",
+                    "Day 4": "Dag 4",
+                    "Day 5": "Dag 5"
+                }
+            },
+            "charge_completion_time": { "name": "Oplaad voltooiingstijd" },
+            "charge_completion_day": {
+                "name": "Oplaad voltooiingsdag",
+                "state": {
+                    "Auto": "Auto",
+                    "Today": "Vandaag",
+                    "Tomorrow": "Morgen",
+                    "Day 3": "Dag 3",
+                    "Day 4": "Dag 4",
+                    "Day 5": "Dag 5"
+                }
+            },
+            "blackout_start_time": { "name": "Blackout starttijd" },
+            "blackout_end_time": { "name": "Blackout eindtijd" }
         },
         "sensor": {
             "charging": {
@@ -108,7 +142,8 @@
             "opportunistic_charging": { "name": "Opportunistisch opladen" },
             "opportunistic_type2_charging": { "name": "Opportunistisch type 2 opladen" },
             "low_price_charging": { "name": "Lage prijs opladen" },
-            "low_soc_charging": { "name": "Lage SOC opladen" }
+            "low_soc_charging": { "name": "Lage SOC opladen" },
+            "use_predicted_epex_data": { "name": "Gebruik voorspelde EPEX-data" }
         }
     }
 }

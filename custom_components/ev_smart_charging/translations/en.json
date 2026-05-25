@@ -9,6 +9,11 @@
                     "ev_soc_sensor": "EV SOC entity",
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
                     "charger_entity": "Charger control entity (single space to remove)",
+                    "charging_state_entity": "Charging state entity (single space to remove)",
+                    "epex_country": "EPEX country code",
+                    "epex_fixed_price": "EPEX fixed price",
+                    "epex_tax_percent": "EPEX tax percent",
+                    "epex_unit": "EPEX unit",
                     "ev_controlled": "An EV integration will control start/stop of charging"
                 }
             }
@@ -34,6 +39,11 @@
                     "ev_soc_sensor": "EV SOC entity",
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
                     "charger_entity": "Charger control entity (single space to remove)",
+                    "charging_state_entity": "Charging state entity (single space to remove)",
+                    "epex_country": "EPEX country code",
+                    "epex_fixed_price": "EPEX fixed price",
+                    "epex_tax_percent": "EPEX tax percent",
+                    "epex_unit": "EPEX unit",
                     "ev_controlled": "An EV integration will control start/stop of charging"
                 }
             }
@@ -66,7 +76,31 @@
         },
         "select": {
             "charge_start_time": { "name": "Charge start time" },
-            "charge_completion_time": { "name": "Charge completion time" }
+            "charge_start_day": {
+                "name": "Charge start day",
+                "state": {
+                    "Auto": "Auto",
+                    "Today": "Today",
+                    "Tomorrow": "Tomorrow",
+                    "Day 3": "Day 3",
+                    "Day 4": "Day 4",
+                    "Day 5": "Day 5"
+                }
+            },
+            "charge_completion_time": { "name": "Charge completion time" },
+            "charge_completion_day": {
+                "name": "Charge completion day",
+                "state": {
+                    "Auto": "Auto",
+                    "Today": "Today",
+                    "Tomorrow": "Tomorrow",
+                    "Day 3": "Day 3",
+                    "Day 4": "Day 4",
+                    "Day 5": "Day 5"
+                }
+            },
+            "blackout_start_time": { "name": "Blackout start time" },
+            "blackout_end_time": { "name": "Blackout end time" }
         },
         "sensor": {
             "charging": {
@@ -108,7 +142,8 @@
             "opportunistic_charging": { "name": "Opportunistic charging" },
             "opportunistic_type2_charging": { "name": "Opportunistic type2 charging" },
             "low_price_charging": { "name": "Low price charging" },
-            "low_soc_charging": { "name": "Low SOC charging" }
+            "low_soc_charging": { "name": "Low SOC charging" },
+            "use_predicted_epex_data": { "name": "Use predicted EPEX data" }
         }
     }
 }
