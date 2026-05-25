@@ -100,6 +100,23 @@ def get_parameter(config_entry: ConfigEntry, parameter: str, default_val: Any = 
     return default_val
 
 
+def get_parameter_with_legacy(
+    config_entry: ConfigEntry,
+    parameter: str,
+    legacy_parameter: str | None,
+    default_val: Any = None,
+):
+    """Get parameter and optionally fall back to a legacy key name."""
+    value = get_parameter(config_entry, parameter, None)
+    if value is not None:
+        return value
+    if legacy_parameter:
+        legacy_value = get_parameter(config_entry, legacy_parameter, None)
+        if legacy_value is not None:
+            return legacy_value
+    return default_val
+
+
 def get_quarter_index(option: str) -> int | None:
     """Get index of option."""
 

@@ -10,10 +10,10 @@
                     "ev_target_soc_sensor": "Entitet för önskad laddnivå (ett mellanslags för att ta bort)",
                     "charger_entity": "Entitet för laddningsstyrning (ett mellanslags för att ta bort)",
                     "charging_state_entity": "Entitet för laddningsstatus (ett mellanslags för att ta bort)",
-                    "epex_country": "EPEX landskod",
-                    "epex_fixed_price": "EPEX fast pris",
-                    "epex_tax_percent": "EPEX skatteprocent",
-                    "epex_unit": "EPEX enhet",
+                    "epex_predictor_country": "EPEX Predictor landskod",
+                    "epex_predictor_fixed_price": "EPEX Predictor fast pris",
+                    "epex_predictor_tax_percent": "EPEX Predictor skatteprocent",
+                    "epex_predictor_unit": "EPEX Predictor enhet",
                     "ev_controlled": "Elbilsintegration kommer att styra start och stopp av laddning."
                 }
             }
@@ -40,10 +40,10 @@
                     "ev_target_soc_sensor": "Entitet för önskad laddnivå (ett mellanslags för att ta bort)",
                     "charger_entity": "Entitet för laddningsstyrning (ett mellanslags för att ta bort)",
                     "charging_state_entity": "Entitet för laddningsstatus (ett mellanslags för att ta bort)",
-                    "epex_country": "EPEX landskod",
-                    "epex_fixed_price": "EPEX fast pris",
-                    "epex_tax_percent": "EPEX skatteprocent",
-                    "epex_unit": "EPEX enhet",
+                    "epex_predictor_country": "EPEX Predictor landskod",
+                    "epex_predictor_fixed_price": "EPEX Predictor fast pris",
+                    "epex_predictor_tax_percent": "EPEX Predictor skatteprocent",
+                    "epex_predictor_unit": "EPEX Predictor enhet",
                     "ev_controlled": "Elbilsintegration kommer att styra start och stopp av laddning."
                 }
             }
@@ -62,36 +62,78 @@
     },
     "entity": {
         "button": {
-            "manually_start_charging": { "name": "Starta laddning manuellt" },
-            "manually_stop_charging": { "name": "Stoppa laddning manuellt" }
+            "manually_start_charging": {
+                "name": "Starta laddning manuellt"
+            },
+            "manually_stop_charging": {
+                "name": "Stoppa laddning manuellt"
+            }
         },
         "number": {
-            "charging_speed": { "name": "Laddningshastighet" },
-            "electricity_price_limit": { "name": "Elprisgräns" },
-            "opportunistic_level": { "name": "Opportunistisk nivå" },
-            "opportunistic_type2_level": { "name": "Opportunistisk typ 2 nivå" },
-            "low_price_charging_level": { "name": "Prisnivå för lågprisladdning" },
-            "low_soc_charging_level": { "name": "Laddnivå för lågladdnivåladdning" },
-            "minimum_ev_soc": { "name": "Lägsta laddnivå (SOC)" }
+            "charging_speed": {
+                "name": "Laddningshastighet"
+            },
+            "electricity_price_limit": {
+                "name": "Elprisgräns"
+            },
+            "opportunistic_level": {
+                "name": "Opportunistisk nivå"
+            },
+            "opportunistic_type2_level": {
+                "name": "Opportunistisk typ 2 nivå"
+            },
+            "low_price_charging_level": {
+                "name": "Prisnivå för lågprisladdning"
+            },
+            "low_soc_charging_level": {
+                "name": "Laddnivå för lågladdnivåladdning"
+            },
+            "minimum_ev_soc": {
+                "name": "Lägsta laddnivå (SOC)"
+            }
         },
         "select": {
-            "charge_start_time": { "name": "Starttid för laddning" },
-            "charge_completion_time": { "name": "Sluttid för laddning" }
+            "charge_start_time": {
+                "name": "Starttid för laddning"
+            },
+            "charge_completion_time": {
+                "name": "Sluttid för laddning"
+            }
         },
         "sensor": {
             "charging": {
                 "name": "Laddning",
                 "state_attributes": {
-                    "current_price": { "name": "Nuvarande pris"},
-                    "ev_soc": {"name": "Laddnivå (SOC)"},
-                    "ev_target_soc": {"name": "Önskad laddnivå (SOC)"},
-                    "charging_is_planned": {"name": "Laddning är planerad"},
-                    "charging_start_time": {"name": "Laddning starttid"},
-                    "charging_stop_time": {"name": "Laddning sluttid"},
-                    "charging_number_of_hours": {"name": "Antal timmar laddning"},
-                    "opportunistic": {"name": "Opportunistisk"},
-                    "raw_two_days": {"name": "Priser två dagar"},
-                    "charging_schedule": {"name": "Laddningsschema"}
+                    "current_price": {
+                        "name": "Nuvarande pris"
+                    },
+                    "ev_soc": {
+                        "name": "Laddnivå (SOC)"
+                    },
+                    "ev_target_soc": {
+                        "name": "Önskad laddnivå (SOC)"
+                    },
+                    "charging_is_planned": {
+                        "name": "Laddning är planerad"
+                    },
+                    "charging_start_time": {
+                        "name": "Laddning starttid"
+                    },
+                    "charging_stop_time": {
+                        "name": "Laddning sluttid"
+                    },
+                    "charging_number_of_hours": {
+                        "name": "Antal timmar laddning"
+                    },
+                    "opportunistic": {
+                        "name": "Opportunistisk"
+                    },
+                    "raw_two_days": {
+                        "name": "Priser två dagar"
+                    },
+                    "charging_schedule": {
+                        "name": "Laddningsschema"
+                    }
                 }
             },
             "status": {
@@ -110,16 +152,36 @@
             }
         },
         "switch": {
-            "smart_charging_activated": { "name": "Smart laddning aktiverad" },
-            "apply_price_limit": { "name": "Tillämpa elprisgräns" },
-            "continuous_charging_preferred": { "name": "Föredra kontinuerlig laddning" },
-            "ev_connected": { "name": "Elbil ansluten" },
-            "keep_charger_on": { "name": "Håll laddaren aktiv" },
-            "opportunistic_charging": { "name": "Opportunistisk laddning" },
-            "opportunistic_type2_charging": { "name": "Opportunistisk typ 2 laddning" },
-            "low_price_charging": { "name": "Laddning vid lågt pris" },
-            "low_soc_charging": { "name": "Laddning vid låg laddnivå (SOC)" },
-            "use_predicted_epex_data": { "name": "Använd predikterade EPEX-data" }
+            "smart_charging_activated": {
+                "name": "Smart laddning aktiverad"
+            },
+            "apply_price_limit": {
+                "name": "Tillämpa elprisgräns"
+            },
+            "continuous_charging_preferred": {
+                "name": "Föredra kontinuerlig laddning"
+            },
+            "ev_connected": {
+                "name": "Elbil ansluten"
+            },
+            "keep_charger_on": {
+                "name": "Håll laddaren aktiv"
+            },
+            "opportunistic_charging": {
+                "name": "Opportunistisk laddning"
+            },
+            "opportunistic_type2_charging": {
+                "name": "Opportunistisk typ 2 laddning"
+            },
+            "low_price_charging": {
+                "name": "Laddning vid lågt pris"
+            },
+            "low_soc_charging": {
+                "name": "Laddning vid låg laddnivå (SOC)"
+            },
+            "use_predicted_epex_data": {
+                "name": "Använd predikterade EPEX Predictor-data"
+            }
         }
     }
 }

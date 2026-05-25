@@ -83,11 +83,15 @@ from .const import (
     CONF_EPEX_FIXED_PRICE,
     CONF_EPEX_TAX_PERCENT,
     CONF_EPEX_UNIT,
+    CONF_EPEX_PREDICTOR_COUNTRY,
+    CONF_EPEX_PREDICTOR_FIXED_PRICE,
+    CONF_EPEX_PREDICTOR_TAX_PERCENT,
+    CONF_EPEX_PREDICTOR_UNIT,
     DEFAULT_TARGET_SOC,
-    DEFAULT_EPEX_COUNTRY,
-    DEFAULT_EPEX_FIXED_PRICE,
-    DEFAULT_EPEX_TAX_PERCENT,
-    DEFAULT_EPEX_UNIT,
+    DEFAULT_EPEX_PREDICTOR_COUNTRY,
+    DEFAULT_EPEX_PREDICTOR_FIXED_PRICE,
+    DEFAULT_EPEX_PREDICTOR_TAX_PERCENT,
+    DEFAULT_EPEX_PREDICTOR_UNIT,
     ENTITY_KEY_USE_PREDICTED_EPEX_SWITCH,
     READY_QUARTER_NONE,
     READY_DAY_AUTO,
@@ -116,7 +120,13 @@ from .helpers.coordinator import (
     get_start_quarter_utc,
 )
 from .helpers.raw import Raw
-from .helpers.general import Utils, Validator, get_parameter, get_quarter_index
+from .helpers.general import (
+    Utils,
+    Validator,
+    get_parameter,
+    get_parameter_with_legacy,
+    get_quarter_index,
+)
 from .sensor import (
     EVSmartChargingSensor,
     EVSmartChargingSensorCharging,
@@ -178,21 +188,33 @@ class EVSmartChargingCoordinator:
         self.price_adaptor = PriceAdaptor()
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
-        self.epex_country = get_parameter(
-            self.config_entry, CONF_EPEX_COUNTRY, DEFAULT_EPEX_COUNTRY
+        self.epex_country = get_parameter_with_legacy(
+            self.config_entry,
+            CONF_EPEX_PREDICTOR_COUNTRY,
+            CONF_EPEX_COUNTRY,
+            DEFAULT_EPEX_PREDICTOR_COUNTRY,
         )
         self.epex_fixed_price = float(
-            get_parameter(
-                self.config_entry, CONF_EPEX_FIXED_PRICE, DEFAULT_EPEX_FIXED_PRICE
+            get_parameter_with_legacy(
+                self.config_entry,
+                CONF_EPEX_PREDICTOR_FIXED_PRICE,
+                CONF_EPEX_FIXED_PRICE,
+                DEFAULT_EPEX_PREDICTOR_FIXED_PRICE,
             )
         )
         self.epex_tax_percent = float(
-            get_parameter(
-                self.config_entry, CONF_EPEX_TAX_PERCENT, DEFAULT_EPEX_TAX_PERCENT
+            get_parameter_with_legacy(
+                self.config_entry,
+                CONF_EPEX_PREDICTOR_TAX_PERCENT,
+                CONF_EPEX_TAX_PERCENT,
+                DEFAULT_EPEX_PREDICTOR_TAX_PERCENT,
             )
         )
-        self.epex_unit = get_parameter(
-            self.config_entry, CONF_EPEX_UNIT, DEFAULT_EPEX_UNIT
+        self.epex_unit = get_parameter_with_legacy(
+            self.config_entry,
+            CONF_EPEX_PREDICTOR_UNIT,
+            CONF_EPEX_UNIT,
+            DEFAULT_EPEX_PREDICTOR_UNIT,
         )
 
         self.charger_switch = ChargerSwitch(

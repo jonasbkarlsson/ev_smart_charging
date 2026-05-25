@@ -93,6 +93,12 @@ CONF_GRID_VOLTAGE = "grid_voltage"
 CONF_CHARGING_STATE_ENTITY = "charging_state_entity"
 CONF_BLACKOUT_START_TIME = "blackout_start_time"
 CONF_BLACKOUT_END_TIME = "blackout_end_time"
+CONF_EPEX_PREDICTOR_COUNTRY = "epex_predictor_country"
+CONF_EPEX_PREDICTOR_FIXED_PRICE = "epex_predictor_fixed_price"
+CONF_EPEX_PREDICTOR_TAX_PERCENT = "epex_predictor_tax_percent"
+CONF_EPEX_PREDICTOR_UNIT = "epex_predictor_unit"
+
+# Deprecated legacy option keys; retained for backward compatibility with existing installs.
 CONF_EPEX_COUNTRY = "epex_country"
 CONF_EPEX_FIXED_PRICE = "epex_fixed_price"
 CONF_EPEX_TAX_PERCENT = "epex_tax_percent"
@@ -216,10 +222,16 @@ READY_DAYS_NO_PREDICTION = ["Auto", "Today", "Tomorrow"]
 START_QUARTER_NONE = -48 * 4  # TODO: Does this need to be changed?
 READY_QUARTER_NONE = 72 * 4  # TODO: Does this need to be changed?
 
-DEFAULT_EPEX_COUNTRY = "NL"
-DEFAULT_EPEX_FIXED_PRICE = 11.207
-DEFAULT_EPEX_TAX_PERCENT = 21.0
-DEFAULT_EPEX_UNIT = "EUR_PER_KWH"
+DEFAULT_EPEX_PREDICTOR_COUNTRY = "NL"
+DEFAULT_EPEX_PREDICTOR_FIXED_PRICE = 11.207
+DEFAULT_EPEX_PREDICTOR_TAX_PERCENT = 21.0
+DEFAULT_EPEX_PREDICTOR_UNIT = "EUR_PER_KWH"
+
+# Deprecated aliases retained for backward compatibility.
+DEFAULT_EPEX_COUNTRY = DEFAULT_EPEX_PREDICTOR_COUNTRY
+DEFAULT_EPEX_FIXED_PRICE = DEFAULT_EPEX_PREDICTOR_FIXED_PRICE
+DEFAULT_EPEX_TAX_PERCENT = DEFAULT_EPEX_PREDICTOR_TAX_PERCENT
+DEFAULT_EPEX_UNIT = DEFAULT_EPEX_PREDICTOR_UNIT
 
 CHARGING_STATUS_WAITING_NEW_PRICE = "waiting_for_new_prices"
 CHARGING_STATUS_NO_PLAN = "no_charging_planned"
