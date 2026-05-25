@@ -6,25 +6,24 @@
 
 [![hacs][hacsbadge]][hacs]
 [![Project Maintenance][maintenance-shield]][user_profile]
-[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 ![Icon](assets/icon.png)
 
-The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration can get the electricity price information from a large number of integrations or from a template sensor that supports the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor).
+The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration can get the electricity price information from a large number of integrations or from a template sensor that supports the [generic price format](https://github.com/nikagl/ev_smart_charging/wiki/Price-sensor).
 
 The integration calculates the set of 15-minute intervals that will give the lowest price, by default restricted to a continuous set. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight) or when the time of the day is before the configured charge completion time. When the automatic charging has started, changes of settings will not have any effect.
 
 ## Requirements
-- A [price integration with native support](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Supported-price-sensors) or a template sensor that generates price data using the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor).
+- A [price integration with native support](https://github.com/nikagl/ev_smart_charging/wiki/Supported-price-sensors) or a template sensor that generates price data using the [generic price format](https://github.com/nikagl/ev_smart_charging/wiki/Price-sensor).
   - Integrations with native support includes, but is not limited to, the (HACS) [Nord Pool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice), the [GE-Spot](https://github.com/enoch85/ge-spot), the [Entso-e](https://github.com/JaccoR/hass-entso-e) and the [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations.
-  - Price integrations without native support can be used via a [template sensor](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Supported-price-sensors). This includes the Home Assistant native [Nord Pool](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Nordpool-(Home-Assistant)) integration.
+  - Price integrations without native support can be used via a [template sensor](https://github.com/nikagl/ev_smart_charging/wiki/Supported-price-sensors). This includes the Home Assistant native [Nord Pool](https://github.com/nikagl/ev_smart_charging/wiki/Nordpool-(Home-Assistant)) integration.
 - Home Assistant version 2023.4 or newer.
 
 ## Features
 - Automatic EV charging control based on electricity prices.
 - Can automatically detect and use instances of the (HACS) [Nord Pool](https://github.com/custom-components/nordpool), [Energi Data Service](https://github.com/MTrab/energidataservice), [GE-Spot](https://github.com/enoch85/ge-spot), [Entso-e](https://github.com/JaccoR/hass-entso-e) and [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations.
-- Supports manual configuration of other price integrations that fulfills [the listed requirements](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Supported-price-sensors).
-- Supports a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). A template sensor can be used to get price information from price integrations without native support and/or to construct other special price information.
+- Supports manual configuration of other price integrations that fulfills [the listed requirements](https://github.com/nikagl/ev_smart_charging/wiki/Supported-price-sensors).
+- Supports a [generic price format](https://github.com/nikagl/ev_smart_charging/wiki/Price-sensor). A template sensor can be used to get price information from price integrations without native support and/or to construct other special price information.
 - Supports price information given with 15 minutes and 60 minutes intervals.
 - Configuration of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
@@ -43,7 +42,7 @@ The integration calculates the set of 15-minute intervals that will give the low
 ### HACS
 1. In Home Assistant go to HACS -> Integrations. Click on "+ Explore & Download Repositories" and search for "EV Smart Charging".
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=jonasbkarlsson&repository=ev_smart_charging&category=integration)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=nikagl&repository=ev_smart_charging&category=integration)
 
 2. In Home Assistant go to Settings -> Devices & Services -> Integrations. Click on "+ Add integration" and search for "EV Smart Charging".
 
@@ -67,7 +66,7 @@ The configuration form contains the entities that the integration is interacting
 Parameter | Required | Description
 -- | -- | --
 Name | Yes | The name of the instance.
-Electricity price entity | Yes | Sensor from any compatible price integration or a template sensor providing the price in the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). For the Entso-e integration, the entity called `sensor.average_electricity_price` should be used.
+Electricity price entity | Yes | Sensor from any compatible price integration or a template sensor providing the price in the [generic price format](https://github.com/nikagl/ev_smart_charging/wiki/Price-sensor). For the Entso-e integration, the entity called `sensor.average_electricity_price` should be used.
 EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100. Note that this entity is crucial for the integration. If live information about he SOC is not available, please carefully read the section below with more information about the EV SOC entity.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'. This entity can either be a Switch or an Input Boolean.
@@ -387,7 +386,7 @@ If your charger's integration does not provide a switch entity that this integra
 
 Also, if information about the EV being connected to the charger is available, an automation can provide that information to the integration in order to improve the handling of the case when the car is not connected to the charger at the time charging is planned to start.
 
-Some examples are given below. Additional examples are given in the [Wiki page](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Chargers).
+Some examples are given below. Additional examples are given in the [Wiki page](https://github.com/nikagl/ev_smart_charging/wiki/Chargers).
 
 ### Example of automation to start charging
 ```
@@ -476,16 +475,14 @@ To verify that the integration is able to control the charging, go to Settings -
 
 If the above works, the integration is able to control the charging.
 
-[ev_smart_charging]: https://github.com/jonasbkarlsson/ev_smart_charging
-[releases-shield]: https://img.shields.io/github/v/release/jonasbkarlsson/ev_smart_charging?style=for-the-badge
-[releases]: https://github.com/jonasbkarlsson/ev_smart_charging/releases
-[coverage-shield]: https://img.shields.io/codecov/c/gh/jonasbkarlsson/ev_smart_charging?style=for-the-badge&logo=codecov
-[coverage]: https://app.codecov.io/gh/jonasbkarlsson/ev_smart_charging
-[license-shield]: https://img.shields.io/github/license/jonasbkarlsson/ev_smart_charging?style=for-the-badge
-[license]: https://github.com/jonasbkarlsson/ev_smart_charging/blob/main/LICENSE
+[ev_smart_charging]: https://github.com/nikagl/ev_smart_charging
+[releases-shield]: https://img.shields.io/github/v/release/nikagl/ev_smart_charging?style=for-the-badge
+[releases]: https://github.com/nikagl/ev_smart_charging/releases
+[coverage-shield]: https://img.shields.io/codecov/c/gh/nikagl/ev_smart_charging?style=for-the-badge&logo=codecov
+[coverage]: https://app.codecov.io/gh/nikagl/ev_smart_charging
+[license-shield]: https://img.shields.io/github/license/nikagl/ev_smart_charging?style=for-the-badge
+[license]: https://github.com/nikagl/ev_smart_charging/blob/main/LICENSE
 [hacs]: https://github.com/hacs/integration
 [hacsbadge]: https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge
-[maintenance-shield]: https://img.shields.io/badge/maintainer-Jonas%20Karlsson%20@jonasbkarlsson-41BDF5.svg?style=for-the-badge
-[user_profile]: https://github.com/jonasbkarlsson
-[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-FFDD00.svg?style=for-the-badge&logo=buymeacoffee
-[buymecoffee]: https://www.buymeacoffee.com/jonasbkarlsson
+[maintenance-shield]: https://img.shields.io/badge/maintainer-nikagl-41BDF5.svg?style=for-the-badge
+[user_profile]: https://github.com/nikagl

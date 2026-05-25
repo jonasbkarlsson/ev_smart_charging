@@ -7,7 +7,7 @@ NAME = "EV Smart Charging"
 DOMAIN = "ev_smart_charging"
 DOMAIN_DATA = f"{DOMAIN}_data"
 VERSION = "2.5.2-beta-01"
-ISSUE_URL = "https://github.com/jonasbkarlsson/ev_smart_charging/issues"
+ISSUE_URL = "https://github.com/nikagl/ev_smart_charging/issues"
 
 # Icons
 ICON = "mdi:flash"
