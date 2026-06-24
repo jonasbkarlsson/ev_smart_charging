@@ -63,6 +63,7 @@ from .const import (
     CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_LOW_SOC_CHARGING_LEVEL,
     CONF_MAX_PRICE,
+    CONF_MIN_SESSION_DURATION,
     CONF_MIN_SOC,
     CONF_OPPORTUNISTIC_LEVEL,
     CONF_OPPORTUNISTIC_TYPE2_LEVEL,
@@ -72,6 +73,7 @@ from .const import (
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_START_QUARTER,
+    DEFAULT_MIN_SESSION_DURATION,
     DEFAULT_TARGET_SOC,
     READY_QUARTER_NONE,
     START_QUARTER_NONE,
@@ -202,6 +204,11 @@ class EVSmartChargingCoordinator:
         )
         self.low_soc_charging = float(
             get_parameter(self.config_entry, CONF_LOW_SOC_CHARGING_LEVEL, 20.0)
+        )
+        self.min_session_duration = float(
+            get_parameter(
+                self.config_entry, CONF_MIN_SESSION_DURATION, DEFAULT_MIN_SESSION_DURATION
+            )
         )
 
         self.auto_charging_state = STATE_OFF
@@ -975,6 +982,7 @@ class EVSmartChargingCoordinator:
             or self.opportunistic_feature_triggered,
             "switch_continuous": self.switch_continuous,
             "max_price": max_price,
+            "min_session_duration": self.min_session_duration,
         }
 
         time_now_local = dt.now()

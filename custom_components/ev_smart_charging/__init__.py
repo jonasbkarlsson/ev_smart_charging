@@ -23,9 +23,11 @@ from .const import (
     CONF_GRID_VOLTAGE,
     CONF_LOW_PRICE_CHARGING_LEVEL,
     CONF_LOW_SOC_CHARGING_LEVEL,
+    CONF_MIN_SESSION_DURATION,
     CONF_OPPORTUNISTIC_LEVEL,
     CONF_SOLAR_CHARGING_CONFIGURED,
     CONF_START_QUARTER,
+    DEFAULT_MIN_SESSION_DURATION,
     DOMAIN,
     STARTUP_MESSAGE,
     PLATFORMS,
@@ -166,7 +168,12 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         new[CONF_GRID_VOLTAGE] = 230  # [V]
         migration = True
 
-    if version > 7:
+    if version == 7:
+        version = 8
+        new[CONF_MIN_SESSION_DURATION] = DEFAULT_MIN_SESSION_DURATION
+        migration = True
+
+    if version > 8:
         _LOGGER.error(
             "Migration from version %s to a lower version is not possible",
             version,
