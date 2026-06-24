@@ -1034,3 +1034,88 @@ async def test_get_start_quarter_utc(hass, set_cet_timezone, freezer):
     assert datetime1 == datetime(
         2022, 10, 1, 10, 0, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
     )
+
+
+async def test_get_lowest_quarters_non_continuous_min_session_duration(
+    hass, set_cet_timezone, freezer
+):
+    """Test minimum session duration grouping for non-continuous charging."""
+
+    def contiguous_sessions(quarters: list) -> list:
+        """Group a sorted quarter list into (start, end, length) sessions."""
+        if not quarters:
+            return []
+        ordered = sorted(quarters)
+        sessions = [[ordered[0]]]
+        for quarter in ordered[1:]:
+            if quarter == sessions[-1][-1] + 1:
+                sessions[-1].append(quarter)
+            else:
+                sessions.append([quarter])
+        return [(s[0], s[-1], len(s)) for s in sessions]
+
+    raw_two_days: Raw = Raw(PRICE_20220930)
+    raw_two_days.extend(Raw(PRICE_20221001))
+    start_quarter: int = START_QUARTER_NONE
+
+    # This window fragments into two sessions without grouping:
+    # a 1h block (4 quarters) and a 3h block (12 quarters).
+    freezer.move_to("2022-09-30T23:10:00+02:00")
+    ready_quarter: int = 4 * 4
+    quarters: int = 4 * 4
+    expected_fragmented = list(range(23 * 4, 24 * 4)) + list(range(25 * 4, 28 * 4))
+
+    # min_session_duration = 0 must equal the default (backward compatible).
+    assert (
+        get_lowest_quarters(
+            get_start_quarter_utc(start_quarter, ready_quarter),
+            get_ready_quarter_utc(ready_quarter),
+            False,
+            raw_two_days,
+            quarters,
+            0.0,
+        )
+        == expected_fragmented
+    )
+
+    # A minimum shorter than the smallest existing session (1h) changes nothing.
+    assert (
+        get_lowest_quarters(
+            get_start_quarter_utc(start_quarter, ready_quarter),
+            get_ready_quarter_utc(ready_quarter),
+            False,
+            raw_two_days,
+            quarters,
+            1.0,
+        )
+        == expected_fragmented
+    )
+
+    # A 2h minimum exceeds the 1h fragment: it must be merged away, leaving a
+    # single contiguous 4h session, with the total charging time preserved.
+    grouped = get_lowest_quarters(
+        get_start_quarter_utc(start_quarter, ready_quarter),
+        get_ready_quarter_utc(ready_quarter),
+        False,
+        raw_two_days,
+        quarters,
+        2.0,
+    )
+    assert len(grouped) == quarters  # total preserved
+    sessions = contiguous_sessions(grouped)
+    assert len(sessions) == 1  # no fragmentation
+    assert all(length >= 2 * 4 for _, _, length in sessions)  # minimum honoured
+    assert grouped == list(range(24 * 4, 28 * 4))
+
+    # Degenerate: total needed (2h) is below the minimum session (4h) and can
+    # never satisfy it — must degrade gracefully (total preserved, no crash).
+    freezer.move_to("2022-09-30T23:10:00+02:00")
+    short = get_lowest_quarters(
+        get_start_quarter_utc(start_quarter, 4 * 4),
+        get_ready_quarter_utc(4 * 4),
+        False,
+        raw_two_days,
+        2 * 4,
+        4.0,
+    )
+    assert len(short) == 2 * 4
