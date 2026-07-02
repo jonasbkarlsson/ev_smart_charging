@@ -23,7 +23,7 @@ from tests.helpers.helpers import (
     MockSOCEntity,
     MockTargetSOCEntity,
 )
-from tests.price import PRICE_20220930, PRICE_20221001
+from tests.price import PRICE_20220930, PRICE_20221001, PRICE_20221002
 from tests.const import MOCK_CONFIG_NO_READY
 
 
@@ -182,4 +182,47 @@ async def test_coordinator_no_ready2(
     assert coordinator.sensor.charging_is_planned is False
 
     # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
+
+async def test_coordinator_no_ready_ignores_overmorrow_when_predictor_off(
+    hass: HomeAssistant, skip_service_calls, set_cet_timezone, freezer
+):
+    """When predictor is disabled, only tomorrow native prices should be used."""
+
+    freezer.move_to("2022-09-30T13:30:00+02:00")
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+    MockSOCEntity.create(hass, entity_registry, "65")
+    MockTargetSOCEntity.create(hass, entity_registry, "80")
+    MockPriceEntity.create(hass, entity_registry, 123)
+    MockChargerEntity.create(hass, entity_registry, STATE_OFF)
+
+    # Include two future days in raw_tomorrow to mimic sensors that expose
+    # tomorrow and later data in the same attribute.
+    MockPriceEntity.set_state(hass, PRICE_20220930, PRICE_20221001 + PRICE_20221002)
+
+    config_entry = MockConfigEntry(
+        domain=DOMAIN, data=MOCK_CONFIG_NO_READY, entry_id="test"
+    )
+    if MAJOR_VERSION > 2024 or (MAJOR_VERSION == 2024 and MINOR_VERSION >= 7):
+        config_entry.mock_state(hass=hass, state=ConfigEntryState.LOADED)
+    config_entry.add_to_hass(hass)
+    assert await async_setup_entry(hass, config_entry)
+    await hass.async_block_till_done()
+
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    assert coordinator is not None
+    assert coordinator.switch_use_predicted_epex_data is False
+
+    await coordinator.update_sensors()
+    await hass.async_block_till_done()
+
+    # Only tomorrow is kept (96 quarters) even if the sensor supplied later days.
+    assert coordinator.raw_tomorrow_local is not None
+    assert len(coordinator.raw_tomorrow_local.get_raw()) == 24 * 4
+    assert coordinator.raw_tomorrow_local.get_raw()[-1]["start"] == datetime(
+        2022, 10, 1, 23, 45, tzinfo=dt_util.get_time_zone("Europe/Stockholm")
+    )
+
     coordinator.unsubscribe_listeners()

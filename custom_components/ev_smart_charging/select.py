@@ -10,15 +10,30 @@ from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import (
     CONF_READY_QUARTER,
+    CONF_READY_DAY,
     CONF_START_QUARTER,
+    CONF_START_DAY,
     DOMAIN,
     ENTITY_KEY_CONF_READY_QUARTER,
+    ENTITY_KEY_CONF_READY_DAY,
     ENTITY_KEY_CONF_START_QUARTER,
+    ENTITY_KEY_CONF_START_DAY,
     QUARTERS,
+    READY_DAYS,
+    READY_DAYS_NO_PREDICTION,
+    START_DAYS,
+    START_DAYS_NO_PREDICTION,
     ICON_TIME,
+    ICON_DAY,
     READY_QUARTER_NONE,
     SELECT,
     START_QUARTER_NONE,
+    ENTITY_KEY_CONF_BLACKOUT_START_TIME,
+    ENTITY_KEY_CONF_BLACKOUT_END_TIME,
+    CONF_BLACKOUT_START_TIME,
+    CONF_BLACKOUT_END_TIME,
+    ICON_BLACKOUT_START,
+    ICON_BLACKOUT_END,
 )
 from .coordinator import EVSmartChargingCoordinator
 from .entity import EVSmartChargingEntity
@@ -35,7 +50,11 @@ async def async_setup_entry(
     coordinator = hass.data[DOMAIN][entry.entry_id]
     selects = []
     selects.append(EVSmartChargingSelectStartQuarter(entry, coordinator))
+    selects.append(EVSmartChargingSelectStartDay(entry, coordinator))
     selects.append(EVSmartChargingSelectReadyQuarter(entry, coordinator))
+    selects.append(EVSmartChargingSelectReadyDay(entry, coordinator))
+    selects.append(EVSmartChargingSelectBlackoutStart(entry, coordinator))
+    selects.append(EVSmartChargingSelectBlackoutEnd(entry, coordinator))
     async_add_devices(selects)
 
 
@@ -115,4 +134,118 @@ class EVSmartChargingSelectReadyQuarter(EVSmartChargingSelect):
             if self.coordinator.ready_quarter_local == 0:
                 # Treat 00:00 as 24:00
                 self.coordinator.ready_quarter_local = 24 * 4
+            await self.coordinator.update_configuration()
+
+
+class EVSmartChargingSelectReadyDay(EVSmartChargingSelect):
+    """EV Smart Charging ready_day select class."""
+
+    _entity_key = ENTITY_KEY_CONF_READY_DAY
+    _attr_icon = ICON_DAY
+    _attr_entity_category = EntityCategory.CONFIG
+
+    @property
+    def options(self):
+        """Return available options depending on predicted price mode."""
+        if self.coordinator.switch_use_predicted_epex_data:
+            return READY_DAYS
+        return READY_DAYS_NO_PREDICTION
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSelectReadyDay.__init__()")
+        super().__init__(entry, coordinator)
+        if self.state is None:
+            self._attr_current_option = get_parameter(entry, CONF_READY_DAY, "Auto")
+            self.update_ha_state()
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+        if option not in self.options:
+            option = READY_DAYS_NO_PREDICTION[0]
+        await super().async_select_option(option)
+        if self.state:
+            await self.coordinator.set_ready_day(self.state)
+
+
+class EVSmartChargingSelectStartDay(EVSmartChargingSelect):
+    """EV Smart Charging start_day select class."""
+
+    _entity_key = ENTITY_KEY_CONF_START_DAY
+    _attr_icon = ICON_DAY
+    _attr_entity_category = EntityCategory.CONFIG
+
+    @property
+    def options(self):
+        """Return available options depending on predicted price mode."""
+        if self.coordinator.switch_use_predicted_epex_data:
+            return START_DAYS
+        return START_DAYS_NO_PREDICTION
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSelectStartDay.__init__()")
+        super().__init__(entry, coordinator)
+        if self.state is None:
+            self._attr_current_option = get_parameter(entry, CONF_START_DAY, "Auto")
+            self.update_ha_state()
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+        if option not in self.options:
+            option = START_DAYS_NO_PREDICTION[0]
+        await super().async_select_option(option)
+        if self.state:
+            await self.coordinator.set_start_day(self.state)
+
+
+class EVSmartChargingSelectBlackoutStart(EVSmartChargingSelect):
+    """EV Smart Charging blackout_start_time select class."""
+
+    _entity_key = ENTITY_KEY_CONF_BLACKOUT_START_TIME
+    _attr_icon = ICON_BLACKOUT_START
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_options = QUARTERS
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSelectBlackoutStart.__init__()")
+        super().__init__(entry, coordinator)
+        if self.state is None:
+            self._attr_current_option = get_parameter(
+                entry, CONF_BLACKOUT_START_TIME, "None"
+            )
+            self.update_ha_state()
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+        await super().async_select_option(option)
+        if self.state:
+            self.coordinator.blackout_start_local = get_quarter_index(self.state)
+            if self.coordinator.blackout_start_local is None:
+                self.coordinator.blackout_start_local = START_QUARTER_NONE
+            await self.coordinator.update_configuration()
+
+
+class EVSmartChargingSelectBlackoutEnd(EVSmartChargingSelect):
+    """EV Smart Charging blackout_end_time select class."""
+
+    _entity_key = ENTITY_KEY_CONF_BLACKOUT_END_TIME
+    _attr_icon = ICON_BLACKOUT_END
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_options = QUARTERS
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingSelectBlackoutEnd.__init__()")
+        super().__init__(entry, coordinator)
+        if self.state is None:
+            self._attr_current_option = get_parameter(
+                entry, CONF_BLACKOUT_END_TIME, "None"
+            )
+            self.update_ha_state()
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+        await super().async_select_option(option)
+        if self.state:
+            self.coordinator.blackout_end_local = get_quarter_index(self.state)
+            if self.coordinator.blackout_end_local is None:
+                self.coordinator.blackout_end_local = START_QUARTER_NONE
             await self.coordinator.update_configuration()

@@ -1,7 +1,8 @@
 """Coordinator for EV Smart Charging"""
 
-from datetime import datetime
+from datetime import date, datetime, timedelta, timezone
 import logging
+from urllib.parse import urlencode
 from homeassistant.config_entries import (
     ConfigEntry,
 )
@@ -43,6 +44,7 @@ from homeassistant.helpers.entity_registry import (
     EntityRegistry,
     async_entries_for_config_entry,
 )
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.const import STATE_ON, STATE_OFF
 from homeassistant.util import dt
 
@@ -68,14 +70,48 @@ from .const import (
     CONF_OPPORTUNISTIC_TYPE2_LEVEL,
     CONF_PCT_PER_HOUR,
     CONF_READY_QUARTER,
+    CONF_READY_DAY,
+    CONF_READY_DATE,
     CONF_PRICE_SENSOR,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_START_QUARTER,
+    CONF_START_DAY,
+    CONF_START_DATE,
+    CONF_CHARGING_STATE_ENTITY,
+    CONF_EPEX_COUNTRY,
+    CONF_EPEX_FIXED_PRICE,
+    CONF_EPEX_TAX_PERCENT,
+    CONF_EPEX_UNIT,
+    CONF_EPEX_PREDICTOR_COUNTRY,
+    CONF_EPEX_PREDICTOR_FIXED_PRICE,
+    CONF_EPEX_PREDICTOR_TAX_PERCENT,
+    CONF_EPEX_PREDICTOR_UNIT,
     DEFAULT_TARGET_SOC,
+    DEFAULT_EPEX_PREDICTOR_COUNTRY,
+    DEFAULT_EPEX_PREDICTOR_FIXED_PRICE,
+    DEFAULT_EPEX_PREDICTOR_TAX_PERCENT,
+    DEFAULT_EPEX_PREDICTOR_UNIT,
+    ENTITY_KEY_USE_PREDICTED_EPEX_SWITCH,
     READY_QUARTER_NONE,
+    READY_DAY_AUTO,
     START_QUARTER_NONE,
+    START_DAY_AUTO,
+    START_DAY_3,
+    START_DAY_4,
+    START_DAY_5,
+    START_DAYS_NO_PREDICTION,
+    START_DAY_TODAY,
+    START_DAY_TOMORROW,
     SWITCH,
+    CONF_BLACKOUT_START_TIME,
+    CONF_BLACKOUT_END_TIME,
+    READY_DAY_3,
+    READY_DAY_4,
+    READY_DAY_5,
+    READY_DAYS_NO_PREDICTION,
+    READY_DAY_TODAY,
+    READY_DAY_TOMORROW,
 )
 from .helpers.coordinator import (
     Scheduler,
@@ -84,7 +120,13 @@ from .helpers.coordinator import (
     get_start_quarter_utc,
 )
 from .helpers.raw import Raw
-from .helpers.general import Utils, Validator, get_parameter, get_quarter_index
+from .helpers.general import (
+    Utils,
+    Validator,
+    get_parameter,
+    get_parameter_with_legacy,
+    get_quarter_index,
+)
 from .sensor import (
     EVSmartChargingSensor,
     EVSmartChargingSensorCharging,
@@ -141,13 +183,53 @@ class EVSmartChargingCoordinator:
         self.switch_opportunistic_type2 = None
         self.switch_opportunistic_type2_entity_id = None
         self.switch_opportunistic_type2_unique_id = None
+        self.switch_use_predicted_epex_data = False
         self.price_entity_id = None
         self.price_adaptor = PriceAdaptor()
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
+        self.epex_country = get_parameter_with_legacy(
+            self.config_entry,
+            CONF_EPEX_PREDICTOR_COUNTRY,
+            CONF_EPEX_COUNTRY,
+            DEFAULT_EPEX_PREDICTOR_COUNTRY,
+        )
+        self.epex_fixed_price = float(
+            get_parameter_with_legacy(
+                self.config_entry,
+                CONF_EPEX_PREDICTOR_FIXED_PRICE,
+                CONF_EPEX_FIXED_PRICE,
+                DEFAULT_EPEX_PREDICTOR_FIXED_PRICE,
+            )
+        )
+        self.epex_tax_percent = float(
+            get_parameter_with_legacy(
+                self.config_entry,
+                CONF_EPEX_PREDICTOR_TAX_PERCENT,
+                CONF_EPEX_TAX_PERCENT,
+                DEFAULT_EPEX_PREDICTOR_TAX_PERCENT,
+            )
+        )
+        self.epex_unit = get_parameter_with_legacy(
+            self.config_entry,
+            CONF_EPEX_PREDICTOR_UNIT,
+            CONF_EPEX_UNIT,
+            DEFAULT_EPEX_PREDICTOR_UNIT,
+        )
 
         self.charger_switch = ChargerSwitch(
             hass, get_parameter(self.config_entry, CONF_CHARGER_ENTITY)
+        )
+        # Store the entity that reflects actual charging state
+        self.charging_state_entity_id = get_parameter(
+            self.config_entry, CONF_CHARGING_STATE_ENTITY, ""
+        )
+
+        # Set up periodic check for actual charging state (every minute)
+        self.listeners.append(
+            async_track_time_change(
+                hass, self.periodic_check_charging_state, minute="/1", second=0
+            )
         )
 
         self.scheduler = Scheduler()
@@ -176,6 +258,14 @@ class EVSmartChargingCoordinator:
         )
         if self.start_quarter_local is None:
             self.start_quarter_local = START_QUARTER_NONE
+        self.start_day_local = get_parameter(
+            self.config_entry, CONF_START_DAY, START_DAY_AUTO
+        )
+        self.start_date_local = self._parse_date_parameter(
+            get_parameter(self.config_entry, CONF_START_DATE, "")
+        )
+        if self.start_day_local != START_DAY_AUTO and self.start_date_local is None:
+            self.start_date_local = self._resolve_day_to_date(self.start_day_local)
 
         self.ready_quarter_local = get_quarter_index(
             get_parameter(self.config_entry, CONF_READY_QUARTER, "08:00")
@@ -185,9 +275,27 @@ class EVSmartChargingCoordinator:
         if self.ready_quarter_local == 0:
             # Treat 00:00 as 24:00
             self.ready_quarter_local = 24 * 4
+        self.ready_day_local = get_parameter(
+            self.config_entry, CONF_READY_DAY, READY_DAY_AUTO
+        )
+        self.ready_date_local = self._parse_date_parameter(
+            get_parameter(self.config_entry, CONF_READY_DATE, "")
+        )
+        if self.ready_day_local != READY_DAY_AUTO and self.ready_date_local is None:
+            self.ready_date_local = self._resolve_day_to_date(self.ready_day_local)
         self.ready_quarter_first = (
             True  # True for first update_sensor the ready_quarter
         )
+        self.blackout_start_local = get_quarter_index(
+            get_parameter(self.config_entry, CONF_BLACKOUT_START_TIME, "None")
+        )
+        if self.blackout_start_local is None:
+            self.blackout_start_local = START_QUARTER_NONE
+        self.blackout_end_local = get_quarter_index(
+            get_parameter(self.config_entry, CONF_BLACKOUT_END_TIME, "None")
+        )
+        if self.blackout_end_local is None:
+            self.blackout_end_local = START_QUARTER_NONE
 
         self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE, 0.0))
         self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC, 0.0))
@@ -220,6 +328,25 @@ class EVSmartChargingCoordinator:
         )
         # Update state once after intitialization
         self.listeners.append(async_call_later(hass, 10.0, self.update_initial))
+
+    async def periodic_check_charging_state(self, date_time=None):
+        """Periodically check if charging has actually started, and retry if not."""
+        if not self.charging_state_entity_id:
+            return
+        # Only check if we think we should be charging
+        should_be_charging = self.auto_charging_state == STATE_ON
+        if not should_be_charging:
+            return
+        # Get the actual state of the charging state entity
+        state_obj = self.hass.states.get(self.charging_state_entity_id)
+        if state_obj is None:
+            return
+        is_actually_charging = state_obj.state == STATE_ON
+        if not is_actually_charging:
+            _LOGGER.warning(
+                f"EV Smart Charging: Charging should be ON but {self.charging_state_entity_id} is not ON. Retrying start."
+            )
+            await self.turn_on_charging()
 
     def unsubscribe_listeners(self):
         """Unsubscribed to listeners"""
@@ -794,6 +921,206 @@ class EVSmartChargingCoordinator:
             )
         await self.update_configuration()
 
+    async def switch_use_predicted_epex_data_update(self, state: bool):
+        """Handle the built-in predicted EPEX data switch."""
+        self.switch_use_predicted_epex_data = state
+        _LOGGER.debug("switch_use_predicted_epex_data_update = %s", state)
+        if not state:
+            # Restrict explicit days when predicted data is disabled.
+            if self.start_day_local not in START_DAYS_NO_PREDICTION:
+                await self.set_start_day(START_DAYS_NO_PREDICTION[0])
+            if self.ready_day_local not in READY_DAYS_NO_PREDICTION:
+                await self.set_ready_day(READY_DAYS_NO_PREDICTION[0])
+        await self.update_configuration()
+
+    async def _fetch_predicted_epex_raw_local(self) -> Raw:
+        """Fetch predicted EPEX prices and return as local Raw object."""
+        params = {
+            "country": self.epex_country,
+            "fixedPrice": self.epex_fixed_price,
+            "taxPercent": self.epex_tax_percent,
+            "unit": self.epex_unit,
+            "hours": 120,
+        }
+        url = f"https://epexpredictor.batzill.com/prices_short?{urlencode(params)}"
+
+        session = async_get_clientsession(self.hass)
+        try:
+            async with session.get(url, timeout=20) as response:
+                if response.status != 200:
+                    _LOGGER.warning(
+                        "Failed to fetch predicted EPEX data. status=%s",
+                        response.status,
+                    )
+                    return Raw([])
+                payload = await response.json()
+        except Exception as err:  # pylint: disable=broad-except
+            _LOGGER.warning("Failed to fetch predicted EPEX data: %s", err)
+            return Raw([])
+
+        timestamps = payload.get("s", [])
+        prices = payload.get("t", [])
+        if not isinstance(timestamps, list) or not isinstance(prices, list):
+            return Raw([])
+
+        _LOGGER.debug(
+            "Predicted EPEX payload received: points=%s unit=%s",
+            len(prices),
+            self.epex_unit,
+        )
+
+        items = []
+        for idx, timestamp in enumerate(timestamps):
+            if idx >= len(prices):
+                break
+            try:
+                ts_int = int(timestamp)
+                value = float(prices[idx])
+            except (TypeError, ValueError):
+                continue
+            start_utc = datetime.fromtimestamp(ts_int, tz=timezone.utc)
+            items.append(
+                {
+                    "start": dt.as_local(start_utc),
+                    "value": value,
+                    "predicted": True,
+                }
+            )
+
+        if not items:
+            return Raw([])
+        return Raw(items)
+
+    @staticmethod
+    def _median_numeric(values: list[float]) -> float | None:
+        """Return median for a numeric list or None when empty."""
+        if not values:
+            return None
+        sorted_values = sorted(values)
+        mid = len(sorted_values) // 2
+        if len(sorted_values) % 2 == 1:
+            return float(sorted_values[mid])
+        return float((sorted_values[mid - 1] + sorted_values[mid]) / 2)
+
+    async def _merge_predicted_prices(self):
+        """Merge predicted EPEX prices into tomorrow-and-later raw data."""
+        predicted_raw = await self._fetch_predicted_epex_raw_local()
+        if not predicted_raw.is_valid():
+            return
+
+        predicted_items = predicted_raw.get_raw()
+
+        # Auto-normalize predicted values to the same magnitude as live prices
+        # (for example EUR/kWh vs ct/kWh).
+        reference_values = []
+        if self.raw_today_local and self.raw_today_local.is_valid():
+            reference_values.extend(
+                [float(item["value"]) for item in self.raw_today_local.get_raw()]
+            )
+        if self.raw_tomorrow_local and self.raw_tomorrow_local.is_valid():
+            reference_values.extend(
+                [float(item["value"]) for item in self.raw_tomorrow_local.get_raw()]
+            )
+        predicted_values = [float(item["value"]) for item in predicted_items]
+
+        reference_median = self._median_numeric(reference_values)
+        predicted_median = self._median_numeric(predicted_values)
+        scale_factor = 1.0
+        if reference_median is not None and predicted_median is not None:
+            if reference_median >= 10 and predicted_median < 5:
+                scale_factor = 100.0
+            elif reference_median < 5 and predicted_median >= 10:
+                scale_factor = 0.01
+
+        if scale_factor != 1.0:
+            for item in predicted_items:
+                item["value"] = float(item["value"]) * scale_factor
+            _LOGGER.warning(
+                "Scaled predicted EPEX prices by factor %.2f (ref median %.4f, predicted median %.4f)",
+                scale_factor,
+                reference_median,
+                predicted_median,
+            )
+        else:
+            _LOGGER.debug(
+                "Predicted EPEX scaling unchanged (ref median=%s, predicted median=%s)",
+                reference_median,
+                predicted_median,
+            )
+
+        now_local = dt.now()
+        future_start = now_local.replace(
+            hour=0, minute=0, second=0, microsecond=0
+        ) + timedelta(days=1)
+        existing = []
+        if self.raw_tomorrow_local and self.raw_tomorrow_local.is_valid():
+            existing = self.raw_tomorrow_local.get_raw()
+        existing_starts = {item["start"] for item in existing}
+
+        merged = list(existing)
+        for item in predicted_items:
+            if item["start"] < future_start:
+                continue
+            if item["start"] in existing_starts:
+                continue
+            merged.append(item)
+
+        merged.sort(key=lambda item: item["start"])
+        if merged:
+            self.raw_tomorrow_local = Raw(merged)
+            self.tomorrow_valid = self.raw_tomorrow_local.is_valid()
+
+    @staticmethod
+    def _parse_date_parameter(date_value) -> date | None:
+        """Parse an ISO date string from options/config."""
+        if not date_value or not isinstance(date_value, str):
+            return None
+        try:
+            return date.fromisoformat(date_value)
+        except ValueError:
+            _LOGGER.debug("Invalid saved date value ignored: %s", date_value)
+            return None
+
+    @staticmethod
+    def _resolve_day_to_date(day_value: str) -> date | None:
+        """Resolve a day selection to a concrete local date."""
+        offsets = {
+            START_DAY_TODAY: 0,
+            START_DAY_TOMORROW: 1,
+            START_DAY_3: 2,
+            START_DAY_4: 3,
+            START_DAY_5: 4,
+            READY_DAY_TODAY: 0,
+            READY_DAY_TOMORROW: 1,
+            READY_DAY_3: 2,
+            READY_DAY_4: 3,
+            READY_DAY_5: 4,
+        }
+        offset = offsets.get(day_value)
+        if offset is None:
+            return None
+        return (dt.now() + timedelta(days=offset)).date()
+
+    async def set_start_day(self, day_value: str):
+        """Update start day and lock it to a concrete date when not Auto."""
+        self.start_day_local = day_value
+        self.start_date_local = (
+            None
+            if day_value == START_DAY_AUTO
+            else self._resolve_day_to_date(day_value)
+        )
+        await self.update_configuration()
+
+    async def set_ready_day(self, day_value: str):
+        """Update ready day and lock it to a concrete date when not Auto."""
+        self.ready_day_local = day_value
+        self.ready_date_local = (
+            None
+            if day_value == READY_DAY_AUTO
+            else self._resolve_day_to_date(day_value)
+        )
+        await self.update_configuration()
+
     async def update_configuration(self):
         """Called when the configuration has been updated"""
         await self.update_sensors(configuration_updated=True)
@@ -855,7 +1182,16 @@ class EVSmartChargingCoordinator:
             self.raw_tomorrow_local = self.price_adaptor.get_raw_tomorrow_local(
                 price_state
             )
+
+            # When predicted prices are disabled, only use tomorrow's native prices.
+            # Some price sensors expose multiple future days in the "tomorrow" payload.
+            if not self.switch_use_predicted_epex_data:
+                self.raw_tomorrow_local = self.raw_tomorrow_local.copy().tomorrow()
+
             self.tomorrow_valid = self.raw_tomorrow_local.is_valid()
+
+            if self.switch_use_predicted_epex_data:
+                await self._merge_predicted_prices()
 
             # Fix to take care of Nordpool bug
             # https://github.com/custom-components/nordpool/issues/235
@@ -961,20 +1297,42 @@ class EVSmartChargingCoordinator:
         if self.sensor.opportunistic != self.opportunistic_feature_triggered:
             self.sensor.opportunistic = self.opportunistic_feature_triggered
 
+        from .const import QUARTERS
+
+        if self.blackout_start_local != START_QUARTER_NONE:
+            self.sensor.blackout_start = QUARTERS[self.blackout_start_local]
+        else:
+            self.sensor.blackout_start = None
+        if self.blackout_end_local != START_QUARTER_NONE:
+            self.sensor.blackout_end = QUARTERS[self.blackout_end_local]
+        else:
+            self.sensor.blackout_end = None
+
+        window_start_utc = get_start_quarter_utc(
+            self.start_quarter_local,
+            self.ready_quarter_local,
+            self.start_day_local,
+            self.start_date_local,
+        )
+        window_end_utc = get_ready_quarter_utc(
+            self.ready_quarter_local,
+            self.ready_day_local,
+            self.ready_date_local,
+        )
         scheduling_params = {
             "ev_soc": self.ev_soc,
             "ev_target_soc": self.ev_target_soc,
             "min_soc": self.number_min_soc,
             "charging_pct_per_hour": self.charging_pct_per_hour,
-            "start_quarter": get_start_quarter_utc(
-                self.start_quarter_local, self.ready_quarter_local
-            ),
-            "ready_quarter": get_ready_quarter_utc(self.ready_quarter_local),
+            "start_quarter": window_start_utc,
+            "ready_quarter": window_end_utc,
             "switch_active": self.switch_active,
             "switch_apply_limit": self.switch_apply_limit
             or self.opportunistic_feature_triggered,
             "switch_continuous": self.switch_continuous,
             "max_price": max_price,
+            "blackout_start": self.blackout_start_local,
+            "blackout_end": self.blackout_end_local,
         }
 
         time_now_local = dt.now()

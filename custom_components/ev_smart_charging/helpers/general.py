@@ -14,7 +14,6 @@ from custom_components.ev_smart_charging.const import (
 )
 from .raw import Raw
 
-
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -97,6 +96,23 @@ def get_parameter(config_entry: ConfigEntry, parameter: str, default_val: Any = 
         return config_entry.options.get(parameter)
     if parameter in config_entry.data.keys():
         return config_entry.data.get(parameter)
+    return default_val
+
+
+def get_parameter_with_legacy(
+    config_entry: ConfigEntry,
+    parameter: str,
+    legacy_parameter: str | None,
+    default_val: Any = None,
+):
+    """Get parameter and optionally fall back to a legacy key name."""
+    value = get_parameter(config_entry, parameter, None)
+    if value is not None:
+        return value
+    if legacy_parameter:
+        legacy_value = get_parameter(config_entry, legacy_parameter, None)
+        if legacy_value is not None:
+            return legacy_value
     return default_val
 
 

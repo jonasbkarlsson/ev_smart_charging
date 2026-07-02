@@ -6,8 +6,8 @@ from homeassistant.const import __version__ as HA_VERSION
 NAME = "EV Smart Charging"
 DOMAIN = "ev_smart_charging"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.1.0"
-ISSUE_URL = "https://github.com/jonasbkarlsson/ev_smart_charging/issues"
+VERSION = "2.5.2-beta-01"
+ISSUE_URL = "https://github.com/nikagl/ev_smart_charging/issues"
 
 # Icons
 ICON = "mdi:flash"
@@ -18,6 +18,9 @@ ICON_MIN_SOC = "mdi:battery-charging-30"
 ICON_START = "mdi:play-circle-outline"
 ICON_STOP = "mdi:stop-circle-outline"
 ICON_TIME = "mdi:clock-time-four-outline"
+ICON_DAY = "mdi:calendar-range"
+ICON_BLACKOUT_START = "mdi:clock-minus-outline"
+ICON_BLACKOUT_END = "mdi:clock-check-outline"
 
 # Platforms
 SENSOR = Platform.SENSOR
@@ -47,6 +50,7 @@ ENTITY_KEY_OPPORTUNISTIC_SWITCH = "opportunistic_charging"
 ENTITY_KEY_OPPORTUNISTIC_TYPE2_SWITCH = "opportunistic_type2_charging"
 ENTITY_KEY_LOW_PRICE_CHARGING_SWITCH = "low_price_charging"
 ENTITY_KEY_LOW_SOC_CHARGING_SWITCH = "low_soc_charging"
+ENTITY_KEY_USE_PREDICTED_EPEX_SWITCH = "use_predicted_epex_data"
 ENTITY_KEY_START_BUTTON = "manually_start_charging"
 ENTITY_KEY_STOP_BUTTON = "manually_stop_charging"
 ENTITY_KEY_CONF_PCT_PER_HOUR_NUMBER = "charging_speed"
@@ -57,7 +61,11 @@ ENTITY_KEY_CONF_LOW_PRICE_CHARGING_NUMBER = "low_price_charging_level"
 ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER = "low_soc_charging_level"
 ENTITY_KEY_CONF_MIN_SOC_NUMBER = "minimum_ev_soc"
 ENTITY_KEY_CONF_START_QUARTER = "charge_start_time"
+ENTITY_KEY_CONF_START_DAY = "charge_start_day"
 ENTITY_KEY_CONF_READY_QUARTER = "charge_completion_time"
+ENTITY_KEY_CONF_READY_DAY = "charge_completion_day"
+ENTITY_KEY_CONF_BLACKOUT_START_TIME = "blackout_start_time"
+ENTITY_KEY_CONF_BLACKOUT_END_TIME = "blackout_end_time"
 
 # Configuration and options
 CONF_DEVICE_NAME = "device_name"
@@ -68,7 +76,11 @@ CONF_CHARGER_ENTITY = "charger_entity"
 CONF_EV_CONTROLLED = "ev_controlled"
 CONF_PCT_PER_HOUR = "pct_per_hour"
 CONF_START_QUARTER = "start_quarter"
+CONF_START_DAY = "start_day"
 CONF_READY_QUARTER = "ready_quarter"
+CONF_READY_DAY = "ready_day"
+CONF_START_DATE = "start_date"
+CONF_READY_DATE = "ready_date"
 CONF_MAX_PRICE = "maximum_price"
 CONF_OPPORTUNISTIC_LEVEL = "opportunistic_level"
 CONF_OPPORTUNISTIC_TYPE2_LEVEL = "opportunistic_type2_level"
@@ -78,6 +90,19 @@ CONF_MIN_SOC = "min_soc"
 CONF_SOLAR_CHARGING_CONFIGURED = "solar_charging_configured"
 CONF_GRID_USAGE_SENSOR = "grid_usage_sensor"
 CONF_GRID_VOLTAGE = "grid_voltage"
+CONF_CHARGING_STATE_ENTITY = "charging_state_entity"
+CONF_BLACKOUT_START_TIME = "blackout_start_time"
+CONF_BLACKOUT_END_TIME = "blackout_end_time"
+CONF_EPEX_PREDICTOR_COUNTRY = "epex_predictor_country"
+CONF_EPEX_PREDICTOR_FIXED_PRICE = "epex_predictor_fixed_price"
+CONF_EPEX_PREDICTOR_TAX_PERCENT = "epex_predictor_tax_percent"
+CONF_EPEX_PREDICTOR_UNIT = "epex_predictor_unit"
+
+# Deprecated aliases retained for backward compatibility.
+CONF_EPEX_COUNTRY = "epex_country"
+CONF_EPEX_FIXED_PRICE = "epex_fixed_price"
+CONF_EPEX_TAX_PERCENT = "epex_tax_percent"
+CONF_EPEX_UNIT = "epex_unit"
 
 QUARTERS = [
     "None",
@@ -178,8 +203,35 @@ QUARTERS = [
     "23:30",
     "23:45",
 ]
+READY_DAYS = ["Auto", "Today", "Tomorrow", "Day 3", "Day 4", "Day 5"]
+READY_DAY_AUTO = "Auto"
+READY_DAY_TODAY = "Today"
+READY_DAY_TOMORROW = "Tomorrow"
+READY_DAY_3 = "Day 3"
+READY_DAY_4 = "Day 4"
+READY_DAY_5 = "Day 5"
+START_DAYS = ["Auto", "Today", "Tomorrow", "Day 3", "Day 4", "Day 5"]
+START_DAY_AUTO = "Auto"
+START_DAY_TODAY = "Today"
+START_DAY_TOMORROW = "Tomorrow"
+START_DAY_3 = "Day 3"
+START_DAY_4 = "Day 4"
+START_DAY_5 = "Day 5"
+START_DAYS_NO_PREDICTION = ["Auto", "Today", "Tomorrow"]
+READY_DAYS_NO_PREDICTION = ["Auto", "Today", "Tomorrow"]
 START_QUARTER_NONE = -48 * 4  # TODO: Does this need to be changed?
 READY_QUARTER_NONE = 72 * 4  # TODO: Does this need to be changed?
+
+DEFAULT_EPEX_PREDICTOR_COUNTRY = "NL"
+DEFAULT_EPEX_PREDICTOR_FIXED_PRICE = 11.207
+DEFAULT_EPEX_PREDICTOR_TAX_PERCENT = 21.0
+DEFAULT_EPEX_PREDICTOR_UNIT = "EUR_PER_KWH"
+
+# Deprecated aliases retained for backward compatibility.
+DEFAULT_EPEX_COUNTRY = DEFAULT_EPEX_PREDICTOR_COUNTRY
+DEFAULT_EPEX_FIXED_PRICE = DEFAULT_EPEX_PREDICTOR_FIXED_PRICE
+DEFAULT_EPEX_TAX_PERCENT = DEFAULT_EPEX_PREDICTOR_TAX_PERCENT
+DEFAULT_EPEX_UNIT = DEFAULT_EPEX_PREDICTOR_UNIT
 
 CHARGING_STATUS_WAITING_NEW_PRICE = "waiting_for_new_prices"
 CHARGING_STATUS_NO_PLAN = "no_charging_planned"

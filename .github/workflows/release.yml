@@ -1,0 +1,58 @@
+name: Auto Release on Merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read current version
+        id: current_version
+        run: |
+          VERSION=$(python3 -c "import json; d=json.load(open('custom_components/ev_smart_charging/manifest.json')); print(d['version'])")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Bump patch version
+        id: new_version
+        run: |
+          CURRENT="${{ steps.current_version.outputs.version }}"
+          IFS='.' read -ra PARTS <<< "$CURRENT"
+          NEW_VERSION="${PARTS[0]}.${PARTS[1]}.$((${PARTS[2]} + 1))"
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update version files
+        run: |
+          python3 scripts/update_manifest.py --version "${{ steps.new_version.outputs.version }}"
+          bash scripts/update_const "${{ steps.new_version.outputs.version }}"
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add custom_components/ev_smart_charging/manifest.json custom_components/ev_smart_charging/const.py
+          git commit -m "Bump version to ${{ steps.new_version.outputs.version }} [skip ci]"
+          git push
+
+      - name: Create and push tag
+        run: |
+          git tag "v${{ steps.new_version.outputs.version }}"
+          git push origin "v${{ steps.new_version.outputs.version }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.new_version.outputs.version }}"
+          name: "v${{ steps.new_version.outputs.version }}"
+          generate_release_notes: true

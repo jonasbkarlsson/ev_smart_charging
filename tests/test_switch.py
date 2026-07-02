@@ -23,6 +23,7 @@ from custom_components.ev_smart_charging.switch import (
     EVSmartChargingSwitchContinuous,
     EVSmartChargingSwitchEVConnected,
     EVSmartChargingSwitchKeepOn,
+    EVSmartChargingSwitchUsePredictedEpexData,
 )
 
 from .const import MOCK_CONFIG_USER_NO_CHARGER
@@ -78,16 +79,21 @@ async def test_switch(hass, bypass_validate_input_and_control):
     switch_keep_on: EVSmartChargingSwitchKeepOn = hass.data["entity_components"][
         SWITCH
     ].get_entity("switch.ev_smart_charging_keep_charger_on")
+    switch_use_predicted: EVSmartChargingSwitchUsePredictedEpexData = hass.data[
+        "entity_components"
+    ][SWITCH].get_entity("switch.ev_smart_charging_use_predicted_epex_data")
     assert switch_active
     assert switch_limit
     assert switch_continuous
     assert switch_ev_connected
     assert switch_keep_on
+    assert switch_use_predicted
     assert isinstance(switch_active, EVSmartChargingSwitchActive)
     assert isinstance(switch_limit, EVSmartChargingSwitchApplyLimit)
     assert isinstance(switch_continuous, EVSmartChargingSwitchContinuous)
     assert isinstance(switch_ev_connected, EVSmartChargingSwitchEVConnected)
     assert isinstance(switch_keep_on, EVSmartChargingSwitchKeepOn)
+    assert isinstance(switch_use_predicted, EVSmartChargingSwitchUsePredictedEpexData)
 
     # Test the switches
     await switch_active.async_turn_on()
@@ -120,6 +126,11 @@ async def test_switch(hass, bypass_validate_input_and_control):
 
     await switch_keep_on.async_turn_on()
     assert coordinator.switch_keep_on is True
+
+    await switch_use_predicted.async_turn_on()
+    assert coordinator.switch_use_predicted_epex_data is True
+    await switch_use_predicted.async_turn_off()
+    assert coordinator.switch_use_predicted_epex_data is False
     await switch_keep_on.async_turn_off()
     assert coordinator.switch_keep_on is False
     await switch_keep_on.async_turn_on()

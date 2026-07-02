@@ -9,6 +9,11 @@
                     "ev_soc_sensor": "Elbil SOC-enhet (ladenivå)",
                     "ev_target_soc_sensor": "Enhet for ønsket SOC/ladenivå (mellomrom for å ta bort)",
                     "charger_entity": "Ladekontrollenhet (mellomrom for å ta bort)",
+                    "charging_state_entity": "Enhet for lade status (mellomrom for å ta bort)",
+                    "epex_predictor_country": "EPEX Predictor landskode",
+                    "epex_predictor_fixed_price": "EPEX Predictor fastpris",
+                    "epex_predictor_tax_percent": "EPEX Predictor mva-prosent",
+                    "epex_predictor_unit": "EPEX Predictor enhet",
                     "ev_controlled": "Elbilintegrasjon, brukes for å styre start og stopp av lading."
                 }
             }
@@ -34,6 +39,11 @@
                     "ev_soc_sensor": "Elbil SOC-enhet",
                     "ev_target_soc_sensor": "Elbil mål-SOC-enhet (mellomrom for å ta bort)",
                     "charger_entity": "Ladekontrollenhet (mellomrom for å ta bort)",
+                    "charging_state_entity": "Enhet for lade status (mellomrom for å ta bort)",
+                    "epex_predictor_country": "EPEX Predictor landskode",
+                    "epex_predictor_fixed_price": "EPEX Predictor fastpris",
+                    "epex_predictor_tax_percent": "EPEX Predictor mva-prosent",
+                    "epex_predictor_unit": "EPEX Predictor enhet",
                     "ev_controlled": "Elbil-integrasjon for å kontrollere start/stopp av lading"
                 }
             }
@@ -52,36 +62,78 @@
     },
     "entity": {
         "button": {
-            "manually_start_charging": { "name": "Start lading manuelt" },
-            "manually_stop_charging": { "name": "Stopp lading manuelt" }
+            "manually_start_charging": {
+                "name": "Start lading manuelt"
+            },
+            "manually_stop_charging": {
+                "name": "Stopp lading manuelt"
+            }
         },
         "number": {
-            "charging_speed": { "name": "Ladehastighet" },
-            "electricity_price_limit": { "name": "Maksimum strømpris" },
-            "opportunistic_level": { "name": "Opportunistisk nivå" },
-            "opportunistic_type2_level": { "name": "Opportunistisk type 2 nivå" },
-            "low_price_charging_level": { "name": "Lad ved lavt prisnivå" },
-            "low_soc_charging_level": { "name": "Lad ved lavt ladenivå (SOC)" },
-            "minimum_ev_soc": { "name": "Minimum ladenivå (SOC)" }
+            "charging_speed": {
+                "name": "Ladehastighet"
+            },
+            "electricity_price_limit": {
+                "name": "Maksimum strømpris"
+            },
+            "opportunistic_level": {
+                "name": "Opportunistisk nivå"
+            },
+            "opportunistic_type2_level": {
+                "name": "Opportunistisk type 2 nivå"
+            },
+            "low_price_charging_level": {
+                "name": "Lad ved lavt prisnivå"
+            },
+            "low_soc_charging_level": {
+                "name": "Lad ved lavt ladenivå (SOC)"
+            },
+            "minimum_ev_soc": {
+                "name": "Minimum ladenivå (SOC)"
+            }
         },
         "select": {
-            "charge_start_time": { "name": "Starttidspunkt for lading" },
-            "charge_completion_time": { "name": "Sluttidspunkt for lading" }
+            "charge_start_time": {
+                "name": "Starttidspunkt for lading"
+            },
+            "charge_completion_time": {
+                "name": "Sluttidspunkt for lading"
+            }
         },
         "sensor": {
             "charging": {
                 "name": "Lading",
                 "state_attributes": {
-                    "current_price": { "name": "Gjeldende pris"},
-                    "ev_soc": {"name": "Ladenivå (SOC)"},
-                    "ev_target_soc": {"name": "Ønsket ladenivå (SOC)"},
-                    "charging_is_planned": {"name": "Lading er planlagt"},
-                    "charging_start_time": {"name": "Starttidspunkt for lading"},
-                    "charging_stop_time": {"name": "Stopptidspunkt for lading"},
-                    "charging_number_of_hours": {"name": "Antall ladetimer"},
-                    "opportunistic": {"name": "Opportunistisk"},
-                    "raw_two_days": {"name": "Strømpriser to dager"},
-                    "charging_schedule": {"name": "Ladeskjema"}
+                    "current_price": {
+                        "name": "Gjeldende pris"
+                    },
+                    "ev_soc": {
+                        "name": "Ladenivå (SOC)"
+                    },
+                    "ev_target_soc": {
+                        "name": "Ønsket ladenivå (SOC)"
+                    },
+                    "charging_is_planned": {
+                        "name": "Lading er planlagt"
+                    },
+                    "charging_start_time": {
+                        "name": "Starttidspunkt for lading"
+                    },
+                    "charging_stop_time": {
+                        "name": "Stopptidspunkt for lading"
+                    },
+                    "charging_number_of_hours": {
+                        "name": "Antall ladetimer"
+                    },
+                    "opportunistic": {
+                        "name": "Opportunistisk"
+                    },
+                    "raw_two_days": {
+                        "name": "Strømpriser to dager"
+                    },
+                    "charging_schedule": {
+                        "name": "Ladeskjema"
+                    }
                 }
             },
             "status": {
@@ -100,15 +152,36 @@
             }
         },
         "switch": {
-            "smart_charging_activated": { "name": "Smart lading aktivert" },
-            "apply_price_limit": { "name": "Bruk prisgrense" },
-            "continuous_charging_preferred": { "name": "Kontinuerlig lading foretrukket" },
-            "ev_connected": { "name": "Elbil tilkoblet" },
-            "keep_charger_on": { "name": "Hold laderen på" },
-            "opportunistic_charging": { "name": "Opportunistisk lading" },
-            "opportunistic_type2_charging": { "name": "Opportunistisk type 2 lading" },
-            "low_price_charging": { "name": "Lad ved lav pris" },
-            "low_soc_charging": { "name": "Lad ved lavt ladenivå (SOC)" }
+            "smart_charging_activated": {
+                "name": "Smart lading aktivert"
+            },
+            "apply_price_limit": {
+                "name": "Bruk prisgrense"
+            },
+            "continuous_charging_preferred": {
+                "name": "Kontinuerlig lading foretrukket"
+            },
+            "ev_connected": {
+                "name": "Elbil tilkoblet"
+            },
+            "keep_charger_on": {
+                "name": "Hold laderen på"
+            },
+            "opportunistic_charging": {
+                "name": "Opportunistisk lading"
+            },
+            "opportunistic_type2_charging": {
+                "name": "Opportunistisk type 2 lading"
+            },
+            "low_price_charging": {
+                "name": "Lad ved lav pris"
+            },
+            "low_soc_charging": {
+                "name": "Lad ved lavt ladenivå (SOC)"
+            },
+            "use_predicted_epex_data": {
+                "name": "Bruk predikerte EPEX Predictor-data"
+            }
         }
     }
 }

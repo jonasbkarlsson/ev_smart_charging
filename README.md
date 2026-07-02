@@ -6,25 +6,24 @@
 
 [![hacs][hacsbadge]][hacs]
 [![Project Maintenance][maintenance-shield]][user_profile]
-[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 ![Icon](assets/icon.png)
 
-The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration can get the electricity price information from a large number of integrations or from a template sensor that supports the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor).
+The EV Smart Charging integration will automatically charge the electric vehicle (EV) when the electricity price is the lowest. The integration can get the electricity price information from a large number of integrations or from a template sensor that supports the [generic price format](https://github.com/nikagl/ev_smart_charging/wiki/Price-sensor).
 
 The integration calculates the set of 15-minute intervals that will give the lowest price, by default restricted to a continuous set. This calculation is done when the electricity prices for tomorrow is available (typically between shortly after 13:00 CET/CEST and midnight) or when the time of the day is before the configured charge completion time. When the automatic charging has started, changes of settings will not have any effect.
 
 ## Requirements
-- A [price integration with native support](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Supported-price-sensors) or a template sensor that generates price data using the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor).
+- A [price integration with native support](https://github.com/nikagl/ev_smart_charging/wiki/Supported-price-sensors) or a template sensor that generates price data using the [generic price format](https://github.com/nikagl/ev_smart_charging/wiki/Price-sensor).
   - Integrations with native support includes, but is not limited to, the (HACS) [Nord Pool](https://github.com/custom-components/nordpool), the [Energi Data Service](https://github.com/MTrab/energidataservice), the [GE-Spot](https://github.com/enoch85/ge-spot), the [Entso-e](https://github.com/JaccoR/hass-entso-e) and the [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations.
-  - Price integrations without native support can be used via a [template sensor](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Supported-price-sensors). This includes the Home Assistant native [Nord Pool](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Nordpool-(Home-Assistant)) integration.
+  - Price integrations without native support can be used via a [template sensor](https://github.com/nikagl/ev_smart_charging/wiki/Supported-price-sensors). This includes the Home Assistant native [Nord Pool](https://github.com/nikagl/ev_smart_charging/wiki/Nordpool-(Home-Assistant)) integration.
 - Home Assistant version 2023.4 or newer.
 
 ## Features
 - Automatic EV charging control based on electricity prices.
 - Can automatically detect and use instances of the (HACS) [Nord Pool](https://github.com/custom-components/nordpool), [Energi Data Service](https://github.com/MTrab/energidataservice), [GE-Spot](https://github.com/enoch85/ge-spot), [Entso-e](https://github.com/JaccoR/hass-entso-e) and [TGE](https://github.com/PiotrMachowski/Home-Assistant-custom-components-TGE) integrations.
-- Supports manual configuration of other price integrations that fulfills [the listed requirements](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Supported-price-sensors).
-- Supports a [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). A template sensor can be used to get price information from price integrations without native support and/or to construct other special price information.
+- Supports manual configuration of other price integrations that fulfills [the listed requirements](https://github.com/nikagl/ev_smart_charging/wiki/Supported-price-sensors).
+- Supports a [generic price format](https://github.com/nikagl/ev_smart_charging/wiki/Price-sensor). A template sensor can be used to get price information from price integrations without native support and/or to construct other special price information.
 - Supports price information given with 15 minutes and 60 minutes intervals.
 - Configuration of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
@@ -43,7 +42,7 @@ The integration calculates the set of 15-minute intervals that will give the low
 ### HACS
 1. In Home Assistant go to HACS -> Integrations. Click on "+ Explore & Download Repositories" and search for "EV Smart Charging".
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=jonasbkarlsson&repository=ev_smart_charging&category=integration)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=nikagl&repository=ev_smart_charging&category=integration)
 
 2. In Home Assistant go to Settings -> Devices & Services -> Integrations. Click on "+ Add integration" and search for "EV Smart Charging".
 
@@ -67,15 +66,34 @@ The configuration form contains the entities that the integration is interacting
 Parameter | Required | Description
 -- | -- | --
 Name | Yes | The name of the instance.
-Electricity price entity | Yes | Sensor from any compatible price integration or a template sensor providing the price in the [generic price format](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Price-sensor). For the Entso-e integration, the entity called `sensor.average_electricity_price` should be used.
+Electricity price entity | Yes | Sensor from any compatible price integration or a template sensor providing the price in the [generic price format](https://github.com/nikagl/ev_smart_charging/wiki/Price-sensor). For the Entso-e integration, the entity called `sensor.average_electricity_price` should be used.
 EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 and 100. Note that this entity is crucial for the integration. If live information about he SOC is not available, please carefully read the section below with more information about the EV SOC entity.
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'. This entity can either be a Switch or an Input Boolean.
 Charging control by EV integration | Yes | Select this if an EV integration (and not a charger integration) will be used to control start/stop of charging. Also, if an EV integration is used to control start/stop of charging, it is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected`.
+EPEX Predictor country code | No | Country code used by the built-in EPEX Predictor request (for example `NL`, `SE`, `DE`). Only used when `switch.ev_smart_charging_use_predicted_epex_data` is turned on.
+EPEX Predictor fixed price | No | Fixed price component sent to the built-in EPEX Predictor API. Only used when `switch.ev_smart_charging_use_predicted_epex_data` is turned on.
+EPEX Predictor tax percent | No | Tax percent sent to the built-in EPEX Predictor API. Only used when `switch.ev_smart_charging_use_predicted_epex_data` is turned on.
+EPEX Predictor unit | No | Unit sent to the built-in EPEX Predictor API (default `EUR_PER_KWH`). Only used when `switch.ev_smart_charging_use_predicted_epex_data` is turned on.
 
 With the exception of Name, the above configuration items can be changed after intial configuration in Settings -> Devices & Services -> Integrations -> EV Smart Charging -> 1 device -> Configure. To change Name, the native way to rename Integrations or Devices in Home Assistant can be used.
 
 Additional parameters that affects how the charging will be performed are available as configuration entities. These entities can be placed in the dashboard and can be controlled using automations.
+
+### Built-in EPEX Predictor
+
+When `switch.ev_smart_charging_use_predicted_epex_data` is enabled, the integration fetches predicted tomorrow-and-later prices and merges them into `raw_two_days` for scheduling and dashboard visualization.
+
+The predictor input fields in the config flow/options flow are:
+- EPEX Predictor country code
+- EPEX Predictor fixed price
+- EPEX Predictor tax percent
+- EPEX Predictor unit
+
+For predictor model details and supported input semantics, see:
+- https://github.com/b3nn0/EpexPredictor
+
+Thanks to [b3nn0](https://github.com/b3nn0) for EpexPredictor.
 
 ### Configuration entities
 
@@ -103,6 +121,7 @@ Entity | Type | Description
 `switch.ev_smart_charging_opportunistic_type2_charging` | Switch | Activates opportunistic type 2 charging, see the desciption of the configuration entity `number.ev_smart_charging_opportunistic_type2_level`. The two types of opportunistic charging can not be used at the same time.
 `switch.ev_smart_charging_low_soc_charging` | Switch | Activates charging immediately if the EV SOC is lower than a configured level. It is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected` if this switch is set to on. Note that this charging is not shown as a scheduled charging. A typical use case is to charge the EV directly when returning home to a minimum level, and then do a complete charging using the scheduled charging when the price is lowest.
 `switch.ev_smart_charging_low_price_charging` | Switch | Activates charging immediately if the electricity price is lower than a configured level. It is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected` if this switch is set to on. Note that this charging is not shown as a scheduled charging.
+`switch.ev_smart_charging_use_predicted_epex_data` | Switch | Enables use of built-in EPEX Predictor prices for tomorrow and later. When off, only non-predicted prices are used.
 `switch.ev_smart_charging_continuous_charging_preferred` | Switch | If turned on, will as basis schedule one continuous charging session. If turned off, will schedule charging on the 15-minute intervals with lowest electricity price, even if they are not continuous.
 `switch.ev_smart_charging_keep_charger_on` | Switch | If "on", the `sensor.ev_smart_charging_charging` will not turn off after completed charge cycle. The feature is intended to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery. If this option is used, the feature `Electricity price limit` will be turned off, and vice versa. *NOTE* It is required that `switch.ev_smart_charging_ev_connected` is controlled in a proper way in order for this feature to work. Also, there is an assumption made that the EV itself will stop its charging when reaching the target SOC.
 `switch.ev_smart_charging_ev_connected` | Switch | Tells the integration that the EV is connected to the charger. Is preferable controlled by automations (see example below). Can avoid problems occuring when the EV is not connected to the charger at the time the charging should start. Using it will also ensure that the `sensor.ev_smart_charging_charging` is set to "off" when the EV is not connected to the charger.
@@ -123,7 +142,7 @@ Attribute | Description
 `charging_stop_time` | If charging is planned, the date and time when the charging will stop.
 `charging_number_of_hours` | If charging is planned, the number of hours that charging is planned. This might be less than the time between the start and stop times, if non-continuous charging is configured.
 `opportunistic` | `true` if an opportunistic charging feature has been triggered.
-`raw_two_days` | The electricity price today and tomorrow from the electricity price entity.
+`raw_two_days` | Available price data used for scheduling and graphing. With built-in EPEX Predictor enabled, this can include tomorrow and later predicted prices.
 `charging_schedule` | The calculated charging schedule. Can be used by an ApexCharts card to visulize the planned charging, see below.
 
 ## Lovelace UI
@@ -178,7 +197,7 @@ cards:
       xaxis:
         labels:
           show: true
-          format: HH
+          format: ddd HH
           rotate: -45
           rotateAlways: true
           hideOverlappingLabels: true
@@ -258,6 +277,76 @@ cards:
     unit: '%'
 ```
 
+### Dynamic dashboard period (recommended)
+
+The static `graph_span: 2d` example above is easy to start with, but it will always render a fixed range.
+
+If you want the chart/table to show exactly the period that is really available:
+- 1 day if only today is available,
+- 2 days when tomorrow is available,
+- up to 5 days when EPEX Predictor is enabled,
+
+use `config-template-card` and derive the range from `raw_two_days`.
+
+```yaml
+type: custom:config-template-card
+entities:
+  - sensor.ev_smart_charging_charging
+  - switch.ev_smart_charging_use_predicted_epex_data
+variables:
+  # Keep only rows that should be visualized for the current predictor mode.
+  - >
+    const ev = states['sensor.ev_smart_charging_charging'];
+    const usePred = states['switch.ev_smart_charging_use_predicted_epex_data']?.state === 'on';
+    const rows = ev?.attributes?.raw_two_days || [];
+    return rows.filter((r) => usePred || !r.predicted);
+  # Number of unique days in the filtered data (minimum 1 day).
+  - >
+    const keys = [...new Set(vars[0].map((r) => new Date(r.start).toDateString()))];
+    return Math.max(keys.length, 1);
+  # Chart start.
+  - >
+    if (!vars[0].length) return Date.now();
+    return new Date(vars[0][0].start).getTime();
+  # Chart end (last interval end if available).
+  - >
+    if (!vars[0].length) return Date.now() + 24 * 60 * 60 * 1000;
+    const last = vars[0][vars[0].length - 1];
+    if (last.end) return new Date(last.end).getTime();
+    return new Date(last.start).getTime() + 15 * 60 * 1000;
+card:
+  type: custom:apexcharts-card
+  locale: en
+  graph_span: "${vars[1] + 'd'}"
+  apex_config:
+    xaxis:
+      labels:
+        format: "${vars[1] > 1 ? 'ddd HH:mm' : 'HH:mm'}"
+      min: ${vars[2]}
+      max: ${vars[3]}
+  series:
+    - entity: sensor.ev_smart_charging_charging
+      name: Electricity price
+      type: line
+      data_generator: >
+        return vars[0].map((r) => [new Date(r.start), r.value]);
+    - entity: sensor.ev_smart_charging_charging
+      name: Charging
+      type: area
+      curve: stepline
+      color: black
+      data_generator: >
+        const minTs = vars[2];
+        const maxTs = vars[3];
+        const schedule = entity.attributes.charging_schedule || [];
+        return schedule
+          .filter((r) => r.value && r.value > 0)
+          .map((r) => [new Date(r.start), r.value])
+          .filter((p) => p[0].getTime() >= minTs && p[0].getTime() <= maxTs);
+```
+
+For table cards, reuse the same filtered list (`vars[0]`) so the table only shows rows that are also shown in the chart.
+
 ## Integrating with EVs
 
 ### EV SOC entity
@@ -297,7 +386,7 @@ If your charger's integration does not provide a switch entity that this integra
 
 Also, if information about the EV being connected to the charger is available, an automation can provide that information to the integration in order to improve the handling of the case when the car is not connected to the charger at the time charging is planned to start.
 
-Some examples are given below. Additional examples are given in the [Wiki page](https://github.com/jonasbkarlsson/ev_smart_charging/wiki/Chargers).
+Some examples are given below. Additional examples are given in the [Wiki page](https://github.com/nikagl/ev_smart_charging/wiki/Chargers).
 
 ### Example of automation to start charging
 ```
@@ -386,16 +475,14 @@ To verify that the integration is able to control the charging, go to Settings -
 
 If the above works, the integration is able to control the charging.
 
-[ev_smart_charging]: https://github.com/jonasbkarlsson/ev_smart_charging
-[releases-shield]: https://img.shields.io/github/v/release/jonasbkarlsson/ev_smart_charging?style=for-the-badge
-[releases]: https://github.com/jonasbkarlsson/ev_smart_charging/releases
-[coverage-shield]: https://img.shields.io/codecov/c/gh/jonasbkarlsson/ev_smart_charging?style=for-the-badge&logo=codecov
-[coverage]: https://app.codecov.io/gh/jonasbkarlsson/ev_smart_charging
-[license-shield]: https://img.shields.io/github/license/jonasbkarlsson/ev_smart_charging?style=for-the-badge
-[license]: https://github.com/jonasbkarlsson/ev_smart_charging/blob/main/LICENSE
+[ev_smart_charging]: https://github.com/nikagl/ev_smart_charging
+[releases-shield]: https://img.shields.io/github/v/release/nikagl/ev_smart_charging?style=for-the-badge
+[releases]: https://github.com/nikagl/ev_smart_charging/releases
+[coverage-shield]: https://img.shields.io/codecov/c/gh/nikagl/ev_smart_charging?style=for-the-badge&logo=codecov
+[coverage]: https://app.codecov.io/gh/nikagl/ev_smart_charging
+[license-shield]: https://img.shields.io/github/license/nikagl/ev_smart_charging?style=for-the-badge
+[license]: https://github.com/nikagl/ev_smart_charging/blob/main/LICENSE
 [hacs]: https://github.com/hacs/integration
 [hacsbadge]: https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge
-[maintenance-shield]: https://img.shields.io/badge/maintainer-Jonas%20Karlsson%20@jonasbkarlsson-41BDF5.svg?style=for-the-badge
-[user_profile]: https://github.com/jonasbkarlsson
-[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-FFDD00.svg?style=for-the-badge&logo=buymeacoffee
-[buymecoffee]: https://www.buymeacoffee.com/jonasbkarlsson
+[maintenance-shield]: https://img.shields.io/badge/maintainer-nikagl-41BDF5.svg?style=for-the-badge
+[user_profile]: https://github.com/nikagl

@@ -9,6 +9,11 @@
                     "ev_soc_sensor": "EV SOC sensor",
                     "ev_target_soc_sensor": "EV doel SOC input (enkele spatie om niet te gebruiken)",
                     "charger_entity": "Entity voor de oplader bedieningsschakelaar (enkele spatie om niet te gebruiken)",
+                    "charging_state_entity": "Entity voor de laadstatus (enkele spatie om niet te gebruiken)",
+                    "epex_predictor_country": "EPEX Predictor landcode",
+                    "epex_predictor_fixed_price": "EPEX Predictor vaste prijs",
+                    "epex_predictor_tax_percent": "EPEX Predictor belastingpercentage",
+                    "epex_predictor_unit": "EPEX Predictor eenheid",
                     "ev_controlled": "Een EV integratie bediend het starten/stoppen van het opladen"
                 }
             }
@@ -34,6 +39,11 @@
                     "ev_soc_sensor": "EV SOC sensor",
                     "ev_target_soc_sensor": "EV doel SOC input (enkele spatie om niet te gebruiken)",
                     "charger_entity": "Entity voor de oplader bedieningsschakelaar (enkele spatie om niet te gebruiken)",
+                    "charging_state_entity": "Entity voor de laadstatus (enkele spatie om niet te gebruiken)",
+                    "epex_predictor_country": "EPEX Predictor landcode",
+                    "epex_predictor_fixed_price": "EPEX Predictor vaste prijs",
+                    "epex_predictor_tax_percent": "EPEX Predictor belastingpercentage",
+                    "epex_predictor_unit": "EPEX Predictor eenheid",
                     "ev_controlled": "Een EV integratie bediend het starten/stoppen van het opladen"
                 }
             }
@@ -52,36 +62,106 @@
     },
     "entity": {
         "button": {
-            "manually_start_charging": { "name": "Handmatige start opladen" },
-            "manually_stop_charging": { "name": "Handmatige stop opladen" }
+            "manually_start_charging": {
+                "name": "Handmatige start opladen"
+            },
+            "manually_stop_charging": {
+                "name": "Handmatige stop opladen"
+            }
         },
         "number": {
-            "charging_speed": { "name": "Oplaadsnelheid" },
-            "electricity_price_limit": { "name": "Limiet elektriciteitsprijs" },
-            "opportunistic_level": { "name": "Opportunistisch niveau" },
-            "opportunistic_type2_level": { "name": "Opportunistisch type 2 niveau" },
-            "low_price_charging_level": { "name": "Lage prijs oplaadniveau" },
-            "low_soc_charging_level": { "name": "Lage SOC oplaadniveau" },
-            "minimum_ev_soc": { "name": "Minimum EV SOC" }
+            "charging_speed": {
+                "name": "Oplaadsnelheid"
+            },
+            "electricity_price_limit": {
+                "name": "Limiet elektriciteitsprijs"
+            },
+            "opportunistic_level": {
+                "name": "Opportunistisch niveau"
+            },
+            "opportunistic_type2_level": {
+                "name": "Opportunistisch type 2 niveau"
+            },
+            "low_price_charging_level": {
+                "name": "Lage prijs oplaadniveau"
+            },
+            "low_soc_charging_level": {
+                "name": "Lage SOC oplaadniveau"
+            },
+            "minimum_ev_soc": {
+                "name": "Minimum EV SOC"
+            }
         },
         "select": {
-            "charge_start_time": { "name": "Oplaad starttijd" },
-            "charge_completion_time": { "name": "Oplaad voltooiingstijd" }
+            "charge_start_time": {
+                "name": "Oplaad starttijd"
+            },
+            "charge_start_day": {
+                "name": "Oplaad startdag",
+                "state": {
+                    "Auto": "Auto",
+                    "Today": "Vandaag",
+                    "Tomorrow": "Morgen",
+                    "Day 3": "Dag 3",
+                    "Day 4": "Dag 4",
+                    "Day 5": "Dag 5"
+                }
+            },
+            "charge_completion_time": {
+                "name": "Oplaad voltooiingstijd"
+            },
+            "charge_completion_day": {
+                "name": "Oplaad voltooiingsdag",
+                "state": {
+                    "Auto": "Auto",
+                    "Today": "Vandaag",
+                    "Tomorrow": "Morgen",
+                    "Day 3": "Dag 3",
+                    "Day 4": "Dag 4",
+                    "Day 5": "Dag 5"
+                }
+            },
+            "blackout_start_time": {
+                "name": "Blackout starttijd"
+            },
+            "blackout_end_time": {
+                "name": "Blackout eindtijd"
+            }
         },
         "sensor": {
             "charging": {
                 "name": "Opladen",
                 "state_attributes": {
-                    "current_price": { "name": "Actuele prijs"},
-                    "ev_soc": {"name": "EV SOC"},
-                    "ev_target_soc": {"name": "EV instelwaarde SOC"},
-                    "charging_is_planned": {"name": "Opladen staat gepland"},
-                    "charging_start_time": {"name": "Starttijd opladen"},
-                    "charging_stop_time": {"name": "Tijd opladen gereed"},
-                    "charging_number_of_hours": {"name": "Aantal uren opladen"},
-                    "opportunistic": {"name": "Opportunistisch"},
-                    "raw_two_days": {"name": "Ruwe data van 2 dagen"},
-                    "charging_schedule": {"name": "Oplaad schema"}
+                    "current_price": {
+                        "name": "Actuele prijs"
+                    },
+                    "ev_soc": {
+                        "name": "EV SOC"
+                    },
+                    "ev_target_soc": {
+                        "name": "EV instelwaarde SOC"
+                    },
+                    "charging_is_planned": {
+                        "name": "Opladen staat gepland"
+                    },
+                    "charging_start_time": {
+                        "name": "Starttijd opladen"
+                    },
+                    "charging_stop_time": {
+                        "name": "Tijd opladen gereed"
+                    },
+                    "charging_number_of_hours": {
+                        "name": "Aantal uren opladen"
+                    },
+                    "opportunistic": {
+                        "name": "Opportunistisch"
+                    },
+                    "raw_two_days": {
+                        "name": "Ruwe data van 2 dagen"
+                    },
+                    "charging_schedule": {
+                        "name": "Oplaad schema"
+                    }
                 }
             },
             "status": {
@@ -100,15 +180,36 @@
             }
         },
         "switch": {
-            "smart_charging_activated": { "name": "Activeer slim opladen" },
-            "apply_price_limit": { "name": "Prijslimiet toepassen" },
-            "continuous_charging_preferred": { "name": "Bij voorkeur continu opladen" },
-            "ev_connected": { "name": "EV aangesloten" },
-            "keep_charger_on": { "name": "Oplader ingeschakeld houden" },
-            "opportunistic_charging": { "name": "Opportunistisch opladen" },
-            "opportunistic_type2_charging": { "name": "Opportunistisch type 2 opladen" },
-            "low_price_charging": { "name": "Lage prijs opladen" },
-            "low_soc_charging": { "name": "Lage SOC opladen" }
+            "smart_charging_activated": {
+                "name": "Activeer slim opladen"
+            },
+            "apply_price_limit": {
+                "name": "Prijslimiet toepassen"
+            },
+            "continuous_charging_preferred": {
+                "name": "Bij voorkeur continu opladen"
+            },
+            "ev_connected": {
+                "name": "EV aangesloten"
+            },
+            "keep_charger_on": {
+                "name": "Oplader ingeschakeld houden"
+            },
+            "opportunistic_charging": {
+                "name": "Opportunistisch opladen"
+            },
+            "opportunistic_type2_charging": {
+                "name": "Opportunistisch type 2 opladen"
+            },
+            "low_price_charging": {
+                "name": "Lage prijs opladen"
+            },
+            "low_soc_charging": {
+                "name": "Lage SOC opladen"
+            },
+            "use_predicted_epex_data": {
+                "name": "Gebruik voorspelde EPEX Predictor-data"
+            }
         }
     }
 }
