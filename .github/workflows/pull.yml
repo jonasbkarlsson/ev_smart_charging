@@ -8,7 +8,7 @@ jobs:
     runs-on: "ubuntu-latest"
     name: Validate
     steps:
-      - uses: "actions/checkout@v5"
+      - uses: "actions/checkout@v7"
 
       - name: HACS validation
         uses: "hacs/action@main"
@@ -23,7 +23,7 @@ jobs:
     runs-on: "ubuntu-latest"
     name: Check style formatting
     steps:
-      - uses: "actions/checkout@v5"
+      - uses: "actions/checkout@v7"
       - uses: "actions/setup-python@v6"
         with:
           python-version: "3.x"
@@ -45,7 +45,7 @@ jobs:
     name: Run tests
     steps:
       - name: Check out code from GitHub
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v7"
       - name: Setup Python
         uses: "actions/setup-python@v6"
         with:
@@ -68,7 +68,7 @@ jobs:
             tests
       - name: "Upload coverage to Codecov"
         if: ${{ matrix.python-version == '3.13' }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true

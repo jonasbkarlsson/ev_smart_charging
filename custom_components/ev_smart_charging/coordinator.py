@@ -427,7 +427,9 @@ class EVSmartChargingCoordinator:
                     self.scheduler.get_charging_number_of_quarters()
                 )
                 if self.sensor_status:
-                    if not self.switch_ev_connected:
+                    if not self.switch_active:
+                        self.sensor_status.set_status(CHARGING_STATUS_NOT_ACTIVE)
+                    elif not self.switch_ev_connected:
                         self.sensor_status.set_status(CHARGING_STATUS_DISCONNECTED)
                     elif self.low_soc_charging_state == STATE_ON:
                         self.sensor_status.set_status(CHARGING_STATUS_LOW_SOC_CHARGING)
