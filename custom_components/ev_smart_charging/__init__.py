@@ -29,6 +29,7 @@ from .const import (
     DOMAIN,
     STARTUP_MESSAGE,
     PLATFORMS,
+    CONF_CHARGING_TIME_ENTITY,
 )
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
@@ -166,7 +167,12 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         new[CONF_GRID_VOLTAGE] = 230  # [V]
         migration = True
 
-    if version > 7:
+    if version == 7:
+        version = 8
+        new[CONF_CHARGING_TIME_ENTITY] = None
+        migration = True
+
+    if version > 8:
         _LOGGER.error(
             "Migration from version %s to a lower version is not possible",
             version,
