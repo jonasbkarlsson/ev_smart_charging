@@ -1,4 +1,5 @@
 """Adds config flow for EV Smart Charging."""
+
 import logging
 from typing import Any, Optional
 import voluptuous as vol
@@ -29,7 +30,7 @@ _LOGGER = logging.getLogger(__name__)
 class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow."""
 
-    VERSION = 7
+    VERSION = 8
     user_input: Optional[dict[str, Any]]
 
     def __init__(self):
@@ -60,9 +61,9 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_input[CONF_DEVICE_NAME] = DeviceNameCreator.create(self.hass)
             user_input[CONF_PRICE_SENSOR] = FindEntity.find_price_sensor(self.hass)
             user_input[CONF_EV_SOC_SENSOR] = FindEntity.find_vw_soc_sensor(self.hass)
-            user_input[
-                CONF_EV_TARGET_SOC_SENSOR
-            ] = FindEntity.find_vw_target_soc_sensor(self.hass)
+            user_input[CONF_EV_TARGET_SOC_SENSOR] = (
+                FindEntity.find_vw_target_soc_sensor(self.hass)
+            )
             user_input[CONF_CHARGER_ENTITY] = FindEntity.find_ocpp_device(self.hass)
             user_input[CONF_EV_CONTROLLED] = False
             user_input[CONF_SOLAR_CHARGING_CONFIGURED] = False
@@ -102,7 +103,8 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_CHARGER_ENTITY, default=user_input[CONF_CHARGER_ENTITY]
             ): cv.string,
             vol.Optional(
-                CONF_CHARGING_STATE_ENTITY, default=user_input[CONF_CHARGING_STATE_ENTITY]
+                CONF_CHARGING_STATE_ENTITY,
+                default=user_input[CONF_CHARGING_STATE_ENTITY],
             ): cv.string,
             vol.Optional(
                 CONF_EV_CONTROLLED, default=user_input[CONF_EV_CONTROLLED]
