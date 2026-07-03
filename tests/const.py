@@ -2,6 +2,7 @@
 
 from custom_components.ev_smart_charging.const import (
     CONF_CHARGER_ENTITY,
+    CONF_CHARGING_STATE_ENTITY,
     CONF_DEVICE_NAME,
     CONF_EV_CONTROLLED,
     CONF_LOW_PRICE_CHARGING_LEVEL,
@@ -70,6 +71,7 @@ MOCK_CONFIG_CHARGER_EXTRA = {
     CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
     CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
     CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
+    CONF_CHARGING_STATE_ENTITY: "",
     CONF_EV_CONTROLLED: False,
 }
 
