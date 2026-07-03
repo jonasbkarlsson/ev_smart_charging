@@ -1,14 +1,14 @@
 {
-    "codeowners": [
-        "@jonasbkarlsson"
-    ],
-    "config_flow": true,
-    "dependencies": [],
-    "documentation": "https://github.com/jonasbkarlsson/ev_smart_charging/",
-    "domain": "ev_smart_charging",
-    "iot_class": "calculated",
-    "issue_tracker": "https://github.com/jonasbkarlsson/ev_smart_charging/issues",
-    "name": "EV Smart Charging",
-    "requirements": [],
-    "version": "v2.5.1"
+  "domain": "ev_smart_charging",
+  "name": "EV Smart Charging",
+  "codeowners": [
+    "@jonasbkarlsson"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/jonasbkarlsson/ev_smart_charging/",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/jonasbkarlsson/ev_smart_charging/issues",
+  "requirements": [],
+  "version": "0.1.0"
 }
