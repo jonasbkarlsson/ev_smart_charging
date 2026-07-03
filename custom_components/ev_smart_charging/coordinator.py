@@ -151,7 +151,9 @@ class EVSmartChargingCoordinator:
             hass, get_parameter(self.config_entry, CONF_CHARGER_ENTITY)
         )
         # Store the entity that reflects actual charging state
-        self.charging_state_entity_id = get_parameter(self.config_entry, CONF_CHARGING_STATE_ENTITY, "")
+        self.charging_state_entity_id = get_parameter(
+            self.config_entry, CONF_CHARGING_STATE_ENTITY, ""
+        )
 
         # Set up periodic check for actual charging state (every minute)
         self.listeners.append(
@@ -246,7 +248,8 @@ class EVSmartChargingCoordinator:
         is_actually_charging = state_obj.state == STATE_ON
         if not is_actually_charging:
             _LOGGER.warning(
-                f"EV Smart Charging: Charging should be ON but {self.charging_state_entity_id} is not ON. Retrying start."
+                "EV Smart Charging: Charging should be ON but %s is not ON. Retrying start.",
+                self.charging_state_entity_id,
             )
             await self.turn_on_charging()
 

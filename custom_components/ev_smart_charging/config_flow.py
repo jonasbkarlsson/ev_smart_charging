@@ -163,6 +163,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 default=get_parameter(self.config_entry, CONF_CHARGER_ENTITY),
             ): cv.string,
             vol.Optional(
+                CONF_CHARGING_STATE_ENTITY,
+                default=get_parameter(self.config_entry, CONF_CHARGING_STATE_ENTITY),
+            ): cv.string,
+            vol.Optional(
                 CONF_EV_CONTROLLED,
                 default=get_parameter(self.config_entry, CONF_EV_CONTROLLED),
             ): cv.boolean,
