@@ -25,6 +25,7 @@ MOCK_CONFIG_USER = {
     CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
     CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
     CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
+    CONF_CHARGING_STATE_ENTITY: "",
     CONF_EV_CONTROLLED: False,
 }
 
