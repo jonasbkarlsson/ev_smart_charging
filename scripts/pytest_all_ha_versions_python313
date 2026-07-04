@@ -27,6 +27,7 @@ run_next_test() {
   number2=$(echo "$output" | awk '{print $1}')
   if [ "$number1" != "$number2" ]; then
     echo "Results are different!"
+    pytest -q --no-summary --asyncio-mode=$asynciomode tests
     exit 1
   fi
 }
@@ -48,6 +49,7 @@ pip3 install -qq homeassistant==2025.4.4 pytest-homeassistant-custom-component==
 run_next_test "auto"
 
 pip3 install -qq homeassistant==2025.5.3 pytest-homeassistant-custom-component==0.13.246
+pip3 install -qq pycares==4.11.0
 run_next_test "auto"
 
 pip3 install -qq homeassistant==2025.6.3 pytest-homeassistant-custom-component==0.13.254
@@ -61,3 +63,20 @@ run_next_test "auto"
 
 pip3 install -qq homeassistant==2025.9.4 pytest-homeassistant-custom-component==0.13.281
 run_next_test "auto"
+
+pip3 install -qq homeassistant==2025.10.4 pytest-homeassistant-custom-component==0.13.289
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2025.11.3 pytest-homeassistant-custom-component==0.13.297
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2025.12.4 pytest-homeassistant-custom-component==0.13.301
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2026.1.3 pytest-homeassistant-custom-component==0.13.308
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2026.2.3 pytest-homeassistant-custom-component==0.13.316
+run_next_test "auto"
+
+# As of HA 2026.3, Python 3.13 is not supported.
