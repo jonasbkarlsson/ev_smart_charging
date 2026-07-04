@@ -154,11 +154,14 @@ class EVSmartChargingCoordinator:
         self.charging_state_entity_id = get_parameter(
             self.config_entry, CONF_CHARGING_STATE_ENTITY, ""
         )
-
-        # Set up periodic check for actual charging state (every minute)
+        # Set up periodic check for actual charging state
+        # Every 5 minutes, except at 00, 15, 30, 45 minutes
         self.listeners.append(
             async_track_time_change(
-                hass, self.periodic_check_charging_state, minute="/1", second=0
+                hass,
+                self.periodic_check_charging_state,
+                minute=[5, 10, 20, 25, 35, 40, 50, 55],
+                second=0,
             )
         )
 
@@ -233,7 +236,9 @@ class EVSmartChargingCoordinator:
         # Update state once after intitialization
         self.listeners.append(async_call_later(hass, 10.0, self.update_initial))
 
-    async def periodic_check_charging_state(self, date_time=None):
+    async def periodic_check_charging_state(
+        self, date_time=None
+    ):  # pylint: disable=unused-argument
         """Periodically check if charging has actually started, and retry if not."""
         if not self.charging_state_entity_id:
             return
