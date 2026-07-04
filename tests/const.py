@@ -2,6 +2,7 @@
 
 from custom_components.ev_smart_charging.const import (
     CONF_CHARGER_ENTITY,
+    CONF_CHARGING_STATE_ENTITY,
     CONF_DEVICE_NAME,
     CONF_EV_CONTROLLED,
     CONF_LOW_PRICE_CHARGING_LEVEL,
@@ -24,6 +25,7 @@ MOCK_CONFIG_USER = {
     CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
     CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
     CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
+    CONF_CHARGING_STATE_ENTITY: "",
     CONF_EV_CONTROLLED: False,
 }
 
@@ -70,6 +72,7 @@ MOCK_CONFIG_CHARGER_EXTRA = {
     CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
     CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
     CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
+    CONF_CHARGING_STATE_ENTITY: "",
     CONF_EV_CONTROLLED: False,
 }
 
@@ -194,6 +197,21 @@ MOCK_CONFIG_USER_NO_CHARGER = {
     CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
     CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
     CONF_CHARGER_ENTITY: "",
+    CONF_CHARGING_STATE_ENTITY: "",
+    CONF_PCT_PER_HOUR: 6.0,
+    CONF_START_QUARTER: "None",
+    CONF_READY_QUARTER: "08:00",
+    CONF_MAX_PRICE: 0.0,
+    CONF_OPPORTUNISTIC_LEVEL: 50.0,
+    CONF_MIN_SOC: 30.0,
+}
+
+MOCK_CONFIG_USER_WITH_CHARGING_STATE = {
+    CONF_PRICE_SENSOR: "sensor.nordpool_kwh_se3_sek_2_10_0",
+    CONF_EV_SOC_SENSOR: "sensor.volkswagen_we_connect_id_state_of_charge",
+    CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
+    CONF_CHARGER_ENTITY: "",
+    CONF_CHARGING_STATE_ENTITY: "binary_sensor.ocpp_charging_state",
     CONF_PCT_PER_HOUR: 6.0,
     CONF_START_QUARTER: "None",
     CONF_READY_QUARTER: "08:00",

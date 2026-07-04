@@ -20,6 +20,7 @@ from custom_components.ev_smart_charging.const import (
     BUTTON,
     DOMAIN,
     NAME,
+    Platform,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
     PLATFORM_VW,
@@ -31,6 +32,7 @@ from tests.const import (
     MOCK_CONFIG_ALL,
     MOCK_CONFIG_USER_NO_CHARGER,
     MOCK_CONFIG_USER,
+    MOCK_CONFIG_USER_WITH_CHARGING_STATE,
     MOCK_CONFIG_USER_WRONG_CHARGER,
     MOCK_CONFIG_USER_WRONG_PRICE,
 )
@@ -301,6 +303,49 @@ async def test_validate_step_user_charger(hass: HomeAssistant, freezer):
         "55",
     )
     assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) is None
+
+
+async def test_validate_step_user_charging_state(hass: HomeAssistant, freezer):
+    """Test the charging state entity in test_validate_step_user."""
+
+    dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
+    freezer.move_to("2022-10-01T14:00:00+02:00")
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+
+    # First create a price, soc and target soc entities
+    MockPriceEntity.create(hass, entity_registry)
+    MockSOCEntity.create(hass, entity_registry)
+    MockTargetSOCEntity.create(hass, entity_registry)
+
+    # Check with no charging state entity
+    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER_NO_CHARGER) is None
+
+    # Check with non-existent charging state entity
+    assert FlowValidator.validate_step_user(
+        hass, deepcopy(MOCK_CONFIG_USER_WITH_CHARGING_STATE)
+    ) == (
+        "base",
+        "charging_state_entity_not_found",
+    )
+
+    # Check with correct charging state entity
+    entity_registry.async_get_or_create(
+        domain=Platform.BINARY_SENSOR,
+        platform=PLATFORM_OCPP,
+        unique_id="charging_state",
+    )
+    assert entity_registry.async_is_registered("binary_sensor.ocpp_charging_state")
+    hass.states.async_set(
+        "binary_sensor.ocpp_charging_state",
+        "on",
+    )
+    assert (
+        FlowValidator.validate_step_user(
+            hass, deepcopy(MOCK_CONFIG_USER_WITH_CHARGING_STATE)
+        )
+        is None
+    )
 
 
 async def test_find_entity(hass: HomeAssistant):
