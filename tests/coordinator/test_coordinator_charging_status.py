@@ -36,6 +36,9 @@ async def test_periodic_check_charging_state_retries_when_entity_is_off(
 
     coordinator.turn_on_charging.assert_awaited_once_with()
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_periodic_check_charging_state_does_not_retry_when_entity_is_on(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone
@@ -55,6 +58,9 @@ async def test_periodic_check_charging_state_does_not_retry_when_entity_is_on(
     await coordinator.periodic_check_charging_state()
 
     coordinator.turn_on_charging.assert_not_awaited()
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
 
 
 async def test_periodic_check_charging_state_does_not_retry_when_auto_charging_is_off(
@@ -76,6 +82,9 @@ async def test_periodic_check_charging_state_does_not_retry_when_auto_charging_i
 
     coordinator.turn_on_charging.assert_not_awaited()
 
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
+
 
 async def test_periodic_check_charging_state_does_not_retry_when_state_is_missing(
     hass: HomeAssistant, skip_service_calls, set_cet_timezone
@@ -93,3 +102,6 @@ async def test_periodic_check_charging_state_does_not_retry_when_state_is_missin
     await coordinator.periodic_check_charging_state()
 
     coordinator.turn_on_charging.assert_not_awaited()
+
+    # Unsubscribe to listeners
+    coordinator.unsubscribe_listeners()
