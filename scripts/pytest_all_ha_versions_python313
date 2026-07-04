@@ -79,16 +79,4 @@ run_next_test "auto"
 pip3 install -qq homeassistant==2026.2.3 pytest-homeassistant-custom-component==0.13.316
 run_next_test "auto"
 
-# As of HA 2026.3, Python 3.14 is supported.
-pip3 install -qq homeassistant==2026.3.4 pytest-homeassistant-custom-component==0.13.320
-run_next_test "auto"
-
-pip3 install -qq homeassistant==2026.4.4 pytest-homeassistant-custom-component==0.13.325
-run_next_test "auto"
-
-pip3 install -qq homeassistant==2026.5.4 pytest-homeassistant-custom-component==0.13.333
-run_next_test "auto"
-
-pip3 install -qq homeassistant==2026.6.4 pytest-homeassistant-custom-component==0.13.340
-run_next_test "auto"
-
+# As of HA 2026.3, Python 3.13 is not supported.
