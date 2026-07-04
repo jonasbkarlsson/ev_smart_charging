@@ -23,7 +23,8 @@
             "ev_target_soc_not_found": "EV Target SOC entity not found.",
             "ev_target_soc_invalid_data": "The Target SOC entity gives invalid data.",
             "charger_control_switch_not_found": "Charger control entity not found.",
-            "charger_control_switch_not_switch": "Charger control entity is not a switch or an input boolean."
+            "charger_control_switch_not_switch": "Charger control entity is not a switch or an input boolean.",
+            "charging_state_entity_not_found": "Charging state entity not found."
         }
     },
     "options": {
@@ -49,7 +50,8 @@
             "ev_target_soc_not_found": "EV Target SOC entity not found.",
             "ev_target_soc_invalid_data": "The Target SOC entity gives invalid data.",
             "charger_control_switch_not_found": "Charger control entity not found.",
-            "charger_control_switch_not_switch": "Charger control entity is not a switch or an input boolean."
+            "charger_control_switch_not_switch": "Charger control entity is not a switch or an input boolean.",
+            "charging_state_entity_not_found": "Charging state entity not found."
         }
     },
     "entity": {

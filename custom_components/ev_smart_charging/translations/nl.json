@@ -23,7 +23,8 @@
             "ev_target_soc_not_found": "EV doel SOC input niet gevonden.",
             "ev_target_soc_invalid_data": "De EV doel SOC input heeft ongeldige data.",
             "charger_control_switch_not_found": "Entity voor de oplader bedieningsschakelaar niet gevonden.",
-            "charger_control_switch_not_switch": "Oplader bedieningsschakelaar entity is geen switch of een input boolean."
+            "charger_control_switch_not_switch": "Oplader bedieningsschakelaar entity is geen switch of een input boolean.",
+            "charging_state_entity_not_found": "Entity voor de laadstatus niet gevonden."
         }
     },
     "options": {
@@ -49,7 +50,8 @@
             "ev_target_soc_not_found": "EV doel SOC input niet gevonden.",
             "ev_target_soc_invalid_data": "De EV doel SOC input heeft ongeldige data.",
             "charger_control_switch_not_found": "Entity voor de oplader bedieningsschakelaar niet gevonden.",
-            "charger_control_switch_not_switch": "Oplader bedieningsschakelaar entity is geen switch of een input boolean."
+            "charger_control_switch_not_switch": "Oplader bedieningsschakelaar entity is geen switch of een input boolean.",
+            "charging_state_entity_not_found": "Entity voor de laadstatus niet gevonden."
         }
     },
     "entity": {

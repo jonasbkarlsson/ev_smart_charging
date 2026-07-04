@@ -23,7 +23,8 @@
             "ev_target_soc_not_found": "Entiteten för önskad laddnivå (SOC) hittas inte.",
             "ev_target_soc_invalid_data": "Entiteten för önskad laddnivå ger inkorrekt data.",
             "charger_control_switch_not_found": "Entitet för laddningsstyrning hittas inte.",
-            "charger_control_switch_not_switch": "Entiteten för laddningsstyrning är inte en brytare eller en input boolean."
+            "charger_control_switch_not_switch": "Entiteten för laddningsstyrning är inte en brytare eller en input boolean.",
+            "charging_state_entity_not_found": "Entitet för laddningsstatus hittas inte."
         }
     },
     "options": {
@@ -49,7 +50,8 @@
             "ev_target_soc_not_found": "Entiteten för önskad laddnivå hittas inte.",
             "ev_target_soc_invalid_data": "Entiteten för önskad laddnivå ger inkorrekt data.",
             "charger_control_switch_not_found": "Entitet för laddningsstyrning hittas inte.",
-            "charger_control_switch_not_switch": "Entiteten för laddningsstyrning är inte en brytare eller en input boolean."
+            "charger_control_switch_not_switch": "Entiteten för laddningsstyrning är inte en brytare eller en input boolean.",
+            "charging_state_entity_not_found": "Entitet för laddningsstatus hittas inte."
         }
     },
     "entity": {

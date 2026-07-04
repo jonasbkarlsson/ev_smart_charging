@@ -23,7 +23,8 @@
             "ev_target_soc_not_found": "Elbil mål-SOC-enhet ikke funnet.",
             "ev_target_soc_invalid_data": "Mål-SOC-enheten gir ugyldige data.",
             "charger_control_switch_not_found": "Ladekontrollenhet ikke funnet.",
-            "charger_control_switch_not_switch": "Ladekontrollenhet er ikke en bryter eller en input boolean."
+            "charger_control_switch_not_switch": "Ladekontrollenhet er ikke en bryter eller en input boolean.",
+            "charging_state_entity_not_found": "Enhet for lade status ikke funnet."
         }
     },
     "options": {
@@ -49,7 +50,8 @@
             "ev_target_soc_not_found": "Elbil mål-SOC-enhet ikke funnet.",
             "ev_target_soc_invalid_data": "Mål-SOC-enheten gir ugyldige data.",
             "charger_control_switch_not_found": "Ladekontrollenhet ikke funnet.",
-            "charger_control_switch_not_switch": "Ladekontrollenhet er ikke en bryter eller en input boolean."
+            "charger_control_switch_not_switch": "Ladekontrollenhet er ikke en bryter eller en input boolean.",
+            "charging_state_entity_not_found": "Enhet for lade status ikke funnet."
         }
     },
     "entity": {

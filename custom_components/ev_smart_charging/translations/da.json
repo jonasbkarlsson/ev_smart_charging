@@ -23,7 +23,8 @@
             "ev_target_soc_not_found": "Elbil mål-SOC-enhed ikke fundet.",
             "ev_target_soc_invalid_data": "Mål-SOC-enheden giver ugyldige data.",
             "charger_control_switch_not_found": "Ladeenhed ikke fundet.",
-            "charger_control_switch_not_switch": "Ladeenhed er ikke en afbryder eller en input boolean."
+            "charger_control_switch_not_switch": "Ladeenhed er ikke en afbryder eller en input boolean.",
+            "charging_state_entity_not_found": "Enhed for lade status ikke fundet."
         }
     },
     "options": {
@@ -49,7 +50,8 @@
             "ev_target_soc_not_found": "Elbil mål-SOC-enhed ikke fundet.",
             "ev_target_soc_invalid_data": "Mål-SOC-enheden giver ugyldige data.",
             "charger_control_switch_not_found": "Ladeenhed ikke fundet.",
-            "charger_control_switch_not_switch": "Ladeenhed er ikke en afbryder eller en input boolean."
+            "charger_control_switch_not_switch": "Ladeenhed er ikke en afbryder eller en input boolean.",
+            "charging_state_entity_not_found": "Enhed for lade status ikke fundet."
         }
     },
     "entity": {
