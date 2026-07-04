@@ -35,6 +35,7 @@
                     "ev_soc_sensor": "Elbil SOC-enhed",
                     "ev_target_soc_sensor": "Elbil mål-SOC-enhed (mellemrum for at fjerne)",
                     "charger_entity": "Ladeenhed (mellemrum for at fjerne)",
+                    "charging_state_entity": "Enhed for lade status (mellemrum for at fjerne)",
                     "ev_controlled": "Elbil-integration for at kontrollere start/stop af opladning"
                 }
             }
