@@ -416,6 +416,18 @@ class EVSmartChargingCoordinator:
                 await self.turn_on_charging()
             if not turn_on_charging and current_value:
                 # Turn off charging
+
+                # Patch current quarter to reflect low_price / low_soc activity
+            if (
+                self.low_price_charging_state == STATE_ON
+                or self.low_soc_charging_state == STATE_ON
+            ):
+                patch_value = self.charging_pct_per_hour if self.charging_pct_per_hour else 1.0
+                self._patch_current_quarter_in_schedule(patch_value)
+            else:
+                self._patch_current_quarter_in_schedule(0.0)
+               # end insert to reflect low price activity 
+                
                 self.auto_charging_state = STATE_OFF
                 await self.turn_off_charging()
 
@@ -478,6 +490,20 @@ class EVSmartChargingCoordinator:
                 self._charging_schedule = Scheduler.get_empty_schedule()
                 self.sensor.charging_schedule = self._charging_schedule
 
+def _patch_current_quarter_in_schedule(self, charging_value: float) -> None:
+    """Patch the current quarter slot in charging_schedule to reflect
+    low_price or low_soc charging activity."""
+    if self._charging_schedule is None:
+        return
+    time_now = dt.now()
+    for item in self._charging_schedule:
+        if item["start"] <= time_now < item["end"]:
+            item["value"] = charging_value
+            break
+    self.sensor.charging_schedule = (
+        Raw(self._charging_schedule).copy().to_local().get_raw()
+    )
+    
     async def turn_on_charging(self, state: bool = True):
         """Turn on charging"""
 
