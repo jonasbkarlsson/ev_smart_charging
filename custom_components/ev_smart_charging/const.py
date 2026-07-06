@@ -32,6 +32,7 @@ PLATFORM_ENTSOE = "entsoe"
 PLATFORM_TGE = "tge"
 PLATFORM_GESPOT = "ge_spot"
 PLATFORM_VW = "volkswagen_we_connect_id"
+PLATFORM_TESLA_FLEET = "tesla_fleet"
 PLATFORM_OCPP = "ocpp"
 PLATFORM_GENERIC = "generic"
 
@@ -80,6 +81,7 @@ CONF_MIN_SESSION_DURATION = "min_session_duration"
 CONF_SOLAR_CHARGING_CONFIGURED = "solar_charging_configured"
 CONF_GRID_USAGE_SENSOR = "grid_usage_sensor"
 CONF_GRID_VOLTAGE = "grid_voltage"
+CONF_CHARGING_STATE_ENTITY = "charging_state_entity"
 
 QUARTERS = [
     "None",

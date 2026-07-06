@@ -74,6 +74,7 @@ from .const import (
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_START_QUARTER,
     DEFAULT_MIN_SESSION_DURATION,
+    CONF_CHARGING_STATE_ENTITY,
     DEFAULT_TARGET_SOC,
     READY_QUARTER_NONE,
     START_QUARTER_NONE,
@@ -151,6 +152,20 @@ class EVSmartChargingCoordinator:
         self.charger_switch = ChargerSwitch(
             hass, get_parameter(self.config_entry, CONF_CHARGER_ENTITY)
         )
+        # Store the entity that reflects actual charging state
+        self.charging_state_entity_id = get_parameter(
+            self.config_entry, CONF_CHARGING_STATE_ENTITY, ""
+        )
+        # Set up periodic check for actual charging state
+        # Every 5 minutes, except at 00, 15, 30, 45 minutes
+        self.listeners.append(
+            async_track_time_change(
+                hass,
+                self.periodic_check_charging_state,
+                minute=[5, 10, 20, 25, 35, 40, 50, 55],
+                second=0,
+            )
+        )
 
         self.scheduler = Scheduler()
 
@@ -207,7 +222,9 @@ class EVSmartChargingCoordinator:
         )
         self.min_session_duration = float(
             get_parameter(
-                self.config_entry, CONF_MIN_SESSION_DURATION, DEFAULT_MIN_SESSION_DURATION
+                self.config_entry,
+                CONF_MIN_SESSION_DURATION,
+                DEFAULT_MIN_SESSION_DURATION,
             )
         )
 
@@ -227,6 +244,28 @@ class EVSmartChargingCoordinator:
         )
         # Update state once after intitialization
         self.listeners.append(async_call_later(hass, 10.0, self.update_initial))
+
+    async def periodic_check_charging_state(
+        self, date_time=None
+    ):  # pylint: disable=unused-argument
+        """Periodically check if charging has actually started, and retry if not."""
+        if not self.charging_state_entity_id:
+            return
+        # Only check if we think we should be charging
+        should_be_charging = self.auto_charging_state == STATE_ON
+        if not should_be_charging:
+            return
+        # Get the actual state of the charging state entity
+        state_obj = self.hass.states.get(self.charging_state_entity_id)
+        if state_obj is None:
+            return
+        is_actually_charging = state_obj.state == STATE_ON
+        if not is_actually_charging:
+            _LOGGER.warning(
+                "EV Smart Charging: Charging should be ON but %s is not ON. Retrying start.",
+                self.charging_state_entity_id,
+            )
+            await self.turn_on_charging()
 
     def unsubscribe_listeners(self):
         """Unsubscribed to listeners"""
@@ -405,7 +444,9 @@ class EVSmartChargingCoordinator:
                     self.scheduler.get_charging_number_of_quarters()
                 )
                 if self.sensor_status:
-                    if not self.switch_ev_connected:
+                    if not self.switch_active:
+                        self.sensor_status.set_status(CHARGING_STATUS_NOT_ACTIVE)
+                    elif not self.switch_ev_connected:
                         self.sensor_status.set_status(CHARGING_STATUS_DISCONNECTED)
                     elif self.low_soc_charging_state == STATE_ON:
                         self.sensor_status.set_status(CHARGING_STATUS_LOW_SOC_CHARGING)

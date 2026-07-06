@@ -18,6 +18,7 @@ from homeassistant.util import dt
 
 from .coordinator import EVSmartChargingCoordinator
 from .const import (
+    CONF_CHARGING_STATE_ENTITY,
     CONF_EV_CONTROLLED,
     CONF_GRID_USAGE_SENSOR,
     CONF_GRID_VOLTAGE,
@@ -171,6 +172,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
     if version == 7:
         version = 8
         new[CONF_MIN_SESSION_DURATION] = DEFAULT_MIN_SESSION_DURATION
+        new[CONF_CHARGING_STATE_ENTITY] = ""
         migration = True
 
     if version > 8:

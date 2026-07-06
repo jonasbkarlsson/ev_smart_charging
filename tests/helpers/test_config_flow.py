@@ -20,8 +20,10 @@ from custom_components.ev_smart_charging.const import (
     BUTTON,
     DOMAIN,
     NAME,
+    Platform,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
+    PLATFORM_TESLA_FLEET,
     PLATFORM_VW,
     SENSOR,
     SWITCH,
@@ -31,6 +33,7 @@ from tests.const import (
     MOCK_CONFIG_ALL,
     MOCK_CONFIG_USER_NO_CHARGER,
     MOCK_CONFIG_USER,
+    MOCK_CONFIG_USER_WITH_CHARGING_STATE,
     MOCK_CONFIG_USER_WRONG_CHARGER,
     MOCK_CONFIG_USER_WRONG_PRICE,
 )
@@ -43,6 +46,8 @@ from tests.helpers.helpers import (
     MockPriceEntityTGE,
     MockSOCEntity,
     MockTargetSOCEntity,
+    MockTeslaFleetSOCEntity,
+    MockTeslaFleetTargetSOCEntity,
 )
 from tests.price import PRICE_THIRTEEN_LIST
 
@@ -303,6 +308,49 @@ async def test_validate_step_user_charger(hass: HomeAssistant, freezer):
     assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER) is None
 
 
+async def test_validate_step_user_charging_state(hass: HomeAssistant, freezer):
+    """Test the charging state entity in test_validate_step_user."""
+
+    dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
+    freezer.move_to("2022-10-01T14:00:00+02:00")
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+
+    # First create a price, soc and target soc entities
+    MockPriceEntity.create(hass, entity_registry)
+    MockSOCEntity.create(hass, entity_registry)
+    MockTargetSOCEntity.create(hass, entity_registry)
+
+    # Check with no charging state entity
+    assert FlowValidator.validate_step_user(hass, MOCK_CONFIG_USER_NO_CHARGER) is None
+
+    # Check with non-existent charging state entity
+    assert FlowValidator.validate_step_user(
+        hass, deepcopy(MOCK_CONFIG_USER_WITH_CHARGING_STATE)
+    ) == (
+        "base",
+        "charging_state_entity_not_found",
+    )
+
+    # Check with correct charging state entity
+    entity_registry.async_get_or_create(
+        domain=Platform.BINARY_SENSOR,
+        platform=PLATFORM_OCPP,
+        unique_id="charging_state",
+    )
+    assert entity_registry.async_is_registered("binary_sensor.ocpp_charging_state")
+    hass.states.async_set(
+        "binary_sensor.ocpp_charging_state",
+        "on",
+    )
+    assert (
+        FlowValidator.validate_step_user(
+            hass, deepcopy(MOCK_CONFIG_USER_WITH_CHARGING_STATE)
+        )
+        is None
+    )
+
+
 async def test_find_entity(hass: HomeAssistant):
     """Test the FindEntity."""
 
@@ -390,3 +438,65 @@ async def test_device_name_creator(hass: HomeAssistant):
     )
     assert (name4 := DeviceNameCreator.create(hass)) not in names
     assert NAME in name4
+
+
+async def test_find_tesla_fleet_entity(hass: HomeAssistant):
+    """Test the FindEntity for Tesla Fleet."""
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+
+    # Initially no Tesla Fleet entities should be found
+    assert FindEntity.find_tesla_fleet_soc_sensor(hass) == ""
+    assert FindEntity.find_tesla_fleet_target_soc_sensor(hass) == ""
+
+    # Create Tesla Fleet SOC entity
+    MockTeslaFleetSOCEntity.create(hass, entity_registry)
+    assert FindEntity.find_tesla_fleet_soc_sensor(hass) != ""
+    assert "battery_level" in FindEntity.find_tesla_fleet_soc_sensor(hass)
+
+    # Create Tesla Fleet Target SOC entity
+    MockTeslaFleetTargetSOCEntity.create(hass, entity_registry)
+    assert FindEntity.find_tesla_fleet_target_soc_sensor(hass) != ""
+    assert "charge_limit" in FindEntity.find_tesla_fleet_target_soc_sensor(hass)
+
+
+async def test_find_ev_soc_sensor_priority(hass: HomeAssistant):
+    """Test that find_ev_soc_sensor prefers Tesla Fleet over VW."""
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+
+    # No EV entities -> empty string
+    assert FindEntity.find_ev_soc_sensor(hass) == ""
+    assert FindEntity.find_ev_target_soc_sensor(hass) == ""
+
+    # Only VW entities -> returns VW
+    MockSOCEntity.create(hass, entity_registry)
+    MockTargetSOCEntity.create(hass, entity_registry)
+    assert "volkswagen" in FindEntity.find_ev_soc_sensor(hass)
+    assert "volkswagen" in FindEntity.find_ev_target_soc_sensor(hass)
+
+    # Add Tesla Fleet entities -> now prefers Tesla Fleet
+    MockTeslaFleetSOCEntity.create(hass, entity_registry)
+    MockTeslaFleetTargetSOCEntity.create(hass, entity_registry)
+    assert "tesla_fleet" in FindEntity.find_ev_soc_sensor(hass)
+    assert "tesla_fleet" in FindEntity.find_ev_target_soc_sensor(hass)
+
+
+async def test_find_tesla_fleet_soc_excludes_usable(hass: HomeAssistant):
+    """Test that find_tesla_fleet_soc_sensor excludes usable_battery_level."""
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+
+    # Create a usable_battery_level entity (should be excluded)
+    entity_registry.async_get_or_create(
+        domain=SENSOR,
+        platform=PLATFORM_TESLA_FLEET,
+        unique_id="usable_battery_level",
+    )
+    hass.states.async_set("sensor.tesla_fleet_usable_battery_level", "50")
+    assert FindEntity.find_tesla_fleet_soc_sensor(hass) == ""
+
+    # Create the correct battery_level entity
+    MockTeslaFleetSOCEntity.create(hass, entity_registry)
+    assert FindEntity.find_tesla_fleet_soc_sensor(hass) != ""
+    assert "usable" not in FindEntity.find_tesla_fleet_soc_sensor(hass)
