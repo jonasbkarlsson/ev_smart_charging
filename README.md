@@ -36,7 +36,7 @@ The integration calculates the set of 15-minute intervals that will give the low
 - Optional possibility to provide information to the integration about when the EV is connected to the charger.
 - Optional possibility to keep the charger on after completed charging, to enable preconditioning before departure, i.e., preheating/cooling can be done from the power grid instead of the battery.
 - Service calls to dynamically control all configuration parameters that affect charging.
-- Automatically detects and connects to the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id) and [OCPP](https://github.com/lbbrhzn/ocpp). Connections to other EV and charger integrations can be configured manually.
+- Automatically detects and connects to the integrations [Volkswagen We Connect ID](https://github.com/mitch-dc/volkswagen_we_connect_id), [Tesla Fleet](https://www.home-assistant.io/integrations/tesla_fleet/) and [OCPP](https://github.com/lbbrhzn/ocpp). Connections to other EV and charger integrations can be configured manually.
 
 ## Installation
 

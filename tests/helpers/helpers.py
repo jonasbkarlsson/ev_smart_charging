@@ -12,6 +12,7 @@ from custom_components.ev_smart_charging.const import (
     PLATFORM_GESPOT,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
+    PLATFORM_TESLA_FLEET,
     PLATFORM_TGE,
     PLATFORM_VW,
     SENSOR,
@@ -379,3 +380,45 @@ class MockChargerEntity:
     def set_state(hass: HomeAssistant, new_state: str):
         """Set state"""
         hass.states.async_set("switch.ocpp_charge_control", new_state)
+
+
+class MockTeslaFleetSOCEntity:
+    """Mockup for Tesla Fleet SOC entity"""
+
+    @staticmethod
+    def create(hass: HomeAssistant, entity_registry: EntityRegistry, value: str = "55"):
+        """Create a correct Tesla Fleet SOC entity"""
+        entity_registry.async_get_or_create(
+            domain=SENSOR,
+            platform=PLATFORM_TESLA_FLEET,
+            unique_id="battery_level",
+        )
+        MockTeslaFleetSOCEntity.set_state(hass, value)
+
+    @staticmethod
+    def set_state(hass: HomeAssistant, new_state: str):
+        """Set state"""
+        hass.states.async_set(
+            "sensor.tesla_fleet_battery_level", new_state
+        )
+
+
+class MockTeslaFleetTargetSOCEntity:
+    """Mockup for Tesla Fleet Target SOC (Charge Limit) entity"""
+
+    @staticmethod
+    def create(hass: HomeAssistant, entity_registry: EntityRegistry, value: str = "80"):
+        """Create a correct Tesla Fleet target SOC entity"""
+        entity_registry.async_get_or_create(
+            domain=SENSOR,
+            platform=PLATFORM_TESLA_FLEET,
+            unique_id="charge_limit",
+        )
+        MockTeslaFleetTargetSOCEntity.set_state(hass, value)
+
+    @staticmethod
+    def set_state(hass: HomeAssistant, new_state: str):
+        """Set state"""
+        hass.states.async_set(
+            "sensor.tesla_fleet_charge_limit", new_state
+        )

@@ -32,6 +32,7 @@ PLATFORM_ENTSOE = "entsoe"
 PLATFORM_TGE = "tge"
 PLATFORM_GESPOT = "ge_spot"
 PLATFORM_VW = "volkswagen_we_connect_id"
+PLATFORM_TESLA_FLEET = "tesla_fleet"
 PLATFORM_OCPP = "ocpp"
 PLATFORM_GENERIC = "generic"
 

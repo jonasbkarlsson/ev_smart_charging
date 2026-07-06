@@ -30,6 +30,7 @@ from ..const import (
     PLATFORM_NORDPOOL,
     PLATFORM_TGE,
     PLATFORM_OCPP,
+    PLATFORM_TESLA_FLEET,
     PLATFORM_VW,
     SWITCH,
 )
@@ -242,6 +243,35 @@ class FindEntity:
         return ""
 
     @staticmethod
+    def find_tesla_fleet_soc_sensor(hass: HomeAssistant) -> str:
+        """Search for Tesla Fleet SOC sensor"""
+        entity_registry: EntityRegistry = async_entity_registry_get(hass)
+        registry_entries: UserDict[str, RegistryEntry] = (
+            entity_registry.entities.items()
+        )
+        for entry in registry_entries:
+            if entry[1].platform == PLATFORM_TESLA_FLEET:
+                entity_id = entry[1].entity_id
+                if "battery_level" in entity_id:
+                    if "usable" not in entity_id:
+                        return entity_id
+        return ""
+
+    @staticmethod
+    def find_tesla_fleet_target_soc_sensor(hass: HomeAssistant) -> str:
+        """Search for Tesla Fleet Target SOC (Charge Limit) sensor"""
+        entity_registry: EntityRegistry = async_entity_registry_get(hass)
+        registry_entries: UserDict[str, RegistryEntry] = (
+            entity_registry.entities.items()
+        )
+        for entry in registry_entries:
+            if entry[1].platform == PLATFORM_TESLA_FLEET:
+                entity_id = entry[1].entity_id
+                if "charge_limit" in entity_id:
+                    return entity_id
+        return ""
+
+    @staticmethod
     def find_ocpp_device(hass: HomeAssistant) -> str:
         """Find OCPP entity"""
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
@@ -255,6 +285,26 @@ class FindEntity:
                     if "charge_control" in entity_id:
                         return entity_id
         return ""
+
+    @staticmethod
+    def find_ev_soc_sensor(hass: HomeAssistant) -> str:
+        """Search for EV SOC sensor across supported platforms"""
+        sensor = ""
+        if len(sensor) == 0:
+            sensor = FindEntity.find_tesla_fleet_soc_sensor(hass)
+        if len(sensor) == 0:
+            sensor = FindEntity.find_vw_soc_sensor(hass)
+        return sensor
+
+    @staticmethod
+    def find_ev_target_soc_sensor(hass: HomeAssistant) -> str:
+        """Search for EV Target SOC sensor across supported platforms"""
+        sensor = ""
+        if len(sensor) == 0:
+            sensor = FindEntity.find_tesla_fleet_target_soc_sensor(hass)
+        if len(sensor) == 0:
+            sensor = FindEntity.find_vw_target_soc_sensor(hass)
+        return sensor
 
 
 class DeviceNameCreator:
