@@ -17,7 +17,7 @@ jobs:
       contents: write
     steps:
       - name: 📥 Checkout the repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: 🛠️ Set up Python
         uses: actions/setup-python@v6
@@ -34,7 +34,7 @@ jobs:
           bash ${{ github.workspace }}/scripts/update_const ${{ steps.version.outputs.version }}
 
       - name: 📤 Upload zip to action
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ github.event_name == 'push' }}
         with:
           name: ev_smart_charging
@@ -48,7 +48,7 @@ jobs:
           zip ev_smart_charging.zip -r ./
 
       - name: 📤 Upload zip to release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: ${{ github.event_name == 'release' }}
         with:
           files: ${{ github.workspace }}/custom_components/ev_smart_charging/ev_smart_charging.zip

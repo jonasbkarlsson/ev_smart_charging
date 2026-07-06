@@ -1,4 +1,5 @@
 """Adds config flow for EV Smart Charging."""
+
 import logging
 from typing import Any, Optional
 import voluptuous as vol
@@ -17,6 +18,7 @@ from .const import (
     CONF_PRICE_SENSOR,
     CONF_CHARGER_ENTITY,
     CONF_SOLAR_CHARGING_CONFIGURED,
+    CONF_CHARGING_STATE_ENTITY,
     DOMAIN,
 )
 from .helpers.config_flow import DeviceNameCreator, FindEntity, FlowValidator
@@ -28,7 +30,7 @@ _LOGGER = logging.getLogger(__name__)
 class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow."""
 
-    VERSION = 7
+    VERSION = 8
     user_input: Optional[dict[str, Any]]
 
     def __init__(self):
@@ -58,13 +60,14 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Provide defaults for form
             user_input[CONF_DEVICE_NAME] = DeviceNameCreator.create(self.hass)
             user_input[CONF_PRICE_SENSOR] = FindEntity.find_price_sensor(self.hass)
-            user_input[CONF_EV_SOC_SENSOR] = FindEntity.find_ev_soc_sensor(self.hass)
-            user_input[
-                CONF_EV_TARGET_SOC_SENSOR
-            ] = FindEntity.find_ev_target_soc_sensor(self.hass)
+            user_input[CONF_EV_SOC_SENSOR] = FindEntity.find_vw_soc_sensor(self.hass)
+            user_input[CONF_EV_TARGET_SOC_SENSOR] = (
+                FindEntity.find_vw_target_soc_sensor(self.hass)
+            )
             user_input[CONF_CHARGER_ENTITY] = FindEntity.find_ocpp_device(self.hass)
             user_input[CONF_EV_CONTROLLED] = False
             user_input[CONF_SOLAR_CHARGING_CONFIGURED] = False
+            user_input[CONF_CHARGING_STATE_ENTITY] = ""
 
         else:
             # process user_input
@@ -98,6 +101,10 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ): cv.string,
             vol.Optional(
                 CONF_CHARGER_ENTITY, default=user_input[CONF_CHARGER_ENTITY]
+            ): cv.string,
+            vol.Optional(
+                CONF_CHARGING_STATE_ENTITY,
+                default=user_input[CONF_CHARGING_STATE_ENTITY],
             ): cv.string,
             vol.Optional(
                 CONF_EV_CONTROLLED, default=user_input[CONF_EV_CONTROLLED]
@@ -154,6 +161,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(
                 CONF_CHARGER_ENTITY,
                 default=get_parameter(self.config_entry, CONF_CHARGER_ENTITY),
+            ): cv.string,
+            vol.Optional(
+                CONF_CHARGING_STATE_ENTITY,
+                default=get_parameter(self.config_entry, CONF_CHARGING_STATE_ENTITY),
             ): cv.string,
             vol.Optional(
                 CONF_EV_CONTROLLED,

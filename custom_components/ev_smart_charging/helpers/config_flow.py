@@ -18,6 +18,7 @@ from custom_components.ev_smart_charging.helpers.price_adaptor import PriceAdapt
 # pylint: disable=relative-beyond-top-level
 from ..const import (
     CONF_CHARGER_ENTITY,
+    CONF_CHARGING_STATE_ENTITY,
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     DOMAIN,
@@ -97,6 +98,19 @@ class FlowValidator:
             if entity.domain not in [SWITCH, INPUT_BOOLEAN_DOMAIN]:
                 user_input[CONF_CHARGER_ENTITY] = ""
                 return ("base", "charger_control_switch_not_switch")
+
+        # Validate Charging state entity
+        # If the set value is only whitespaces, the value will be set to ""
+        user_input[CONF_CHARGING_STATE_ENTITY] = user_input[
+            CONF_CHARGING_STATE_ENTITY
+        ].strip()
+        if len(user_input[CONF_CHARGING_STATE_ENTITY]) > 0:
+            entity = hass.states.get(user_input[CONF_CHARGING_STATE_ENTITY])
+            if entity is None:
+                # Work around for https://github.com/home-assistant/core/issues/30381
+                # It's not possible for the user to input an emtpy string on the second attempt
+                user_input[CONF_CHARGING_STATE_ENTITY] = ""
+                return ("base", "charging_state_entity_not_found")
 
         return None
 

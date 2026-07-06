@@ -18,6 +18,7 @@ from homeassistant.util import dt
 
 from .coordinator import EVSmartChargingCoordinator
 from .const import (
+    CONF_CHARGING_STATE_ENTITY,
     CONF_EV_CONTROLLED,
     CONF_GRID_USAGE_SENSOR,
     CONF_GRID_VOLTAGE,
@@ -166,7 +167,12 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         new[CONF_GRID_VOLTAGE] = 230  # [V]
         migration = True
 
-    if version > 7:
+    if version == 7:
+        version = 8
+        new[CONF_CHARGING_STATE_ENTITY] = ""
+        migration = True
+
+    if version > 8:
         _LOGGER.error(
             "Migration from version %s to a lower version is not possible",
             version,
