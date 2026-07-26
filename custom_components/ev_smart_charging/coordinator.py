@@ -1,6 +1,6 @@
 """Coordinator for EV Smart Charging"""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from homeassistant.config_entries import (
     ConfigEntry,
@@ -44,6 +44,7 @@ from homeassistant.helpers.entity_registry import (
     async_entries_for_config_entry,
 )
 from homeassistant.const import STATE_ON, STATE_OFF
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.helpers.price_adaptor import PriceAdaptor
@@ -144,6 +145,7 @@ class EVSmartChargingCoordinator:
         self.switch_opportunistic_type2_unique_id = None
         self.price_entity_id = None
         self.price_adaptor = PriceAdaptor()
+        self.is_tibber_price_sensor = False
         self.ev_soc_entity_id = None
         self.ev_target_soc_entity_id = None
 
@@ -528,6 +530,9 @@ class EVSmartChargingCoordinator:
 
         self.price_entity_id = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
         price_state = self.hass.states.get(self.price_entity_id)
+        self.is_tibber_price_sensor = self.price_adaptor.is_tibber_price_entity(
+            self.hass, self.price_entity_id
+        )
         self.price_adaptor.initiate(price_state)
         self.ev_soc_entity_id = get_parameter(self.config_entry, CONF_EV_SOC_SENSOR)
         self.ev_target_soc_entity_id = get_parameter(
@@ -585,6 +590,14 @@ class EVSmartChargingCoordinator:
             # Set default Target SOC when there is no sensor
             self.sensor.ev_target_soc = DEFAULT_TARGET_SOC
             self.ev_target_soc = DEFAULT_TARGET_SOC
+
+        if self.is_tibber_price_sensor:
+            # Tibber publishes the following day's prices in the afternoon.
+            self.listeners.append(
+                async_track_time_change(
+                    self.hass, self.update_sensors, hour=13, minute=5, second=0
+                )
+            )
 
         self._charging_schedule = Scheduler.get_empty_schedule()
         self.sensor.charging_schedule = self._charging_schedule
@@ -856,6 +869,30 @@ class EVSmartChargingCoordinator:
             configuration_updated=configuration_updated,
         )
 
+    async def _async_get_tibber_price_state(self, price_state: State) -> State | None:
+        """Fetch Tibber's today and tomorrow prices through its HA action."""
+        start = dt.start_of_local_day()
+        try:
+            response = await self.hass.services.async_call(
+                "tibber",
+                "get_prices",
+                {
+                    "start": start.isoformat(),
+                    "end": (start + timedelta(days=2)).isoformat(),
+                },
+                blocking=True,
+                return_response=True,
+            )
+        except HomeAssistantError:
+            _LOGGER.exception("Unable to fetch Tibber prices")
+            return None
+
+        if not isinstance(response, dict):
+            _LOGGER.error("Tibber returned an invalid price response: %s", response)
+            return None
+
+        return self.price_adaptor.tibber_price_state(price_state, response)
+
     async def update_sensors(
         self,
         entity_id: str = None,
@@ -884,6 +921,8 @@ class EVSmartChargingCoordinator:
             return
 
         price_state = self.hass.states.get(self.price_entity_id)
+        if self.is_tibber_price_sensor and price_state is not None:
+            price_state = await self._async_get_tibber_price_state(price_state)
         if self.price_adaptor.is_price_state(price_state):
             self.sensor.current_price = self.price_adaptor.get_current_price(
                 price_state

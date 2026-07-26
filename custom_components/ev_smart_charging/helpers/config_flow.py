@@ -31,6 +31,7 @@ from ..const import (
     PLATFORM_TGE,
     PLATFORM_OCPP,
     PLATFORM_TESLA_FLEET,
+    PLATFORM_TIBBER,
     PLATFORM_VW,
     SWITCH,
 )
@@ -101,9 +102,9 @@ class FlowValidator:
 
         # Validate Charging state entity
         # If the set value is only whitespaces, the value will be set to ""
-        user_input[CONF_CHARGING_STATE_ENTITY] = user_input[
-            CONF_CHARGING_STATE_ENTITY
-        ].strip()
+        user_input[CONF_CHARGING_STATE_ENTITY] = user_input.get(
+            CONF_CHARGING_STATE_ENTITY, ""
+        ).strip()
         if len(user_input[CONF_CHARGING_STATE_ENTITY]) > 0:
             entity = hass.states.get(user_input[CONF_CHARGING_STATE_ENTITY])
             if entity is None:
@@ -132,6 +133,8 @@ class FindEntity:
             sensor = FindEntity.find_tge_sensor(hass)
         if len(sensor) == 0:
             sensor = FindEntity.find_entsoe_sensor(hass)
+        if len(sensor) == 0:
+            sensor = FindEntity.find_tibber_sensor(hass)
         return sensor
 
     @staticmethod
@@ -182,6 +185,15 @@ class FindEntity:
                 entity_id = entry[1].entity_id
                 if "average_electricity_price" in entity_id:
                     return entity_id
+        return ""
+
+    @staticmethod
+    def find_tibber_sensor(hass: HomeAssistant) -> str:
+        """Find the Tibber electricity price sensor."""
+        entity_registry: EntityRegistry = async_entity_registry_get(hass)
+        for entry in entity_registry.entities.values():
+            if entry.platform == PLATFORM_TIBBER:
+                return entry.entity_id
         return ""
 
     @staticmethod

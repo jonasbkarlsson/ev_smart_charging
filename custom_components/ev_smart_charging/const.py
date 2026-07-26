@@ -35,6 +35,7 @@ PLATFORM_VW = "volkswagen_we_connect_id"
 PLATFORM_TESLA_FLEET = "tesla_fleet"
 PLATFORM_OCPP = "ocpp"
 PLATFORM_GENERIC = "generic"
+PLATFORM_TIBBER = "tibber"
 
 # Entity keys
 ENTITY_KEY_CHARGING_SENSOR = "charging"

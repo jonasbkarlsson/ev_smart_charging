@@ -6,10 +6,12 @@ import logging
 
 from typing import Any
 from homeassistant.core import HomeAssistant, State
+from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
 from homeassistant.util import dt
 
 from custom_components.ev_smart_charging.const import (
     CONF_PRICE_SENSOR,
+    PLATFORM_TIBBER,
 )
 from custom_components.ev_smart_charging.helpers.raw import PriceFormat, Raw
 
@@ -171,6 +173,34 @@ class PriceAdaptor:
         return self.get_raw_today_local(state).get_value(time_now)
 
     @staticmethod
+    def is_tibber_price_entity(hass: HomeAssistant, entity_id: str) -> bool:
+        """Return whether an entity is supplied by the Tibber integration."""
+        entry = async_entity_registry_get(hass).async_get(entity_id)
+        return entry is not None and entry.platform == PLATFORM_TIBBER
+
+    @staticmethod
+    def tibber_price_state(
+        price_state: State, response: dict[str, Any]
+    ) -> State | None:
+        """Convert the Tibber get_prices response to the generic price format."""
+        prices_by_home = response.get("prices")
+        if not isinstance(prices_by_home, dict):
+            return None
+
+        home_name = price_state.attributes.get("app_nickname")
+        prices = prices_by_home.get(home_name)
+        if prices is None and len(prices_by_home) == 1:
+            prices = next(iter(prices_by_home.values()))
+        if not isinstance(prices, list):
+            return None
+
+        return State(
+            price_state.entity_id,
+            price_state.state,
+            {"prices": prices},
+        )
+
+    @staticmethod
     def validate_price_entity(
         hass: HomeAssistant, user_input: dict[str, Any]
     ) -> tuple[str, str] | None:
@@ -180,6 +210,11 @@ class PriceAdaptor:
         price_state = hass.states.get(user_input[CONF_PRICE_SENSOR])
         if price_state is None:
             return ("base", "price_not_found")
+
+        # Tibber publishes the schedule via tibber.get_prices rather than
+        # sensor attributes. The service is fetched by the coordinator.
+        if PriceAdaptor.is_tibber_price_entity(hass, price_state.entity_id):
+            return None
 
         adaptor = PriceAdaptor()
         if not adaptor.initiate(price_state):
