@@ -24,7 +24,6 @@ from .const import (
     MOCK_CONFIG_ALL_V3,
 )
 
-
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
 # for a given test. We can also leverage fixtures and mocks that are available in
 # Home Assistant using the pytest_homeassistant_custom_component plugin.
@@ -246,8 +245,7 @@ async def test_setup_new_integration_name(hass, bypass_validate_input_and_contro
         hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
     )
 
-    test = hass.data["device_registry"].devices
-    device = hass.data["device_registry"].devices[next(iter(test))]
+    device = next(iter(hass.data["device_registry"].devices))
     # The behvior of HA 2024.6 and older (name_by_user is updated)
     # and HA 2024.7 and newer (name is updated) is different.
     assert device.name_by_user == "New title" or device.name == "New title"
@@ -263,8 +261,7 @@ async def test_setup_new_integration_name(hass, bypass_validate_input_and_contro
         hass.data[DOMAIN][config_entry.entry_id], EVSmartChargingCoordinator
     )
 
-    test = hass.data["device_registry"].devices
-    device = hass.data["device_registry"].devices[next(iter(test))]
+    device = next(iter(hass.data["device_registry"].devices))
     # The behvior of HA 2024.6 and older (name_by_user is updated)
     # and HA 2024.7 and newer (name is updated) is different.
     assert device.name_by_user == "New title2" or device.name == "New title2"
