@@ -246,6 +246,9 @@ async def test_setup_new_integration_name(hass, bypass_validate_input_and_contro
     )
 
     device = next(iter(hass.data["device_registry"].devices))
+    if isinstance(device, str):
+        # Up to HA 2026.8
+        device = hass.data["device_registry"].async_get(device)
     # The behvior of HA 2024.6 and older (name_by_user is updated)
     # and HA 2024.7 and newer (name is updated) is different.
     assert device.name_by_user == "New title" or device.name == "New title"
@@ -262,6 +265,9 @@ async def test_setup_new_integration_name(hass, bypass_validate_input_and_contro
     )
 
     device = next(iter(hass.data["device_registry"].devices))
+    if isinstance(device, str):
+        # Up to HA 2026.8
+        device = hass.data["device_registry"].async_get(device)
     # The behvior of HA 2024.6 and older (name_by_user is updated)
     # and HA 2024.7 and newer (name is updated) is different.
     assert device.name_by_user == "New title2" or device.name == "New title2"
