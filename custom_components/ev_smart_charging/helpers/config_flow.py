@@ -319,11 +319,9 @@ class DeviceNameCreator:
         ev_devices = []
         for device in devices:
             if isinstance(device, str):
-                identifiers = device_registry.async_get(device).identifiers
-            else:
-                # From HA 2026.9
-                identifiers = device.identifiers
-            for item in identifiers:
+                # Up to HA 2026.8
+                device = device_registry.async_get(device)
+            for item in device.identifiers:
                 if item[0] == DOMAIN:
                     ev_devices.append(device)
         # If this is the first device. just return NAME
@@ -332,11 +330,7 @@ class DeviceNameCreator:
         # Find the highest number at the end of the name
         higest = 1
         for device in ev_devices:
-            if isinstance(device, str):
-                device_name = device_registry.async_get(device).name
-            else:
-                # From HA 2026.9
-                device_name = device.name
+            device_name = device.name
             if device_name == NAME:
                 pass
             else:
