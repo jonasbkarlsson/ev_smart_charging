@@ -119,6 +119,34 @@ async def test_inintiate(hass, freezer):
     assert price_adaptor.is_price_state(price_state) is False
 
 
+async def test_tibber_price_response_is_converted_to_generic_format(hass, freezer):
+    """Test Tibber get_prices response conversion."""
+    dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
+    freezer.move_to("2022-10-01T14:00:00+02:00")
+    prices = [
+        {
+            "start_time": f"2022-10-01T{hour:02d}:00:00+02:00",
+            "price": float(hour),
+        }
+        for hour in range(24)
+    ]
+    state = State(
+        "sensor.electricity_price_home",
+        "14.0",
+        {"app_nickname": "Home"},
+    )
+
+    tibber_state = PriceAdaptor.tibber_price_state(
+        state, {"prices": {"Home": prices}}
+    )
+
+    assert tibber_state is not None
+    adaptor = PriceAdaptor()
+    assert adaptor.initiate(tibber_state)
+    assert adaptor.is_price_state(tibber_state)
+    assert adaptor.get_current_price(tibber_state) == 14.0
+
+
 async def test_is_price_state(hass, freezer):
     """Test is_price_state"""
 
