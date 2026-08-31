@@ -478,6 +478,48 @@ class EVSmartChargingCoordinator:
                 self._charging_schedule = Scheduler.get_empty_schedule()
                 self.sensor.charging_schedule = self._charging_schedule
 
+            # Reflect low_price / low_soc charging on the schedule graph for the
+            # current quarter, so opportunistic charging is visible in the
+            # charging_schedule attribute (dashboard / history). Operates on a
+            # copy only; self._charging_schedule and planned slots are untouched.
+            display_schedule = Raw(self._charging_schedule).copy().to_local().get_raw()
+            self.sensor.charging_schedule = self._overlay_opportunistic_charging(
+                display_schedule
+            )
+
+    def _overlay_opportunistic_charging(self, schedule: list) -> list:
+        """Overlay low_price / low_soc charging on the current quarter.
+
+        low_price_charging and low_soc_charging turn the charger on but are, by
+        design, not part of the optimized plan, so the Scheduler leaves their
+        quarters at 0 and the charging_schedule graph shows nothing while they
+        are active. This lights up the *current* quarter for dashboard / history
+        visibility. It works on a copy of the schedule (the display attribute)
+        and never touches self._charging_schedule or a genuine planned slot.
+        """
+        if not schedule:
+            return schedule
+        if (
+            self.low_price_charging_state != STATE_ON
+            and self.low_soc_charging_state != STATE_ON
+        ):
+            return schedule
+        # Match the height the Scheduler uses for planned quarters
+        # (value_in_graph = max_value * 0.75) so the bar lines up visually.
+        if self.raw_two_days is not None and self.raw_two_days.max_value():
+            on_value = self.raw_two_days.max_value() * 0.75
+        else:
+            on_value = 1.0
+        time_now = dt.now()
+        for item in schedule:
+            if item["start"] <= time_now < item["end"]:
+                # Only light a quarter the Scheduler left off; never lower a
+                # genuine planned slot.
+                if not item["value"]:
+                    item["value"] = on_value
+                break
+        return schedule
+
     async def turn_on_charging(self, state: bool = True):
         """Turn on charging"""
 

@@ -125,7 +125,7 @@ Attribute | Description
 `charging_number_of_hours` | If charging is planned, the number of hours that charging is planned. This might be less than the time between the start and stop times, if non-continuous charging is configured.
 `opportunistic` | `true` if an opportunistic charging feature has been triggered.
 `raw_two_days` | The electricity price today and tomorrow from the electricity price entity.
-`charging_schedule` | The calculated charging schedule. Can be used by an ApexCharts card to visulize the planned charging, see below.
+`charging_schedule` | The calculated charging schedule. Can be used by an ApexCharts card to visulize the planned charging, see below. While `low_price_charging` or `low_soc_charging` is active, the current quarter is also marked here so that opportunistic charging is visible in the graph and history (the `sensor.ev_smart_charging_status` sensor already reports these as separate statuses).
 
 ## Lovelace UI
 
