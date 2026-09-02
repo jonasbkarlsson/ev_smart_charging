@@ -23,6 +23,7 @@ def get_lowest_quarters(
     continuous: bool,
     raw_two_days: Raw,
     quarters: int,
+    min_session_duration: float = 0.0,
 ) -> list:
     """From the two-day prices, calculate the cheapest set of quarters"""
 
@@ -32,18 +33,24 @@ def get_lowest_quarters(
         )
 
     return get_lowest_quarters_non_continuous(
-        start_quarter, ready_quarter, raw_two_days, quarters
+        start_quarter, ready_quarter, raw_two_days, quarters, min_session_duration
     )
 
 
 def get_lowest_quarters_non_continuous(
-    start_quarter: datetime, ready_quarter: datetime, raw_two_days: Raw, quarters: int
+    start_quarter: datetime,
+    ready_quarter: datetime,
+    raw_two_days: Raw,
+    quarters: int,
+    min_session_duration: float = 0.0,
 ) -> list:
     """From the two-day prices, calculate the cheapest non-continues set of quarters
 
-    A non-continues range of quarters will be choosen."""
+    A non-continues range of quarters will be choosen.
+    If min_session_duration > 0, sessions shorter than this duration will be filtered out."""
 
     _LOGGER.debug("ready_quarter = %s", ready_quarter)
+    _LOGGER.debug("min_session_duration = %s hours", min_session_duration)
 
     if quarters == 0:
         return []
@@ -108,9 +115,144 @@ def get_lowest_quarters_non_continuous(
         q2 = same_hour_quarters[::-1][0:n1]
         selected_quarters = q1 + q2
 
+    # Apply minimum session duration grouping if specified
+    if min_session_duration > 0:
+        min_quarters = int(min_session_duration * 4)  # Convert hours to quarters
+        _LOGGER.debug("min_quarters = %s", min_quarters)
+        selected_quarters = _apply_minimum_session_duration(
+            selected_quarters, sorted_index, prices, quarters, min_quarters
+        )
+
     lowest_quarters = [x + time_start_index for x in sorted(selected_quarters)]
 
     return lowest_quarters
+
+
+def _apply_minimum_session_duration(
+    selected_quarters: list,
+    sorted_index: list,
+    prices: list,
+    target_quarters: int,
+    min_quarters: int,
+) -> list:
+    """Apply minimum session duration by filtering out short sessions and replacing them.
+
+    Args:
+        selected_quarters: Initially selected quarters
+        sorted_index: All quarters sorted by price
+        prices: Price for each quarter
+        target_quarters: Target number of quarters to select
+        min_quarters: Minimum quarters per session
+
+    Returns:
+        List of quarters meeting minimum session duration requirement
+    """
+    _LOGGER.debug("Applying minimum session duration filter")
+
+    # Group selected quarters into contiguous sessions
+    def group_into_sessions(quarters):
+        if not quarters:
+            return []
+        sorted_q = sorted(quarters)
+        sessions = []
+        current_session = [sorted_q[0]]
+        for q in sorted_q[1:]:
+            if q == current_session[-1] + 1:
+                current_session.append(q)
+            else:
+                sessions.append(current_session)
+                current_session = [q]
+        sessions.append(current_session)
+        return sessions
+
+    # Iteratively filter and replace short sessions
+    max_iterations = 20  # Prevent infinite loops
+    iteration = 0
+    current_selection = set(selected_quarters)
+    available_quarters = set(sorted_index)
+
+    while iteration < max_iterations:
+        iteration += 1
+        sessions = group_into_sessions(list(current_selection))
+        _LOGGER.debug("Iteration %s: Found %s sessions", iteration, len(sessions))
+
+        # Find sessions that are too short
+        short_sessions = [s for s in sessions if len(s) < min_quarters]
+
+        if not short_sessions:
+            # All sessions meet the minimum duration
+            _LOGGER.debug("All sessions meet minimum duration")
+            break
+
+        # Remove quarters from short sessions
+        for session in short_sessions:
+            current_selection -= set(session)
+            _LOGGER.debug("Removed short session of length %s", len(session))
+
+        # Calculate how many quarters we need to add back
+        quarters_needed = target_quarters - len(current_selection)
+
+        if quarters_needed <= 0:
+            break
+
+        # Find next cheapest quarters not yet selected
+        candidates = [q for q in sorted_index if q not in current_selection]
+        if not candidates:
+            _LOGGER.warning("No more candidate quarters available")
+            break
+
+        # Add quarters one by one, preferring those that extend existing sessions
+        quarters_added = 0
+        while quarters_added < quarters_needed and candidates:
+            best_candidate = None
+            best_score = -1
+
+            for candidate in candidates:
+                # Score based on: 1) extends existing session, 2) creates longer session
+                score = 0
+                # Check if adjacent to any quarter in current selection
+                if (candidate - 1) in current_selection or (
+                    candidate + 1
+                ) in current_selection:
+                    score += 100  # High priority for extending sessions
+
+                # Among adjacent candidates, prefer based on how many neighbors they have
+                neighbors = sum(
+                    [
+                        1
+                        for offset in [-1, 1]
+                        if (candidate + offset) in current_selection
+                    ]
+                )
+                score += neighbors * 10
+
+                if score > best_score:
+                    best_score = score
+                    best_candidate = candidate
+
+            # If no adjacent quarter found, just take the cheapest
+            if best_candidate is None:
+                best_candidate = candidates[0]
+
+            current_selection.add(best_candidate)
+            candidates.remove(best_candidate)
+            quarters_added += 1
+
+    # If we still don't have enough quarters, just add the cheapest remaining ones
+    if len(current_selection) < target_quarters:
+        remaining = [q for q in sorted_index if q not in current_selection]
+        needed = target_quarters - len(current_selection)
+        current_selection.update(remaining[:needed])
+        _LOGGER.debug("Added %s quarters to reach target", needed)
+
+    final_sessions = group_into_sessions(list(current_selection))
+    _LOGGER.debug(
+        "Final: %s sessions, lengths: %s",
+        len(final_sessions),
+        [len(s) for s in final_sessions],
+    )
+
+    return sorted(list(current_selection))
 
 
 def get_lowest_quarters_continuous(
@@ -313,12 +455,14 @@ class Scheduler:
             params["charging_pct_per_hour"],
         )
         _LOGGER.debug("charging_quarters = %s", charging_quarters)
+        min_session_duration = params.get("min_session_duration", 0.0)
         lowest_quarters = get_lowest_quarters(
             params["start_quarter"],
             params["ready_quarter"],
             params["switch_continuous"],
             raw_two_days,
             charging_quarters,
+            min_session_duration,
         )
         _LOGGER.debug("lowest_quarters = %s", lowest_quarters)
         self.schedule_base = get_charging_original(lowest_quarters, raw_two_days)
@@ -339,6 +483,7 @@ class Scheduler:
             params["switch_continuous"],
             raw_two_days,
             charging_quarters,
+            min_session_duration,
         )
         _LOGGER.debug("lowest_quarters_min_soc = %s", lowest_quarters)
         self.schedule_base_min_soc = get_charging_original(

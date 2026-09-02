@@ -28,6 +28,7 @@ The integration calculates the set of 15-minute intervals that will give the low
 - Supports price information given with 15 minutes and 60 minutes intervals.
 - Configuration of the latest time of the day when the charging should be completed, and the earliest time the charging can start.
 - Selection of preference between one continuous charging session or several (possibly more price optimized) non-continuous charging sessions.
+- Configurable minimum session duration to reduce charging fragmentation and minimize start/stop cycles when using non-continuous charging.
 - Optional setting of minimum SOC level that should be reached independently of the electricity price.
 - Optional setting to only charge when the electricity price is lower than a specified level (will be ignored if needed by the minimum SOC setting).
 - Two types of optional settings to lower the level of maximum electricity price even further if the electricity price is very low at the end of the day tomorrow.
@@ -91,6 +92,7 @@ Entity | Type | Descriptions, valid value ranges and service calls
 `number.ev_smart_charging_opportunistic_type2_level` | Number | If the `switch.ev_smart_charging_opportunistic_type2_charging` switch is activated, the price limit will be set based on `last available price * Opportunistic type2 level / 100`. For example, if the Opportunistic type2 level is set to 90, the price limit will be set to 90% of the last available price. If the last available price is negative, the price limit will be `last available price * (200 - Opportunistic type2 level) / 100`. If `switch.ev_smart_charging_apply_price_limit` is also activated, the lowest of the two price limits will be used. Valid values min=0, step=1, max=200. Can be set by service call number.set_value.
 `number.ev_smart_charging_low_soc_charging_level` | Number | If the `switch.ev_smart_charging_low_soc_charging` switch is activated, charging will be done immediately if the EV SOC is below this level. Valid values min=0.0, step=1.0, max=100. Can be set by service call `number.set_value`.
 `number.ev_smart_charging_low_price_charging_level` | Number | If the `switch.ev_smart_charging_low_price_charging` switch is activated, charging will be done immediately if the electricity price is below this level. Valid values min=-10000, step=0.01, max=10000. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_minimum_session_duration` | Number | Minimum duration for each charging session when non-continuous charging is used. This helps reduce charging fragmentation (frequent start/stop cycles) that can occur with 15-minute price intervals. Set to 0 for no grouping (original behavior), or 0.5-4.0 hours to group short sessions into longer ones. For example, setting this to 1.0 ensures each charging session is at least 1 hour long. Only applies when `switch.ev_smart_charging_continuous_charging_preferred` is OFF. Valid values min=0.0, step=0.25, max=4.0. Can be set by service call `number.set_value`.
 
 ## Entities
 

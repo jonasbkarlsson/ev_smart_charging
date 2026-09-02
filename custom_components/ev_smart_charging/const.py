@@ -59,6 +59,7 @@ ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER = "low_soc_charging_level"
 ENTITY_KEY_CONF_MIN_SOC_NUMBER = "minimum_ev_soc"
 ENTITY_KEY_CONF_START_QUARTER = "charge_start_time"
 ENTITY_KEY_CONF_READY_QUARTER = "charge_completion_time"
+ENTITY_KEY_MIN_SESSION_DURATION_NUMBER = "minimum_session_duration"
 
 # Configuration and options
 CONF_DEVICE_NAME = "device_name"
@@ -76,6 +77,7 @@ CONF_OPPORTUNISTIC_TYPE2_LEVEL = "opportunistic_type2_level"
 CONF_LOW_PRICE_CHARGING_LEVEL = "low_price_charging_level"
 CONF_LOW_SOC_CHARGING_LEVEL = "low_soc_charging_level"
 CONF_MIN_SOC = "min_soc"
+CONF_MIN_SESSION_DURATION = "min_session_duration"
 CONF_SOLAR_CHARGING_CONFIGURED = "solar_charging_configured"
 CONF_GRID_USAGE_SENSOR = "grid_usage_sensor"
 CONF_GRID_VOLTAGE = "grid_voltage"
@@ -196,6 +198,7 @@ CHARGING_STATUS_LOW_SOC_CHARGING = "low_soc_charging"
 # Defaults
 DEFAULT_NAME = DOMAIN
 DEFAULT_TARGET_SOC = 100
+DEFAULT_MIN_SESSION_DURATION = 0.0
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------

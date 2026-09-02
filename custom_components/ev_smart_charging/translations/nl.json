@@ -66,7 +66,8 @@
             "opportunistic_type2_level": { "name": "Opportunistisch type 2 niveau" },
             "low_price_charging_level": { "name": "Lage prijs oplaadniveau" },
             "low_soc_charging_level": { "name": "Lage SOC oplaadniveau" },
-            "minimum_ev_soc": { "name": "Minimum EV SOC" }
+            "minimum_ev_soc": { "name": "Minimum EV SOC" },
+            "minimum_session_duration": { "name": "Minimale sessieduur" }
         },
         "select": {
             "charge_start_time": { "name": "Oplaad starttijd" },
