@@ -18,6 +18,7 @@ from .const import (
     CONF_OPPORTUNISTIC_LEVEL,
     CONF_OPPORTUNISTIC_TYPE2_LEVEL,
     CONF_PCT_PER_HOUR,
+    CONF_WAITING_COST,
     DOMAIN,
     ENTITY_KEY_CONF_LOW_PRICE_CHARGING_NUMBER,
     ENTITY_KEY_CONF_LOW_SOC_CHARGING_NUMBER,
@@ -26,8 +27,10 @@ from .const import (
     ENTITY_KEY_CONF_PCT_PER_HOUR_NUMBER,
     ENTITY_KEY_CONF_MAX_PRICE_NUMBER,
     ENTITY_KEY_CONF_MIN_SOC_NUMBER,
+    ENTITY_KEY_CONF_WAITING_COST_NUMBER,
     ICON_BATTERY_50,
     ICON_CASH,
+    ICON_TIME,
     NUMBER,
 )
 from .coordinator import EVSmartChargingCoordinator
@@ -51,6 +54,7 @@ async def async_setup_entry(
     numbers.append(EVSmartChargingNumberOpportunisticType2(entry, coordinator))
     numbers.append(EVSmartChargingNumberLowPriceCharging(entry, coordinator))
     numbers.append(EVSmartChargingNumberLowSocCharging(entry, coordinator))
+    numbers.append(EVSmartChargingNumberWaitingCost(entry, coordinator))
     async_add_devices(numbers)
 
 
@@ -268,4 +272,28 @@ class EVSmartChargingNumberLowSocCharging(EVSmartChargingNumber):
         """Set new value."""
         await super().async_set_native_value(value)
         self.coordinator.low_soc_charging = value
+        await self.coordinator.update_configuration()
+
+
+class EVSmartChargingNumberWaitingCost(EVSmartChargingNumber):
+    """EV Smart Charging waiting cost number class."""
+
+    _entity_key = ENTITY_KEY_CONF_WAITING_COST_NUMBER
+    _attr_icon = ICON_TIME
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value = 0.0
+    _attr_native_max_value = 10000.0
+    _attr_native_step = 0.001
+
+    def __init__(self, entry, coordinator: EVSmartChargingCoordinator):
+        _LOGGER.debug("EVSmartChargingNumberWaitingCost.__init__()")
+        super().__init__(entry, coordinator)
+        if self.value is None:
+            self._attr_native_value = get_parameter(entry, CONF_WAITING_COST, 0.0)
+            self.update_ha_state()
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set new value."""
+        await super().async_set_native_value(value)
+        self.coordinator.waiting_cost = value
         await self.coordinator.update_configuration()

@@ -72,6 +72,7 @@ from .const import (
     CONF_EV_SOC_SENSOR,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_START_QUARTER,
+    CONF_WAITING_COST,
     CONF_CHARGING_STATE_ENTITY,
     DEFAULT_TARGET_SOC,
     READY_QUARTER_NONE,
@@ -205,6 +206,9 @@ class EVSmartChargingCoordinator:
         )
 
         self.max_price = float(get_parameter(self.config_entry, CONF_MAX_PRICE, 0.0))
+        self.waiting_cost = float(
+            get_parameter(self.config_entry, CONF_WAITING_COST, 0.0)
+        )
         self.number_min_soc = int(get_parameter(self.config_entry, CONF_MIN_SOC, 0.0))
         self.number_opportunistic_level = int(
             get_parameter(self.config_entry, CONF_OPPORTUNISTIC_LEVEL, 50.0)
@@ -1012,6 +1016,7 @@ class EVSmartChargingCoordinator:
             or self.opportunistic_feature_triggered,
             "switch_continuous": self.switch_continuous,
             "max_price": max_price,
+            "waiting_cost": self.waiting_cost,
         }
 
         time_now_local = dt.now()
