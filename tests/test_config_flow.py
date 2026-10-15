@@ -10,12 +10,24 @@ from homeassistant.data_entry_flow import FlowResultType
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ev_smart_charging.const import DOMAIN
+from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
+
+from custom_components.ev_smart_charging.const import (
+    CONF_EV_SOC_SENSOR,
+    CONF_EV_TARGET_SOC_SENSOR,
+    DOMAIN,
+)
 
 from .const import (
     MOCK_CONFIG_ALL,
     MOCK_CONFIG_CHARGER_EXTRA,
     MOCK_CONFIG_USER,
+)
+from .helpers.helpers import (
+    MockBavarianDataSOCEntity,
+    MockBavarianDataTargetSOCEntity,
+    MockTeslaFleetSOCEntity,
+    MockTeslaFleetTargetSOCEntity,
 )
 
 
@@ -161,3 +173,45 @@ async def test_unsuccessful_config_flow_option(hass: HomeAssistant):
     assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "init"
     assert len(result["errors"]) > 0
+
+
+def _form_default(result: Dict[str, Any], key: str) -> Any:
+    """The default a form field is pre-filled with."""
+    for field in result["data_schema"].schema:
+        if field == key:
+            return field.default()
+    return None
+
+
+@pytest.mark.parametrize(
+    ("soc_mock", "target_mock", "soc_entity", "target_entity"),
+    [
+        (
+            MockTeslaFleetSOCEntity,
+            MockTeslaFleetTargetSOCEntity,
+            "sensor.tesla_fleet_battery_level",
+            "sensor.tesla_fleet_charge_limit",
+        ),
+        (
+            MockBavarianDataSOCEntity,
+            MockBavarianDataTargetSOCEntity,
+            MockBavarianDataSOCEntity.ENTITY_ID,
+            MockBavarianDataTargetSOCEntity.ENTITY_ID,
+        ),
+    ],
+)
+async def test_config_flow_finds_ev_entities(
+    hass: HomeAssistant, soc_mock, target_mock, soc_entity, target_entity
+):
+    """The user form is pre-filled for every supported EV integration."""
+    entity_registry = async_entity_registry_get(hass)
+    soc_mock.create(hass, entity_registry)
+    target_mock.create(hass, entity_registry)
+
+    result: Dict[str, Any] = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+
+    assert result["type"] == FlowResultType.FORM
+    assert _form_default(result, CONF_EV_SOC_SENSOR) == soc_entity
+    assert _form_default(result, CONF_EV_TARGET_SOC_SENSOR) == target_entity

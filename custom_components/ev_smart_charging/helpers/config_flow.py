@@ -29,9 +29,11 @@ from ..const import (
     PLATFORM_GESPOT,
     PLATFORM_NORDPOOL,
     PLATFORM_TGE,
+    PLATFORM_BAVARIANDATA,
     PLATFORM_OCPP,
     PLATFORM_TESLA_FLEET,
     PLATFORM_VW,
+    SENSOR,
     SWITCH,
 )
 from .general import Validator
@@ -272,6 +274,42 @@ class FindEntity:
         return ""
 
     @staticmethod
+    def find_bavariandata_entity(hass: HomeAssistant, unique_id_suffix: str) -> str:
+        """Search for a BavarianData (BMW CarData) sensor by unique id.
+
+        BavarianData names its entities in the user's language, so the
+        entity id differs between installations. The unique id is
+        "<VIN>_<key>" everywhere.
+        """
+        entity_registry: EntityRegistry = async_entity_registry_get(hass)
+        registry_entries: UserDict[str, RegistryEntry] = (
+            entity_registry.entities.items()
+        )
+        for entry in registry_entries:
+            if (
+                entry[1].platform == PLATFORM_BAVARIANDATA
+                and entry[1].domain == SENSOR
+                and entry[1].disabled_by is None
+                and entry[1].unique_id.endswith(unique_id_suffix)
+            ):
+                return entry[1].entity_id
+        return ""
+
+    @staticmethod
+    def find_bavariandata_soc_sensor(hass: HomeAssistant) -> str:
+        """Search for BavarianData SOC sensor"""
+        # The predicted SOC: while charging it keeps counting when BMW
+        # pauses its own SOC updates, which can last an hour or more.
+        return FindEntity.find_bavariandata_entity(hass, "_soc_estimate")
+
+    @staticmethod
+    def find_bavariandata_target_soc_sensor(hass: HomeAssistant) -> str:
+        """Search for BavarianData Target SOC sensor"""
+        return FindEntity.find_bavariandata_entity(
+            hass, "_vehicle.powertrain.electric.battery.stateOfCharge.target"
+        )
+
+    @staticmethod
     def find_ocpp_device(hass: HomeAssistant) -> str:
         """Find OCPP entity"""
         entity_registry: EntityRegistry = async_entity_registry_get(hass)
@@ -294,6 +332,8 @@ class FindEntity:
             sensor = FindEntity.find_tesla_fleet_soc_sensor(hass)
         if len(sensor) == 0:
             sensor = FindEntity.find_vw_soc_sensor(hass)
+        if len(sensor) == 0:
+            sensor = FindEntity.find_bavariandata_soc_sensor(hass)
         return sensor
 
     @staticmethod
@@ -304,6 +344,8 @@ class FindEntity:
             sensor = FindEntity.find_tesla_fleet_target_soc_sensor(hass)
         if len(sensor) == 0:
             sensor = FindEntity.find_vw_target_soc_sensor(hass)
+        if len(sensor) == 0:
+            sensor = FindEntity.find_bavariandata_target_soc_sensor(hass)
         return sensor
 
 

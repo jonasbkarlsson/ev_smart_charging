@@ -23,6 +23,7 @@ from custom_components.ev_smart_charging.const import (
     Platform,
     PLATFORM_NORDPOOL,
     PLATFORM_OCPP,
+    PLATFORM_BAVARIANDATA,
     PLATFORM_TESLA_FLEET,
     PLATFORM_VW,
     SENSOR,
@@ -38,6 +39,8 @@ from tests.const import (
     MOCK_CONFIG_USER_WRONG_PRICE,
 )
 from tests.helpers.helpers import (
+    MockBavarianDataSOCEntity,
+    MockBavarianDataTargetSOCEntity,
     MockChargerEntity,
     MockPriceEntity,
     MockPriceEntityEnergiDataService,
@@ -500,3 +503,39 @@ async def test_find_tesla_fleet_soc_excludes_usable(hass: HomeAssistant):
     MockTeslaFleetSOCEntity.create(hass, entity_registry)
     assert FindEntity.find_tesla_fleet_soc_sensor(hass) != ""
     assert "usable" not in FindEntity.find_tesla_fleet_soc_sensor(hass)
+
+
+async def test_find_bavariandata_entity(hass: HomeAssistant):
+    """Test the FindEntity for BavarianData."""
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+
+    assert FindEntity.find_bavariandata_soc_sensor(hass) == ""
+    assert FindEntity.find_bavariandata_target_soc_sensor(hass) == ""
+
+    # A sibling whose unique id only starts the same way must not match.
+    entity_registry.async_get_or_create(
+        domain=SENSOR,
+        platform=PLATFORM_BAVARIANDATA,
+        unique_id="WBA00000000000000_soc_estimate_testing",
+    )
+    assert FindEntity.find_bavariandata_soc_sensor(hass) == ""
+
+    MockBavarianDataSOCEntity.create(hass, entity_registry)
+    assert (
+        FindEntity.find_bavariandata_soc_sensor(hass)
+        == MockBavarianDataSOCEntity.ENTITY_ID
+    )
+
+    MockBavarianDataTargetSOCEntity.create(hass, entity_registry)
+    assert (
+        FindEntity.find_bavariandata_target_soc_sensor(hass)
+        == MockBavarianDataTargetSOCEntity.ENTITY_ID
+    )
+
+    # Reached through the generic finders as well.
+    assert FindEntity.find_ev_soc_sensor(hass) == MockBavarianDataSOCEntity.ENTITY_ID
+    assert (
+        FindEntity.find_ev_target_soc_sensor(hass)
+        == MockBavarianDataTargetSOCEntity.ENTITY_ID
+    )
