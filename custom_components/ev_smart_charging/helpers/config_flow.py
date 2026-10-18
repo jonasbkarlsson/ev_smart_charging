@@ -20,6 +20,7 @@ from ..const import (
     CONF_CHARGER_ENTITY,
     CONF_CHARGING_STATE_ENTITY,
     CONF_EV_SOC_SENSOR,
+    CONF_EV_SOC_TIMESTAMP_ENTITY,
     CONF_EV_TARGET_SOC_SENSOR,
     DOMAIN,
     NAME,
@@ -111,6 +112,19 @@ class FlowValidator:
                 # It's not possible for the user to input an emtpy string on the second attempt
                 user_input[CONF_CHARGING_STATE_ENTITY] = ""
                 return ("base", "charging_state_entity_not_found")
+
+        # Validate EV SOC timestamp entity
+        # If the set value is only whitespaces, the value will be set to ""
+        user_input[CONF_EV_SOC_TIMESTAMP_ENTITY] = user_input.get(
+            CONF_EV_SOC_TIMESTAMP_ENTITY, ""
+        ).strip()
+        if len(user_input[CONF_EV_SOC_TIMESTAMP_ENTITY]) > 0:
+            entity = hass.states.get(user_input[CONF_EV_SOC_TIMESTAMP_ENTITY])
+            if entity is None:
+                # Work around for https://github.com/home-assistant/core/issues/30381
+                # It's not possible for the user to input an emtpy string on the second attempt
+                user_input[CONF_EV_SOC_TIMESTAMP_ENTITY] = ""
+                return ("base", "ev_soc_timestamp_entity_not_found")
 
         return None
 

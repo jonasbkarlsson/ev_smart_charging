@@ -19,6 +19,7 @@ from .const import (
     CONF_CHARGER_ENTITY,
     CONF_SOLAR_CHARGING_CONFIGURED,
     CONF_CHARGING_STATE_ENTITY,
+    CONF_EV_SOC_TIMESTAMP_ENTITY,
     DOMAIN,
 )
 from .helpers.config_flow import DeviceNameCreator, FindEntity, FlowValidator
@@ -30,7 +31,7 @@ _LOGGER = logging.getLogger(__name__)
 class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow."""
 
-    VERSION = 8
+    VERSION = 9
     user_input: Optional[dict[str, Any]]
 
     def __init__(self):
@@ -68,6 +69,7 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_input[CONF_EV_CONTROLLED] = False
             user_input[CONF_SOLAR_CHARGING_CONFIGURED] = False
             user_input[CONF_CHARGING_STATE_ENTITY] = ""
+            user_input[CONF_EV_SOC_TIMESTAMP_ENTITY] = ""
 
         else:
             # process user_input
@@ -105,6 +107,10 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Optional(
                 CONF_CHARGING_STATE_ENTITY,
                 default=user_input[CONF_CHARGING_STATE_ENTITY],
+            ): cv.string,
+            vol.Optional(
+                CONF_EV_SOC_TIMESTAMP_ENTITY,
+                default=user_input[CONF_EV_SOC_TIMESTAMP_ENTITY],
             ): cv.string,
             vol.Optional(
                 CONF_EV_CONTROLLED, default=user_input[CONF_EV_CONTROLLED]
@@ -165,6 +171,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(
                 CONF_CHARGING_STATE_ENTITY,
                 default=get_parameter(self.config_entry, CONF_CHARGING_STATE_ENTITY),
+            ): cv.string,
+            vol.Optional(
+                CONF_EV_SOC_TIMESTAMP_ENTITY,
+                default=get_parameter(
+                    self.config_entry, CONF_EV_SOC_TIMESTAMP_ENTITY, ""
+                ),
             ): cv.string,
             vol.Optional(
                 CONF_EV_CONTROLLED,
