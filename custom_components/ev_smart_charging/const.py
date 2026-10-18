@@ -12,6 +12,7 @@ ISSUE_URL = "https://github.com/jonasbkarlsson/ev_smart_charging/issues"
 # Icons
 ICON = "mdi:flash"
 ICON_BATTERY_50 = "mdi:battery-50"
+ICON_BATTERY_CHARGING = "mdi:battery-charging"
 ICON_CASH = "mdi:cash"
 ICON_CONNECTION = "mdi:connection"
 ICON_MIN_SOC = "mdi:battery-charging-30"
@@ -39,6 +40,7 @@ PLATFORM_GENERIC = "generic"
 # Entity keys
 ENTITY_KEY_CHARGING_SENSOR = "charging"
 ENTITY_KEY_STATUS_SENSOR = "status"
+ENTITY_KEY_CALCULATED_SOC_SENSOR = "calculated_soc"
 ENTITY_KEY_ACTIVE_SWITCH = "smart_charging_activated"
 ENTITY_KEY_APPLY_LIMIT_SWITCH = "apply_price_limit"
 ENTITY_KEY_CONTINUOUS_SWITCH = "continuous_charging_preferred"
@@ -80,6 +82,7 @@ CONF_SOLAR_CHARGING_CONFIGURED = "solar_charging_configured"
 CONF_GRID_USAGE_SENSOR = "grid_usage_sensor"
 CONF_GRID_VOLTAGE = "grid_voltage"
 CONF_CHARGING_STATE_ENTITY = "charging_state_entity"
+CONF_EV_SOC_TIMESTAMP_ENTITY = "ev_soc_timestamp_entity"
 
 QUARTERS = [
     "None",

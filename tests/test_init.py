@@ -203,6 +203,18 @@ async def test_setup_with_migration_v3(hass, bypass_validate_input_and_control):
     assert config_entry.entry_id not in hass.data[DOMAIN]
 
 
+async def test_setup_with_migration_v8(hass, bypass_validate_input_and_control):
+    """Test entry migration from version 8."""
+    config_entry = MockConfigEntry(
+        domain=DOMAIN, data=MOCK_CONFIG_ALL, entry_id="test", version=8
+    )
+    config_entry.add_to_hass(hass)
+
+    assert await async_migrate_entry(hass, config_entry)
+    assert config_entry.version == 9
+    assert config_entry.data["ev_soc_timestamp_entity"] == ""
+
+
 async def test_setup_with_migration_from_future(
     hass, bypass_validate_input_and_control
 ):

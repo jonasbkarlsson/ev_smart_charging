@@ -20,6 +20,7 @@ from .coordinator import EVSmartChargingCoordinator
 from .const import (
     CONF_CHARGING_STATE_ENTITY,
     CONF_EV_CONTROLLED,
+    CONF_EV_SOC_TIMESTAMP_ENTITY,
     CONF_GRID_USAGE_SENSOR,
     CONF_GRID_VOLTAGE,
     CONF_LOW_PRICE_CHARGING_LEVEL,
@@ -172,7 +173,12 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         new[CONF_CHARGING_STATE_ENTITY] = ""
         migration = True
 
-    if version > 8:
+    if version == 8:
+        version = 9
+        new[CONF_EV_SOC_TIMESTAMP_ENTITY] = ""
+        migration = True
+
+    if version > 9:
         _LOGGER.error(
             "Migration from version %s to a lower version is not possible",
             version,

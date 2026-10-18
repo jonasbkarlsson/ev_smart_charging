@@ -10,6 +10,7 @@
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
                     "charger_entity": "Charger control entity (single space to remove)",
                     "charging_state_entity": "Charging state entity (single space to remove)",
+                    "ev_soc_timestamp_entity": "EV SOC last reported entity (single space to remove)",
                     "ev_controlled": "An EV integration will control start/stop of charging"
                 }
             }
@@ -24,7 +25,8 @@
             "ev_target_soc_invalid_data": "The Target SOC entity gives invalid data.",
             "charger_control_switch_not_found": "Charger control entity not found.",
             "charger_control_switch_not_switch": "Charger control entity is not a switch or an input boolean.",
-            "charging_state_entity_not_found": "Charging state entity not found."
+            "charging_state_entity_not_found": "Charging state entity not found.",
+            "ev_soc_timestamp_entity_not_found": "EV SOC last reported entity not found."
         }
     },
     "options": {
@@ -37,6 +39,7 @@
                     "ev_target_soc_sensor": "EV Target SOC entity (single space to remove)",
                     "charger_entity": "Charger control entity (single space to remove)",
                     "charging_state_entity": "Charging state entity (single space to remove)",
+                    "ev_soc_timestamp_entity": "EV SOC last reported entity (single space to remove)",
                     "ev_controlled": "An EV integration will control start/stop of charging"
                 }
             }
@@ -51,7 +54,8 @@
             "ev_target_soc_invalid_data": "The Target SOC entity gives invalid data.",
             "charger_control_switch_not_found": "Charger control entity not found.",
             "charger_control_switch_not_switch": "Charger control entity is not a switch or an input boolean.",
-            "charging_state_entity_not_found": "Charging state entity not found."
+            "charging_state_entity_not_found": "Charging state entity not found.",
+            "ev_soc_timestamp_entity_not_found": "EV SOC last reported entity not found."
         }
     },
     "entity": {
@@ -88,6 +92,7 @@
                     "charging_schedule": {"name": "Charging schedule"}
                 }
             },
+            "calculated_soc": { "name": "Calculated EV SOC" },
             "status": {
                 "name": "Status",
                 "state": {

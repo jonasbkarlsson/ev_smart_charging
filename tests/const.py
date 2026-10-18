@@ -12,6 +12,7 @@ from custom_components.ev_smart_charging.const import (
     CONF_OPPORTUNISTIC_LEVEL,
     CONF_PRICE_SENSOR,
     CONF_EV_SOC_SENSOR,
+    CONF_EV_SOC_TIMESTAMP_ENTITY,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_PCT_PER_HOUR,
     CONF_READY_QUARTER,
@@ -73,6 +74,7 @@ MOCK_CONFIG_CHARGER_EXTRA = {
     CONF_EV_TARGET_SOC_SENSOR: "sensor.volkswagen_we_connect_id_target_state_of_charge",
     CONF_CHARGER_ENTITY: "switch.ocpp_charge_control",
     CONF_CHARGING_STATE_ENTITY: "",
+    CONF_EV_SOC_TIMESTAMP_ENTITY: "",
     CONF_EV_CONTROLLED: False,
 }
 
@@ -371,4 +373,13 @@ MOCK_CONFIG_NEGATIVE_PRICE_0 = {
     CONF_MAX_PRICE: 0.0,
     CONF_OPPORTUNISTIC_LEVEL: 50.0,
     CONF_MIN_SOC: 30.0,
+}
+
+MOCK_CONFIG_CALCULATED_SOC = MOCK_CONFIG_ALL | {
+    CONF_CHARGING_STATE_ENTITY: "binary_sensor.ocpp_charging_state",
+    CONF_EV_SOC_TIMESTAMP_ENTITY: "sensor.volkswagen_we_connect_id_last_reported",
+}
+
+MOCK_CONFIG_USER_WITH_SOC_TIMESTAMP = MOCK_CONFIG_USER_NO_CHARGER | {
+    CONF_EV_SOC_TIMESTAMP_ENTITY: "sensor.volkswagen_we_connect_id_last_reported",
 }

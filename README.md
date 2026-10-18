@@ -72,6 +72,7 @@ EV SOC entity | Yes | Entity with the car's State-of-Charge. A value between 0 a
 EV target SOC entity | No | Entity with the target value for the State-of-Charge. A value between 0 and 100. If not provided, 100 is assumed.
 Charger control entity | No | If provided, the integration will directly control the charger by setting the state of this entity to 'on' or 'off'. This entity can either be a Switch or an Input Boolean.
 Charging state entity | No | If provided, will be used by the integration to check that the charger is charging. If the charger is not charging when it should, the integration will try to start the charging again. The entity shall have the state 'on' when the charger is charging, and may be e.g. a Switch or Input Boolean.
+EV SOC last reported entity | No | Timestamp sensor with the time the EV last reported its SOC. If provided, the integration calculates the SOC between reports from the EV, see [Calculated SOC](#calculated-soc).
 Charging control by EV integration | Yes | Select this if an EV integration (and not a charger integration) will be used to control start/stop of charging. Also, if an EV integration is used to control start/stop of charging, it is highly recommended to create an automation that controls `switch.ev_smart_charging_ev_connected`.
 
 With the exception of Name, the above configuration items can be changed after intial configuration in Settings -> Devices & Services -> Integrations -> EV Smart Charging -> 1 device -> Configure. To change Name, the native way to rename Integrations or Devices in Home Assistant can be used.
@@ -287,6 +288,15 @@ mode: single
 A lot of the functionality in this integration relies on knowing the EV SOC. However, if this information is not available, then it is still possible to use this integration to control a charger. In this case, create a Number Helper in Setting -> Devices & Services -> Helpers (for example named "SOC" that typically will create an entity `input_number.soc`), and then use this entity when configuring the integration. For the integration to work well, the value of the SOC should change between charging cycles. The recommended way to do this is to set the SOC value to 100 when charging is completed, and then set it to an appropriate value when starting next charging cycle.
 
 For example, if the SOC entity is set 60, the Target SOC entity is set to 100 (or not configured) and the `Charging speed` parameter is set to 10, then there will be 4 hours of charging, (100-60)/10 = 4.
+
+### Calculated SOC
+Many EVs only report their SOC now and then, for example when the car wakes up. If the time of the last report is available, e.g. a "last reported" sensor from the EV integration, it can be configured as `EV SOC last reported entity`. The integration then calculates the SOC as the last reported SOC plus the charging done since that report:
+
+calculated SOC = reported SOC + hours of charging since the report x `Charging speed`
+
+The calculated SOC is capped at the EV Target SOC and is used instead of the reported SOC everywhere in the integration. It is also available as `sensor.ev_smart_charging_calculated_soc`, with the attributes `reported_soc`, `reported_at` and `charging_hours`.
+
+Hours of charging are only counted while the `Charging state entity` is 'on', so this entity should only be 'on' while the charger actually delivers power. If no `Charging state entity` is configured, the integration's own charging state is used. Make sure that `Charging speed` matches the actual charging speed of the car.
 
 ### EV Target SOC entity
 If the EV Target SOC is available as a state attribute, then a similar solution as for EV SOC above can be used.

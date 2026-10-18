@@ -1,19 +1,29 @@
 """Sensor platform for EV Smart Charging."""
 
 import logging
+from typing import Any
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.core import HomeAssistant
-from homeassistant.const import STATE_OFF
+from homeassistant.const import PERCENTAGE, STATE_OFF
+from homeassistant.helpers.restore_state import ExtraStoredData, RestoreEntity
+from homeassistant.util import dt
 
 
 from .const import (
     DOMAIN,
+    ENTITY_KEY_CALCULATED_SOC_SENSOR,
     ENTITY_KEY_CHARGING_SENSOR,
     ENTITY_KEY_STATUS_SENSOR,
+    ICON_BATTERY_CHARGING,
     SENSOR,
 )
 from .entity import EVSmartChargingEntity
+from .helpers.soc_estimator import SocEstimator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -25,6 +35,8 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_devices):
     sensors = []
     sensors.append(EVSmartChargingSensorCharging(entry))
     sensors.append(EVSmartChargingSensorStatus(entry))
+    if coordinator.soc_estimator is not None:
+        sensors.append(EVSmartChargingSensorCalculatedSoc(entry, coordinator))
     async_add_devices(sensors)
     await coordinator.add_sensor(sensors)
 
@@ -203,4 +215,60 @@ class EVSmartChargingSensorStatus(EVSmartChargingSensor):
     def set_status(self, new_status):
         """Set new status."""
         self._attr_native_value = new_status
+        self.update_ha_state()
+
+
+class CalculatedSocExtraStoredData(ExtraStoredData):
+    """Stored state of the SOC estimator"""
+
+    def __init__(self, data: dict[str, Any]) -> None:
+        self.data = data
+
+    def as_dict(self) -> dict[str, Any]:
+        return self.data
+
+
+class EVSmartChargingSensorCalculatedSoc(EVSmartChargingSensor, RestoreEntity):
+    """EV Smart Charging calculated SOC sensor class."""
+
+    _entity_key = ENTITY_KEY_CALCULATED_SOC_SENSOR
+    _attr_icon = ICON_BATTERY_CHARGING
+    _attr_device_class = SensorDeviceClass.BATTERY
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = PERCENTAGE
+
+    def __init__(self, entry, coordinator):
+        _LOGGER.debug("EVSmartChargingSensorCalculatedSoc.__init__()")
+        super().__init__(entry)
+        self.coordinator = coordinator
+        self.soc_estimator: SocEstimator = coordinator.soc_estimator
+        self._attr_native_value = None
+        self._charging_hours = 0.0
+
+    async def async_added_to_hass(self) -> None:
+        """Restore the SOC estimator."""
+        await super().async_added_to_hass()
+        restored = await self.async_get_last_extra_data()
+        if restored is not None:
+            self.soc_estimator.restore(restored.as_dict())
+            if self.coordinator.sensor is not None:
+                await self.coordinator.update_sensors()
+
+    @property
+    def extra_restore_state_data(self) -> CalculatedSocExtraStoredData:
+        return CalculatedSocExtraStoredData(self.soc_estimator.as_dict(dt.now()))
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        reported_at = self.soc_estimator.reported_at
+        return {
+            "reported_soc": self.soc_estimator.reported_soc,
+            "reported_at": reported_at.isoformat() if reported_at else None,
+            "charging_hours": round(self._charging_hours, 2),
+        }
+
+    def set_soc(self, soc: float | None, charging_hours: float):
+        """Set new calculated SOC."""
+        self._attr_native_value = soc
+        self._charging_hours = charging_hours
         self.update_ha_state()

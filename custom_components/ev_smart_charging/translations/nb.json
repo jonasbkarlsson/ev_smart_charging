@@ -10,6 +10,7 @@
                     "ev_target_soc_sensor": "Enhet for ønsket SOC/ladenivå (mellomrom for å ta bort)",
                     "charger_entity": "Ladekontrollenhet (mellomrom for å ta bort)",
                     "charging_state_entity": "Enhet for lade status (mellomrom for å ta bort)",
+                    "ev_soc_timestamp_entity": "Enhet for tidspunkt for siste EV SOC (mellomrom for å ta bort)",
                     "ev_controlled": "Elbilintegrasjon, brukes for å styre start og stopp av lading."
                 }
             }
@@ -24,7 +25,8 @@
             "ev_target_soc_invalid_data": "Mål-SOC-enheten gir ugyldige data.",
             "charger_control_switch_not_found": "Ladekontrollenhet ikke funnet.",
             "charger_control_switch_not_switch": "Ladekontrollenhet er ikke en bryter eller en input boolean.",
-            "charging_state_entity_not_found": "Enhet for lade status ikke funnet."
+            "charging_state_entity_not_found": "Enhet for lade status ikke funnet.",
+            "ev_soc_timestamp_entity_not_found": "Enhet for tidspunkt for siste EV SOC ikke funnet."
         }
     },
     "options": {
@@ -37,6 +39,7 @@
                     "ev_target_soc_sensor": "Elbil mål-SOC-enhet (mellomrom for å ta bort)",
                     "charger_entity": "Ladekontrollenhet (mellomrom for å ta bort)",
                     "charging_state_entity": "Enhet for lade status (mellomrom for å ta bort)",
+                    "ev_soc_timestamp_entity": "Enhet for tidspunkt for siste EV SOC (mellomrom for å ta bort)",
                     "ev_controlled": "Elbil-integrasjon for å kontrollere start/stopp av lading"
                 }
             }
@@ -51,7 +54,8 @@
             "ev_target_soc_invalid_data": "Mål-SOC-enheten gir ugyldige data.",
             "charger_control_switch_not_found": "Ladekontrollenhet ikke funnet.",
             "charger_control_switch_not_switch": "Ladekontrollenhet er ikke en bryter eller en input boolean.",
-            "charging_state_entity_not_found": "Enhet for lade status ikke funnet."
+            "charging_state_entity_not_found": "Enhet for lade status ikke funnet.",
+            "ev_soc_timestamp_entity_not_found": "Enhet for tidspunkt for siste EV SOC ikke funnet."
         }
     },
     "entity": {
@@ -88,6 +92,7 @@
                     "charging_schedule": {"name": "Ladeskjema"}
                 }
             },
+            "calculated_soc": { "name": "Beregnet EV SOC" },
             "status": {
                 "name": "Status",
                 "state": {

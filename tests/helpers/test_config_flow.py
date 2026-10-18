@@ -34,6 +34,7 @@ from tests.const import (
     MOCK_CONFIG_USER_NO_CHARGER,
     MOCK_CONFIG_USER,
     MOCK_CONFIG_USER_WITH_CHARGING_STATE,
+    MOCK_CONFIG_USER_WITH_SOC_TIMESTAMP,
     MOCK_CONFIG_USER_WRONG_CHARGER,
     MOCK_CONFIG_USER_WRONG_PRICE,
 )
@@ -346,6 +347,37 @@ async def test_validate_step_user_charging_state(hass: HomeAssistant, freezer):
     assert (
         FlowValidator.validate_step_user(
             hass, deepcopy(MOCK_CONFIG_USER_WITH_CHARGING_STATE)
+        )
+        is None
+    )
+
+
+async def test_validate_step_user_soc_timestamp(hass: HomeAssistant, freezer):
+    """Test the EV SOC timestamp entity in test_validate_step_user."""
+
+    dt.set_default_time_zone(ZoneInfo(key="Europe/Stockholm"))
+    freezer.move_to("2022-10-01T14:00:00+02:00")
+
+    entity_registry: EntityRegistry = async_entity_registry_get(hass)
+    MockPriceEntity.create(hass, entity_registry)
+    MockSOCEntity.create(hass, entity_registry)
+    MockTargetSOCEntity.create(hass, entity_registry)
+
+    # Check with non-existent timestamp entity
+    user_input = deepcopy(MOCK_CONFIG_USER_WITH_SOC_TIMESTAMP)
+    assert FlowValidator.validate_step_user(hass, user_input) == (
+        "base",
+        "ev_soc_timestamp_entity_not_found",
+    )
+    assert user_input["ev_soc_timestamp_entity"] == ""
+
+    # Check with correct timestamp entity
+    hass.states.async_set(
+        "sensor.volkswagen_we_connect_id_last_reported", "2022-10-01T14:00:00+02:00"
+    )
+    assert (
+        FlowValidator.validate_step_user(
+            hass, deepcopy(MOCK_CONFIG_USER_WITH_SOC_TIMESTAMP)
         )
         is None
     )

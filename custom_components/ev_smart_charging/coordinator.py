@@ -1,6 +1,6 @@
 """Coordinator for EV Smart Charging"""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from homeassistant.config_entries import (
     ConfigEntry,
@@ -36,6 +36,7 @@ from homeassistant.helpers.event import (
     async_call_later,
     async_track_state_change,
     async_track_time_change,
+    async_track_time_interval,
     async_track_state_change_event,
 )
 from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
@@ -70,6 +71,7 @@ from .const import (
     CONF_READY_QUARTER,
     CONF_PRICE_SENSOR,
     CONF_EV_SOC_SENSOR,
+    CONF_EV_SOC_TIMESTAMP_ENTITY,
     CONF_EV_TARGET_SOC_SENSOR,
     CONF_START_QUARTER,
     CONF_CHARGING_STATE_ENTITY,
@@ -86,8 +88,10 @@ from .helpers.coordinator import (
 )
 from .helpers.raw import Raw
 from .helpers.general import Utils, Validator, get_parameter, get_quarter_index
+from .helpers.soc_estimator import SocEstimator
 from .sensor import (
     EVSmartChargingSensor,
+    EVSmartChargingSensorCalculatedSoc,
     EVSmartChargingSensorCharging,
     EVSmartChargingSensorStatus,
 )
@@ -123,6 +127,7 @@ class EVSmartChargingCoordinator:
 
         self.sensor = None
         self.sensor_status = None
+        self.sensor_calculated_soc = None
         self.switch_active = None
         self.switch_apply_limit = None
         self.switch_apply_limit_entity_id = None
@@ -164,6 +169,19 @@ class EVSmartChargingCoordinator:
                 second=0,
             )
         )
+
+        # Calculate the SOC between reports from the EV, if the time of the reports is known
+        self.ev_soc_timestamp_entity_id = get_parameter(
+            self.config_entry, CONF_EV_SOC_TIMESTAMP_ENTITY, ""
+        )
+        self.soc_estimator = None
+        if self.ev_soc_timestamp_entity_id:
+            self.soc_estimator = SocEstimator()
+            self.listeners.append(
+                async_track_time_interval(
+                    hass, self.update_calculated_soc, timedelta(minutes=1)
+                )
+            )
 
         self.scheduler = Scheduler()
 
@@ -257,6 +275,45 @@ class EVSmartChargingCoordinator:
                 self.charging_state_entity_id,
             )
             await self.turn_on_charging()
+
+    async def update_calculated_soc(
+        self, date_time=None
+    ):  # pylint: disable=unused-argument
+        """Update the calculated SOC while charging"""
+        if self.sensor is not None and self.soc_estimator.is_charging():
+            await self.update_sensors()
+
+    def is_actually_charging(self) -> bool:
+        """Return True if the charger delivers power to the EV"""
+        if self.charging_state_entity_id:
+            state_obj = self.hass.states.get(self.charging_state_entity_id)
+            return state_obj is not None and state_obj.state == STATE_ON
+        return self.sensor is not None and self.sensor.native_value == STATE_ON
+
+    def get_calculated_soc(self, reported_soc: float) -> float:
+        """Return the reported SOC plus the charging done since it was reported"""
+        time_now = dt.now()
+        self.soc_estimator.set_charging(self.is_actually_charging(), time_now)
+
+        reported_at = None
+        timestamp_state = self.hass.states.get(self.ev_soc_timestamp_entity_id)
+        if timestamp_state is not None:
+            try:
+                reported_at = dt.parse_datetime(timestamp_state.state)
+            except ValueError:
+                reported_at = None
+            if reported_at is not None and reported_at.tzinfo is None:
+                reported_at = reported_at.replace(tzinfo=dt.DEFAULT_TIME_ZONE)
+        self.soc_estimator.report(reported_soc, reported_at, time_now)
+
+        calculated_soc = self.soc_estimator.get_soc(
+            time_now, self.charging_pct_per_hour, self.ev_target_soc
+        )
+        if self.sensor_calculated_soc is not None:
+            self.sensor_calculated_soc.set_soc(
+                calculated_soc, self.soc_estimator.charging_hours(time_now)
+            )
+        return calculated_soc
 
     def unsubscribe_listeners(self):
         """Unsubscribed to listeners"""
@@ -481,6 +538,9 @@ class EVSmartChargingCoordinator:
     async def turn_on_charging(self, state: bool = True):
         """Turn on charging"""
 
+        if self.soc_estimator is not None and not self.charging_state_entity_id:
+            self.soc_estimator.set_charging(state, dt.now())
+
         if state is True:
             _LOGGER.debug("Turn on charging")
             self.sensor.set_state(STATE_ON)
@@ -525,6 +585,8 @@ class EVSmartChargingCoordinator:
                 self.sensor = sensor
             if isinstance(sensor, EVSmartChargingSensorStatus):
                 self.sensor_status = sensor
+            if isinstance(sensor, EVSmartChargingSensorCalculatedSoc):
+                self.sensor_calculated_soc = sensor
 
         self.price_entity_id = get_parameter(self.config_entry, CONF_PRICE_SENSOR)
         price_state = self.hass.states.get(self.price_entity_id)
@@ -533,16 +595,18 @@ class EVSmartChargingCoordinator:
         self.ev_target_soc_entity_id = get_parameter(
             self.config_entry, CONF_EV_TARGET_SOC_SENSOR
         )
+        tracked_entity_ids = [self.price_entity_id, self.ev_soc_entity_id]
+        if self.soc_estimator is not None:
+            tracked_entity_ids.append(self.ev_soc_timestamp_entity_id)
+            if self.charging_state_entity_id:
+                tracked_entity_ids.append(self.charging_state_entity_id)
 
         if MAJOR_VERSION <= 2023 or (MAJOR_VERSION == 2024 and MINOR_VERSION <= 5):
             # Use for Home Assistant 2024.5 or older
             self.listeners.append(
                 async_track_state_change(
                     self.hass,
-                    [
-                        self.price_entity_id,
-                        self.ev_soc_entity_id,
-                    ],
+                    tracked_entity_ids,
                     self.update_sensors,
                 )
             )
@@ -551,10 +615,7 @@ class EVSmartChargingCoordinator:
             self.listeners.append(
                 async_track_state_change_event(
                     self.hass,
-                    [
-                        self.price_entity_id,
-                        self.ev_soc_entity_id,
-                    ],
+                    tracked_entity_ids,
                     self.update_sensors_new,
                 )
             )
@@ -936,10 +997,6 @@ class EVSmartChargingCoordinator:
             self.ev_soc_valid = True
             self.sensor.ev_soc = ev_soc_state.state
             self.ev_soc = float(ev_soc_state.state)
-            # To handle non-live SOC
-            if self.ev_soc != self.ev_soc_previous:
-                self.ev_soc_previous = self.ev_soc
-                self.ev_soc_before_last_charging = -1
         else:
             if self.ev_soc_valid:
                 # Make only one error message per outage.
@@ -959,6 +1016,15 @@ class EVSmartChargingCoordinator:
                         "Target SOC sensor not valid: %s", ev_target_soc_state
                     )
                 self.ev_target_soc_valid = False
+
+        if self.ev_soc_valid:
+            if self.soc_estimator is not None:
+                self.ev_soc = self.get_calculated_soc(float(ev_soc_state.state))
+                self.sensor.ev_soc = self.ev_soc
+            # To handle non-live SOC
+            if self.ev_soc != self.ev_soc_previous:
+                self.ev_soc_previous = self.ev_soc
+                self.ev_soc_before_last_charging = -1
 
         # Check if Opportunistic charging should be used
         if (

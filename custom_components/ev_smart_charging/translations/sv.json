@@ -10,6 +10,7 @@
                     "ev_target_soc_sensor": "Entitet för önskad laddnivå (ett mellanslag för att ta bort)",
                     "charger_entity": "Entitet för laddningsstyrning (ett mellanslag för att ta bort)",
                     "charging_state_entity": "Entitet för laddningsstatus (ett mellanslag för att ta bort)",
+                    "ev_soc_timestamp_entity": "Entitet för tidpunkt för senaste EV SOC (ett mellanslag för att ta bort)",
                     "ev_controlled": "Elbilsintegration kommer att styra start och stopp av laddning."
                 }
             }
@@ -24,7 +25,8 @@
             "ev_target_soc_invalid_data": "Entiteten för önskad laddnivå ger inkorrekt data.",
             "charger_control_switch_not_found": "Entitet för laddningsstyrning hittas inte.",
             "charger_control_switch_not_switch": "Entiteten för laddningsstyrning är inte en brytare eller en input boolean.",
-            "charging_state_entity_not_found": "Entitet för laddningsstatus hittas inte."
+            "charging_state_entity_not_found": "Entitet för laddningsstatus hittas inte.",
+            "ev_soc_timestamp_entity_not_found": "Entitet för tidpunkt för senaste EV SOC hittas inte."
         }
     },
     "options": {
@@ -37,6 +39,7 @@
                     "ev_target_soc_sensor": "Entitet för önskad laddnivå (ett mellanslag för att ta bort)",
                     "charger_entity": "Entitet för laddningsstyrning (ett mellanslag för att ta bort)",
                     "charging_state_entity": "Entitet för laddningsstatus (ett mellanslag för att ta bort)",
+                    "ev_soc_timestamp_entity": "Entitet för tidpunkt för senaste EV SOC (ett mellanslag för att ta bort)",
                     "ev_controlled": "Elbilsintegration kommer att styra start och stopp av laddning."
                 }
             }
@@ -51,7 +54,8 @@
             "ev_target_soc_invalid_data": "Entiteten för önskad laddnivå ger inkorrekt data.",
             "charger_control_switch_not_found": "Entitet för laddningsstyrning hittas inte.",
             "charger_control_switch_not_switch": "Entiteten för laddningsstyrning är inte en brytare eller en input boolean.",
-            "charging_state_entity_not_found": "Entitet för laddningsstatus hittas inte."
+            "charging_state_entity_not_found": "Entitet för laddningsstatus hittas inte.",
+            "ev_soc_timestamp_entity_not_found": "Entitet för tidpunkt för senaste EV SOC hittas inte."
         }
     },
     "entity": {
@@ -88,6 +92,7 @@
                     "charging_schedule": {"name": "Laddningsschema"}
                 }
             },
+            "calculated_soc": { "name": "Beräknad EV SOC" },
             "status": {
                 "name": "Status",
                 "state": {
