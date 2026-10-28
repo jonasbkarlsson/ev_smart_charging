@@ -34,10 +34,18 @@ from homeassistant.helpers.device_registry import async_get as async_device_regi
 from homeassistant.helpers.device_registry import DeviceRegistry
 from homeassistant.helpers.event import (
     async_call_later,
-    async_track_state_change,
     async_track_time_change,
     async_track_state_change_event,
 )
+
+try:
+    from homeassistant.helpers.event import (  # pylint: disable=no-name-in-module
+        async_track_state_change,
+    )
+except ImportError:
+    # Removed in HA 2026.11. Only used for HA 2024.5 and older, see add_sensor().
+    async_track_state_change = None  # pylint: disable=invalid-name
+
 from homeassistant.helpers.entity_registry import async_get as async_entity_registry_get
 from homeassistant.helpers.entity_registry import (
     EntityRegistry,
