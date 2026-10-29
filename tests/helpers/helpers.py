@@ -6,6 +6,7 @@ from homeassistant.helpers.entity_registry import EntityRegistry
 from homeassistant.util import dt as dt_util
 
 from custom_components.ev_smart_charging.const import (
+    PLATFORM_BAVARIANDATA,
     PLATFORM_ENERGIDATASERVICE,
     PLATFORM_ENTSOE,
     PLATFORM_GENERIC,
@@ -422,3 +423,38 @@ class MockTeslaFleetTargetSOCEntity:
         hass.states.async_set(
             "sensor.tesla_fleet_charge_limit", new_state
         )
+
+
+class MockBavarianDataSOCEntity:
+    """Mockup for BavarianData (BMW CarData) predicted SOC entity"""
+
+    # Entity ids follow the installation's language; this one is German.
+    ENTITY_ID = "sensor.i5_edrive40_ladezustand_integrationsseitig_vorhergesagt"
+
+    @staticmethod
+    def create(hass: HomeAssistant, entity_registry: EntityRegistry, value: str = "64"):
+        """Create a correct BavarianData SOC entity"""
+        entity_registry.async_get_or_create(
+            domain=SENSOR,
+            platform=PLATFORM_BAVARIANDATA,
+            unique_id="WBA00000000000000_soc_estimate",
+            suggested_object_id="i5_edrive40_ladezustand_integrationsseitig_vorhergesagt",
+        )
+        hass.states.async_set(MockBavarianDataSOCEntity.ENTITY_ID, value)
+
+
+class MockBavarianDataTargetSOCEntity:
+    """Mockup for BavarianData (BMW CarData) target SOC entity"""
+
+    ENTITY_ID = "sensor.i5_edrive40_zielwert_des_ladezustands_der_hochvoltbatterie"
+
+    @staticmethod
+    def create(hass: HomeAssistant, entity_registry: EntityRegistry, value: str = "80"):
+        """Create a correct BavarianData target SOC entity"""
+        entity_registry.async_get_or_create(
+            domain=SENSOR,
+            platform=PLATFORM_BAVARIANDATA,
+            unique_id="WBA00000000000000_vehicle.powertrain.electric.battery.stateOfCharge.target",
+            suggested_object_id="i5_edrive40_zielwert_des_ladezustands_der_hochvoltbatterie",
+        )
+        hass.states.async_set(MockBavarianDataTargetSOCEntity.ENTITY_ID, value)
