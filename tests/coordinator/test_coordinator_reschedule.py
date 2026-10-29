@@ -2,7 +2,11 @@
 
 from datetime import datetime
 import asyncio
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+try:
+    from pytest_homeassistant_custom_component.common import MockConfigEntry  # type: ignore
+except ImportError:
+    from pytest_homeassistant.common import MockConfigEntry  # type: ignore
 from freezegun import freeze_time
 
 from homeassistant.config_entries import ConfigEntryState

@@ -1,6 +1,9 @@
 """Test ev_smart_charging coordinator."""
 
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+try:
+    from pytest_homeassistant_custom_component.common import MockConfigEntry  # type: ignore
+except ImportError:
+    from pytest_homeassistant.common import MockConfigEntry  # type: ignore
 
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import MAJOR_VERSION, MINOR_VERSION

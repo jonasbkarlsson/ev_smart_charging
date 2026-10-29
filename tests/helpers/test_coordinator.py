@@ -41,7 +41,7 @@ from tests.schedule import MOCK_SCHEDULE_20220930
 
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
 # for a given test. We can also leverage fixtures and mocks that are available in
-# Home Assistant using the pytest_homeassistant_custom_component plugin.
+# Home Assistant using the pytest_homeassistant package.
 # Assertions allow you to verify that the return value of whatever is on the left
 # side of the assertion matches with the right side.
 

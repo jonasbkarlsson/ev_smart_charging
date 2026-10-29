@@ -1,7 +1,11 @@
 """Test ev_smart_charging coordinator."""
 
 from datetime import datetime
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+try:
+    from pytest_homeassistant_custom_component.common import MockConfigEntry  # type: ignore
+except ImportError:
+    from pytest_homeassistant.common import MockConfigEntry  # type: ignore
 
 from homeassistant.core import HomeAssistant
 from homeassistant.const import STATE_OFF

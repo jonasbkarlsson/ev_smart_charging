@@ -12,6 +12,7 @@ updates:
     ignore:
       - dependency-name: "homeassistant"
       - dependency-name: "pytest-homeassistant-custom-component"
+      - dependency-name: "pytest-home-assistant"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

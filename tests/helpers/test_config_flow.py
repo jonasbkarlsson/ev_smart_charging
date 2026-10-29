@@ -9,7 +9,10 @@ from homeassistant.helpers.entity_registry import async_get as async_entity_regi
 from homeassistant.helpers.entity_registry import EntityRegistry
 from homeassistant.util import dt
 
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+try:
+    from pytest_homeassistant_custom_component.common import MockConfigEntry  # type: ignore
+except ImportError:
+    from pytest_homeassistant.common import MockConfigEntry  # type: ignore
 
 from custom_components.ev_smart_charging.helpers.config_flow import (
     DeviceNameCreator,

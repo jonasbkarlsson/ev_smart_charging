@@ -51,5 +51,13 @@ run_next_test "auto"
 pip3 install -qq homeassistant==2026.8.3 pytest-homeassistant-custom-component==0.13.357
 run_next_test "auto"
 
-#pip3 install -qq homeassistant==2026.9.0b4 pytest-homeassistant-custom-component==0.13.361
-#run_next_test "auto"
+pip3 install -qq homeassistant==2026.9.4 pytest-homeassistant-custom-component==0.13.367
+run_next_test "auto"
+
+pip3 install -qq homeassistant==2026.10.4 pytest-homeassistant-custom-component==0.13.375
+run_next_test "auto"
+
+pip3 uninstall -yqq pytest-homeassistant-custom-component
+pip3 install -qq homeassistant==2026.11.0b0 \
+  "pytest-home-assistant @ git+https://github.com/home-assistant/core@2026.11.0b0#subdirectory=packages/pytest-home-assistant"
+run_next_test "auto"

@@ -2,7 +2,10 @@
 
 from datetime import datetime
 
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+try:
+    from pytest_homeassistant_custom_component.common import MockConfigEntry  # type: ignore
+except ImportError:
+    from pytest_homeassistant.common import MockConfigEntry  # type: ignore
 
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant

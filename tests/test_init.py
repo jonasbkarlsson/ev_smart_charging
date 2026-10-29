@@ -4,7 +4,11 @@ from homeassistant.const import MAJOR_VERSION, MINOR_VERSION
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.exceptions import ConfigEntryNotReady
 import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+try:
+    from pytest_homeassistant_custom_component.common import MockConfigEntry  # type: ignore
+except ImportError:
+    from pytest_homeassistant.common import MockConfigEntry  # type: ignore
 
 from custom_components.ev_smart_charging import (
     async_migrate_entry,
@@ -26,7 +30,7 @@ from .const import (
 
 # We can pass fixtures as defined in conftest.py to tell pytest to use the fixture
 # for a given test. We can also leverage fixtures and mocks that are available in
-# Home Assistant using the pytest_homeassistant_custom_component plugin.
+# Home Assistant using the pytest_homeassistant package.
 # Assertions allow you to verify that the return value of whatever is on the left
 # side of the assertion matches with the right side.
 
