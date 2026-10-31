@@ -1,6 +1,10 @@
 """Test ev_smart_charging external issues."""
 
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+# From HA 2026.11, pytest_homeassistant_custom_component is deprecated and replaced with pytest_homeassistant.
+try:
+    from pytest_homeassistant.common import MockConfigEntry  # type: ignore
+except ImportError:
+    from pytest_homeassistant_custom_component.common import MockConfigEntry  # type: ignore
 
 from homeassistant.core import HomeAssistant
 from homeassistant.const import STATE_OFF

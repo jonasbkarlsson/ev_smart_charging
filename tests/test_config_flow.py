@@ -8,7 +8,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
 import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+# From HA 2026.11, pytest_homeassistant_custom_component is deprecated and replaced with pytest_homeassistant.
+try:
+    from pytest_homeassistant.common import MockConfigEntry  # type: ignore
+except ImportError:
+    from pytest_homeassistant_custom_component.common import MockConfigEntry  # type: ignore
 
 from custom_components.ev_smart_charging.const import DOMAIN
 

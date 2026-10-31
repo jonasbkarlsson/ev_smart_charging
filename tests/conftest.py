@@ -13,24 +13,35 @@
 # Home Assistant core. You can find those fixture definitions here:
 # https://github.com/MatthewFlamm/pytest-homeassistant-custom-component/blob/master/pytest_homeassistant_custom_component/common.py
 #
+# As of Home Assistant 2026.11, Home Assistant core provides these fixtures directly in
+# the package pytest_homeassistant.
+#
 # See here for more info: https://docs.pytest.org/en/latest/fixture.html (note that
 # pytest includes fixtures OOB which you can use as defined on this page)
 from unittest.mock import patch
 import pytest
 from homeassistant.util import dt as dt_util
 
+# The following declarations are only required when running tests with
+# pytest-homeassistant-custom-component. It is not needed when running tests
+# with pytest-homeassistant.
+# pylint: disable=unused-import
+try:
+    from pytest_homeassistant_custom_component.common import MockConfigEntry  # type: ignore
 
-# pylint: disable=invalid-name
-pytest_plugins = "pytest_homeassistant_custom_component"
+    # pylint: disable=invalid-name
+    pytest_plugins = "pytest_homeassistant_custom_component"
 
+    # This fixture enables loading custom integrations in all tests.
+    # Remove to enable selective use of this fixture
+    # pylint: disable=unused-argument
+    @pytest.fixture(autouse=True)
+    def auto_enable_custom_integrations(enable_custom_integrations):
+        """Enables loading of custom integration"""
+        yield
 
-# This fixture enables loading custom integrations in all tests.
-# Remove to enable selective use of this fixture
-# pylint: disable=unused-argument
-@pytest.fixture(autouse=True)
-def auto_enable_custom_integrations(enable_custom_integrations):
-    """Enables loading of custom integration"""
-    yield
+except ImportError:
+    pass
 
 
 # This fixture is used to prevent HomeAssistant from attempting to create and dismiss persistent
