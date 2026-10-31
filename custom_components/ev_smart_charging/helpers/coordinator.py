@@ -23,21 +23,44 @@ def get_lowest_quarters(
     continuous: bool,
     raw_two_days: Raw,
     quarters: int,
+    *,
+    waiting_cost: float = 0.0,
+    max_price: float | None = None,
 ) -> list:
-    """From the two-day prices, calculate the cheapest set of quarters"""
+    """From the two-day prices, calculate the cheapest set of quarters
+
+    waiting_cost is added to the price for every hour a quarter starts after the first
+    candidate quarter. Quarters above max_price are only chosen if there are not enough
+    other quarters. max_price is ignored for continuous charging."""
 
     if continuous:
         return get_lowest_quarters_continuous(
-            start_quarter, ready_quarter, raw_two_days, quarters
+            start_quarter, ready_quarter, raw_two_days, quarters, waiting_cost
         )
 
     return get_lowest_quarters_non_continuous(
-        start_quarter, ready_quarter, raw_two_days, quarters
+        start_quarter, ready_quarter, raw_two_days, quarters, waiting_cost, max_price
     )
 
 
+def get_quarter_costs(items: list[dict[str, Any]], waiting_cost: float) -> list[float]:
+    """Price of each quarter plus the waiting cost for the hours since the first quarter"""
+
+    # Subtracting datetimes that share a tzinfo ignores DST changes, timestamp() does not.
+    first_start = items[0]["start"].timestamp()
+    return [
+        item["value"] + waiting_cost * (item["start"].timestamp() - first_start) / 3600
+        for item in items
+    ]
+
+
 def get_lowest_quarters_non_continuous(
-    start_quarter: datetime, ready_quarter: datetime, raw_two_days: Raw, quarters: int
+    start_quarter: datetime,
+    ready_quarter: datetime,
+    raw_two_days: Raw,
+    quarters: int,
+    waiting_cost: float = 0.0,
+    max_price: float | None = None,
 ) -> list:
     """From the two-day prices, calculate the cheapest non-continues set of quarters
 
@@ -82,7 +105,16 @@ def get_lowest_quarters_non_continuous(
         return list(range(time_start_index, time_end_index + 1))
 
     prices = price[time_start_index : time_end_index + 1]
-    sorted_index = sorted(range(len(prices)), key=prices.__getitem__)
+    costs = get_quarter_costs(
+        raw_two_days.get_raw()[time_start_index : time_end_index + 1], waiting_cost
+    )
+    # Quarters above the price limit are ranked last. Otherwise, with a waiting cost, an
+    # early quarter above the limit could take the place of a later one below it and the
+    # schedule would come out short when the limit is applied.
+    sorted_index = sorted(
+        range(len(prices)),
+        key=lambda i: (max_price is not None and prices[i] > max_price, costs[i]),
+    )
 
     # Find the lowest quarters. If the quarter with highest selected quarter has exactly the same price
     # as some of the not selected quarters, then the selected the quarters with that price which are
@@ -114,7 +146,11 @@ def get_lowest_quarters_non_continuous(
 
 
 def get_lowest_quarters_continuous(
-    start_quarter: datetime, ready_quarter: datetime, raw_two_days: Raw, quarters: int
+    start_quarter: datetime,
+    ready_quarter: datetime,
+    raw_two_days: Raw,
+    quarters: int,
+    waiting_cost: float = 0.0,
 ) -> list:
     """From the two-day prices, calculate the cheapest continues set of quarters
 
@@ -160,8 +196,12 @@ def get_lowest_quarters_continuous(
     if (time_end_index - time_start_index) < quarters:
         return list(range(time_start_index, time_end_index + 1))
 
+    costs = get_quarter_costs(
+        raw_two_days.get_raw()[time_start_index : time_end_index + 1], waiting_cost
+    )
     for index in range(time_start_index, time_end_index - quarters + 2):
-        window_sum = sum(price[index : (index + quarters)])
+        offset = index - time_start_index
+        window_sum = sum(costs[offset : (offset + quarters)])
         if lowest_index is None or lowest_price is None or window_sum < lowest_price:
             lowest_index = index
             lowest_price = window_sum
@@ -313,12 +353,17 @@ class Scheduler:
             params["charging_pct_per_hour"],
         )
         _LOGGER.debug("charging_quarters = %s", charging_quarters)
+        waiting_cost = params.get("waiting_cost", 0.0)
         lowest_quarters = get_lowest_quarters(
             params["start_quarter"],
             params["ready_quarter"],
             params["switch_continuous"],
             raw_two_days,
             charging_quarters,
+            waiting_cost=waiting_cost,
+            max_price=(
+                params["max_price"] if params.get("switch_apply_limit") else None
+            ),
         )
         _LOGGER.debug("lowest_quarters = %s", lowest_quarters)
         self.schedule_base = get_charging_original(lowest_quarters, raw_two_days)
@@ -339,6 +384,7 @@ class Scheduler:
             params["switch_continuous"],
             raw_two_days,
             charging_quarters,
+            waiting_cost=waiting_cost,
         )
         _LOGGER.debug("lowest_quarters_min_soc = %s", lowest_quarters)
         self.schedule_base_min_soc = get_charging_original(

@@ -1,6 +1,6 @@
 """Test ev_smart_charging/helpers/coordinator.py"""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from homeassistant.util import dt as dt_util
 from custom_components.ev_smart_charging.const import (
@@ -499,6 +499,57 @@ async def test_get_lowest_quarters_non_continuous_15min(
         raw_two_days,
         quarters,
     ) == [58, 59, 60, 61, 62, 63, 76, 77, 78, 79]
+
+
+def raw_15min(prices: list[float]) -> Raw:
+    """Raw with 15-minute prices starting 2022-09-30 00:00"""
+
+    start = datetime(2022, 9, 30, tzinfo=dt_util.get_time_zone("Europe/Stockholm"))
+    return Raw(
+        [
+            {"start": start + timedelta(minutes=15 * i), "value": price}
+            for i, price in enumerate(prices)
+        ]
+    )
+
+
+async def test_get_lowest_quarters_waiting_cost(hass, set_cet_timezone, freezer):
+    """Test that the waiting cost trades a lower price against an earlier start"""
+
+    # Quarter 0 has passed. Quarter 9 is 2 hours after the first candidate, quarter 1.
+    freezer.move_to("2022-09-30T00:20:00+02:00")
+    raw_two_days = raw_15min([1.0, 10.0] + [20.0] * 7 + [9.95] + [20.0] * 6)
+    start = raw_two_days.get_raw()[0]["start"]
+    ready = raw_two_days.get_raw()[-1]["end"]
+
+    for continuous in [False, True]:
+        # 2 hours of waiting cost 0.04, less than the price difference of 0.05
+        assert get_lowest_quarters(
+            start, ready, continuous, raw_two_days, 1, waiting_cost=0.02
+        ) == [9]
+        # 2 hours of waiting cost 0.1, more than the price difference
+        assert get_lowest_quarters(
+            start, ready, continuous, raw_two_days, 1, waiting_cost=0.05
+        ) == [1]
+
+
+async def test_get_lowest_quarters_waiting_cost_price_limit(
+    hass, set_cet_timezone, freezer
+):
+    """Test that an early quarter above the price limit is not chosen over a later one
+    below it"""
+
+    freezer.move_to("2022-09-29T23:00:00+02:00")
+    raw_two_days = raw_15min([10.5] + [20.0] * 7 + [9.0] + [20.0] * 7)
+    start = raw_two_days.get_raw()[0]["start"]
+    ready = raw_two_days.get_raw()[-1]["end"]
+
+    assert get_lowest_quarters(
+        start, ready, False, raw_two_days, 1, waiting_cost=1.0
+    ) == [0]
+    assert get_lowest_quarters(
+        start, ready, False, raw_two_days, 1, waiting_cost=1.0, max_price=10.0
+    ) == [8]
 
 
 async def test_get_lowest_quarters_continuous(hass, set_cet_timezone, freezer):

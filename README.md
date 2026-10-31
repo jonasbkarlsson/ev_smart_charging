@@ -91,6 +91,15 @@ Entity | Type | Descriptions, valid value ranges and service calls
 `number.ev_smart_charging_opportunistic_type2_level` | Number | If the `switch.ev_smart_charging_opportunistic_type2_charging` switch is activated, the price limit will be set based on `last available price * Opportunistic type2 level / 100`. For example, if the Opportunistic type2 level is set to 90, the price limit will be set to 90% of the last available price. If the last available price is negative, the price limit will be `last available price * (200 - Opportunistic type2 level) / 100`. If `switch.ev_smart_charging_apply_price_limit` is also activated, the lowest of the two price limits will be used. Valid values min=0, step=1, max=200. Can be set by service call number.set_value.
 `number.ev_smart_charging_low_soc_charging_level` | Number | If the `switch.ev_smart_charging_low_soc_charging` switch is activated, charging will be done immediately if the EV SOC is below this level. Valid values min=0.0, step=1.0, max=100. Can be set by service call `number.set_value`.
 `number.ev_smart_charging_low_price_charging_level` | Number | If the `switch.ev_smart_charging_low_price_charging` switch is activated, charging will be done immediately if the electricity price is below this level. Valid values min=-10000, step=0.01, max=10000. Can be set by service call `number.set_value`.
+`number.ev_smart_charging_waiting_cost` | Number | How much more per kWh you are willing to pay to charge one hour earlier, in the unit of the electricity price entity. See [Waiting cost](#waiting-cost). Valid values min=0, step=0.001, max=10000. Can be set by service call `number.set_value`.
+
+### Waiting cost
+
+By default the scheduled charging uses the quarters with the lowest price, even when a slightly cheaper quarter is much later than a more expensive one. This matters most when the charge completion time is `None`. The schedule is then rebuilt when tomorrow's prices arrive, and tonight's charging can move to tomorrow to save very little.
+
+The waiting cost r changes how quarters are ranked. Each quarter is ranked by its price plus r times the number of hours from the first quarter that can be used for charging. For example, with prices in c/kWh and r = 0.05, a quarter two hours later must be more than 0.1 c/kWh cheaper to be chosen over an earlier one. With r = 0, the default, quarters are ranked by price only.
+
+The waiting cost is only used for ranking. The price limit, the low price charging level and the sensor attributes still use the real prices. It applies to both continuous and non-continuous charging, and to the minimum EV SOC schedule. For non-continuous charging with the price limit applied, quarters above the limit are ranked after all others, so an early quarter above the limit does not take the place of a later quarter below it.
 
 ## Entities
 
